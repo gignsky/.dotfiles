@@ -1,0 +1,21 @@
+alias ytcustom='time yt-dlp -f bv*+ba --embed-metadata --embed-info-json --embed-subs --sub-format srt --convert-subs srt --embed-chapters --merge-output-format mkv -N 100 -o "%(title)s.%(ext)s"'
+
+#user .bashrc updates
+alias start='sudo apt install net-tools qemu-guest-agent -y'
+alias testup='sudo apt update && sudo apt list --upgradable'
+alias startupdate='sudo apt install net-tools qemu-guest-agent -y && sudo apt auto-remove -y && sudo apt update -y && sudo apt list --upgradable && sudo apt-get dist-upgrade -y'
+alias smbstart='echo "please use root command"'
+alias smbend='sudo apt remove cifs-utils smbclient -y && sudo rm -rf /home/.creds && sudo apt auto-remove -y'
+alias nfsstart='sudo apt install nfs-common -y'
+alias nfsend='sudo apt remove nfs-common -y && sudo apt auto-remove -y'
+alias whatsOut='sudo apt list --upgradable'
+alias davstart='sudo apt install davfs2 cadaver -y'
+alias fix='sudo apt --fix-broken install'
+alias stats='cat /run/motd.dynamic'
+alias update='sudo apt auto-remove -y && sudo apt update -y && sudo apt list --upgradable && sudo apt-get dist-upgrade -y'
+alias updatec='sudo apt auto-remove -y && sudo apt update -y && sudo apt list --upgradable && sudo apt-get dist-upgrade -y && clear'
+alias updater='sudo apt auto-remove -y && sudo apt update -y && sudo apt list --upgradable && sudo apt-get dist-upgrade -y && sudo reboot'
+alias cls='clear'
+
+alias install='sudo apt install'
+alias remove='sudo apt remove'
