@@ -120,7 +120,9 @@ antigen bundle cp
 antigen bundle sudo
 antigen bundle colored-man-pages
 antigen bundle command-not-found
-
+antigen bundle djui/alias-tips
+antigen bundle aliases
+antigen bundle ansible
 
 antigen apply
 
