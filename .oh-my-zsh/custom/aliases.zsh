@@ -16,6 +16,7 @@ alias ycm='yadm commit -m'
 alias ycam='yadm commit -am'
 alias yps='yadm push'
 alias ypl='yadm pull'
+alias yr='yadm restore'
 
 #user .bashrc updates
 alias start='sudo apt install net-tools qemu-guest-agent -y'
