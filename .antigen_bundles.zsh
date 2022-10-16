@@ -10,4 +10,3 @@ antigen bundle command-not-found
 antigen bundle djui/alias-tips
 antigen bundle aliases
 antigen bundle ansible
-antigen bundle vagrant
