@@ -1,6 +1,8 @@
 alias ytcustom='time yt-dlp -f bv*+ba --embed-metadata --embed-info-json --embed-subs --sub-format srt --convert-subs srt --embed-chapters --merge-output-format mkv -N 100 -o "%(title)s.%(ext)s"'
 
 #user .bashrc updates
+alias gp='grep'
+
 alias start='sudo apt install net-tools qemu-guest-agent -y'
 alias testup='sudo apt update && sudo apt list --upgradable'
 alias startupdate='sudo apt install net-tools qemu-guest-agent -y && sudo apt auto-remove -y && sudo apt update -y && sudo apt list --upgradable && sudo apt-get upgrade -y'
