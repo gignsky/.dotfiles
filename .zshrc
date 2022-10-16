@@ -17,6 +17,11 @@ fi
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
+#path for vagrant in wsl
+export VAGRANT_WSL_ENABLE_WINDOWS_ACCESS="1"
+export VAGRANT_DEFAULT_PROVIDER=hyperv
+export VAGRANT_WSL_WINDOWS_ACCESS_HOME_PATH=/mnt/d/vagrantProjects
+
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
