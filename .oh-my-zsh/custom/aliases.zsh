@@ -2,6 +2,9 @@
 alias asc=acs
 alias als=acs
 
+#ansible
+alias aping="a -i inventory/hosts ubuntu -m ping --user gig"
+
 #pip && Python
 alias pipupdate='python3 -m pip install --upgrade pip'
 alias python=python3
