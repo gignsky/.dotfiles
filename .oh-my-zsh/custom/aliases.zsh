@@ -1,3 +1,9 @@
+#alias modification line
+alias alsmod='nano $HOME/.oh-my-zsh/custom/aliases.zsh'
+
+#systemctl stuff
+alias syst='sudo systemctl'
+
 #zsh alias fix cause I keep forgetting
 alias asc=acs
 alias als=acs
