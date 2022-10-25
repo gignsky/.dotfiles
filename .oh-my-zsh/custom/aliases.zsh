@@ -3,7 +3,7 @@ alias asc=acs
 alias als=acs
 
 #ansible
-alias aping="a -i inventory/hosts ubuntu -m ping --user gig"
+alias aping="a -i inventory/hosts all -m ping --user gig"
 
 #pip && Python
 alias pipupdate='python3 -m pip install --upgrade pip'
@@ -36,7 +36,7 @@ alias stats='cat /run/motd.dynamic'
 alias update='sudo apt auto-remove -y && sudo apt update -y && sudo apt list --upgradable && sudo apt-get upgrade -y'
 alias updatec='sudo apt auto-remove -y && sudo apt update -y && sudo apt list --upgradable && sudo apt-get upgrade -y && clear'
 alias updater='sudo apt auto-remove -y && sudo apt update -y && sudo apt list --upgradable && sudo apt-get upgrade -y && sudo reboot'
-alias cls='clear'
+alias cls='clear && neofetch'
 
 alias install='sudo apt install -y'
 alias remove='sudo apt remove -y && sudo apt auto-remove -y'
