@@ -2,6 +2,10 @@
 alias asc=acs
 alias als=acs
 
+#proxmox stuff
+alias qm='sudo qm'
+alias pct='sudo pct'
+
 #ansible
 alias aping="a -i ./inventory/hosts all -m ping"
 
