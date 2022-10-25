@@ -11,3 +11,4 @@ antigen bundle djui/alias-tips
 antigen bundle aliases
 antigen bundle ansible
 antigen bundle virtualenvwrapper
+antigen bundle z
