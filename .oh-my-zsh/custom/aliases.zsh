@@ -14,7 +14,8 @@ alias qm='sudo qm'
 alias pct='sudo pct'
 
 #ansible
-alias aping="a -i ./inventory/hosts all -m ping"
+alias apingg="a -i ./inventory/hosts all -m ping -u gig"
+alias apingr="a -i ./inventory/hosts all -m ping -u root"
 
 #pip && Python
 alias pipupdate='python3 -m pip install --upgrade pip'
