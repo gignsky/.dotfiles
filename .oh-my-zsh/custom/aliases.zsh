@@ -1,8 +1,9 @@
 #alias modification line
 alias alsmod='nano $HOME/.oh-my-zsh/custom/aliases.zsh'
 
-#systemctl stuff
+#ubuntu stuff
 alias syst='sudo systemctl'
+alias mounta='sudo mount -a'
 
 #zsh alias fix cause I keep forgetting
 alias asc=acs
