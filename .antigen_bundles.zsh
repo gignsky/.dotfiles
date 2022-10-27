@@ -12,3 +12,4 @@ antigen bundle aliases
 antigen bundle ansible
 antigen bundle virtualenvwrapper
 antigen bundle z
+antigen bundle copybuffer
