@@ -117,7 +117,8 @@ source $HOME/antigen.zsh
 
 antigen use oh-my-zsh
 
-antigen init ./.antigen_bundles.zsh
+antigen init $HOME/.antigen_bundles.zsh
+antigen init $HOME/.antigen_bundles_2.zsh
 
 antigen theme romkatv/powerlevel10k
 
@@ -126,4 +127,4 @@ antigen apply
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
-./.neofetch.zsh
+$HOME/.neofetch.zsh
