@@ -14,8 +14,8 @@ alias qm='sudo qm'
 alias pct='sudo pct'
 
 #ansible
-alias apingg="a -i ./inventory/hosts all -m ping -u gig"
-alias apingr="a -i ./inventory/hosts all -m ping -u root"
+alias apingg="a -i ./inventory all -m ping -u gig"
+alias apingr="a -i ./inventory all -m ping -u root"
 alias alint='ansible-lint'
 
 #pip && Python
