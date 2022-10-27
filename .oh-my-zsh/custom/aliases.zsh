@@ -16,6 +16,7 @@ alias pct='sudo pct'
 #ansible
 alias apingg="a -i ./inventory/hosts all -m ping -u gig"
 alias apingr="a -i ./inventory/hosts all -m ping -u root"
+alias alint='ansible-lint'
 
 #pip && Python
 alias pipupdate='python3 -m pip install --upgrade pip'
