@@ -83,11 +83,24 @@ zstyle ':omz:update' mode reminder  # just remind me to update when it's time
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git)
+plugins=()
 
 source $ZSH/oh-my-zsh.sh
 
 # User configuration
+
+$HOME/.neofetch.zsh
+
+source $HOME/antigen.zsh
+
+antigen use oh-my-zsh
+
+antigen init $HOME/.antigen_bundles.zsh
+antigen init $HOME/.antigen_bundles_2.zsh
+
+antigen theme romkatv/powerlevel10k
+
+antigen apply
 
 # export MANPATH="/usr/local/man:$MANPATH"
 
@@ -113,18 +126,8 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-source $HOME/antigen.zsh
-
-antigen use oh-my-zsh
-
-antigen init $HOME/.antigen_bundles.zsh
-antigen init $HOME/.antigen_bundles_2.zsh
-
-antigen theme romkatv/powerlevel10k
-
-antigen apply
+#unalias pip
+alias pip=pip3
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-
-$HOME/.neofetch.zsh
