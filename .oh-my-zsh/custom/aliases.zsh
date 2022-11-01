@@ -1,6 +1,9 @@
 #alias modification line
 alias alsmod='nano $HOME/.oh-my-zsh/custom/aliases.zsh'
 
+#ssh
+alias ssh=mosh
+
 #ubuntu stuff
 alias syst='sudo systemctl'
 alias mounta='sudo mount -a'
