@@ -56,6 +56,8 @@ alias stats='cat /run/motd.dynamic'
 alias update='sudo apt auto-remove -y && sudo apt update -y && sudo apt list --upgradable && sudo apt-get upgrade -y'
 alias updatec='sudo apt auto-remove -y && sudo apt update -y && sudo apt list --upgradable && sudo apt-get upgrade -y && clear'
 alias updater='sudo apt auto-remove -y && sudo apt update -y && sudo apt list --upgradable && sudo apt-get upgrade -y && sudo reboot'
+
+#clear
 alias ccls='clear && neofetch'
 alias cls='clear'
 alias cll='clear && ll'
