@@ -58,6 +58,7 @@ alias updatec='sudo apt auto-remove -y && sudo apt update -y && sudo apt list --
 alias updater='sudo apt auto-remove -y && sudo apt update -y && sudo apt list --upgradable && sudo apt-get upgrade -y && sudo reboot'
 alias ccls='clear && neofetch'
 alias cls='clear'
+alias cll='clear && ll'
 
 #install remove
 alias install='sudo apt install -y'
