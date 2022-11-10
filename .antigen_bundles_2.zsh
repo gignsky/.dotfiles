@@ -4,3 +4,5 @@ antigen bundle zsh-users/zsh-completions
 antigen bundle djui/alias-tips
 antigen bundle zpm-zsh/ls
 antigen bundle zpm-zsh/colors
+antigen bundle zpm-zsh/material-colors
+
