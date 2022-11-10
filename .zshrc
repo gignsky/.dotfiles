@@ -131,6 +131,7 @@ antigen apply
 alias pip=pip3
 unalias ls
 unalias la
+alias ll='ls -lah --tree --level 2'
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
