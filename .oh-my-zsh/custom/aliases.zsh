@@ -9,7 +9,7 @@ alias sshm=mosh
 
 #ubuntu stuff
 alias syst='sudo systemctl'
-alias mounta='sudo mount -a'
+alias mounta='sudo mount -av'
 
 #zsh alias fix cause I keep forgetting
 alias asc=acs
