@@ -1,3 +1,6 @@
+#nzbget
+alias nzbget='/export/utility-share/nzbgetFiles/nzbget'
+
 #rsync
 alias rs='rsync -avu --progress'
 
