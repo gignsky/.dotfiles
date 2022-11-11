@@ -41,6 +41,11 @@ alias ypl='yadm pull'
 alias yr='yadm restore'
 alias yd='yadm diff'
 
+#file management
+alias rm='rm -v'
+alias cp='cp -v'
+alias mv='mv -v'
+
 #user .bashrc updates
 alias start='sudo apt install net-tools qemu-guest-agent -y'
 alias testup='sudo apt update && sudo apt list --upgradable'
