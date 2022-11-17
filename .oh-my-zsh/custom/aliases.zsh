@@ -3,6 +3,7 @@ alias nzbget='/export/utility-share/nzbgetFiles/nzbget'
 
 #rsync
 alias rs='rsync -avu --progress'
+alias srs='sudo rsync -avu --progress'
 
 #alias modification line
 alias alsmod='nano $HOME/.oh-my-zsh/custom/aliases.zsh'
