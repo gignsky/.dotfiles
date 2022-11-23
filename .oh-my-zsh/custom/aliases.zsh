@@ -1,3 +1,6 @@
+#cleanup
+alias cleanup='sudo apt autoremove'
+
 #nzbget
 alias nzbget='/export/utility-share/nzbgetFiles/nzbget'
 
