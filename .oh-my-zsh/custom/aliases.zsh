@@ -8,10 +8,10 @@ alias nzbget='/export/utility-share/nzbgetFiles/nzbget'
 alias lla=lsa
 
 #rsync
-alias rs='rsync -avu --progress'
-alias drs='rsync -avunh --progress'
-alias srs='sudo rsync -avuh --progress'
-alias dsrs='sudo rsync -avunh --progress'
+alias rs='rsync -avuh --info=progress2'
+alias drs='rsync -avunhi --info=progress2'
+alias srs='sudo rsync -avuh --info=progress2'
+alias dsrs='sudo rsync -avunhi --info=progress2'
 
 #alias modification line
 alias alsmod='nano $HOME/.oh-my-zsh/custom/aliases.zsh'
