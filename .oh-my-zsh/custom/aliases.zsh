@@ -55,6 +55,7 @@ alias yd='yadm diff'
 
 #file management
 alias rm='rm -v'
+alias rdd='rm -rfvi'
 alias cp='cp -v'
 alias mv='mv -v'
 
