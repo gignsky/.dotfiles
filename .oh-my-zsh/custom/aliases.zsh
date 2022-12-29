@@ -2,7 +2,7 @@
 alias cleanup='sudo apt autoremove -y'
 
 #nzbget
-alias nzbget='/export/utility-share/nzbgetFiles/nzbget'
+alias nzbget='/export/danger-fast-nzbget/nzbgetFiles/nzbget'
 
 #ls
 alias lla=lsa
