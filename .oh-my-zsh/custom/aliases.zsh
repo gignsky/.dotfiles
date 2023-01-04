@@ -30,6 +30,7 @@ alias als=acs
 #proxmox stuff
 alias qm='sudo qm'
 alias pct='sudo pct'
+alias pvecm='sudo pvecm'
 
 #ansible
 alias apingg="a -i ./inventory all -m ping -u gig"
