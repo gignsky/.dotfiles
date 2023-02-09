@@ -1,6 +1,8 @@
 #cleanup
 alias cleanup='sudo apt autoremove -y'
 
+alias localnmap='nmap -v -sn 192.168.51.0/24 | grep -v down'
+
 #nzbget
 alias nzbget='/export/danger-fast-nzbget/nzbgetFiles/nzbget'
 
