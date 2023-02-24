@@ -1,3 +1,6 @@
+#pdf to word helper
+alias pdftoword='abiword --to=doc' 
+
 #cleanup
 alias cleanup='sudo apt autoremove -y'
 
