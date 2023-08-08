@@ -1,3 +1,6 @@
+#du
+alias duh='sudo du -hscx * | sort -h'
+
 #pdf to word helper
 alias pdftoword='abiword --to=doc' 
 
