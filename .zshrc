@@ -141,3 +141,6 @@ unalias als
 
 #ZSH_CUSTOME Setting
 ZDH_CUSTOM=${ZSH_CUSTOM:-~/.oh-my-zsh/custom}
+
+#Export kube_editor
+export KUBE_EDITOR=/usr/bin/nano
