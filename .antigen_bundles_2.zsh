@@ -5,4 +5,4 @@ antigen bundle djui/alias-tips
 antigen bundle zpm-zsh/ls
 antigen bundle zpm-zsh/colors
 antigen bundle zpm-zsh/dircolors-neutral
-
+antigen bundle dbz/kube-aliases
