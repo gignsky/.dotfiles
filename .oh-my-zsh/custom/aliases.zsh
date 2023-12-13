@@ -1,5 +1,5 @@
 #tdarr-switcher reactivate venv
-alias reactivate='deactivate; rdd .venv; python -m venv .venv; cd ..; cd tdarr-node-switcher; pip list; pipi pipdeptree; cd ..; cd tdarr-node-switcher; pipdeptree; pipupdate'
+alias reactivate='deactivate; rdd .venv; python -m venv .venv; cd ..; cd tdarr-node-switcher; pip list; pipi wheel pipdeptree; cd ..; cd tdarr-node-switcher; pipdeptree; pipupdate'
 
 #du
 alias duh='sudo du -hscx * | sort -h'
