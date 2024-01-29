@@ -1,6 +1,10 @@
 #tdarr-switcher reactivate venv
 alias reactivate='deactivate; rdd .venv; python -m venv .venv; cd ..; cd tdarr-node-switcher; pip list; pipi wheel pipdeptree; cd ..; cd tdarr-node-switcher; pipdeptree; pipupdate'
 
+#tar
+alias tarball='tar -czf'
+alias untar='tar -xzf'
+
 #du
 alias duh='sudo du -hscx * | sort -h'
 
