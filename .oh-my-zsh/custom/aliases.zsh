@@ -5,6 +5,7 @@ alias reactivate='deactivate; rdd .venv; python -m venv .venv; cd ..; cd tdarr-n
 alias binit='buildozer init'
 alias bdrun='buildozer android debug deploy run'
 alias brun='buildozer android deploy run'
+alias bdeploy='buildozer android deploy'
 
 #tar
 alias tarball='tar -czf'
