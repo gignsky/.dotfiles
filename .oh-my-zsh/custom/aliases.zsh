@@ -6,6 +6,7 @@ alias binit='buildozer init'
 alias bdebug='buildozer android debug'
 alias brelease='buildozer android release'
 alias bd=buildozer
+alias bda='buildozer android'
 
 #tar
 alias tarball='tar -czf'
