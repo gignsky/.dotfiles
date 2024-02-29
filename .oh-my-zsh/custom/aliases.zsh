@@ -1,6 +1,11 @@
 #tdarr-switcher reactivate venv
 alias reactivate='deactivate; rdd .venv; python -m venv .venv; cd ..; cd tdarr-node-switcher; pip list; pipi wheel pipdeptree; cd ..; cd tdarr-node-switcher; pipdeptree; pipupdate'
 
+#buildozer
+alias binit='buildozer init'
+alias bdrun='buildozer android debug deploy run'
+alias bdrun='buildozer android deploy run'
+
 #tar
 alias tarball='tar -czf'
 alias untar='tar -xzf'
