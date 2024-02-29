@@ -2,9 +2,9 @@
 alias reactivate='deactivate; rdd .venv; python -m venv .venv; cd ..; cd tdarr-node-switcher; pip list; pipi wheel pipdeptree; cd ..; cd tdarr-node-switcher; pipdeptree; pipupdate'
 
 #buildozer
-alias binit='buildozer init'
-alias bdebug='buildozer android debug'
-alias brelease='buildozer android release'
+alias bdinit='buildozer init'
+alias bddebug='buildozer android debug'
+alias bdrelease='buildozer android release'
 alias bd=buildozer
 alias bda='buildozer android'
 
