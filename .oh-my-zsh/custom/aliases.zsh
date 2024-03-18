@@ -1,3 +1,6 @@
+#pipdeptree
+alias pipdf='pipdeptree -f > requirements.txt'
+
 #tdarr-switcher reactivate venv
 alias reactivate='deactivate; rdd .venv; python -m venv .venv; cd ..; cd tdarr-node-switcher; pip list; pipi wheel pipdeptree; cd ..; cd tdarr-node-switcher; pipdeptree; pipupdate'
 
