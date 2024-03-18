@@ -1,4 +1,5 @@
 #pipdeptree
+alias pipd=pipdeptree
 alias pipdf='pipdeptree -f > requirements.txt'
 
 #tdarr-switcher reactivate venv
