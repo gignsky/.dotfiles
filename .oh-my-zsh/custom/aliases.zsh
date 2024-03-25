@@ -69,6 +69,7 @@ alias python=python3
 
 #ytcustom
 alias ytcustom='time yt-dlp -f bv\*+ba --embed-metadata --embed-info-json --embed-subs --sub-format srt --convert-subs srt --embed-chapters --merge-output-format mkv -N 100 --restrict-filenames'
+alias ytcustomplaylist='time yt-dlp -f bv\*+ba --embed-metadata --embed-info-json --embed-subs --sub-format srt --convert-subs srt --embed-chapters --merge-output-format mkv -N 100 --restrict-filenames -o "%(playlist)s/%(playlist_index)s - %(title)s.%(ext)s"'
 
 #yadm aliases
 alias ys='yadm status'
