@@ -5,6 +5,7 @@ alias cr='cargo run'
 alias cbr='cargo build --release'
 alias cbrw='cargo build --target x86_64-pc-windows-gnu --release'
 alias cc='cargo clean'
+alias cba='cargo build && cargo build --target x86_64-pc-windows-gnu --release && cargo build --release'
 
 #pipdeptree
 alias pipd=pipdeptree
