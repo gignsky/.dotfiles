@@ -86,8 +86,6 @@ zstyle ':omz:update' mode reminder  # just remind me to update when it's time
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(cd-ls)
 
-source $ZSH/oh-my-zsh.sh
-
 # User configuration
 
 $HOME/.neofetch.zsh
@@ -126,6 +124,9 @@ antigen apply
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
+
+ZSH_DISABLE_COMPFIX=true
+source $ZSH/oh-my-zsh.sh
 
 #unalias pip
 alias pip=pip3
