@@ -1,3 +1,6 @@
+#cd to z
+alias cd=z
+
 #cargo
 alias cb='cargo build'
 alias cr='cargo run'
