@@ -1,6 +1,3 @@
-#cd to z
-alias cd=z
-
 #cargo
 alias cb='cargo build'
 alias cr='cargo run'
@@ -8,7 +5,9 @@ alias cbr='cargo build --release'
 alias cbrw='cargo build --target x86_64-pc-windows-gnu --release'
 alias ccl='cargo clean'
 alias cc='cargo check'
-alias cin='cargo binstall -y'
+alias cbin='cargo binstall -y'
+alias cin='cargo install -y'
+alias cuin='cargo uninstall'
 
 #pipdeptree
 alias pipd=pipdeptree
