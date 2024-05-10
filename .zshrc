@@ -152,3 +152,5 @@ export KUBE_EDITOR=/usr/bin/nano
 
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+eval "$(zoxide init zsh --cmd cd)"
