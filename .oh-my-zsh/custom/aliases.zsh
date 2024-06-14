@@ -6,7 +6,7 @@ alias cbrw='cargo build --target x86_64-pc-windows-gnu --release'
 alias ccl='cargo clean'
 alias cc='cargo check'
 alias cbin='cargo binstall -y'
-alias cin='cargo install -y'
+alias cin='cargo install'
 alias cuin='cargo uninstall'
 
 #pipdeptree
