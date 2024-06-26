@@ -1,4 +1,4 @@
-export PATH=/home/gig/.local/bin:$PATH
+# export PATH=/home/gig/.local/bin:$PATH
 
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
 # Initialization code that may require console input (password prompts, [y/n]
@@ -84,10 +84,11 @@ zstyle ':omz:update' mode reminder  # just remind me to update when it's time
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(cd-ls)
+# plugins=(cd-ls)
 
 # User configuration
-
+# echo "UNCOMMMENTED TEST"
+# echo "Commented test"
 $HOME/.neofetch.zsh
 
 source $HOME/antigen.zsh
@@ -155,4 +156,4 @@ export KUBE_EDITOR=/usr/bin/nano
 
 eval "$(zoxide init zsh --cmd cd)"
 
-. "$HOME/.cargo/env"
+# . "$HOME/.cargo/env"
