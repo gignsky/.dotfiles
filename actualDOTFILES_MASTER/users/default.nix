@@ -1,0 +1,3 @@
+{
+  gig = import ./gig;
+}
