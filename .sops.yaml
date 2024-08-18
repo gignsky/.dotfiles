@@ -1,0 +1,11 @@
+keys:
+  - &users:
+    - &gig age1xtzqgg7sldxl8dz9qct3lvsg8zywqllv8qtcu8h4exdethvggqgse6584v
+  - &hosts:
+    - &buzz: age184sdwkr3876f498etmjkeyu6r0huudql4t8ktwwwatlwm24u5uasmfsskc
+creation_rules:
+  - path_regex: secrets.yaml$
+    key_groups:
+      - age:
+        - *gig
+        - *buzz
