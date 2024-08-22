@@ -8,8 +8,9 @@ alias cc='cargo check'
 alias cbin='cargo binstall -y'
 alias cin='cargo install'
 alias cuin='cargo uninstall'
-alias ce='cargo expand --color=always | bat'
+alias ceb='cargo expand | bat'
 alias cep='cargo expand > expanded.rs'
+alias ce='cargo expand'
 
 #pipdeptree
 alias pipd=pipdeptree
