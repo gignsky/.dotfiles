@@ -1,3 +1,6 @@
+#FUCK CAT USE BAT
+alias cat=bat
+
 #cargo
 alias cb='cargo build'
 alias cr='cargo run'
