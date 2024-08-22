@@ -8,8 +8,7 @@ alias cc='cargo check'
 alias cbin='cargo binstall -y'
 alias cin='cargo install'
 alias cuin='cargo uninstall'
-alias cexpand='cargo expand'
-alias cexpandbat='cargo expand --color=always | bat'
+alias ce='cargo expand --color=always | bat'
 
 #pipdeptree
 alias pipd=pipdeptree
@@ -33,7 +32,7 @@ alias untar='tar -xzf'
 alias duh='sudo du -hscx * | sort -h'
 
 #pdf to word helper
-alias pdftoword='abiword --to=doc' 
+alias pdftoword='abiword --to=doc'
 
 #cleanup
 alias cleanup='sudo apt autoremove -y'
