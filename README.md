@@ -1,3 +1,6 @@
+# ALL BELOW THIS LINE IS SIMPLY REFERENCE FROM SOMEONE ELSES CONFIG
+
+
 # Nix Starter Config
 
 This repo contains a few a simple nix flake templates for getting started with
