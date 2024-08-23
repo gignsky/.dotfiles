@@ -58,7 +58,7 @@
         # rnix-lsp
         nil
         nixpkgs-fmt;
-        # just
+        just
         # pre-commit
 
         # age
