@@ -17,7 +17,7 @@
     # ./users.nix
 
     # Import your generated (nixos-generate-config) hardware configuration
-    ./hardware-configuration.nix
+    # ./hardware-configuration.nix
     # core utils
     ../common/core
 
@@ -29,7 +29,7 @@
     ../common/users/gig
   ];
 
-  networking.hostName = "buzz";
+  networking.hostName = "minimalIso";
 
   # Bootloader.
   boot.loader.grub.enable = true;
