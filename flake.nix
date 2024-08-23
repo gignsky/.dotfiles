@@ -48,6 +48,11 @@
         #"aarch64-darwin"
       ];
       specialArgs = { inherit inputs outputs nixpkgs; };
+      exampleBaseIso = {
+          isoImage.squashfsCompression = "gzip -Xcompression-level 1";
+          systemd.services.sshd.wantedBy = nixpkgs.lib.mkForce [ "multi-user.target" ];
+          # users.users.root.openssh.authorizedKeys.keys = [ "<my ssh key>" ];
+        };
     in
     {
       # Shell configured with packages that are typically only needed when working on or with nix-config.
@@ -74,7 +79,8 @@
           inherit system specialArgs;
           modules = [
             "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
-            ./hosts/minimalIso
+            exampleBaseIso
+            # ./hosts/minimalIso
           ];
         };
 
