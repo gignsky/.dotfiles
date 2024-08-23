@@ -54,7 +54,7 @@
         nix
         home-manager
         git
-        # vscode # We NEED to add a if statement here somehow that checks if you're in wsl
+        vscode # We NEED to add a if statement here somehow that checks if you're in wsl
         # rnix-lsp
         nil
         nixpkgs-fmt;
