@@ -43,10 +43,10 @@
     NIX_CONFIG = "extra-experimental-features = nix-command flakes repl-flake";
     nativeBuildInputs = builtins.attrValues {
       inherit (pkgs)
-	wget
+	      wget
         cowsay
         lolcat
-	bat
+	      bat
         tree
         magic-wormhole
 
@@ -57,8 +57,8 @@
         vscode # We NEED to add a if statement here somehow that checks if you're in wsl
         # rnix-lsp
         nil
-        nixpkgs-fmt;
-        just
+        nixpkgs-fmt
+        just;
         # pre-commit
 
         # age
