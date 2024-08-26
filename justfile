@@ -1,8 +1,14 @@
-just check
-    nix flake check --impure
+# just check
+#     nix flake check --impure
+#
+# just checkpure
+#     nix flake check
+#
+# just iso
+#     nix build .#nixosConfigurations.minimalIso.config.system.build.isoImage
 
-just checkpure
-    nix flake check
+default:
+    @just --list
 
-just iso
-    nix build .#nixosConfigurations.minimalIso.config.system.build.isoImage
+just keepgoing:
+    echo "The way out is through"
