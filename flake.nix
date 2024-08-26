@@ -89,19 +89,20 @@
           ];
         };
 
-        # nixos = nixpkgs.lib.nixosSystem {
-        #   inherit system specialArgs;
-        #   modules = [
-        #     inputs.nixos-wsl.nixosModules.default {
-        #       system.stateVersion = "24.05";
-        #       wsl.enable = true;
-        #     }
-        #     home-manager.nixosModules.home-manager {
-        #       home-manager.extraSpecialArgs = specialArgs;
-        #     }
-        #     ./hosts/ganosLal/wsl
-        #   ];
-        # };
+        # WSL configuration entrypoint - name can not be channged from nixos without some extra work TODO
+        nixos = nixpkgs.lib.nixosSystem {
+          inherit system specialArgs;
+          modules = [
+            inputs.nixos-wsl.nixosModules.default {
+              system.stateVersion = "24.05";
+              wsl.enable = true;
+            }
+            # home-manager.nixosModules.home-manager {
+            #   home-manager.extraSpecialArgs = specialArgs;
+            # }
+            ./hosts/ganosLal/wsl
+          ];
+        };
 
         buzz = nixpkgs.lib.nixosSystem {
           inherit system specialArgs;
@@ -116,16 +117,16 @@
         };
       };
 
-      # # Standalone home-manager configuration entrypoint
-      # # Available through 'home-manager --flake .#your-username@your-hostname'
-      # homeConfigurations = {
-      #   # FIXME replace with your username@hostname
-      #   "your-username@your-hostname" = home-manager.lib.homeManagerConfiguration {
-      #     pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
-      #     extraSpecialArgs = {inherit inputs outputs;};
-      #     # > Our main home-manager configuration file <
-      #     modules = [./home-manager/home.nix];
-      #   };
-      # };
+      # Standalone home-manager configuration entrypoint
+      # Available through 'home-manager --flake .#your-username@your-hostname'
+      homeConfigurations = {
+        # FIXME replace with your username@hostname
+        "gig@nixos" = home-manager.lib.homeManagerConfiguration {
+          pkgs = nixpkgs.legacyPackages.x86_64-linux; # Home-manager requires 'pkgs' instance
+          extraSpecialArgs = {inherit inputs outputs;};
+          # > Our main home-manager configuration file <
+          modules = [./home-manager/home.nix];
+        };
+      };
   };
 }
