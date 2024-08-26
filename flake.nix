@@ -97,6 +97,7 @@
               system.stateVersion = "24.05";
               wsl.enable = true;
             }
+            # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
             # home-manager.nixosModules.home-manager {
             #   home-manager.extraSpecialArgs = specialArgs;
             # }
