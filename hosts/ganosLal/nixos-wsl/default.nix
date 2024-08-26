@@ -28,17 +28,28 @@
 
   };
 
+
+  # unstable overlay
+  nixpkgs.overlays = [
+    (final: prev: {
+      unstable = import inputs.nixpkgs-unstable {
+        system = final.system;
+        config.allowUnfree = true;
+      };
+    })
+  ];
+
   # System-wide packages installed by root
-  environment.systemPackages = [
-    pkgs.wget
-    pkgs.bat
-    pkgs.tree
-    pkgs.magic-wormhole
-    pkgs.git
+  environment.systemPackages = with pkgs; [
+    wget
+    bat
+    tree
+    magic-wormhole
+    git
 
     # unstable packages
-    # pkgs.just
-    # pkgs.unstable.just # need unstable for latest version
+    # just
+    unstable.just # need unstable for latest version
   ];
 
 #   # I think this is unneccecary if I'm going with standalone home-manager rather than flake os module home-manager
