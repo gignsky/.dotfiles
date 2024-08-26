@@ -1,4 +1,4 @@
-{ inputs, lib, config, pkgs, outputs, ...}: {
+{ inputs, lib, config, pkgs, unstable, outputs, ...}: {
   imports = [
     ../../common/core
     ../../common/users/gig
@@ -29,13 +29,15 @@
   };
 
   # System-wide packages installed by root
-  environment.systemPackages = with pkgs; [
-    wget
-    bat
-    tree
-    magic-wormhole
-    just
-    git
+  environment.systemPackages = [
+    pkgs.wget
+    pkgs.bat
+    pkgs.tree
+    pkgs.magic-wormhole
+    pkgs.git
+
+    # unstable packages
+    # unstable.just # need unstable for latest version
   ];
 
 #   # I think this is unneccecary if I'm going with standalone home-manager rather than flake os module home-manager
