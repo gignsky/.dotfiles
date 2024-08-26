@@ -27,6 +27,17 @@
     channel.enable = false;
 
   };
+
+  # System-wide packages installed by root
+  environment.systemPackages = with pkgs; [
+    wget
+    bat
+    tree
+    magic-wormhole
+    just
+    git
+  ];
+
 #   # I think this is unneccecary if I'm going with standalone home-manager rather than flake os module home-manager
 #   home-manager = {
 #     extraSpecialArgs = { inherit inputs outputs; };
