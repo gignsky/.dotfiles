@@ -27,14 +27,14 @@
     channel.enable = false;
 
   };
-
-  home-manager = {
-    extraSpecialArgs = { inherit inputs outputs; };
-    users = {
-      # Import your home-manager configuration
-      gig = import ../../../home/gig/ganosLal/wsl.nix;
-    };
-  };
+#   # I think this is unneccecary if I'm going with standalone home-manager rather than flake os module home-manager
+#   home-manager = {
+#     extraSpecialArgs = { inherit inputs outputs; };
+#     users = {
+#       # Import your home-manager configuration
+#       gig = import ../../../home/gig/ganosLal/wsl.nix;
+#     };
+#   };
 
   system.stateVersion = "24.05";
 }

@@ -126,7 +126,7 @@
           inherit pkgs; # Home-manager requires 'pkgs' instance
           extraSpecialArgs = {inherit specialArgs;};
           # > Our main home-manager configuration file <
-          modules = [./home/home.nix];
+          modules = [./home/gig/home.nix];
         };
       };
   };
