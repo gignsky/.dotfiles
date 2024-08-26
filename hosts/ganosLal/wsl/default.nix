@@ -1,10 +1,11 @@
-{ inputs, lib, config, pkgs, ...}: {
+{ inputs, lib, config, pkgs, outputs, ...}: {
   imports = [
     ../../common/core
     ../../common/users/gig
+    inputs.home-manager.nixosModules.home-manager
   ];
 
-  networking.hostName = "wsl-ganosLal";
+  networking.hostName = "nixos";
 
   # fixes vscode remote wsl stuff
   programs.nix-ld = {
@@ -25,6 +26,14 @@
 
     channel.enable = false;
 
+  };
+
+  home-manager = {
+    extraSpecialArgs = { inherit inputs outputs; };
+    users = {
+      # Import your home-manager configuration
+      gig = import ../../../home/gig/ganosLal/wsl.nix;
+    };
   };
 
   system.stateVersion = "24.05";
