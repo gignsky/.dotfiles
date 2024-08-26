@@ -1,4 +1,4 @@
-{ inputs, lib, config, pkgs, unstable, outputs, ...}: {
+{ inputs, lib, config, pkgs, outputs, ...}: {
   imports = [
     ../../common/core
     ../../common/users/gig
@@ -37,7 +37,8 @@
     pkgs.git
 
     # unstable packages
-    # unstable.just # need unstable for latest version
+    # pkgs.just
+    # pkgs.unstable.just # need unstable for latest version
   ];
 
 #   # I think this is unneccecary if I'm going with standalone home-manager rather than flake os module home-manager

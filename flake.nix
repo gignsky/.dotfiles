@@ -4,12 +4,12 @@
   inputs = {
     #################### Official NixOS and HM Package Sources ####################
     nixpkgs.url = "github:NixOS/nixpkgs/release-24.05";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     nixos-wsl = {
       url = "github:nix-community/NixOS-WSL/main";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     # hardware.url = "github:nixos/nixos-hardware";
 
@@ -46,13 +46,27 @@
   outputs = { self, nixpkgs, home-manager, ... } @ inputs:
     let
       inherit (self) outputs;
+      # inherit (nixpkgs) lib;
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
       forAllSystems = nixpkgs.lib.genAttrs [
         "x86_64-linux"
-        #"aarch64-darwin"
+        "aarch64-linux"
+        "i686-linux"
+        "aarch64-darwin"
+        "x86_64-darwin"
       ];
-      specialArgs = { inherit inputs outputs nixpkgs; };
+      # configVars = import ./vars { inherit inputs lib; };
+      # configLib = import ./lib { inherit lib; };
+      specialArgs = {
+        inherit
+          inputs
+          outputs
+          nixpkgs
+          # configVars
+          # configLib
+          ;
+      };
       exampleBaseIso = {
           isoImage.squashfsCompression = "gzip -Xcompression-level 1";
           systemd.services.sshd.wantedBy = nixpkgs.lib.mkForce [ "multi-user.target" ];
@@ -76,18 +90,20 @@
 #           nixpkgs.legacyPackages.${system}.nixpkgs-fmt
 #         );
 
+      # Custom modifications/overrides to upstream packages.
+      overlays = import ./overlays { inherit inputs; };
 
       # NixOS configuration entrypoint
       # Available through 'nixos-rebuild --flake .#your-hostname'
       nixosConfigurations = {
-        minimalIso = nixpkgs.lib.nixosSystem {
-          inherit system specialArgs;
-          modules = [
-            "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
-            exampleBaseIso
-            ./hosts/minimalIso
-          ];
-        };
+        # minimalIso = nixpkgs.lib.nixosSystem {
+        #   inherit system specialArgs;
+        #   modules = [
+        #     "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
+        #     exampleBaseIso
+        #     ./hosts/minimalIso
+        #   ];
+        # };
 
         # WSL configuration entrypoint - name can not be channged from nixos without some extra work TODO
         nixos = nixpkgs.lib.nixosSystem {
