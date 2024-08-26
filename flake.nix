@@ -4,6 +4,9 @@
   inputs = {
     #################### Official NixOS and HM Package Sources ####################
     nixpkgs.url = "github:NixOS/nixpkgs/release-24.05";
+
+    nixos-wsl.url = "github:nix-community/NixOS-WSL/main";
+
     # nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     # hardware.url = "github:nixos/nixos-hardware";
@@ -81,6 +84,17 @@
             "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
             exampleBaseIso
             # ./hosts/minimalIso
+          ];
+        };
+
+        wsl = nixpkgs.lib.nixosSystem {
+          inherit system specialArgs;
+          modules = [
+            inputs.nixos-wsl.nixosModules.default
+            {
+              system.stateVersion = "24.05";
+              wsl.enable = true;
+            }
           ];
         };
 
