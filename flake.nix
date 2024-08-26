@@ -5,8 +5,10 @@
     #################### Official NixOS and HM Package Sources ####################
     nixpkgs.url = "github:NixOS/nixpkgs/release-24.05";
 
-    nixos-wsl.url = "github:nix-community/NixOS-WSL/main";
-
+    nixos-wsl = {
+      url = "github:nix-community/NixOS-WSL/main";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     # nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     # hardware.url = "github:nixos/nixos-hardware";
@@ -41,7 +43,7 @@
     # };
   };
 
-  outputs = { self, nixpkgs, ... } @ inputs:
+  outputs = { self, nixpkgs, home-manager, ... } @ inputs:
     let
       inherit (self) outputs;
       system = "x86_64-linux";
@@ -58,21 +60,21 @@
         };
     in
     {
-      # Shell configured with packages that are typically only needed when working on or with nix-config.
-      devShells = forAllSystems
-        ( system: import ./shell.nix { inherit pkgs; });
-
-      # Example Hello World package
-      packages.${system}.default = pkgs.writeShellScriptBin "example" ''
-        ${pkgs.cowsay}/bin/cowsay "hello world" | ${pkgs.lolcat}/bin/lolcat
-      '';
-
-      # TODO change this to something that has better looking output rules
-      # Nix formatter available through 'nix fmt' https://nix-community.github.io/nixpkgs-fmt
-      formatter = forAllSystems
-        (system:
-          nixpkgs.legacyPackages.${system}.nixpkgs-fmt
-        );
+#       # Shell configured with packages that are typically only needed when working on or with nix-config.
+#       devShells = forAllSystems
+#         ( system: import ./shell.nix { inherit pkgs; });
+#
+#       # Example Hello World package
+#       packages.${system}.default = pkgs.writeShellScriptBin "example" ''
+#         ${pkgs.cowsay}/bin/cowsay "hello world" | ${pkgs.lolcat}/bin/lolcat
+#       '';
+#
+#       # TODO change this to something that has better looking output rules
+#       # Nix formatter available through 'nix fmt' https://nix-community.github.io/nixpkgs-fmt
+#       formatter = forAllSystems
+#         (system:
+#           nixpkgs.legacyPackages.${system}.nixpkgs-fmt
+#         );
 
 
       # NixOS configuration entrypoint
@@ -83,21 +85,23 @@
           modules = [
             "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
             exampleBaseIso
-            # ./hosts/minimalIso
+            ./hosts/minimalIso
           ];
         };
 
-        wsl = nixpkgs.lib.nixosSystem {
-          inherit system specialArgs;
-          modules = [
-            inputs.nixos-wsl.nixosModules.default
-            {
-              system.stateVersion = "24.05";
-              wsl.enable = true;
-            }
-            ./hosts/ganosLal/wsl
-          ];
-        };
+        # nixos = nixpkgs.lib.nixosSystem {
+        #   inherit system specialArgs;
+        #   modules = [
+        #     inputs.nixos-wsl.nixosModules.default {
+        #       system.stateVersion = "24.05";
+        #       wsl.enable = true;
+        #     }
+        #     home-manager.nixosModules.home-manager {
+        #       home-manager.extraSpecialArgs = specialArgs;
+        #     }
+        #     ./hosts/ganosLal/wsl
+        #   ];
+        # };
 
         buzz = nixpkgs.lib.nixosSystem {
           inherit system specialArgs;
