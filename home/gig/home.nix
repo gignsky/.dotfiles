@@ -49,14 +49,14 @@
   # Add stuff for your user as you see fit:
   # programs.neovim.enable = true;
   home.packages = with pkgs; [
-    wget
+    # wget
     cowsay
     figlet
     lolcat
-    bat
-    tree
-    magic-wormhole
-    just
+    # bat
+    # tree
+    # magic-wormhole
+    # # just
   ];
 
   # Enable home-manager and git
