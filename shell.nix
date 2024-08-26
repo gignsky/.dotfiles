@@ -54,7 +54,7 @@
         nix
         home-manager
         git
-        vscode # We NEED to add a if statement here somehow that checks if you're in wsl
+        # vscode # We NEED to add a if statement here somehow that checks if you're in wsl
         # rnix-lsp
         nil
         nixpkgs-fmt
@@ -70,10 +70,8 @@
 
     GREETING = "You've entered the NixOS Configuration Environment!";
 
-    # shellHook = ''
-    #   echo $GREETING | cowsay | lolcat
-    #   git config --global user.email "gignsky@gmail.com"
-    #   git config --global user.name "Gignsky"
-    # '';
+    shellHook = ''
+      echo $GREETING | cowsay | lolcat
+    '';
   };
 }
