@@ -8,6 +8,9 @@ switch:
     sudo nixos-rebuild switch --flake ~/.dotfiles/.
     home-manager switch --flake ~/.dotfiles/.
 
+home:
+    home-manager switch --flake ~/.dotfiles/.
+
 test:
     sudo nixos-rebuild test --flake ~/.dotfiles/.
     home-manager switch --flake ~/.dotfiles/.
