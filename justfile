@@ -1,3 +1,6 @@
+default:
+    @just --list | bat --file-name "justfile"
+
 check:
     nix flake check --impure --no-build
 
@@ -17,6 +20,3 @@ test:
 
 iso:
     nix build ~/.dotfiles/.#nixosConfigurations.minimalIso.config.system.build.isoImage
-
-default:
-    @just --list
