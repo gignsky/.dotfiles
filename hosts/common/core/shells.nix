@@ -1,11 +1,26 @@
-{ pkgs, lib, ... }:
+{ pkgs, lib, inputs, ... }:
 
 {
+    # unstable overlay
+    nixpkgs.overlays = [
+        (final: prev: {
+        unstable = import inputs.nixpkgs-unstable {
+            system = final.system;
+            config.allowUnfree = true;
+        };
+        })
+    ];
+
     environment.systemPackages = with pkgs; [
-        # cowsay
-        lolcat
         tree
         btop
+        bat
+        tree
+        git
+        gedit
+        fzf
+        magic-wormhole
+        wget
     ];
 
     programs.bash = let
@@ -26,6 +41,7 @@
             als = "alias";
             syst = "systemctl";
             expo = "export NIXPKGS_ALLOW_UNFREE=1";
+            cat = "bat";
         };
 
         shellInit = ''
