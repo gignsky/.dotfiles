@@ -16,13 +16,6 @@
   wsl.enable = true;
   wsl.defaultUser = "gig";
 
-  environment.systemPackages = [
-    pkgs.wget
-    pkgs.git
-    pkgs.bat
-    pkgs.tree
-  ];
-
   # programs.nix-ld = {
   #   enable = true;
   #   package = pkgs.nix-ld-rs;
