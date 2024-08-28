@@ -22,11 +22,13 @@
       "wheel"
       "gig"
     ];
+
+    
   };
 
-  imports = [
-    ../../optional/sshd-with-passwords.nix
-  ];
+  # imports = [
+  #   ../../optional/sshd-with-passwords.nix
+  # ];
 
   services.openssh.enable = true;
 }
