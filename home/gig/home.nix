@@ -2,12 +2,17 @@
 # Use this to configure your home environment (it replaces ~/.config/nixpkgs/home.nix)
 {
   # inputs,
-  outputs,
-  lib,
-  # config,
-  pkgs,
-  ...
-}: {
+  outputs
+, lib
+# , config,
+,  pkgs
+, ...
+}:
+let
+  # import shellAliases from ./common/optional/shellAliases.nix;
+  aliases = import ./common/optional/shellAliases.nix;
+in
+{
   # You can import other home-manager modules here
   imports = [
     # Or modules exported from other flakes (such as nix-colors):
@@ -19,60 +24,71 @@
   nix = {
     package = lib.mkDefault pkgs.nix;
     settings = {
-        experimental-features = [ "nix-command" "flakes" "repl-flake" ];
-        # warn-dirty = false;
+      experimental-features = [ "nix-command" "flakes" "repl-flake" ];
+      # warn-dirty = false;
     };
   };
 
   home = {
     username = "gig";
     homeDirectory = "/home/gig";
-    sessionPath = []; # Add paths to $PATH
+    sessionPath = [ ]; # Add paths to $PATH
     sessionVariables = {
-        FLAKE = "$HOME/.dotfiles/.";
-        SHELL = "zsh";
-        # TERM = "kitty";
-        # TERMINAL = "kitty";
-        EDITOR = "nano";
-        # MANPAGER = "batman"; # see ./cli/bat.nix
+      FLAKE = "$HOME/.dotfiles/.";
+      SHELL = "zsh";
+      # TERM = "kitty";
+      # TERMINAL = "kitty";
+      EDITOR = "nano";
+      # MANPAGER = "batman"; # see ./cli/bat.nix
     };
   };
 
-  # # Programs
-  # home.packages = with pkgs; [
-  #   ################################################################
-  #   ## look through and decide if these might be good to have then sort them throughout the configuration of the home files and the dotfiles, all new packages should start here for testing purposes if not used in a nix-shell -p command
-  #   ################################################################
-  #   # borgbackup
-  #   # eza
-  #   # fd
-  #   # findutils
-  #   # jq
-  #   # nix-tree
-  #   # ncdu
-  #   # pciutils
-  #   # pfetch
-  #   # p7zip
-  #   # ripgrep
-  #   # usbutils
-  #   # unzip
-  #   # unrar
-  #   # zip
-  #   # vscode
-  #   # curl
-  #   # pre-commit;
-  #   # tree
-  # ];
+  # Services
+
+  # Lorri service for direnv integration, direnv is enabled by default.
+  services.lorri.enable = false;
+
+  # Programs
+  home.packages = with pkgs; [
+    # direnv # direnv is enabled by default
+
+    ################################################################
+    ## look through and decide if these might be good to have then sort them throughout the configuration of the home files and the dotfiles, all new packages should start here for testing purposes if not used in a nix-shell -p command
+    ################################################################
+    # borgbackup
+    # eza
+    # fd
+    # findutils
+    # jq
+    # nix-tree
+    # ncdu
+    # pciutils
+    # pfetch
+    # p7zip
+    # ripgrep
+    # usbutils
+    # unzip
+    # unrar
+    # zip
+    # vscode
+    # curl
+    # pre-commit;
+    # tree
+  ];
 
   # Shell configuration
-  programs = {
-    zsh = {
-      enable = true;
-      enableCompletion = true;
-    };
+  programs.zsh = {
+    enable = true;
+    enableCompletion = true;
+    autosuggestion.enable = true;
+    autocd = true; # What's this?
+    syntaxHighlighting.enable = true;
 
-    # direnv.enable = true;
+    shellAliases = aliases;
+
   };
+
+  # programs.direnv.enable = true;
 
   nixpkgs = {
     # You can add overlays here
