@@ -7,7 +7,15 @@ default:
 rebuild-pre:
     nix-shell -p lolcat --run 'echo "[PRE] Rebuilding..." | lolcat'
     # just update-nix-secrets
+    just pre-commit
+
+pre-commit:
+    nix-shell -p lolcat --run 'echo "[PRE-COMMIT] Pre-commit git add, etc..." | lolcat'
     git add '**/*.nix'
+    git add '**/*.sh'
+    git add justfile
+
+
 
 # Run after every rebuild, some of the time
 rebuild-post:
@@ -46,12 +54,13 @@ rebuild-update-full:
     just rebuild
 
 check:
-    just rebuild-pre
+    just pre-commit
     nix flake check --impure --no-build
     nix-shell -p lolcat --run 'echo "[CHECK] Finished." | lolcat'
 
-show:
-    nix flake show
+show args="":
+    just pre-commit
+    scripts/flake-show.sh
 
 # switch:
 #     sudo nixos-rebuild switch --flake ~/.dotfiles/.
@@ -74,8 +83,8 @@ home-trace:
 gc:
     nix-collect-garbage
 
-build args="":
-    just rebuild-pre
+build *args:
+    just pre-commit
     scripts/flake-build.sh {{args}}
 
 #
