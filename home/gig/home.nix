@@ -13,12 +13,33 @@
     # Or modules exported from other flakes (such as nix-colors):
     # inputs.nix-colors.homeManagerModules.default
 
-    ./common/core
+    # ./common/core
     # ./common/optional/shellAliases.nix;
   ];
+  nix = {
+    package = lib.mkDefault pkgs.nix;
+    settings = {
+        experimental-features = [ "nix-command" "flakes" "repl-flake" ];
+        # warn-dirty = false;
+    };
+  };
+
+  home = {
+        username = "gig";
+        homeDirectory = "/home/gig";
+        sessionPath = []; # Add paths to $PATH
+        sessionVariables = {
+            FLAKE = "$HOME/.dotfiles/.";
+            SHELL = "zsh";
+            # TERM = "kitty";
+            # TERMINAL = "kitty";
+            EDITOR = "nano";
+            # MANPAGER = "batman"; # see ./cli/bat.nix
+        };
+  };
 
   # # Programs
-  # environment.systemPackages = with pkgs; [
+  # home.packages = with pkgs; [
   #   ################################################################
   #   ## look through and decide if these might be good to have then sort them throughout the configuration of the home files and the dotfiles, all new packages should start here for testing purposes if not used in a nix-shell -p command
   #   ################################################################
@@ -53,39 +74,36 @@
     direnv.enable = true;
   };
 
-# Can't figure this out right now
-#   nixpkgs = {
-#     # You can add overlays here
-#     overlays = [
-#       # Add overlays your own flake exports (from overlays and pkgs dir):
-#       # outputs.overlays.additions
-#       # outputs.overlays.modifications
-#       # outputs.overlays.unstable-packages
-#
-#       # You can also add overlays exported from other flakes:
-#       # neovim-nightly-overlay.overlays.default
-#
-#       # Or define it inline, for example:
-#       # (final: prev: {
-#       #   hi = final.hello.overrideAttrs (oldAttrs: {
-#       #     patches = [ ./change-hello-to-hi.patch ];
-#       #   });
-#       # })
-#     ];
-#     # Configure your nixpkgs instance
-#     config = {
-#       # Disable if you don't want unfree packages
-#       allowUnfree = true;
-#     };
-#   };
+  nixpkgs = {
+    # You can add overlays here
+    overlays = [
+      # Add overlays your own flake exports (from overlays and pkgs dir):
+      # outputs.overlays.additions
+      # outputs.overlays.modifications
+      outputs.overlays.unstable-packages
 
-  # Add stuff for your user as you see fit:
-  # programs.neovim.enable = true;
-  home.packages = with pkgs; [];
+      # You can also add overlays exported from other flakes:
+      # neovim-nightly-overlay.overlays.default
+
+      # Or define it inline, for example:
+      # (final: prev: {
+      #   hi = final.hello.overrideAttrs (oldAttrs: {
+      #     patches = [ ./change-hello-to-hi.patch ];
+      #   });
+      # })
+    ];
+    # Configure your nixpkgs instance
+    config = {
+      # Disable if you don't want unfree packages
+      allowUnfree = true;
+    };
+  };
 
   # Enable home-manager and git
   programs.home-manager.enable = true;
   programs.git.enable = true;
+
+  services.ssh-agent.enable = true;
 
   # Nicely reload system units when changing configs
   systemd.user.startServices = "sd-switch";
