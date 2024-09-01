@@ -26,4 +26,7 @@
       plugins = with zsh_plugins; trace "++zsh plugin list: ${lib.concatMapStringsSep "," (x: x.name) plugin_list}" plugin_list;
     };
   };
+
+  home.packages = [ pkgs.direnv ];
+
 }
