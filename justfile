@@ -41,7 +41,7 @@ rebuild-update-full:
 check:
     just rebuild-pre
     nix flake check --impure --no-build
-    nix-shell -p lolcat --run 'echo "[CHECK] Done." | lolcat'
+    nix-shell -p lolcat --run 'echo "[CHECK] Finished." | lolcat'
 
 show:
     nix flake show
@@ -50,8 +50,15 @@ show:
 #     sudo nixos-rebuild switch --flake ~/.dotfiles/.
 #     home-manager switch --flake ~/.dotfiles/.
 #
-# home:
-#     home-manager switch --flake ~/.dotfiles/.
+home:
+    just rebuild-pre
+    home-manager switch --flake ~/.dotfiles/.
+    nix-shell -p lolcat --run 'echo "[HOME] Finished." | lolcat'
+
+home-trace:
+    just rebuild-pre
+    home-manager switch --flake ~/.dotfiles/. --show-trace
+    nix-shell -p lolcat --run 'echo "[HOME-TRACE] Finished." | lolcat'
 #
 # test:
 #     sudo nixos-rebuild test --flake ~/.dotfiles/.
