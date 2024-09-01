@@ -41,6 +41,7 @@ rebuild-update-full:
 check:
     just rebuild-pre
     nix flake check --impure --no-build
+    echo "[CHECK] Done."
 
 show:
     nix flake show
