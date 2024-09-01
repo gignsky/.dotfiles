@@ -82,6 +82,25 @@
 
     shellAliases = import ./common/optional/shellAliases.nix;
 
+    history = {
+      # save = true;
+      size = 10000;
+      # ignoreDuplicates = true;
+      # ignoreSpace = true;
+      # share = true;
+      # path = "${config.xdg.dataHome}/zsh/history"; # Suggested from https://nixos.wiki/wiki/Zsh
+      path = "/home/gig/.zsh_history";
+    };
+
+    oh-my-zsh = {
+      enable = true;
+      theme = "robbyrussell";
+      plugins = [
+        "git"
+        # "zsh-autosuggestions"
+        # "zsh-syntax-highlighting"
+      ];
+    };
   };
 
   # programs.direnv.enable = true;
