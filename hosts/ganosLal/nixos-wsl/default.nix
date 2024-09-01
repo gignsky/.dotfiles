@@ -1,7 +1,7 @@
 { inputs, lib, config, pkgs, outputs, ...}: {
   imports = [
     ../../common/core
-    ../../common/users/gig
+    ../../common/users/gig.nix
     # inputs.nixos-wsl.modules
     inputs.home-manager.nixosModules.home-manager
   ];
