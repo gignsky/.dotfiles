@@ -22,11 +22,11 @@
 
     # Direnv
     programs.direnv = {
-        enable = true;
+        enable = lib.mkDefault true;
         # Expanded settings:
         nix-direnv.enable = true;
         loadInNixShell = true;
-        direnvrcExtra = ''
+        direnvrcExtra = lib.mkDefault ''
             echo "direnv: loading direnvrc"
         '';
     };
@@ -52,9 +52,9 @@
             cat = "bat";
         };
 
-        shellInit = ''
-            cat ${sword} | ${pkgs.lolcat}/bin/lolcat
-        '';
+        # shellInit = ''
+        #     cat ${sword} | ${pkgs.lolcat}/bin/lolcat
+        # '';
 
         # loginShellInit = ''
         #     Shell script code called during login bash shell init
