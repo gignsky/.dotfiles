@@ -5,14 +5,14 @@ default:
 
 # Run before every rebuild, everytime
 rebuild-pre:
-    echo "[PRE] Rebuilding..."
+    nix-shell -p lolcat --run 'echo "[PRE] Rebuilding..." | lolcat'
     # just update-nix-secrets
     git add *.nix
 
 # Run after every rebuild, some of the time
 rebuild-post:
     # just check-sops
-    echo "[POST] Rebuilt."
+    nix-shell -p lolcat --run 'echo "[POST] Rebuilt." | lolcat'
 
 # Rebuild the system
 rebuild:
@@ -41,7 +41,7 @@ rebuild-update-full:
 check:
     just rebuild-pre
     nix flake check --impure --no-build
-    echo "[CHECK] Done."
+    nix-shell -p lolcat --run 'echo "[CHECK] Done." | lolcat'
 
 show:
     nix flake show
