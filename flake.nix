@@ -11,15 +11,18 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # hardware.url = "github:nixos/nixos-hardware";
+    # Haven't quite figured out how to use this yet
+    # hardware = {
+    #   url = "github:nixos/nixos-hardware";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
 
+    #################### Utilities ####################
     # Home manager
     home-manager = {
       url = "github:nix-community/home-manager/release-24.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    #################### Utilities ####################
 
     # # Secrets management
     # sops-nix = {
@@ -74,6 +77,9 @@
         };
     in
     {
+      # Custom modifications/overrides to upstream packages.
+      overlays = import ./overlays { inherit inputs; };
+
 #       # Shell configured with packages that are typically only needed when working on or with nix-config.
 #       devShells = forAllSystems
 #         ( system: import ./shell.nix { inherit pkgs; });
@@ -89,9 +95,6 @@
 #         (system:
 #           nixpkgs.legacyPackages.${system}.nixpkgs-fmt
 #         );
-
-      # Custom modifications/overrides to upstream packages.
-      overlays = import ./overlays { inherit inputs; };
 
       # NixOS configuration entrypoint
       # Available through 'nixos-rebuild --flake .#your-hostname'
