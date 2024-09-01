@@ -21,6 +21,9 @@
         fzf
         magic-wormhole
         wget
+
+        # nixos-unstable packages
+        unstable.just
     ];
 
     programs.bash = let
