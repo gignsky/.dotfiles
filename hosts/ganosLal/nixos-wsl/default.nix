@@ -14,11 +14,11 @@
     package = pkgs.nix-ld-rs;
   };
 
-  wsl.enable = true;
+  wsl.enable = true;  # Redunent with nixosModules.default on the flake.nix level
   wsl.defaultUser = "gig";
 
   nix = let
-    flakeInputs = lib.filterAttrs (_: lib.isType "flake") inputs;
+    _flakeInputs = lib.filterAttrs (_: lib.isType "flake") inputs;
   in {
     settings = {
       # Enable flakes and new 'nix' command
