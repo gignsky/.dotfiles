@@ -19,12 +19,19 @@
     #   # path = "${config.xdg.dataHome}/zsh/history"; # Suggested from https://nixos.wiki/wiki/Zsh
     #   path = "/home/gig/.zsh_history";
     # };
+
+    plugins = [
+      {
+        name = "powerlevel10k";
+        src = pkgs.zsh-powerlevel10k;
+        file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
+      }
+    ];
+
     zplug = {
       enable = true;
       plugins = [
         { name = "zsh-users/zsh-autosuggestions"; } # Simple plugin installation
-        { name = "romkatv/powerlevel10k"; }
-        # { name = "zsh-users"; plugin = "zsh-autosuggestions"; }
         # { name = "zsh-users"; plugin = "zsh-completions"; }
         # { name = "zsh-users"; plugin = "zsh-syntax-highlighting"; }
         # { name = "zsh-users"; plugin = "zsh-history-substring-search"; }
@@ -35,7 +42,7 @@
     };
   };
 
-  home.file."$HOME/.p10k.zsh".source = ../../resources/.p10k.zsh;
+  home.file.".p10k.zsh".source = ../../resources/.p10k.zsh;
 
   home.packages = [ pkgs.direnv ];
 
