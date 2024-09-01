@@ -8,10 +8,6 @@
 ,  pkgs
 , ...
 }:
-let
-  # import shellAliases from ./common/optional/shellAliases.nix;
-  aliases = import ./common/optional/shellAliases.nix;
-in
 {
   # You can import other home-manager modules here
   imports = [
@@ -84,7 +80,7 @@ in
     autocd = true; # What's this?
     syntaxHighlighting.enable = true;
 
-    shellAliases = aliases;
+    shellAliases = import ./common/optional/shellAliases.nix;
 
   };
 
