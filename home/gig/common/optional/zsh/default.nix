@@ -32,6 +32,23 @@
       enable = true;
       plugins = [
         { name = "zsh-users/zsh-autosuggestions"; } # Simple plugin installation
+        { name = "plugins/git"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
+        { name = "plugins/sudo"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
+        # { name = "plugins/colored-man-pages"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
+        # { name = "plugins/command-not-found"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
+        { name = "plugins/aliases"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
+        # { name = "plugins/ansible"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
+        # { name = "plugins/virtualenvwrapper"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
+        # { name = "plugins/copybuffer"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
+        # { name = "plugins/cp"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
+        # { name = "zsh-users/zsh-syntax-highlighting";}
+        # { name = "zsh-users/zsh-autosuggestions";}
+        # { name = "zsh-users/zsh-completions";}
+        # { name = "djui/alias-tips";}
+        # { name = "zpm-zsh/ls";}
+        # { name = "zpm-zsh/colors";}
+        # { name = "zpm-zsh/dircolors-neutral";}
+        # { name = "dbz/kube-aliases";}
         # { name = "zsh-users"; plugin = "zsh-completions"; }
         # { name = "zsh-users"; plugin = "zsh-syntax-highlighting"; }
         # { name = "zsh-users"; plugin = "zsh-history-substring-search"; }
