@@ -15,14 +15,14 @@ in
   rec {
 
     zsh_plugins = {
-      zsh-autosuggestions = _zplug "zsh-users" "zsh-autosuggestions";
-      zsh-completions= _zplug "zsh-users" "zsh-completions";
-      zsh-syntax-highlighting = _zplug "zsh-users" "zsh-syntax-highlighting";
-      zsh-history-substring-search = _zplug "zsh-users" "zsh-history-substring-search";
-      powerlevel10k = make_plugin { group = "romkatv"; name = "powerlevel10k"; file = "powerlevel10k.zsh-theme";};
-      nix-zsh-completions = _zplug "spwhitt" "nix-zsh-completions";
-      zsh-vim-mode = _zplug "softmoth" "zsh-vim-mode";
-      desyncr-auto-ls = _zplug "desyncr" "auto-ls";
+      # zsh-autosuggestions = _zplug "zsh-users" "zsh-autosuggestions";
+      # zsh-completions= _zplug "zsh-users" "zsh-completions";
+      # zsh-syntax-highlighting = _zplug "zsh-users" "zsh-syntax-highlighting";
+      # zsh-history-substring-search = _zplug "zsh-users" "zsh-history-substring-search";
+      # powerlevel10k = make_plugin { group = "romkatv"; name = "powerlevel10k"; file = "powerlevel10k.zsh-theme";};
+      # nix-zsh-completions = _zplug "spwhitt" "nix-zsh-completions";
+      # zsh-vim-mode = _zplug "softmoth" "zsh-vim-mode";
+      # desyncr-auto-ls = _zplug "desyncr" "auto-ls";
     };
     plugin_list = builtins.attrValues zsh_plugins;
   }
