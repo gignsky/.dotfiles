@@ -1,6 +1,8 @@
 #FUCK CAT USE BAT
 alias cat=bat
 
+alias lll='ls -lah --tree --level 2'
+
 #cargo
 alias cb='cargo build'
 alias cr='cargo run'
