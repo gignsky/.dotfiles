@@ -20,6 +20,17 @@
         unstable.just
     ];
 
+    # Direnv
+    programs.direnv = {
+        enable = true;
+        # Expanded settings:
+        nix-direnv.enable = true;
+        loadInNixShell = true;
+        direnvrcExtra = ''
+            echo "direnv: loading direnvrc"
+        '';
+    };
+
     programs.bash = let
         sword = ./resources/sword.art;
     in {
