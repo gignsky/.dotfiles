@@ -80,21 +80,21 @@
       # Custom modifications/overrides to upstream packages.
       overlays = import ./overlays { inherit inputs; };
 
-#       # Shell configured with packages that are typically only needed when working on or with nix-config.
-#       devShells = forAllSystems
-#         ( system: import ./shell.nix { inherit pkgs; });
+      # Shell configured with packages that are typically only needed when working on or with nix-config.
+      devShells = forAllSystems
+        ( system: import ./shell.nix { inherit pkgs; });
 #
-#       # Example Hello World package
-#       packages.${system}.default = pkgs.writeShellScriptBin "example" ''
-#         ${pkgs.cowsay}/bin/cowsay "hello world" | ${pkgs.lolcat}/bin/lolcat
-#       '';
-#
-#       # TODO change this to something that has better looking output rules
-#       # Nix formatter available through 'nix fmt' https://nix-community.github.io/nixpkgs-fmt
-#       formatter = forAllSystems
-#         (system:
-#           nixpkgs.legacyPackages.${system}.nixpkgs-fmt
-#         );
+      # Example Hello World package
+      packages.${system}.default = pkgs.writeShellScriptBin "example" ''
+        ${pkgs.cowsay}/bin/cowsay "hello world" | ${pkgs.lolcat}/bin/lolcat
+      '';
+
+      # TODO change this to something that has better looking output rules
+      # Nix formatter available through 'nix fmt' https://nix-community.github.io/nixpkgs-fmt
+      formatter = forAllSystems
+        (system:
+          nixpkgs.legacyPackages.${system}.nixpkgs-fmt
+        );
 
       # NixOS configuration entrypoint
       # Available through 'nixos-rebuild --flake .#your-hostname'
