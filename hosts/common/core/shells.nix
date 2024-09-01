@@ -1,15 +1,9 @@
-{ pkgs, lib, inputs, ... }:
+{ pkgs, lib, inputs, outputs, ... }:
 
 {
     # unstable overlay
-    nixpkgs.overlays = [
-        (final: prev: {
-        unstable = import inputs.nixpkgs-unstable {
-            system = final.system;
-            config.allowUnfree = true;
-        };
-        })
-    ];
+    nixpkgs.overlays = [ outputs.overlays.unstable-packages ];
+
 
     environment.systemPackages = with pkgs; [
         tree
