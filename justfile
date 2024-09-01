@@ -67,6 +67,10 @@ home-trace:
 
 gc:
     nix-collect-garbage
+
+build:
+    just rebuild-pre
+    nix build
 #
 # test:
 #     sudo nixos-rebuild test --flake ~/.dotfiles/.
@@ -93,14 +97,9 @@ gc:
 # rebuild-trace: rebuild-pre && rebuild-post
 #   scripts/system-flake-rebuild-trace.sh
 #
-# update:
-#   nix flake update
-#
-# rebuild-update: update && rebuild
-#
-# diff:
-#   git diff ':!flake.lock'
-#
+diff:
+  git diff ':!flake.lock'
+
 # # sops:
 # #   echo "Editing {{SOPS_FILE}}"
 # #   nix-shell -p sops --run "SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt sops {{SOPS_FILE}}"
