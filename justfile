@@ -7,7 +7,7 @@ default:
 rebuild-pre:
     nix-shell -p lolcat --run 'echo "[PRE] Rebuilding..." | lolcat'
     # just update-nix-secrets
-    git add *.nix
+    git add '**/*.nix'
 
 # Run after every rebuild, some of the time
 rebuild-post:
