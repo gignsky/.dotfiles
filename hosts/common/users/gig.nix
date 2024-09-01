@@ -2,9 +2,10 @@
 
 {
 
-  # imports = [
-  #   ./common/optional/sops.nix
-  # ];
+  imports = [
+    # ./common/optional/sops.nix
+    ../../hosts/common/optional/zsh.nix
+  ];
 
   # sops.secrets.gig-password.neededForUsers = true;
   # users.mutableUsers = false; # required for password to be set via sops during system activation
@@ -23,7 +24,7 @@
       "gig"
     ];
 
-    
+
   };
 
   # imports = [
