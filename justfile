@@ -59,6 +59,9 @@ home-trace:
     just rebuild-pre
     home-manager switch --flake ~/.dotfiles/. --show-trace
     nix-shell -p lolcat --run 'echo "[HOME-TRACE] Finished." | lolcat'
+
+gc:
+    nix-collect-garbage
 #
 # test:
 #     sudo nixos-rebuild test --flake ~/.dotfiles/.
