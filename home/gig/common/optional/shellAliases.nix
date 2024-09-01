@@ -1,4 +1,4 @@
-{...}: {
+{
   # Basics
   ll = "ls -lh";
   lla = "ls -lah";
