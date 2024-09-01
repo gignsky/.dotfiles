@@ -4,7 +4,7 @@
 
   imports = [
     # ./common/optional/sops.nix
-    ../../hosts/common/optional/zsh.nix
+    ../optional/zsh.nix
   ];
 
   # sops.secrets.gig-password.neededForUsers = true;
