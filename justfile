@@ -70,7 +70,8 @@ gc:
 
 build:
     just rebuild-pre
-    nix build
+    scripts/flake-build.sh
+
 #
 # test:
 #     sudo nixos-rebuild test --flake ~/.dotfiles/.
