@@ -26,7 +26,7 @@
     # ../common/optional/xrdp.nix
 
     #gig users
-    ../common/users/gig
+    ../common/users/gig.nix
   ];
 
   networking.hostName = "buzz";
