@@ -12,6 +12,7 @@ rebuild-pre:
 # Run after every rebuild, some of the time
 rebuild-post:
     # just check-sops
+    zsh
     nix-shell -p lolcat --run 'echo "[POST] Rebuilt." | lolcat'
 
 # Rebuild the system
