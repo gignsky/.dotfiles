@@ -25,17 +25,17 @@
   };
 
   home = {
-        username = "gig";
-        homeDirectory = "/home/gig";
-        sessionPath = []; # Add paths to $PATH
-        sessionVariables = {
-            FLAKE = "$HOME/.dotfiles/.";
-            SHELL = "zsh";
-            # TERM = "kitty";
-            # TERMINAL = "kitty";
-            EDITOR = "nano";
-            # MANPAGER = "batman"; # see ./cli/bat.nix
-        };
+    username = "gig";
+    homeDirectory = "/home/gig";
+    sessionPath = []; # Add paths to $PATH
+    sessionVariables = {
+        FLAKE = "$HOME/.dotfiles/.";
+        SHELL = "zsh";
+        # TERM = "kitty";
+        # TERMINAL = "kitty";
+        EDITOR = "nano";
+        # MANPAGER = "batman"; # see ./cli/bat.nix
+    };
   };
 
   # # Programs
