@@ -3,7 +3,7 @@
     ../../common/core
     ../../common/users/gig.nix
     # inputs.nixos-wsl.modules
-    inputs.home-manager.nixosModules.home-manager
+    # inputs.home-manager.nixosModules.home-manager
   ];
 
   networking.hostName = "nixos";
