@@ -8,7 +8,7 @@
   rdd = "rm -rfv";
   cls = "clear";
   md = "mkdir";
-  als = "alias";
+  # als = "alias";
   syst = "systemctl";
   cat = "bat";
 
