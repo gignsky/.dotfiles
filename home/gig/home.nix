@@ -71,7 +71,7 @@
       enableCompletion = true;
     };
 
-    direnv.enable = true;
+    # direnv.enable = true;
   };
 
   nixpkgs = {
