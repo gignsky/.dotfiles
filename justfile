@@ -12,17 +12,23 @@ rebuild-pre:
 # Run after every rebuild, some of the time
 rebuild-post:
     # just check-sops
-    zsh
     nix-shell -p lolcat --run 'echo "[POST] Rebuilt." | lolcat'
+    zsh
 
 # Rebuild the system
-rebuild:
+rebuild args="":
     just rebuild-pre
-    scripts/system-flake-rebuild.sh
+    scripts/system-flake-rebuild.sh {{args}}
+
+# Test rebuilds the system
+rebuild-test args="":
+    just rebuild-pre
+    scripts/system-flake-rebuild-test.sh {{args}}
+    nix-shell -p lolcat --run 'echo "[TEST] Finished." | lolcat'
 
 # Rebuild the system and check sops
-rebuild-full:
-    just rebuild
+rebuild-full args="":
+    just rebuild {{args}}
     just rebuild-post
 
 # Update the flake
@@ -68,9 +74,9 @@ home-trace:
 gc:
     nix-collect-garbage
 
-build:
+build args="":
     just rebuild-pre
-    scripts/flake-build.sh
+    scripts/flake-build.sh {{args}}
 
 #
 # test:
