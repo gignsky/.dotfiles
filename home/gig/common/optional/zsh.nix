@@ -8,7 +8,7 @@
     autocd = true;
     syntaxHighlighting.enable = true;
 
-    shellAliases = import ../shellAliases.nix;
+    shellAliases = import ./shellAliases.nix;
 
     # history = {
     #   # save = true;
@@ -28,16 +28,19 @@
       }
     ];
 
+    oh-my-zsh.enable = true;
+    oh-my-zsh.plugins = [ "aliases" ];
+
     zplug = {
       enable = true;
       plugins = [
-        { name = "zsh-users/zsh-autosuggestions"; } # Simple plugin installation
+        { name = "zsh-users/zsh-autosuggestions"; }
         { name = "plugins/git"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
         { name = "plugins/sudo"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
-        # { name = "plugins/colored-man-pages"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
-        # { name = "plugins/command-not-found"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
-        { name = "plugins/aliases"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
-        # { name = "plugins/ansible"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
+        { name = "plugins/colored-man-pages"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
+        { name = "plugins/command-not-found"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
+        # { name = "plugins/aliases"; tags = ["from:oh-my-zsh"]; } # being substituted by custom package
+        { name = "plugins/ansible"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
         # { name = "plugins/virtualenvwrapper"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
         # { name = "plugins/copybuffer"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
         # { name = "plugins/cp"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
@@ -59,7 +62,7 @@
     };
   };
 
-  home.file.".p10k.zsh".source = ../../resources/.p10k.zsh;
+  home.file.".p10k.zsh".source = ../resources/.p10k.zsh;
 
   home.packages = [ pkgs.direnv ];
 

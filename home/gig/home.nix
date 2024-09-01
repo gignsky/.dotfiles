@@ -15,7 +15,7 @@
     # inputs.nix-colors.homeManagerModules.default
 
     # ./common/core
-    ./common/optional/zsh/default.nix
+    ./common/optional/zsh.nix
   ];
   nix = {
     package = lib.mkDefault pkgs.nix;
