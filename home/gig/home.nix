@@ -15,7 +15,7 @@
     # inputs.nix-colors.homeManagerModules.default
 
     # ./common/core
-    # ./common/optional/shellAliases.nix;
+    ./common/optional/zsh/default.nix
   ];
   nix = {
     package = lib.mkDefault pkgs.nix;
@@ -71,37 +71,6 @@
     # pre-commit;
     # tree
   ];
-
-  # Shell configuration
-  programs.zsh = {
-    enable = true;
-    enableCompletion = true;
-    autosuggestion.enable = true;
-    autocd = true; # What's this?
-    syntaxHighlighting.enable = true;
-
-    shellAliases = import ./common/optional/shellAliases.nix;
-
-    # history = {
-    #   # save = true;
-    #   size = 10000;
-    #   # ignoreDuplicates = true;
-    #   # ignoreSpace = true;
-    #   # share = true;
-    #   # path = "${config.xdg.dataHome}/zsh/history"; # Suggested from https://nixos.wiki/wiki/Zsh
-    #   path = "/home/gig/.zsh_history";
-    # };
-
-    oh-my-zsh = {
-      enable = true;
-      theme = "robbyrussell";
-      plugins = [
-        "git"
-        # "zsh-autosuggestions"
-        # "zsh-syntax-highlighting"
-      ];
-    };
-  };
 
   # programs.direnv.enable = true;
 
