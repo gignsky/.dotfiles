@@ -55,6 +55,10 @@ home:
     home-manager switch --flake ~/.dotfiles/.
     nix-shell -p lolcat --run 'echo "[HOME] Finished." | lolcat'
 
+new home:
+    just home
+    zsh
+
 home-trace:
     just rebuild-pre
     home-manager switch --flake ~/.dotfiles/. --show-trace
