@@ -109,7 +109,7 @@
         # };
 
         # WSL configuration entrypoint - name can not be channged from nixos without some extra work TODO
-        nixos = nixpkgs.lib.nixosSystem {
+        wsl = nixpkgs.lib.nixosSystem {
           inherit system specialArgs;
           modules = [
             inputs.nixos-wsl.nixosModules.default {
@@ -120,7 +120,7 @@
             # home-manager.nixosModules.home-manager {
             #   home-manager.extraSpecialArgs = specialArgs;
             # }
-            ./hosts/ganosLal/nixos-wsl
+            ./hosts/ganosLal/wsl
           ];
         };
 
