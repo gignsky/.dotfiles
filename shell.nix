@@ -15,7 +15,7 @@
       inherit (pkgs)
 	      wget
         cowsay
-        figlet
+        # figlet
         lolcat
 	      bat
         tree
@@ -41,7 +41,7 @@
     GREETING = "Moo!";
 
     shellHook = ''
-      echo $GREETING | figlet | cowsay | lolcat
+      echo $GREETING | cowsay | lolcat
     '';
   };
 }
