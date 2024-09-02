@@ -26,6 +26,10 @@
         src = pkgs.zsh-powerlevel10k;
         file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
       }
+      {
+        name = "als";
+        src = "${pkgs.als}/share/zsh/als";
+      }
     ];
 
     oh-my-zsh.enable = true;
