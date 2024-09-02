@@ -26,7 +26,8 @@
         # rnix-lsp
         # lorri
         nil
-        nixpkgs-fmt
+        # hello
+        # nixpkgs-fmt
         just;
         # pre-commit
 

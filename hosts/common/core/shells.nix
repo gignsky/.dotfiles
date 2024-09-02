@@ -24,11 +24,15 @@
     programs.direnv = {
         enable = lib.mkDefault true;
         # Expanded settings:
-        nix-direnv.enable = true;
-        loadInNixShell = true;
-        direnvrcExtra = lib.mkDefault ''
-            echo "direnv: loading direnvrc"
-        '';
+        nix-direnv = {
+            enable = true;
+            package = pkgs.nix-direnv;
+        };
+        silent = true;
+        # loadInNixShell = true;
+        # direnvrcExtra = lib.mkDefault ''
+        #     echo "direnv: loading direnvrc"
+        # '';
     };
 
     programs.bash = let
