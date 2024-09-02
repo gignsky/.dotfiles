@@ -16,7 +16,6 @@ pre-commit:
     git add justfile
 
 
-
 # Run after every rebuild, some of the time
 rebuild-post:
     # just check-sops
@@ -58,9 +57,9 @@ check:
     nix flake check --impure --no-build
     nix-shell -p lolcat --run 'echo "[CHECK] Finished." | lolcat'
 
-show args="":
+show:
     just pre-commit
-    scripts/flake-show.sh
+    nix flake show --all-systems
 
 # switch:
 #     sudo nixos-rebuild switch --flake ~/.dotfiles/.
