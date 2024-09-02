@@ -42,7 +42,7 @@
   # Services
 
   # Lorri service for direnv integration, direnv is enabled by default.
-  services.lorri.enable = true;
+  # services.lorri.enable = true;
 
   # Programs
   home.packages = with pkgs; [
