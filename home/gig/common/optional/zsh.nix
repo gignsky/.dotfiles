@@ -26,14 +26,16 @@
         src = pkgs.zsh-powerlevel10k;
         file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
       }
-      {
-        name = "als";
-        src = "${pkgs.als}/share/zsh/als";
-      }
+      # {
+      #   name = "als";
+      #   src = "${pkgs.als}/share/zsh/als";
+      # }
     ];
 
-    oh-my-zsh.enable = true;
-    oh-my-zsh.plugins = [ "aliases" ];
+    oh-my-zsh.enable = false;
+    # oh-my-zsh.plugins = [
+    #   "direnv"
+    # ];
 
     zplug = {
       enable = true;
@@ -45,6 +47,7 @@
         { name = "plugins/command-not-found"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
         # { name = "plugins/aliases"; tags = ["from:oh-my-zsh"]; } # being substituted by custom package
         { name = "plugins/ansible"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
+        { name = "plugins/direnv"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
         # { name = "plugins/virtualenvwrapper"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
         # { name = "plugins/copybuffer"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
         # { name = "plugins/cp"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
