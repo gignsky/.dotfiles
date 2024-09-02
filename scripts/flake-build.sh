@@ -5,6 +5,7 @@ if [ ! -z $1 ]; then
 		export PATH_USED=TRUE
 		export PATH=$(pwd)/$2
 	else
+		export PATH_USED=FALSE
 		export PACKAGE=$1
 	fi
 else
