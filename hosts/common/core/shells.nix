@@ -28,7 +28,7 @@
             enable = true;
             package = pkgs.nix-direnv;
         };
-        silent = true;
+        silent = false;
         # loadInNixShell = true;
         # direnvrcExtra = lib.mkDefault ''
         #     echo "direnv: loading direnvrc"
