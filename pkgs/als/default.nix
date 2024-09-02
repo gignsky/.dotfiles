@@ -25,14 +25,21 @@ pkgs.stdenv.mkDerivation {
   nativeBuildInputs = [ pkgs.patch ];
 
   patchPhase = ''
+    mkdir -p $out/${install_path}
     cd $src/plugins/aliases/
+
+    cp aliases.plugin.zsh $out/${install_path}/
+
+    cd $out/${install_path}/
+
     patch -p1 < ${./aliases.plugin.zsh.patch}
+
+    substituteInPlace aliases.plugin.zsh \
+      --replace 'python3' '${pkgs.python3}/bin/python3'
   '';
 
   installPhase = ''
-    mkdir -p $out/${install_path}
     cd $src/plugins/aliases/
-    cp aliases.plugin.zsh $out/${install_path}/
     cp cheatsheet.py $out/${install_path}/
     cp termcolor.py $out/${install_path}/
   '';
