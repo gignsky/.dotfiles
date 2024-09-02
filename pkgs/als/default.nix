@@ -9,9 +9,10 @@ let
   pname = "als";
   install_path = "share/zsh/${pname}";
 in
-{
+pkgs.stdenv.mkDerivation {
+# {
   inherit pname;
-  version = "";
+  version = "0.0.1";
   # Import src from github
   src = fetchgit {
     url = "https://github.com/ohmyzsh/ohmyzsh.git";
@@ -20,12 +21,20 @@ in
 
   strictDeps = true;
   dontBuild = true;
-  buildInputs = [ ];
+  buildInputs = [ pkgs.python3 ];
+  nativeBuildInputs = [ pkgs.patch ];
+
+  patchPhase = ''
+    cd $src/plugins/aliases/
+    patch -p1 < ${./aliases.plugin.zsh.patch}
+  '';
+
   installPhase = ''
     mkdir -p $out/${install_path}
-    cp $src/plugins/aliases/aliases.plugin.zsh $out/${install_path}/
-    cp $src/plugins/aliases/cheatsheet.py $out/${install_path}/
-    cp $src/plugins/aliases/termcolor.py $out/${install_path}/
+    cd $src/plugins/aliases/
+    cp aliases.plugin.zsh $out/${install_path}/
+    cp cheatsheet.py $out/${install_path}/
+    cp termcolor.py $out/${install_path}/
   '';
 
 #   meta = with lib; {

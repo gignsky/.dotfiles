@@ -92,14 +92,6 @@
       # Shell configured with packages that are typically only needed when working on or with nix-config.
       devShells = forAllSystems
         ( system: import ./shell.nix { inherit pkgs; });
-#
-      # packages.${system} = {
-      #   # Example Hello World package
-      #   example = pkgs.writeShellScriptBin "example" ''
-      #     ${pkgs.cowsay}/bin/cowsay "hello world" | ${pkgs.lolcat}/bin/lolcat
-      #   '';
-      #   default = pkgs.als { inherit pkgs system; };
-      # };
 
       # TODO change this to something that has better looking output rules
       # Nix formatter available through 'nix fmt' https://nix-community.github.io/nixpkgs-fmt
