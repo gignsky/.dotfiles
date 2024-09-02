@@ -13,7 +13,8 @@ else
 fi
 
 if [ $PATH_USED == TRUE ]; then
-	nix build --file $PATH
+	echo "Building flake at $PATH"
+	# nix build --file $PATH
 else
 	nix build .#$PACKAGE
 fi
