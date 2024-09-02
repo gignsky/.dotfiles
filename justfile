@@ -86,6 +86,9 @@ build *args:
     just pre-commit
     scripts/flake-build.sh {{args}}
 
+reload:
+    nix-direnv-reload
+
 #
 # test:
 #     sudo nixos-rebuild test --flake ~/.dotfiles/.
