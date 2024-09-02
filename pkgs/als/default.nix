@@ -12,7 +12,7 @@ in
 pkgs.stdenv.mkDerivation {
 # {
   inherit pname;
-  version = "0.0.1";
+  version = "0.0.2";
   # Import src from github
   src = fetchgit {
     url = "https://github.com/ohmyzsh/ohmyzsh.git";
@@ -21,7 +21,7 @@ pkgs.stdenv.mkDerivation {
 
   strictDeps = true;
   dontBuild = true;
-  buildInputs = [ pkgs.python3 ];
+  buildInputs = [ ];
   nativeBuildInputs = [ pkgs.patch ];
 
   patchPhase = ''
