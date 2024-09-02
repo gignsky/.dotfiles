@@ -1,5 +1,6 @@
 {
   # Basics
+  _ = "sudo";
   ll = "ls -lh";
   lla = "ls -lah";
   cp = "cp -rv";
