@@ -15,12 +15,15 @@ pre-commit:
     git add '**/*.sh'
     git add justfile
 
+switch:
+    just rebuild-full
+    just home
+
 
 # Run after every rebuild, some of the time
 rebuild-post:
     # just check-sops
     nix-shell -p lolcat --run 'echo "[POST] Rebuilt." | lolcat'
-    zsh
 
 # Rebuild the system
 rebuild args="":
@@ -50,6 +53,7 @@ rebuild-update:
 # Rebuild the system and update the flake with rebuild-post
 rebuild-update-full:
     just update
+    just home
     just rebuild
 
 check:
