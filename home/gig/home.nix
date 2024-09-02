@@ -46,7 +46,7 @@
 
   # Programs
   home.packages = with pkgs; [
-    direnv # direnv is enabled by default
+    # direnv # direnv is enabled by default
 
     ################################################################
     ## look through and decide if these might be good to have then sort them throughout the configuration of the home files and the dotfiles, all new packages should start here for testing purposes if not used in a nix-shell -p command
@@ -96,6 +96,15 @@
     config = {
       # Disable if you don't want unfree packages
       allowUnfree = true;
+    };
+  };
+
+  programs = {
+    direnv = {
+      enable = true;
+      enableBashIntegration = true;
+      enableZshIntegration = true;
+      nix-direnv.enable=true;
     };
   };
 
