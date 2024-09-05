@@ -69,24 +69,36 @@ show:
 #     sudo nixos-rebuild switch --flake ~/.dotfiles/.
 #     home-manager switch --flake ~/.dotfiles/.
 #
+
+# Run before every home rebuild, on non-quick builds
 pre-home:
     just pre-commit
     echo "[PRE-HOME] Finished." | lolcat
 
-home:
-    just pre-home
-    home-manager switch --flake ~/.dotfiles/.
+# Runs after every home rebuild
+post-home:
     echo "[HOME] Finished." | lolcat
 
-homeq:
-    home-manager switch --flake ~/.dotfiles/.
-    echo "[HOME-Quick] Finished." | lolcat
+home:
+    just pre-home
+    just home-core
+    just post-home
 
-new home:
+homeq:
+    just home-core
+    just post-home
+
+# Runs just home
+home-core:
+    home-manager switch --flake ~/.dotfiles/.
+
+# Runs just home and then zsh
+new-home:
     just home
     zsh
 
-new homeq:
+# Runs just home [quick] and then zsh
+new-homeq:
     just homeq
     zsh
 
