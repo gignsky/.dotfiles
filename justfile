@@ -7,13 +7,11 @@ default:
 rebuild-pre:
     echo "[PRE] Rebuilding..." | lolcat
     # just update-nix-secrets
-    just pre-commit
+    just dont-fuck-my-build
 
-pre-commit:
-    echo "[PRE-COMMIT] Pre-commit git add, etc..." | lolcat
-    git add '**/*.nix'
-    git add '**/*.sh'
-    git add justfile
+dont-fuck-my-build:
+    git ls-files --others --exclude-standard -- '*.nix' | xargs -r git add
+    echo "No chance your build is fucked! 👍" | Lolcat
 
 switch:
     just rebuild-full
@@ -43,6 +41,7 @@ rebuild-full args="":
 
 # Update the flake
 update:
+    just dont-fuck-my-build
     nix flake update
 
 # Rebuild the system and update the flake
@@ -57,11 +56,12 @@ rebuild-update-full:
     just rebuild
 
 check:
-    just pre-commit
+    just dont-fuck-my-build
     nix flake check --impure --no-build
     echo "[CHECK] Finished." | lolcat
 
 show:
+    just dont-fuck-my-build
     nix flake show --all-systems
 
 # switch:
@@ -71,7 +71,7 @@ show:
 
 # Run before every home rebuild, on non-quick builds
 pre-home:
-    just pre-commit
+    just dont-fuck-my-build
     echo "[PRE-HOME] Finished." | lolcat
 
 # Runs after every home rebuild
@@ -80,10 +80,6 @@ post-home:
 
 home:
     just pre-home
-    just home-core
-    just post-home
-
-homeq:
     just home-core
     just post-home
 
@@ -96,13 +92,8 @@ new-home:
     just home
     zsh
 
-# Runs just home [quick] and then zsh
-new-homeq:
-    just homeq
-    zsh
-
 home-trace:
-    just rebuild-pre
+    just dont-fuck-my-builds
     home-manager switch --flake ~/.dotfiles/. --show-trace
     echo "[HOME-TRACE] Finished." | lolcat
 
@@ -110,11 +101,8 @@ gc:
     nix-collect-garbage
 
 build *args:
-    just pre-commit
+    just dont-fuck-my-builds
     scripts/flake-build.sh {{args}}
-
-reload:
-    nix-direnv-reload
 
 #
 # test:
