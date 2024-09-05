@@ -11,6 +11,7 @@
 }: {
   default = pkgs.mkShell {
     NIX_CONFIG = "extra-experimental-features = nix-command flakes repl-flake";
+    # command = "zsh"; # Don't think this is neccecary
     nativeBuildInputs = builtins.attrValues {
       inherit (pkgs)
 	      wget
@@ -27,7 +28,7 @@
         # rnix-lsp
         # lorri
         nil
-        # hello
+        hello
         # nixpkgs-fmt
         just;
         # pre-commit
