@@ -62,7 +62,6 @@ check:
     echo "[CHECK] Finished." | lolcat
 
 show:
-    just pre-commit
     nix flake show --all-systems
 
 # switch:
