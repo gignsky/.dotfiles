@@ -11,7 +11,7 @@ rebuild-pre:
 
 dont-fuck-my-build:
     git ls-files --others --exclude-standard -- '*.nix' | xargs -r git add
-    echo "No chance your build is fucked! 👍" | Lolcat
+    echo "No chance your build is fucked! 👍" | lolcat
 
 switch:
     just rebuild-full
@@ -69,7 +69,7 @@ show:
 #     home-manager switch --flake ~/.dotfiles/.
 #
 
-# Run before every home rebuild, on non-quick builds
+# Run before every home rebuild, on non-quick build
 pre-home:
     just dont-fuck-my-build
     echo "[PRE-HOME] Finished." | lolcat
@@ -88,12 +88,12 @@ home-core:
     home-manager switch --flake ~/.dotfiles/.
 
 # Runs just home and then zsh
-new-home:
+new home:
     just home
     zsh
 
 home-trace:
-    just dont-fuck-my-builds
+    just dont-fuck-my-build
     home-manager switch --flake ~/.dotfiles/. --show-trace
     echo "[HOME-TRACE] Finished." | lolcat
 
@@ -101,7 +101,7 @@ gc:
     nix-collect-garbage
 
 build *args:
-    just dont-fuck-my-builds
+    just dont-fuck-my-build
     scripts/flake-build.sh {{args}}
 
 #
