@@ -145,7 +145,7 @@
         # FIXME replace with your username@hostname
         "gig@nixos" = home-manager.lib.homeManagerConfiguration {
           inherit pkgs; # Home-manager requires 'pkgs' instance
-          extraSpecialArgs = {inherit specialArgs;};
+          extraSpecialArgs = {inherit inputs outputs;};
           # > Our main home-manager configuration file <
           modules = [./home/gig/home.nix];
         };

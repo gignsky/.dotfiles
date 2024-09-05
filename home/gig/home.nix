@@ -47,7 +47,7 @@
   # Programs
   home.packages = with pkgs; [
     # direnv # direnv is enabled by default
-
+    supertree
     ################################################################
     ## look through and decide if these might be good to have then sort them throughout the configuration of the home files and the dotfiles, all new packages should start here for testing purposes if not used in a nix-shell -p command
     ################################################################
@@ -78,9 +78,9 @@
     # You can add overlays here
     overlays = [
       # Add overlays your own flake exports (from overlays and pkgs dir):
-      # outputs.overlays.additions
+      outputs.overlays.additions
       # outputs.overlays.modifications
-      # outputs.overlays.unstable-packages
+      outputs.overlays.unstable-packages
 
       # You can also add overlays exported from other flakes:
       # neovim-nightly-overlay.overlays.default
