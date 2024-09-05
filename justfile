@@ -103,6 +103,7 @@ gc:
 build *args:
     just dont-fuck-my-build
     scripts/flake-build.sh {{args}}
+    quick-results
 
 #
 # test:
