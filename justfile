@@ -5,12 +5,12 @@ default:
 
 # Run before every rebuild, everytime
 rebuild-pre:
-    nix-shell -p lolcat --run 'echo "[PRE] Rebuilding..." | lolcat'
+    echo "[PRE] Rebuilding..." | lolcat
     # just update-nix-secrets
     just pre-commit
 
 pre-commit:
-    nix-shell -p lolcat --run 'echo "[PRE-COMMIT] Pre-commit git add, etc..." | lolcat'
+    echo "[PRE-COMMIT] Pre-commit git add, etc..." | lolcat
     git add '**/*.nix'
     git add '**/*.sh'
     git add justfile
@@ -23,7 +23,7 @@ switch:
 # Run after every rebuild, some of the time
 rebuild-post:
     # just check-sops
-    nix-shell -p lolcat --run 'echo "[POST] Rebuilt." | lolcat'
+    echo "[POST] Rebuilt." | lolcat
 
 # Rebuild the system
 rebuild args="":
@@ -34,7 +34,7 @@ rebuild args="":
 rebuild-test args="":
     just rebuild-pre
     scripts/system-flake-rebuild-test.sh {{args}}
-    nix-shell -p lolcat --run 'echo "[TEST] Finished." | lolcat'
+    echo "[TEST] Finished." | lolcat
 
 # Rebuild the system and check sops
 rebuild-full args="":
@@ -59,7 +59,7 @@ rebuild-update-full:
 check:
     just pre-commit
     nix flake check --impure --no-build
-    nix-shell -p lolcat --run 'echo "[CHECK] Finished." | lolcat'
+    echo "[CHECK] Finished." | lolcat
 
 show:
     just pre-commit
@@ -69,19 +69,31 @@ show:
 #     sudo nixos-rebuild switch --flake ~/.dotfiles/.
 #     home-manager switch --flake ~/.dotfiles/.
 #
+pre-home:
+    just pre-commit
+    echo "[PRE-HOME] Finished." | lolcat
+
 home:
-    just rebuild-pre
+    just pre-home
     home-manager switch --flake ~/.dotfiles/.
-    nix-shell -p lolcat --run 'echo "[HOME] Finished." | lolcat'
+    echo "[HOME] Finished." | lolcat
+
+homeq:
+    home-manager switch --flake ~/.dotfiles/.
+    echo "[HOME-Quick] Finished." | lolcat
 
 new home:
     just home
     zsh
 
+new homeq:
+    just homeq
+    zsh
+
 home-trace:
     just rebuild-pre
     home-manager switch --flake ~/.dotfiles/. --show-trace
-    nix-shell -p lolcat --run 'echo "[HOME-TRACE] Finished." | lolcat'
+    echo "[HOME-TRACE] Finished." | lolcat
 
 gc:
     nix-collect-garbage
@@ -124,10 +136,10 @@ diff:
 
 # # sops:
 # #   echo "Editing {{SOPS_FILE}}"
-# #   nix-shell -p sops --run "SOPS_AGE_KEY_FILE=~/.config/sops/age/keys.txt sops {{SOPS_FILE}}"
+# #   PS_AGE_KEY_FILE=~/.config/sops/age/keys.txt sops {{SOPS_FILE}}
 #
 # age-key:
-#   nix-shell -p age --run "age-keygen"
+#   -keygen
 #
 # rekey:
 #   cd ../nix-secrets && (\
