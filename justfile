@@ -60,9 +60,9 @@ check:
     nix flake check --impure --no-build
     echo "[CHECK] Finished." | lolcat
 
-show:
+show arg="":
     just dont-fuck-my-build
-    nix flake show --all-systems
+    scripts/flake-show.sh *arg
 
 # switch:
 #     sudo nixos-rebuild switch --flake ~/.dotfiles/.
