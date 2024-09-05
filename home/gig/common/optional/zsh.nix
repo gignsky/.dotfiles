@@ -29,6 +29,7 @@
       # {
       #   name = "als";
       #   src = "${pkgs.als}/share/zsh/als";
+      #   file = "share/zsh/als/aliases.plugin.zsh";
       # }
     ];
 
