@@ -9,6 +9,10 @@ rec {
     ${pkgs.cowsay}/bin/cowsay "hello world" | ${pkgs.lolcat}/bin/lolcat
   '';
 
+  supertree = pkgs.writeShellScriptBin "supertree" ''
+    ${pkgs.tree}/bin/tree ..
+  '';
+
   #################### Packages with external source ####################
   als = pkgs.callPackage ./als { };
 
