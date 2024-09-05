@@ -14,15 +14,15 @@
     # command = "zsh"; # Don't think this is neccecary
     nativeBuildInputs = builtins.attrValues {
       inherit (pkgs)
-	      wget
-        cowsay
+	      # wget
+        # cowsay
         # figlet
-        lolcat
-	      bat
-        tree
-        magic-wormhole
-        home-manager
-        zsh
+        # lolcat
+	      # bat
+        # tree
+        # magic-wormhole
+        # home-manager
+        # zsh
         git
         # vscode # We NEED to add a if statement here somehow that checks if you're in wsl
         # rnix-lsp
@@ -40,10 +40,9 @@
         # libiconv
     };
 
-    GREETING = "Moo!";
-
-    shellHook = ''
-      echo $GREETING | cowsay | lolcat
-    '';
+    # shellHook = ''
+    #   echo "Figlet" | figlet | lolcat
+    #   echo "Dotfiles, DevShell Environment!" | cowsay | lolcat
+    # '';
   };
 }
