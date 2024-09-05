@@ -17,7 +17,7 @@ rec {
     if [ -d ./result ]; then
       ${pkgs.tree}/bin/tree ./result
     else
-      echo "No result directory found"
+      echo "No result directory found" | ${pkgs.cowsay}/bin/cowsay | ${pkgs.lolcat}/bin/lolcat
     fi
   '';
 
