@@ -32,7 +32,7 @@
       # }
     ];
 
-    oh-my-zsh.enable = false;
+    # oh-my-zsh.enable = false;
     # oh-my-zsh.plugins = [
     #   "direnv"
     # ];
