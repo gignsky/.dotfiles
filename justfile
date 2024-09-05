@@ -62,7 +62,7 @@ check:
 
 show arg="":
     just dont-fuck-my-build
-    scripts/flake-show.sh *arg
+    scripts/flake-show.sh {{args}}
 
 # switch:
 #     sudo nixos-rebuild switch --flake ~/.dotfiles/.
