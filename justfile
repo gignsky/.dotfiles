@@ -60,7 +60,7 @@ check:
     nix flake check --impure --no-build
     echo "[CHECK] Finished." | lolcat
 
-show arg="":
+show args="":
     just dont-fuck-my-build
     scripts/flake-show.sh {{args}}
 
