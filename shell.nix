@@ -17,7 +17,7 @@
 	      # wget
         # cowsay
         # figlet
-        # lolcat
+        lolcat
 	      # bat
         # tree
         # magic-wormhole
