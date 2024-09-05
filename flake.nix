@@ -52,13 +52,13 @@
       # inherit (nixpkgs) lib;
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
-      forAllSystems = nixpkgs.lib.genAttrs [
-        "x86_64-linux"
-        "aarch64-linux"
-        "i686-linux"
-        "aarch64-darwin"
-        "x86_64-darwin"
-      ];
+      # forAllSystems = nixpkgs.lib.genAttrs [
+      #   "x86_64-linux"
+      #   "aarch64-linux"
+      #   "i686-linux"
+      #   "aarch64-darwin"
+      #   "x86_64-darwin"
+      # ];
       # configVars = import ./vars { inherit inputs lib; };
       # configLib = import ./lib { inherit lib; };
       specialArgs = {
@@ -78,27 +78,25 @@
     in
     {
       # Custom packages to be shared or upstreamed.
-      packages = forAllSystems (
-        system:
-        let
-          pkgs = nixpkgs.legacyPackages.${system};
-        in
-        import ./pkgs { inherit pkgs; }
-      );
+      # packages = forAllSystems (
+      #   system:
+      #   let
+      #     pkgs = nixpkgs.legacyPackages.${system};
+      #   in
+      #   import ./pkgs { inherit pkgs; }
+      # );
+
+      packages.${system} = import ./pkgs { inherit pkgs; };
 
       # Custom modifications/overrides to upstream packages.
       overlays = import ./overlays { inherit inputs; };
 
       # Shell configured with packages that are typically only needed when working on or with nix-config.
-      devShells = forAllSystems
-        ( system: import ./shell.nix { inherit pkgs; });
+      devShells.${system} = import ./shell.nix { inherit pkgs; };
 
       # TODO change this to something that has better looking output rules
       # Nix formatter available through 'nix fmt' https://nix-community.github.io/nixpkgs-fmt
-      formatter = forAllSystems
-        (system:
-          nixpkgs.legacyPackages.${system}.nixpkgs-fmt
-        );
+      formatter.${system} = pkgs.nixpkgs-fmt;
 
       # NixOS configuration entrypoint
       # Available through 'nixos-rebuild --flake .#your-hostname'
