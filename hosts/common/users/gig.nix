@@ -1,6 +1,8 @@
 { pkgs, config, ... }:
 
 {
+  sops.secrets.gig-password.neededForUsers = true;
+  users.mutableUsers = false; # required for password to be set via sops during system activation
 
   imports = [
     # ./common/optional/sops.nix
@@ -16,6 +18,7 @@
     # Be sure to change it (using passwd) after rebooting!
     # initialPassword = "correcthorsebatterystaple";
     isNormalUser = true;
+    # hashedPassword = config.sops.secrets.gig-password.path;
     openssh.authorizedKeys.keys = [
     ];
     # shell = pkgs.zsh; #default shell
@@ -25,6 +28,16 @@
     ];
 
 
+  };
+
+  users.users.tester = {
+    isNormalUser = true;
+    hashedPasswordFile = config.sops.secrets.gig-password.path;
+    openssh.authorizedKeys.keys = [
+    ];
+    extraGroups = [
+      "wheel"
+    ];
   };
 
   # imports = [
