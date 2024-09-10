@@ -1,9 +1,9 @@
 keys:
   - &wsl age1x8m4vpezgs5ucy5d80gqxh5qdhegu5jcfmtazsfdrg6wc2240ydswu3xts
-  # - &gig-temp-dev age12p8lr30zx8q6ml3ehpfa96hefxs48zas3p7ktl9p804r57a3tgvs2s0k85
+  - &gig age12p8lr30zx8q6ml3ehpfa96hefxs48zas3p7ktl9p804r57a3tgvs2s0k85
 creation_rules:
   - path_regex: secrets.yaml$
     key_groups:
       - age:
         - *wsl
-        # - *gig-temp-dev
+        - *gig
