@@ -143,6 +143,15 @@ sops-update:
   echo "Updating ~/.dotfiles/secrets.yaml" | lolcat
   sops updatekeys secrets.yaml
   echo "Updated Secrets!" | lolcat
+
+sops-fix:
+    just pre-home
+    home-manager switch --reset --flake ~/.dotfiles/.
+    systemctl --user reset-failed
+    just home-core
+    just post-home
+
+
 #   echo $SOPS_FILE
 #   PS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
 
