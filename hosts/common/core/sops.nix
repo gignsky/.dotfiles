@@ -18,8 +18,8 @@
             generateKey = true;
         };
 
-        secrets = {
-            gig-password = {};
-        };
+        # secrets = {
+        #     gig-password = {};
+        # };
     };
 }
