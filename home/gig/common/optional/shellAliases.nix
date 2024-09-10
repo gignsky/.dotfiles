@@ -19,6 +19,9 @@
   # NIX Specific
   expo = "export NIXPKGS_ALLOW_UNFREE=1";
 
+  # Template commands
+  # rustup = ""
+
 #   # Cargo
 #   alias cb = "cargo build";
 #   alias cr = "cargo run";
