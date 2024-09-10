@@ -13,6 +13,8 @@
   # sops.secrets.gig-password.neededForUsers = true;
   # users.mutableUsers = false; # required for password to be set via sops during system activation
 
+  users.users.root.hashedPasswordFile = config.sops.secrets.root-password.path;
+
   users.users.gig = {
     # If you do, you can skip setting a root password by passing '--no-root-passwd' to nixos-install.
     # Be sure to change it (using passwd) after rebooting!
@@ -20,7 +22,7 @@
     isNormalUser = true;
     hashedPasswordFile = config.sops.secrets.gig-password.path;
     openssh.authorizedKeys.keys = [
-      (builtins.readFile ./keys/id_demo.pub)
+      (builtins.readFile ./keys/id_rsa.pub)
     ];
     # shell = pkgs.zsh; #default shell
     extraGroups = [
