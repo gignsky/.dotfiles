@@ -147,12 +147,20 @@
       # Standalone home-manager configuration entrypoint
       # Available through 'home-manager --flake .#your-username@your-hostname'
       homeConfigurations = {
-        # FIXME replace with your username@hostname
+        # ganoslalWSL
         "gig@nixos" = home-manager.lib.homeManagerConfiguration {
           inherit pkgs; # Home-manager requires 'pkgs' instance
           extraSpecialArgs = {inherit inputs outputs;};
           # > Our main home-manager configuration file <
-          modules = [./home/gig/home.nix];
+          modules = [./home/gig/wsl.nix];
+        };
+
+        # merlin
+        "gig@merlin" = home-manager.lib.homeManagerConfiguration {
+          inherit pkgs; # Home-manager requires 'pkgs' instance
+          extraSpecialArgs = {inherit inputs outputs;};
+          # > Our main home-manager configuration file <
+          modules = [./home/gig/merlin.nix];
         };
       };
   };
