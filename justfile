@@ -137,8 +137,12 @@ diff:
 sops:
   echo "Editing ~/.dotfiles/secrets.yaml" | lolcat
   sops ~/.dotfiles/secrets.yaml
+  just sops-update
+
+sops-update:
   echo "Updating ~/.dotfiles/secrets.yaml" | lolcat
   sops updatekeys secrets.yaml
+  echo "Updated!" | lolcat
 #   echo $SOPS_FILE
 #   PS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
 
