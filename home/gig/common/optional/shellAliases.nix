@@ -19,6 +19,12 @@
   # NIX Specific
   expo = "export NIXPKGS_ALLOW_UNFREE=1";
 
+  # Keygen
+  new-age = "nix-shell -p age --run 'age-keygen -o key.txt'";
+  ssh-age = "nix-shell -p ssh-to-age --run 'cat /etc/ssh/ssh_host_ed25519_key.pub | ssh-to-age'";
+  new-ssh = "ssh-keygen -t ed25519 -f ";
+  password = "mkpasswd -s";
+
   # Template commands
   # rustup = ""
 

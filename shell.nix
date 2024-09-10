@@ -27,15 +27,18 @@
         # vscode # We NEED to add a if statement here somehow that checks if you're in wsl
         # rnix-lsp
         # lorri
+        nix
         nil
-        hello
+        # hello
+        age
+        ssh-to-age
+        sops
+        home-manager
+        # sops
         # nixpkgs-fmt
         just;
         # pre-commit
 
-        # age
-        # ssh-to-age
-        # sops
 
         # libiconv
     };
