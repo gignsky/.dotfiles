@@ -5,6 +5,7 @@
         ./locale.nix
         ./sshd.nix
         ./shells.nix
+        ./sops.nix
     ];
 
     nixpkgs = {

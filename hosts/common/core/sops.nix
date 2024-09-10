@@ -6,8 +6,8 @@
     ];
 
     sops = {
-        
-        defaultSopsFile = ./resources/secrets.yaml;
+
+        defaultSopsFile = ../../../secrets.yaml;
         validateSopsFiles = false;
 
         age = {
@@ -21,6 +21,7 @@
 
         secrets = {
             gig-password = {};
+            # gig-dev-ssh = {};
         };
     };
 }

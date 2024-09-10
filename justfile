@@ -134,10 +134,12 @@ build *args:
 diff:
   git diff ':!flake.lock'
 
-# # sops:
-# #   echo "Editing {{SOPS_FILE}}"
-# #   PS_AGE_KEY_FILE=~/.config/sops/age/keys.txt sops {{SOPS_FILE}}
-#
+sops:
+  echo "Editing ~/.dotfiles/.secrets.yaml" | lolcat
+  sops ~/.dotfiles/secrets.yaml
+#   echo $SOPS_FILE
+#   PS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
+
 # age-key:
 #   -keygen
 #
