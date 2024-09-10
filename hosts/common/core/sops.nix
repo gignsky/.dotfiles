@@ -6,7 +6,6 @@
     ];
 
     sops = {
-
         defaultSopsFile = ../../../secrets.yaml;
         validateSopsFiles = false;
 
@@ -21,7 +20,6 @@
 
         secrets = {
             gig-password = {};
-            # gig-dev-ssh = {};
         };
     };
 }
