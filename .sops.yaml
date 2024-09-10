@@ -1,11 +1,11 @@
 keys:
   - &users:
-    - &gig age1xtzqgg7sldxl8dz9qct3lvsg8zywqllv8qtcu8h4exdethvggqgse6584v
+    - &gig age12p8lr30zx8q6ml3ehpfa96hefxs48zas3p7ktl9p804r57a3tgvs2s0k85
   - &hosts:
-    - &buzz: age184sdwkr3876f498etmjkeyu6r0huudql4t8ktwwwatlwm24u5uasmfsskc
+    - &nixos: age1x8m4vpezgs5ucy5d80gqxh5qdhegu5jcfmtazsfdrg6wc2240ydswu3xts
 creation_rules:
   - path_regex: secrets.yaml$
     key_groups:
       - age:
         - *gig
-        - *buzz
+        - *nixos
