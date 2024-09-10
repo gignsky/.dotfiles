@@ -16,6 +16,7 @@
 
     # ./common/core
     ./common/optional/zsh.nix
+    ./common/optional/sops.nix
   ];
   nix = {
     package = lib.mkDefault pkgs.nix;
