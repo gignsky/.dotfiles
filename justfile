@@ -8,6 +8,7 @@ rebuild-pre:
     echo "[PRE] Rebuilding..." | lolcat
     # just update-nix-secrets
     just dont-fuck-my-build
+    just sops-update
 
 dont-fuck-my-build:
     git ls-files --others --exclude-standard -- '*.nix' | xargs -r git add
@@ -34,14 +35,16 @@ rebuild-test args="":
     scripts/system-flake-rebuild-test.sh {{args}}
     echo "[TEST] Finished." | lolcat
 
-# Rebuild the system and check sops
+# Rebuild the system and check sops and home manager
 rebuild-full args="":
     just rebuild {{args}}
     just rebuild-post
+    just home
 
 # Update the flake
 update:
     just dont-fuck-my-build
+    just sops-update
     nix flake update
 
 # Rebuild the system and update the flake
