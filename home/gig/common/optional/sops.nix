@@ -13,8 +13,8 @@
     validateSopsFiles = false;
 
     secrets = {
-      "private_keys/gig" = {
-        path = "/home/gig/.ssh/id_demo";
+      "private_keys/dev" = {
+        path = "/home/gig/.ssh/id_rsa";
       };
     };
 
