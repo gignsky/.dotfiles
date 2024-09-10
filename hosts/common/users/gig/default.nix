@@ -7,7 +7,7 @@
 
   imports = [
     # ./common/optional/sops.nix
-    ../optional/zsh.nix
+    ../../optional/zsh.nix
   ];
 
   # sops.secrets.gig-password.neededForUsers = true;
@@ -20,6 +20,7 @@
     isNormalUser = true;
     hashedPasswordFile = config.sops.secrets.gig-password.path;
     openssh.authorizedKeys.keys = [
+      (builtins.readFile ./keys/id_demo.pub)
     ];
     # shell = pkgs.zsh; #default shell
     extraGroups = [
@@ -31,6 +32,7 @@
   # imports = [
   #   ../../optional/sshd-with-passwords.nix
   # ];
+
 
   services.openssh.enable = true;
 }
