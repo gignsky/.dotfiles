@@ -22,6 +22,9 @@
             gig-password = {
                 neededForUsers = true;
             };
+            root-password = {
+                neededForUsers = true;
+            };
 
         };
     };
