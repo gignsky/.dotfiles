@@ -66,6 +66,7 @@
             syst = "systemctl";
             expo = "export NIXPKGS_ALLOW_UNFREE=1";
             cat = "bat";
+            dot = "cd ~/.dotfiles";
         };
 
         shellInit = ''
