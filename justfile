@@ -105,7 +105,7 @@ home-trace:
     echo "[HOME-TRACE] Finished." | lolcat
 
 gc:
-    nix-collect-garbage | lolcat
+    nix-collect-garbage --delete-old | lolcat
     nix store gc | lolcat
 
 pre-build:
