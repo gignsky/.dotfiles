@@ -112,8 +112,11 @@ build *args:
 #     sudo nixos-rebuild test --flake ~/.dotfiles/.
 #     home-manager switch --flake ~/.dotfiles/.
 
-# iso:
-#     nix build ~/.dotfiles/.#nixosConfigurations.minimalIso.config.system.build.isoImage
+iso:
+  # If we dont remove this folder, libvirtd VM doesnt run with the new iso...
+  rm -rf result
+  nix build ./nixos-installer#nixosConfigurations.iso.config.system.build.isoImage
+  quick-results
 
 # rebuild-pre: update-nix-secrets
 #   git add *.nix
