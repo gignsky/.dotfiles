@@ -14,10 +14,9 @@ dont-fuck-my-build:
     git ls-files --others --exclude-standard -- '*.nix' | xargs -r git add
     echo "No chance your build is fucked! 👍" | lolcat
 
-switch:
-    just rebuild-full
+switch args="":
+    just rebuild {{args}}
     just home
-
 
 # Run after every rebuild, some of the time
 rebuild-post:
