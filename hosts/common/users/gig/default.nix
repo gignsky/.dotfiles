@@ -37,7 +37,7 @@ in
         users.users.${configVars.username} = {
           home = "/home/${configVars.username}";
           isNormalUser = true;
-          password = "nixos"; # Overridden if sops is working
+            password = if configVars.isMinimal then "nixos" else null; # Overridden if sops is working
 
           extraGroups =
             [ "wheel" "gig" ]
@@ -52,17 +52,18 @@ in
           # These get placed into /etc/ssh/authorized_keys.d/<name> on nixos
           openssh.authorizedKeys.keys = lib.lists.forEach pubKeys (key: builtins.readFile key);
 
-          shell = pkgs.zsh; # default shell
+          shell = if configVars.isMinimal then null else pkgs.zsh; # default shell
         };
 
         # Proper root use required for borg and some other specific operations
         users.users.root = {
-          password = "nixos"; # Overridden if sops is working
+          password = if configVars.isMinimal then "nixos" else null; # Overridden if sops is working
           # root's ssh keys are mainly used for remote deployment.
           openssh.authorizedKeys.keys = config.users.users.${configVars.username}.openssh.authorizedKeys.keys;
         };
 
       };
   # decrypt gig-password to /run/secrets-for-users/ so it can be used to create the user
-  sops.secrets.gig-password.neededForUsers = true;
+  # sops.secrets.gig-password.neededForUsers = true;
+  # sops.secrets.root-password.neededForUsers = true;
 }
