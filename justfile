@@ -106,7 +106,7 @@ home-trace:
 
 gc:
     nix-collect-garbage --delete-old | lolcat
-    nix store gc | lolcat
+    # nix store gc | lolcat
 
 pre-build:
     echo "Pre-Build Starting..." | lolcat
