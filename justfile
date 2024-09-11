@@ -106,6 +106,7 @@ home-trace:
 
 gc:
     nix-collect-garbage | lolcat
+    nix store gc | lolcat
 
 pre-build:
     echo "Pre-Build Starting..." | lolcat
@@ -170,6 +171,8 @@ sops-fix:
     just home-core
     just post-home
 
+store-photo:
+    nix-du -s=500MB | \dot -Tpng > store.png
 
 #   echo $SOPS_FILE
 #   PS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
