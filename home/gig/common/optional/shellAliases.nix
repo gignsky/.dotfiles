@@ -2,6 +2,7 @@
   # Basics
   _ = "sudo";
   dot = "cd ~/.dotfiles";
+  work = "cd ~/workingFiel";
   ll = "ls -lh";
   lla = "ls -lah";
   cp = "cp -rv";
