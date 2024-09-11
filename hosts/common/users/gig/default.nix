@@ -1,40 +1,68 @@
-{ config, configLib, ... }:
+{ pkgs, config, lib, inputs, configLib, configVars, ... }:
 
+let
+  ifTheyExist = groups: builtins.filter (group: builtins.hasAttr group config.users.groups) groups;
+  sopsHashedPasswordFile =
+    lib.optionalString (lib.hasAttr "sops-nix" inputs)
+      config.sops.secrets."${configVars.username}-password".path;
+  sopsRootHashedPasswordFile =
+    lib.optionalString (lib.hasAttr "sops-nix" inputs)
+      config.sops.secrets."root-password".path;
+  pubKeys = lib.filesystem.listFilesRecursive (./keys);
+
+  # these are values we don't want to set if the environment is minimal. E.g. ISO or nixos-installer
+  # isMinimal is true in the nixos-installer/flake.nix
+  fullUserConfig = lib.optionalAttrs (!configVars.isMinimal) {
+    users.users.${configVars.username} = {
+      hashedPasswordFile = sopsHashedPasswordFile;
+      packages = [ pkgs.home-manager ];
+    };
+
+    users.users.root = {
+      hashedPasswordFile = sopsRootHashedPasswordFile;
+    };
+
+    # # Import this user's personal/home configurations
+    # home-manager.users.${configVars.username} = import (
+    #   configLib.relativeToRoot "home/${configVars.username}/${config.networking.hostName}.nix"
+    # );
+  };
+in
 {
+  config =
+    lib.recursiveUpdate fullUserConfig
+      #this is the second argument to recursiveUpdate
+      {
+        users.mutableUsers = false; # required for password to be set via sops during system activation
+        users.users.${configVars.username} = {
+          home = "/home/${configVars.username}";
+          isNormalUser = true;
+          password = "nixos"; # Overridden if sops is working
+
+          extraGroups =
+            [ "wheel" "gig" ]
+            ++ ifTheyExist [
+              "audio"
+              "video"
+              "docker"
+              "git"
+              "networkmanager"
+            ];
+
+          # These get placed into /etc/ssh/authorized_keys.d/<name> on nixos
+          openssh.authorizedKeys.keys = lib.lists.forEach pubKeys (key: builtins.readFile key);
+
+          shell = pkgs.zsh; # default shell
+        };
+
+        # Proper root use required for borg and some other specific operations
+        users.users.root = {
+          password = "nixos"; # Overridden if sops is working
+          # root's ssh keys are mainly used for remote deployment.
+          openssh.authorizedKeys.keys = config.users.users.${configVars.username}.openssh.authorizedKeys.keys;
+        };
+
+      };
   # decrypt gig-password to /run/secrets-for-users/ so it can be used to create the user
   sops.secrets.gig-password.neededForUsers = true;
-  users.mutableUsers = false; # required for password to be set via sops during system activation
-
-  imports = [
-    # ./common/optional/sops.nix
-    (configLib.relativeToRoot "hosts/common/optional/zsh.nix")
-  ];
-
-  # sops.secrets.gig-password.neededForUsers = true;
-  # users.mutableUsers = false; # required for password to be set via sops during system activation
-
-  users.users.root.hashedPasswordFile = config.sops.secrets.root-password.path;
-
-  users.users.gig = {
-    # If you do, you can skip setting a root password by passing '--no-root-passwd' to nixos-install.
-    # Be sure to change it (using passwd) after rebooting!
-    # initialPassword = "correcthorsebatterystaple";
-    isNormalUser = true;
-    hashedPasswordFile = config.sops.secrets.gig-password.path;
-    openssh.authorizedKeys.keys = [
-      (builtins.readFile ./keys/id_rsa.pub)
-    ];
-    # shell = pkgs.zsh; #default shell
-    extraGroups = [
-      "wheel"
-      "gig"
-    ];
-  };
-
-  # imports = [
-  #   ../../optional/sshd-with-passwords.nix
-  # ];
-
-
-  services.openssh.enable = true;
 }
