@@ -90,6 +90,7 @@
       #   in
       #   import ./pkgs { inherit pkgs; }
       # );
+      # nixosModules = { inherit (import ./modules/nixos); };
 
       packages.${system} = import ./pkgs { inherit pkgs; };
 
