@@ -108,7 +108,7 @@ gc:
     nix-collect-garbage | lolcat
 
 pre-build:
-    echo "Build Starting..." | lolcat
+    echo "Pre-Build Starting..." | lolcat
     just dont-fuck-my-build
     rm -rfv result
 
