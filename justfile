@@ -105,11 +105,20 @@ home-trace:
     echo "[HOME-TRACE] Finished." | lolcat
 
 gc:
-    nix-collect-garbage
+    nix-collect-garbage | lolcat
+
+pre-build:
+    echo "Build Starting..." | lolcat
+    just dont-fuck-my-build
+    rm -rfv result
 
 build *args:
-    just dont-fuck-my-build
+    just pre-build
     scripts/flake-build.sh {{args}}
+    just post-build
+
+post-build:
+    echo "Build Finished." | lolcat
     quick-results
 
 #
@@ -119,9 +128,9 @@ build *args:
 
 iso:
   # If we dont remove this folder, libvirtd VM doesnt run with the new iso...
-  rm -rf result
+  just pre-build
   nix build ./nixos-installer#nixosConfigurations.iso.config.system.build.isoImage
-  quick-results
+  just post-build
 
 # rebuild-pre: update-nix-secrets
 #   git add *.nix
