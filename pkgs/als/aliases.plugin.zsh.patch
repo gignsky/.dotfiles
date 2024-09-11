@@ -1,0 +1,13 @@
+--- a/aliases.plugin.zsh
++++ b/aliases.plugin.zsh
+@@ -5,10 +5,6 @@
+
+ eval '
+   function als(){
+-    (( $+commands[python3] )) || {
+-      echo "[error] No python executable detected"
+-      return
+-    }
+     alias | python3 "'"${0:h}"'/cheatsheet.py" "$@"
+   }
+ '

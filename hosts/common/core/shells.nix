@@ -1,15 +1,54 @@
-{ pkgs, lib, ... }:
+{ pkgs, outputs, configLib, ... }:
 
 {
+    # unstable overlay
+    nixpkgs.overlays = [ outputs.overlays.unstable-packages ];
+
+
     environment.systemPackages = with pkgs; [
-        # cowsay
-        lolcat
         tree
         btop
+        bat
+        tree
+        git
+        gedit
+        fzf
+        magic-wormhole
+        wget
+
+        # nixos-unstable packages
+        unstable.just
     ];
 
+    # # Direnv
+    # programs.direnv = {
+    #     enable = lib.mkDefault true;
+    #     # Expanded settings:
+    #     nix-direnv = {
+    #         enable = true;
+    #         package = pkgs.nix-direnv;
+    #     };
+    #     silent = true;
+    #     loadInNixShell = true;
+    #     # direnvrcExtra = lib.mkDefault ''
+    #     #     echo "direnv: loading direnvrc"
+    #     # '';
+    # };
+
+    programs.direnv = {
+    	enable = true;
+   	    package = pkgs.direnv;
+        silent = false;
+        loadInNixShell = true;
+        direnvrcExtra = "";
+        nix-direnv = {
+            enable = true;
+            package = pkgs.nix-direnv;
+        };
+    };
+
     programs.bash = let
-        sword = ./resources/sword.art;
+        sword = (configLib.relativeToRoot "resources/sword.art");
     in {
         # enable = true;
         enableCompletion = true;
@@ -23,9 +62,10 @@
             rdd = "rm -rfv";
             cls = "clear";
             md = "mkdir";
-            als = "alias";
+            # als = "alias";
             syst = "systemctl";
             expo = "export NIXPKGS_ALLOW_UNFREE=1";
+            cat = "bat";
         };
 
         shellInit = ''
