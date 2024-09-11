@@ -22,7 +22,7 @@
     ../common/core
 
     # optional
-    ../common/optional/gui.nix
+    # ../common/optional/gui.nix
     # ../common/optional/xrdp.nix
 
     #gig users
