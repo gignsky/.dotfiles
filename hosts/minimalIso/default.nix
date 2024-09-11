@@ -1,11 +1,11 @@
-{ inputs, lib, config, pkgs, ...}: {
+{ inputs, lib, configLib, ...}: {
   imports = [
-    ../common/core
-    ../common/optional/gui.nix
-    ../common/optional/xrdp.nix
-    ../common/optional/sshd-with-passwords.nix
-    ../common/optional/sshd-with-root-login.nix
-    ../common/users/gig
+    (configLib.relativeToRoot "hosts/common/users/gig")
+    (configLib.relativeToRoot "hosts/common/core")
+    (configLib.relativeToRoot "hosts/common/optional/gui.nix")
+    (configLib.relativeToRoot "hosts/common/optional/xrdp.nix")
+    (configLib.relativeToRoot "hosts/common/optional/sshd-with-passwords.nix")
+    (configLib.relativeToRoot "hosts/common/optional/sshd-with-root-login.nix")
   ];
 
   networking.hostName = "nix-minimus";

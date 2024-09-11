@@ -1,7 +1,7 @@
-{ inputs, lib, config, pkgs, outputs, ...}: {
+{ inputs, lib, configLib, pkgs, ...}: {
   imports = [
-    ../../common/core
-    ../../common/users/gig
+    (configLib.relativeToRoot "hosts/common/core")
+    (configLib.relativeToRoot "hosts/common/users/gig")
     # inputs.nixos-wsl.modules
     # inputs.home-manager.nixosModules.home-manager
   ];
