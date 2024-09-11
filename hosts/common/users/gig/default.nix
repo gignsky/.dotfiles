@@ -7,7 +7,7 @@
 
   imports = [
     # ./common/optional/sops.nix
-    (configLib.relativeToRoot "common/optional/zsh.nix")
+    (configLib.relativeToRoot "hosts/common/optional/zsh.nix")
   ];
 
   # sops.secrets.gig-password.neededForUsers = true;
