@@ -1,4 +1,4 @@
-{ inputs, config, ... }:
+{ inputs, configLib, ... }:
 
 {
     imports = [
@@ -6,8 +6,7 @@
     ];
 
     sops = {
-        
-        defaultSopsFile = ./resources/secrets.yaml;
+        defaultSopsFile = (configLib.relativeToRoot "secrets.yaml");
         validateSopsFiles = false;
 
         age = {
@@ -20,7 +19,13 @@
         };
 
         secrets = {
-            gig-password = {};
+            gig-password = {
+                neededForUsers = true;
+            };
+            root-password = {
+                neededForUsers = true;
+            };
+
         };
     };
 }
