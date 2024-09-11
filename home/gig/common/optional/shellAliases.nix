@@ -1,6 +1,7 @@
 {
   # Basics
   _ = "sudo";
+  dot = "cd ~/.dotfiles";
   ll = "ls -lh";
   lla = "ls -lah";
   cp = "cp -rv";
