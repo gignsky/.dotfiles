@@ -1,4 +1,4 @@
-{ pkgs, config, ... }:
+{ config, ... }:
 
 {
   # decrypt gig-password to /run/secrets-for-users/ so it can be used to create the user
