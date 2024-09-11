@@ -1,51 +1,13 @@
-{ pkgs ? # If pkgs is not defined, instantiate nixpkgs from locked commit
-  let
-    lock = (builtins.fromJSON (builtins.readFile ./flake.lock)).nodes.nixpkgs.locked;
-    nixpkgs = fetchTarball {
-      url = "https://github.com/nixos/nixpkgs/archive/${lock.rev}.tar.gz";
-      sha256 = lock.narHash;
-    };
-  in
-  import nixpkgs { overlays = [ ]; }
-, ...
-}: {
-  default = pkgs.mkShell {
-    NIX_CONFIG = "extra-experimental-features = nix-command flakes repl-flake";
-    # command = "zsh"; # Don't think this is neccecary
-    nativeBuildInputs = builtins.attrValues {
-      inherit (pkgs)
-	      # wget
-        # cowsay
-        # figlet
-        lolcat
-	      # bat
-        # tree
-        # magic-wormhole
-        # home-manager
-        # zsh
-        git
-        # vscode # We NEED to add a if statement here somehow that checks if you're in wsl
-        # rnix-lsp
-        # lorri
-        nix
-        nil
-        # hello
-        age
-        ssh-to-age
-        sops
-        home-manager
-        # sops
-        # nixpkgs-fmt
-        just;
-        # pre-commit
-
-
-        # libiconv
-    };
-
-    # shellHook = ''
-    #   echo "Figlet" | figlet | lolcat
-    #   echo "Dotfiles, DevShell Environment!" | cowsay | lolcat
-    # '';
-  };
-}
+(import
+  (
+    let
+      lock = builtins.fromJSON (builtins.readFile ./flake.lock);
+    in
+    fetchTarball {
+      url =
+        lock.nodes.flake-compat.locked.url
+          or "https://github.com/edolstra/flake-compat/archive/${lock.nodes.flake-compat.locked.rev}.tar.gz";
+      sha256 = lock.nodes.flake-compat.locked.narHash;
+    }
+  )
+  { src = ./.; }).shellNix
