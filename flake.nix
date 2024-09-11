@@ -66,15 +66,15 @@
       # ];
       configVars = import ./vars { inherit inputs lib; };
       configLib = import ./lib { inherit lib; };
-      # specialArgs = {
-      #   inherit
-      #     inputs
-      #     outputs
-      #     nixpkgs
-      #     # configVars
-      #     # configLib
-      #     ;
-      # };
+      specialArgs = {
+        inherit
+          inputs
+          outputs
+          nixpkgs
+          configVars
+          configLib
+          ;
+      };
       exampleBaseIso = {
           isoImage.squashfsCompression = "gzip -Xcompression-level 1";
           systemd.services.sshd.wantedBy = nixpkgs.lib.mkForce [ "multi-user.target" ];
@@ -137,7 +137,7 @@
 
         # WSL configuration entrypoint - name can not be channged from nixos without some extra work TODO
         wsl = nixpkgs.lib.nixosSystem {
-          inherit system;
+          inherit system specialArgs;
           modules = [
             inputs.nixos-wsl.nixosModules.default {
               system.stateVersion = "24.05";
@@ -151,20 +151,20 @@
           ];
         };
 
-        # Merlin configuration entrypoint
-        merlin = nixpkgs.lib.nixosSystem {
-          inherit system;
-          modules = [
-            # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
-            # home-manager.nixosModules.home-manager {
-            #   home-manager.extraSpecialArgs = specialArgs;
-            # }
-            ./hosts/merlin
-          ];
-        };
+        # # Merlin configuration entrypoint
+        # merlin = nixpkgs.lib.nixosSystem {
+        #   inherit system specialArgs;
+        #   modules = [
+        #     # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
+        #     # home-manager.nixosModules.home-manager {
+        #     #   home-manager.extraSpecialArgs = specialArgs;
+        #     # }
+        #     ./hosts/merlin
+        #   ];
+        # };
 
         buzz = nixpkgs.lib.nixosSystem {
-          inherit system;
+          inherit system specialArgs;
           # > Our main nixos configuration file <
           modules = [
             # home-manager.nixosModules.home-manager

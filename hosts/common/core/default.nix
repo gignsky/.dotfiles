@@ -1,12 +1,7 @@
-{ pkgs, ... }:
+{ configLib, ... }:
 
 {
-    imports = [
-        ./locale.nix
-        ./sshd.nix
-        ./shells.nix
-        ./sops.nix
-    ];
+    imports = (configLib.scanPaths ./.);
 
     nixpkgs = {
         # you can add global overlays here
