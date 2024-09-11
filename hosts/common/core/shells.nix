@@ -1,4 +1,4 @@
-{ pkgs, lib, inputs, outputs, ... }:
+{ pkgs, outputs, ... }:
 
 {
     # unstable overlay
@@ -48,7 +48,7 @@
     };
 
     programs.bash = let
-        sword = ./resources/sword.art;
+        sword = ../../../resources/sword.art;
     in {
         # enable = true;
         enableCompletion = true;
@@ -68,9 +68,9 @@
             cat = "bat";
         };
 
-        # shellInit = ''
-        #     cat ${sword} | ${pkgs.lolcat}/bin/lolcat
-        # '';
+        shellInit = ''
+            cat ${sword} | ${pkgs.lolcat}/bin/lolcat
+        '';
 
         # loginShellInit = ''
         #     Shell script code called during login bash shell init
