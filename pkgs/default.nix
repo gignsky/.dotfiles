@@ -5,9 +5,9 @@
 }:
 rec {
   #################### Example Packages #################################
-  example = pkgs.writeShellScriptBin "example" ''
-    ${pkgs.cowsay}/bin/cowsay "hello world" | ${pkgs.lolcat}/bin/lolcat
-  '';
+  # example = pkgs.writeShellScriptBin "example" ''
+  #   ${pkgs.cowsay}/bin/cowsay "hello world" | ${pkgs.lolcat}/bin/lolcat
+  # '';
 
   supertree = pkgs.writeShellScriptBin "supertree" ''
     ${pkgs.tree}/bin/tree ..
