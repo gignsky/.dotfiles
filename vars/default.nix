@@ -10,6 +10,6 @@
   # gitHubEmail = "7410928+emergentmind@users.noreply.github.com";
   # gitLabEmail = "2889621-emergentmind@users.noreply.gitlab.com";
   #workEmail = inputs.nix-secrets.work-email;
-  # persistFolder = "/persist";
+  persistFolder = "/persist";
   isMinimal = false; # Used to indicate nixos-installer build
 }
