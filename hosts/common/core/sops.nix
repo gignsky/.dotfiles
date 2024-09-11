@@ -1,4 +1,4 @@
-{ inputs, config, ... }:
+{ inputs, configLib, ... }:
 
 {
     imports = [
@@ -6,7 +6,7 @@
     ];
 
     sops = {
-        defaultSopsFile = ../../../secrets.yaml;
+        defaultSopsFile = (configLib.relativeToRoot "secrets.yaml");
         validateSopsFiles = false;
 
         age = {

@@ -1,4 +1,4 @@
-{ pkgs, outputs, ... }:
+{ pkgs, outputs, configLib, ... }:
 
 {
     # unstable overlay
@@ -48,7 +48,7 @@
     };
 
     programs.bash = let
-        sword = ../../../resources/sword.art;
+        sword = (configLib.relativeToRoot "resources/sword.art");
     in {
         # enable = true;
         enableCompletion = true;

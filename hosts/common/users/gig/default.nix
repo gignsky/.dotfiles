@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, configLib, ... }:
 
 {
   # decrypt gig-password to /run/secrets-for-users/ so it can be used to create the user
@@ -7,7 +7,7 @@
 
   imports = [
     # ./common/optional/sops.nix
-    ../../optional/zsh.nix
+    (configLib.relativeToRoot "common/optional/zsh.nix")
   ];
 
   # sops.secrets.gig-password.neededForUsers = true;
