@@ -11,7 +11,7 @@ rebuild-pre:
     just sops-update
 
 dont-fuck-my-build:
-    git ls-files --others --exclude-standard -- '*.nix' | xargs -r git add
+    git ls-files --others --exclude-standard -- '*.nix' | xargs -r git add -v | lolcat
     echo "No chance your build is fucked! 👍" | lolcat
 
 switch args="":
