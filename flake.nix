@@ -97,7 +97,27 @@
       overlays = import ./overlays { inherit inputs; };
 
       # Shell configured with packages that are typically only needed when working on or with nix-config.
-      devShells.${system} = import ./shell.nix { inherit pkgs; };
+      devShells.${system}.default = pkgs.mkShell {
+        NIX_CONFIG = "extra-experimental-features = nix-command flakes repl-flake";
+
+        # inherit (self.checks.${system}.pre-commit-check) shellHook;
+        # buildInputs = self.checks.${system}.pre-commit-check.enabledPackages;
+
+        nativeBuildInputs = builtins.attrValues {
+          inherit (pkgs)
+            git
+            lolcat
+            nix
+            nil
+            age
+            ssh-to-age
+            sops
+            home-manager
+            just
+            ;
+        };
+      };
+      # import ./shell.nix { inherit pkgs; };
 
       # TODO change this to something that has better looking output rules
       # Nix formatter available through 'nix fmt' https://nix-community.github.io/nixpkgs-fmt
