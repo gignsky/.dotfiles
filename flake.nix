@@ -54,7 +54,7 @@
   outputs = { self, nixpkgs, home-manager, ... } @ inputs:
     let
       inherit (self) outputs;
-      # inherit (nixpkgs) lib;
+      inherit (nixpkgs) lib;
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
       # forAllSystems = nixpkgs.lib.genAttrs [
@@ -64,17 +64,17 @@
       #   "aarch64-darwin"
       #   "x86_64-darwin"
       # ];
-      # configVars = import ./vars { inherit inputs lib; };
-      # configLib = import ./lib { inherit lib; };
-      specialArgs = {
-        inherit
-          inputs
-          outputs
-          nixpkgs
-          # configVars
-          # configLib
-          ;
-      };
+      configVars = import ./vars { inherit inputs lib; };
+      configLib = import ./lib { inherit lib; };
+      # specialArgs = {
+      #   inherit
+      #     inputs
+      #     outputs
+      #     nixpkgs
+      #     # configVars
+      #     # configLib
+      #     ;
+      # };
       exampleBaseIso = {
           isoImage.squashfsCompression = "gzip -Xcompression-level 1";
           systemd.services.sshd.wantedBy = nixpkgs.lib.mkForce [ "multi-user.target" ];
@@ -137,7 +137,7 @@
 
         # WSL configuration entrypoint - name can not be channged from nixos without some extra work TODO
         wsl = nixpkgs.lib.nixosSystem {
-          inherit system specialArgs;
+          inherit system;
           modules = [
             inputs.nixos-wsl.nixosModules.default {
               system.stateVersion = "24.05";
@@ -153,7 +153,7 @@
 
         # Merlin configuration entrypoint
         merlin = nixpkgs.lib.nixosSystem {
-          inherit system specialArgs;
+          inherit system;
           modules = [
             # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
             # home-manager.nixosModules.home-manager {
@@ -164,7 +164,7 @@
         };
 
         buzz = nixpkgs.lib.nixosSystem {
-          inherit system specialArgs;
+          inherit system;
           # > Our main nixos configuration file <
           modules = [
             # home-manager.nixosModules.home-manager
