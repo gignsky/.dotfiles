@@ -62,6 +62,11 @@ check:
     nix flake check --impure --no-build
     echo "[CHECK] Finished." | lolcat
 
+check-iso:
+    just dont-fuck-my-build
+    nix flake check --impure --no-build nixos-installer/.
+    echo "[CHECK] Finished." | lolcat
+
 show args="":
     just dont-fuck-my-build
     scripts/flake-show.sh {{args}}
