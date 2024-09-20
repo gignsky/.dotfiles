@@ -17,7 +17,7 @@
       generateKey = true;
     };
 
-    defaultSopsFile = (configLib.relativeToRoot ./secrets.yaml);
+    defaultSopsFile = (configLib.relativeToRoot "./secrets.yaml");
     validateSopsFiles = false;
 
     secrets = {
