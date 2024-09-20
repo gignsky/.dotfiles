@@ -2,6 +2,7 @@
   imports = [
     (configLib.relativeToRoot "hosts/common/core")
     (configLib.relativeToRoot "hosts/common/users/gig")
+    (configLib.relativeToRoot "hosts/common/optional/samba")
     # inputs.nixos-wsl.modules
     # inputs.home-manager.nixosModules.home-manager
   ];
