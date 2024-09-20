@@ -1,13 +1,14 @@
 {
     "nixEnvSelector.nixFile": "${workspaceFolder}/shell.nix",
     "files.exclude": {
-        "**/.git": false,
+        "**/.git": true,
         "**/.svn": true,
         "**/.hg": true,
         "**/CVS": true,
         "**/.DS_Store": true,
         "**/Thumbs.db": true,
-        ".gitignore": true
+        ".gitignore": true,
+        "**/.direnv": true
     },
     "explorerExclude.backup": {}
 }
