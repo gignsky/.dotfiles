@@ -11,6 +11,7 @@
 
     ./appraisals.nix
     ./utility.nix
+    ./risa.nix
   ];
 
 
