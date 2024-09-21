@@ -6,13 +6,7 @@
 }:
 
 {
-  imports = [
-    # inputs.sops-nix.nixosModules.sops
-
-    ./appraisals.nix
-    ./utility.nix
-    ./risa.nix
-  ];
+  imports = (configLib.scanPaths ./.);
 
 
   environment.systemPackages = [ pkgs.cifs-utils ];
