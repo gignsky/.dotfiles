@@ -87,12 +87,12 @@ post-home:
 
 home:
     just pre-home
-    just home-core
+    # just home-core
+    home-manager switch --flake ~/.dotfiles/.
     just post-home
 
 # Runs just home
-home-core:
-    home-manager switch --flake ~/.dotfiles/.
+# home-core:
 
 # Runs just home and then zsh
 new home:
