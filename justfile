@@ -47,15 +47,15 @@ update:
     nix flake update
 
 # Rebuild the system and update the flake
-rebuild-update:
+update-rebuild:
     just update
     just rebuild
 
 # Rebuild the system and update the flake with rebuild-post
-rebuild-update-full:
+update-rebuild-full:
     just update
-    just home
     just rebuild
+    just home
 
 check:
     just dont-fuck-my-build
@@ -87,7 +87,6 @@ post-home:
 
 home:
     just pre-home
-    # just home-core
     home-manager switch --flake ~/.dotfiles/.
     just post-home
 
@@ -166,10 +165,9 @@ sops-update:
 
 sops-fix:
     just pre-home
-    home-manager switch --reset --flake ~/.dotfiles/.
+    home-manager switch --refresh --flake ~/.dotfiles/.
     systemctl --user reset-failed
-    just home-core
-    just post-home
+    just home
 
 store-photo:
     nix-du -s=500MB | \dot -Tpng > store.png
