@@ -25,7 +25,9 @@
             root-password = {
                 neededForUsers = true;
             };
-
+            cifs-creds = {
+                path = "/etc/samba/cifs-creds";
+            };
         };
     };
 }
