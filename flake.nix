@@ -75,11 +75,6 @@
           configLib
           ;
       };
-      exampleBaseIso = {
-          isoImage.squashfsCompression = "gzip -Xcompression-level 1";
-          systemd.services.sshd.wantedBy = nixpkgs.lib.mkForce [ "multi-user.target" ];
-          # users.users.root.openssh.authorizedKeys.keys = [ "<my ssh key>" ];
-        };
     in
     {
       # Custom packages to be shared or upstreamed.
@@ -134,6 +129,7 @@
             inputs.nixos-wsl.nixosModules.default {
               system.stateVersion = "24.05";
               wsl.enable = true;
+              # wsl.nativeSystemd = true;
             }
             # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
             # home-manager.nixosModules.home-manager {
