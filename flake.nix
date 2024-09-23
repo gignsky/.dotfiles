@@ -127,15 +127,6 @@
       # NixOS configuration entrypoint
       # Available through 'nixos-rebuild --flake .#your-hostname'
       nixosConfigurations = {
-        # minimalIso = nixpkgs.lib.nixosSystem {
-        #   inherit system specialArgs;
-        #   modules = [
-        #     "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
-        #     exampleBaseIso
-        #     ./hosts/minimalIso
-        #   ];
-        # };
-
         # WSL configuration entrypoint - name can not be channged from nixos without some extra work TODO
         wsl = nixpkgs.lib.nixosSystem {
           inherit system specialArgs;
@@ -188,13 +179,13 @@
           modules = [./home/gig/wsl.nix];
         };
 
-        # merlin
-        "gig@merlin" = home-manager.lib.homeManagerConfiguration {
-          inherit pkgs; # Home-manager requires 'pkgs' instance
-          extraSpecialArgs = {inherit inputs outputs;};
-          # > Our main home-manager configuration file <
-          modules = [./home/gig/merlin.nix];
-        };
+        # # merlin
+        # "gig@merlin" = home-manager.lib.homeManagerConfiguration {
+        #   inherit pkgs; # Home-manager requires 'pkgs' instance
+        #   extraSpecialArgs = {inherit inputs outputs;};
+        #   # > Our main home-manager configuration file <
+        #   modules = [./home/gig/merlin.nix];
+        # };
 
         # buzz
         "gig@buzz" = home-manager.lib.homeManagerConfiguration {
