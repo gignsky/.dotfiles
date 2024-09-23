@@ -29,8 +29,8 @@
   };
 
   home.packages = with pkgs; [
-    graphviz
-    unstable.nix-du
+    # unstable.nix-du
+    # graphviz # needed for nix-du
   ];
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
