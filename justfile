@@ -159,12 +159,12 @@ diff:
 
 sops:
   just sops-update
-  echo "Editing ~/.dotfiles/secrets.yaml" | lolcat
-  sops ~/.dotfiles/secrets.yaml
+  echo "Editing ~/nix-secrets/secrets.yaml" | lolcat
+  sops ~/nix-secrets/secrets.yaml
 
 sops-update:
-  echo "Updating ~/.dotfiles/secrets.yaml" | lolcat
-  sops updatekeys secrets.yaml
+  echo "Updating ~/nix-secrets/secrets.yaml" | lolcat
+  sops updatekeys ~/nix-secrets/secrets.yaml
   echo "Updated Secrets!" | lolcat
 
 sops-fix:
