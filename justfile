@@ -128,9 +128,13 @@ post-build:
 
 iso:
   # If we dont remove this folder, libvirtd VM doesnt run with the new iso...
+  rm ~/virtualization-boot-files/template/iso/nixos*
   just pre-build
   nix build ./nixos-installer#nixosConfigurations.iso.config.system.build.isoImage
   just post-build
+  cp result/iso/nixos* ~/virtualization-boot-files/template/iso/.
+  ls ~/virtualization-boot-files/template/iso | grep nixos | lolcat
+  rm -rfv result
 
 # rebuild-pre: update-nix-secrets
 #   git add *.nix
@@ -170,7 +174,11 @@ sops-fix:
     just home
 
 store-photo:
-    nix-du -s=500MB | \dot -Tpng > store.png
+    nix-shell -p graphviz nix-du --run "nix-du -s=500MB | \dot -Tpng > store.png"
+
+bootstrap *args:
+    just dont-fuck-my-build
+    ~/.dotfiles/scripts/bootstrap-nixos.sh {{args}}
 
 #   echo $SOPS_FILE
 #   PS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
