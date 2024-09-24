@@ -8,15 +8,15 @@ rebuild-pre:
     echo "[PRE] Rebuilding..." | lolcat
     # just update-nix-secrets
     just dont-fuck-my-build
+    just sops-update
 
 dont-fuck-my-build:
-    git ls-files --others --exclude-standard -- '*.nix' | xargs -r git add
+    git ls-files --others --exclude-standard -- '*.nix' | xargs -r git add -v | lolcat
     echo "No chance your build is fucked! 👍" | lolcat
 
-switch:
-    just rebuild-full
+switch args="":
+    just rebuild {{args}}
     just home
-
 
 # Run after every rebuild, some of the time
 rebuild-post:
@@ -34,14 +34,16 @@ rebuild-test args="":
     scripts/system-flake-rebuild-test.sh {{args}}
     echo "[TEST] Finished." | lolcat
 
-# Rebuild the system and check sops
+# Rebuild the system and check sops and home manager
 rebuild-full args="":
     just rebuild {{args}}
     just rebuild-post
+    just home
 
 # Update the flake
 update:
     just dont-fuck-my-build
+    just sops-update
     nix flake update
 
 # Rebuild the system and update the flake
@@ -58,6 +60,11 @@ rebuild-update-full:
 check:
     just dont-fuck-my-build
     nix flake check --impure --no-build
+    echo "[CHECK] Finished." | lolcat
+
+check-iso:
+    just dont-fuck-my-build
+    nix flake check --impure --no-build nixos-installer/.
     echo "[CHECK] Finished." | lolcat
 
 show args="":
@@ -98,11 +105,21 @@ home-trace:
     echo "[HOME-TRACE] Finished." | lolcat
 
 gc:
-    nix-collect-garbage
+    nix-collect-garbage --delete-old | lolcat
+    # nix store gc | lolcat
+
+pre-build:
+    echo "Pre-Build Starting..." | lolcat
+    just dont-fuck-my-build
+    rm -rfv result
 
 build *args:
-    just dont-fuck-my-build
+    just pre-build
     scripts/flake-build.sh {{args}}
+    just post-build
+
+post-build:
+    echo "Build Finished." | lolcat
     quick-results
 
 #
@@ -110,8 +127,15 @@ build *args:
 #     sudo nixos-rebuild test --flake ~/.dotfiles/.
 #     home-manager switch --flake ~/.dotfiles/.
 
-# iso:
-#     nix build ~/.dotfiles/.#nixosConfigurations.minimalIso.config.system.build.isoImage
+iso:
+  # If we dont remove this folder, libvirtd VM doesnt run with the new iso...
+  rm ~/virtualization-boot-files/template/iso/nixos*
+  just pre-build
+  nix build ./nixos-installer#nixosConfigurations.iso.config.system.build.isoImage
+  just post-build
+  cp result/iso/nixos* ~/virtualization-boot-files/template/iso/.
+  ls ~/virtualization-boot-files/template/iso | grep nixos | lolcat
+  rm -rfv result
 
 # rebuild-pre: update-nix-secrets
 #   git add *.nix
@@ -143,6 +167,21 @@ sops-update:
   echo "Updating ~/.dotfiles/secrets.yaml" | lolcat
   sops updatekeys secrets.yaml
   echo "Updated Secrets!" | lolcat
+
+sops-fix:
+    just pre-home
+    home-manager switch --refresh --flake ~/.dotfiles/.
+    systemctl --user reset-failed
+    just home-core
+    just post-home
+
+store-photo:
+    nix-shell -p graphviz nix-du --run "nix-du -s=500MB | \dot -Tpng > store.png"
+
+bootstrap *args:
+    just dont-fuck-my-build
+    ~/.dotfiles/scripts/bootstrap-nixos.sh {{args}}
+
 #   echo $SOPS_FILE
 #   PS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
 

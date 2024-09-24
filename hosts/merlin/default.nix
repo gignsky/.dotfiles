@@ -19,21 +19,21 @@
     # Import your generated (nixos-generate-config) hardware configuration
     ./hardware-configuration.nix
     # core utils
-    ../common/core
+    (configLib.relativeToRoot "hosts/common/core")
 
     # optional
-    ../common/optional/gui.nix
+    # ../common/optional/gui.nix
     # ../common/optional/xrdp.nix
 
     #gig users
-    ../common/users/gig.nix
+    (configLib.relativeToRoot "hosts/common/users/gig")
   ];
 
-  networking.hostName = "buzz";
+  networking.hostName = "merlin";
 
   # Bootloader.
   boot.loader.grub.enable = true;
-  boot.loader.grub.device = "/dev/sda";
+  # boot.loader.grub.device = "/dev/sda";
   boot.loader.grub.useOSProber = true;
 
   nix = let
