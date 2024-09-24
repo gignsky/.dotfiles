@@ -24,7 +24,7 @@
       # FIXME: Specify arch eventually probably
       # This mkHost is way better: https://github.com/linyinfeng/dotfiles/blob/8785bdb188504cfda3daae9c3f70a6935e35c4df/flake/hosts.nix#L358
       newConfig =
-        name: disk: withSwap: swapSize: qemuGuest:
+        name: disk: qemuGuest:
         (nixpkgs.lib.nixosSystem {
           system = "x86_64-linux";
           specialArgs = minimalSpecialArgs;
@@ -33,7 +33,7 @@
             (configLib.relativeToRoot "hosts/common/disks/standard-disk-config.nix")
             {
               _module.args = {
-                inherit disk withSwap swapSize;
+                inherit disk;
               };
             }
             ./minimal-configuration.nix { _module.args = { inherit qemuGuest; }; }
