@@ -54,7 +54,7 @@
   outputs = { self, nixpkgs, home-manager, ... } @ inputs:
     let
       inherit (self) outputs;
-      # inherit (nixpkgs) lib;
+      inherit (nixpkgs) lib;
       system = "x86_64-linux";
       pkgs = nixpkgs.legacyPackages.${system};
       # forAllSystems = nixpkgs.lib.genAttrs [
@@ -65,14 +65,14 @@
       #   "x86_64-darwin"
       # ];
       # configVars = import ./vars { inherit inputs lib; };
-      # configLib = import ./lib { inherit lib; };
+      configLib = import ./lib { inherit lib; };
       specialArgs = {
         inherit
           inputs
           outputs
           nixpkgs
-          # configVars
-          # configLib
+          configVars
+          configLib
           ;
       };
       exampleBaseIso = {
@@ -167,8 +167,13 @@
           modules = [./home/gig/wsl.nix];
         };
 
-        # # merlin
-        # "gig@merlin" = home-manager.lib.homeManagerConfiguration {
+        # buzz
+        "gig@buzz" = home-manager.lib.homeManagerConfiguration {
+          inherit pkgs; # Home-manager requires 'pkgs' instance
+          extraSpecialArgs = {inherit inputs outputs configLib;};
+          # > Our main home-manager configuration file <
+          modules = [./home/gig/buzz.nix];
+        };
         #   inherit pkgs; # Home-manager requires 'pkgs' instance
         #   extraSpecialArgs = {inherit inputs outputs;};
         #   # > Our main home-manager configuration file <
