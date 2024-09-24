@@ -1,4 +1,4 @@
-{ pkgs, lib, inputs, outputs, ... }:
+{ pkgs, outputs, configLib, ... }:
 
 {
     # unstable overlay
@@ -48,7 +48,7 @@
     };
 
     programs.bash = let
-        sword = ./resources/sword.art;
+        sword = (configLib.relativeToRoot "resources/sword.art");
     in {
         # enable = true;
         enableCompletion = true;
@@ -66,11 +66,12 @@
             syst = "systemctl";
             expo = "export NIXPKGS_ALLOW_UNFREE=1";
             cat = "bat";
+            dot = "cd ~/.dotfiles";
         };
 
-        # shellInit = ''
-        #     cat ${sword} | ${pkgs.lolcat}/bin/lolcat
-        # '';
+        shellInit = ''
+            cat ${sword} | ${pkgs.lolcat}/bin/lolcat
+        '';
 
         # loginShellInit = ''
         #     Shell script code called during login bash shell init

@@ -4,7 +4,7 @@
   inputs,
   lib,
   config,
-  pkgs,
+  configLib,
   ...
 }: {
   # You can import other NixOS modules here
@@ -18,15 +18,16 @@
 
     # Import your generated (nixos-generate-config) hardware configuration
     ./hardware-configuration.nix
+
     # core utils
-    ../common/core
+    (configLib.relativeToRoot "hosts/common/core")
 
     # optional
-    ../common/optional/gui.nix
-    # ../common/optional/xrdp.nix
+    # (configLib.relativeToRoot "hosts/common/optional/gui.nix")
+    # (configLib.relativeToRoot "hosts/common/optional/sshd-with-passwords.nix")
 
     #gig users
-    ../common/users/gig
+    (configLib.relativeToRoot "hosts/common/users/gig")
   ];
 
   networking.hostName = "buzz";
@@ -54,6 +55,8 @@
     registry = lib.mapAttrs (_: flake: {inherit flake;}) flakeInputs;
     nixPath = lib.mapAttrsToList (n: _: "${n}=flake:${n}") flakeInputs;
   };
+
+  services.qemuGuest.enable = true;
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   system.stateVersion = "24.05";

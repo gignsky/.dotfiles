@@ -16,7 +16,7 @@ pkgs.stdenv.mkDerivation {
   # Import src from github
   src = fetchgit {
     url = "https://github.com/ohmyzsh/ohmyzsh.git";
-    hash = "sha256-RGomSLwXoQDFkq1kFWfFMRdMmpW4dlLQ4JR5EDXW3/8=";
+    hash = "sha256-DmEeorRfYdGTbXchxnzvr/iLgMx1DJMUmkYNMwjXqBM=";
   };
 
   strictDeps = true;

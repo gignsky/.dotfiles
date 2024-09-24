@@ -25,6 +25,7 @@
   vscode-remote-workaround.enable = true;
 
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.trustedUsers = [ "root" "gig" ];
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
