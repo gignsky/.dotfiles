@@ -44,13 +44,13 @@
     in
     {
       nixosConfigurations = {
-        # host = newConfig "name" disk" "withSwap" "swapSize" "qemuGuest";
+        # host = newConfig "name" disk" "qemuGuest";
         # Swap size is in GiB
         # grief = newConfig "grief" "/dev/vda" false "0";
         # guppy = newConfig "guppy" "/dev/vda" false "0";
         # gusto = newConfig "gusto" "/dev/sda" true "8";
         # merlin = newConfig "merlin" "/dev/sda" true "16" false;
-        testbuzz = newConfig "testbuzz" "/dev/sda" false "0" true;
+        testbuzz = newConfig "testbuzz" "/dev/sda" true;
 
         # Custom ISO
         #
