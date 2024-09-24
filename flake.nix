@@ -183,7 +183,7 @@
         # ganoslalWSL
         "gig@nixos" = home-manager.lib.homeManagerConfiguration {
           inherit pkgs; # Home-manager requires 'pkgs' instance
-          extraSpecialArgs = {inherit inputs outputs;};
+          extraSpecialArgs = {inherit inputs outputs configLib;};
           # > Our main home-manager configuration file <
           modules = [./home/gig/wsl.nix];
         };
@@ -199,10 +199,18 @@
         # buzz
         "gig@buzz" = home-manager.lib.homeManagerConfiguration {
           inherit pkgs; # Home-manager requires 'pkgs' instance
-          extraSpecialArgs = {inherit inputs outputs;};
+          extraSpecialArgs = {inherit inputs outputs configLib;};
           # > Our main home-manager configuration file <
           modules = [./home/gig/buzz.nix];
         };
+
+        # # testbuzz
+        # "gig@testbuzz" = home-manager.lib.homeManagerConfiguration {
+        #   inherit pkgs; # Home-manager requires 'pkgs' instance
+        #   extraSpecialArgs = {inherit inputs outputs;};
+        #   # > Our main home-manager configuration file <
+        #   modules = [./home/gig/testbuzz.nix];
+        # };
       };
   };
 }
