@@ -3,7 +3,6 @@
 let
   secretsDirectory = builtins.toString inputs.nix-secrets;
   secretsFile = "${secretsDirectory}/secrets.yaml";
-  homeDirectory = configLib.home.homeDirectory;
 in
 {
   imports = [
@@ -18,7 +17,7 @@ in
 
     secrets = {
       "private_keys/dev" = {
-        path = "${homeDirectory}/.ssh/id_rsa";
+        path = "/home/gig/.ssh/id_rsa";
       };
     };
 
