@@ -1,3 +1,8 @@
+# NEED TO WRITE A PROGRAM THAT CONVERTS MAC ADDRESSES BETWEEN THE PROXMOX AND THE ARCHER SYNTAX
+
+# ALL BELOW THIS LINE IS SIMPLY REFERENCE FROM SOMEONE ELSES CONFIG
+
+
 # Nix Starter Config
 
 This repo contains a few a simple nix flake templates for getting started with
