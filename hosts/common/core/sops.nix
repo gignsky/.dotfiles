@@ -1,12 +1,15 @@
 { inputs, configLib, ... }:
 
+let
+    secretspath = builtins.toString inputs.nix-secrets;
+in
 {
     imports = [
         inputs.sops-nix.nixosModules.sops
     ];
 
     sops = {
-        defaultSopsFile = (configLib.relativeToRoot "secrets.yaml");
+        defaultSopsFile = ("${secretspath}/secrets.yaml");
         validateSopsFiles = false;
 
         age = {
