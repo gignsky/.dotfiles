@@ -12,6 +12,7 @@ rebuild-pre:
 
 dont-fuck-my-build:
     git ls-files --others --exclude-standard -- '*.nix' | xargs -r git add -v | lolcat
+    nix flake lock --update-input nix-secrets
     echo "No chance your build is fucked! 👍" | lolcat
 
 switch args="":
@@ -47,15 +48,15 @@ update:
     nix flake update
 
 # Rebuild the system and update the flake
-rebuild-update:
+update-rebuild:
     just update
     just rebuild
 
 # Rebuild the system and update the flake with rebuild-post
-rebuild-update-full:
+update-rebuild-full:
     just update
-    just home
     just rebuild
+    just home
 
 check:
     just dont-fuck-my-build
@@ -87,12 +88,11 @@ post-home:
 
 home:
     just pre-home
-    just home-core
+    home-manager switch --flake ~/.dotfiles/.
     just post-home
 
 # Runs just home
-home-core:
-    home-manager switch --flake ~/.dotfiles/.
+# home-core:
 
 # Runs just home and then zsh
 new home:
@@ -156,24 +156,33 @@ iso:
 #   scripts/system-flake-rebuild-trace.sh
 #
 diff:
-  git diff ':!flake.lock'
+    git diff ':!flake.lock'
 
 sops:
-  just sops-update
-  echo "Editing ~/.dotfiles/secrets.yaml" | lolcat
-  sops ~/.dotfiles/secrets.yaml
+    just sops-update
+    echo "Editing ~/nix-secrets/secrets.yaml" | lolcat
+    sops ~/nix-secrets/secrets.yaml
 
 sops-update:
-  echo "Updating ~/.dotfiles/secrets.yaml" | lolcat
-  sops updatekeys secrets.yaml
-  echo "Updated Secrets!" | lolcat
+    echo "Updating ~/nix-secrets/secrets.yaml" | lolcat
+    cd ../nix-secrets && (\
+    sops updatekeys -y secrets.yaml && \
+    (pre-commit run --all-files || true) && \
+    git add -u && (git commit -m "chore: rekey" || true) && git push \
+    )
+    echo "Updated Secrets!" | lolcat
 
 sops-fix:
     just pre-home
+    just update-nix-secrets
     home-manager switch --refresh --flake ~/.dotfiles/.
     systemctl --user reset-failed
-    just home-core
-    just post-home
+    just home
+
+update-nix-secrets:
+    just sops-update
+    (cd ../nix-secrets && git fetch && git rebase) || true
+    nix flake lock --update-input nix-secrets
 
 store-photo:
     nix-shell -p graphviz nix-du --run "nix-du -s=500MB | \dot -Tpng > store.png"
