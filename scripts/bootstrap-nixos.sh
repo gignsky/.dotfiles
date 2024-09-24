@@ -5,7 +5,7 @@ set -eo pipefail
 target_hostname=""
 target_destination=""
 target_user="gig"
-ssh_key=""
+ssh_key="~/.ssh/id_rsa"
 ssh_port="22"
 persist_dir=""
 # Create a temp directory for generated host keys
@@ -163,10 +163,12 @@ function nixos_anywhere() {
 	$ssh_root_cmd "nixos-generate-config --no-filesystems --root /mnt"
 	$scp_cmd root@"$target_destination":/mnt/etc/nixos/hardware-configuration.nix "${git_root}"/hosts/"$target_hostname"/hardware-configuration.nix
 
+	just dont-fuck-my-build
+
 	# --extra-files here picks up the ssh host key we generated earlier and puts it onto the target machine
 	SHELL=/bin/sh nix run github:nix-community/nixos-anywhere -- --ssh-port "$ssh_port" --extra-files "$temp" --flake .#"$target_hostname" root@"$target_destination"
 
-	echo "Updating ssh host fingerprint at $target_destination to ~/.ssh/known_hosts"
+	yellow "Updating ssh host fingerprint at $target_destination to ~/.ssh/known_hosts"
 	ssh-keyscan -p "$ssh_port" "$target_destination" >>~/.ssh/known_hosts || true
 
 	if [ -n "$persist_dir" ]; then
