@@ -64,7 +64,7 @@
       #   "aarch64-darwin"
       #   "x86_64-darwin"
       # ];
-      # configVars = import ./vars { inherit inputs lib; };
+      configVars = import ./vars { inherit inputs lib; };
       configLib = import ./lib { inherit lib; };
       specialArgs = {
         inherit
@@ -90,6 +90,7 @@
       #   in
       #   import ./pkgs { inherit pkgs; }
       # );
+      # nixosModules = { inherit (import ./modules/nixos); };
 
       packages.${system} = import ./pkgs { inherit pkgs; };
 
@@ -97,7 +98,27 @@
       overlays = import ./overlays { inherit inputs; };
 
       # Shell configured with packages that are typically only needed when working on or with nix-config.
-      devShells.${system} = import ./shell.nix { inherit pkgs; };
+      devShells.${system}.default = pkgs.mkShell {
+        NIX_CONFIG = "extra-experimental-features = nix-command flakes repl-flake";
+
+        # inherit (self.checks.${system}.pre-commit-check) shellHook;
+        # buildInputs = self.checks.${system}.pre-commit-check.enabledPackages;
+
+        nativeBuildInputs = builtins.attrValues {
+          inherit (pkgs)
+            git
+            lolcat
+            nix
+            nil
+            age
+            ssh-to-age
+            sops
+            home-manager
+            just
+            ;
+        };
+      };
+      # import ./shell.nix { inherit pkgs; };
 
       # TODO change this to something that has better looking output rules
       # Nix formatter available through 'nix fmt' https://nix-community.github.io/nixpkgs-fmt
@@ -162,9 +183,17 @@
         # ganoslalWSL
         "gig@nixos" = home-manager.lib.homeManagerConfiguration {
           inherit pkgs; # Home-manager requires 'pkgs' instance
-          extraSpecialArgs = {inherit inputs outputs;};
+          extraSpecialArgs = {inherit inputs outputs configLib;};
           # > Our main home-manager configuration file <
           modules = [./home/gig/wsl.nix];
+        };
+
+        # merlin
+        "gig@merlin" = home-manager.lib.homeManagerConfiguration {
+          inherit pkgs; # Home-manager requires 'pkgs' instance
+          extraSpecialArgs = {inherit inputs outputs;};
+          # > Our main home-manager configuration file <
+          modules = [./home/gig/merlin.nix];
         };
 
         # buzz
@@ -174,10 +203,13 @@
           # > Our main home-manager configuration file <
           modules = [./home/gig/buzz.nix];
         };
+
+        # # testbuzz
+        # "gig@testbuzz" = home-manager.lib.homeManagerConfiguration {
         #   inherit pkgs; # Home-manager requires 'pkgs' instance
         #   extraSpecialArgs = {inherit inputs outputs;};
         #   # > Our main home-manager configuration file <
-        #   modules = [./home/gig/merlin.nix];
+        #   modules = [./home/gig/testbuzz.nix];
         # };
       };
   };
