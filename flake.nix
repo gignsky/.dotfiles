@@ -115,6 +115,9 @@
             sops
             home-manager
             just
+
+            #nececcary for bootstraping
+            ripgrep
             ;
         };
       };
@@ -175,6 +178,18 @@
             ./hosts/buzz
           ];
         };
+
+        testbuzz = nixpkgs.lib.nixosSystem {
+          inherit system specialArgs;
+          # > Our main nixos configuration file <
+          modules = [
+            # home-manager.nixosModules.home-manager
+            # {
+            #   home-manager.extraSpecialArgs = specialArgs;
+            # }
+            ./hosts/testbuzz
+          ];
+        };
       };
 
       # Standalone home-manager configuration entrypoint
@@ -204,13 +219,13 @@
           modules = [./home/gig/buzz.nix];
         };
 
-        # # testbuzz
-        # "gig@testbuzz" = home-manager.lib.homeManagerConfiguration {
-        #   inherit pkgs; # Home-manager requires 'pkgs' instance
-        #   extraSpecialArgs = {inherit inputs outputs;};
-        #   # > Our main home-manager configuration file <
-        #   modules = [./home/gig/testbuzz.nix];
-        # };
+        # testbuzz
+        "gig@testbuzz" = home-manager.lib.homeManagerConfiguration {
+          inherit pkgs; # Home-manager requires 'pkgs' instance
+          extraSpecialArgs = {inherit inputs outputs configLib;};
+          # > Our main home-manager configuration file <
+          modules = [./home/gig/testbuzz.nix];
+        };
       };
   };
 }
