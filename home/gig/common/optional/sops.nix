@@ -7,7 +7,7 @@
 
   sops = {
     # This is the gig/dev key and needs ot have been copied to this location on the host
-    age.keyFile = "/var/lib/sops-nix/key.txt";
+    age.keyFile = "/home/gig/.config/sops/age/keys.txt";
     defaultSopsFile = (configLib.relativeToRoot "./secrets.yaml");
     validateSopsFiles = false;
 
