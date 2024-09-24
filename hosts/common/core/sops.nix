@@ -1,4 +1,4 @@
-{ inputs, config, ... }:
+{ inputs, configLib, ... }:
 
 {
     imports = [
@@ -6,7 +6,7 @@
     ];
 
     sops = {
-        defaultSopsFile = ../../../secrets.yaml;
+        defaultSopsFile = (configLib.relativeToRoot "secrets.yaml");
         validateSopsFiles = false;
 
         age = {
@@ -22,7 +22,12 @@
             gig-password = {
                 neededForUsers = true;
             };
-
+            root-password = {
+                neededForUsers = true;
+            };
+            cifs-creds = {
+                path = "/etc/samba/cifs-creds";
+            };
         };
     };
 }
