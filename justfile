@@ -12,7 +12,7 @@ rebuild-pre:
 
 dont-fuck-my-build:
     git ls-files --others --exclude-standard -- '*.nix' | xargs -r git add -v | lolcat
-    nix flake lock --update-inputs nix-secrets
+    nix flake lock --update-input nix-secrets
     echo "No chance your build is fucked! 👍" | lolcat
 
 switch args="":
