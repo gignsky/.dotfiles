@@ -156,23 +156,33 @@ iso:
 #   scripts/system-flake-rebuild-trace.sh
 #
 diff:
-  git diff ':!flake.lock'
+    git diff ':!flake.lock'
 
 sops:
-  just sops-update
-  echo "Editing ~/nix-secrets/secrets.yaml" | lolcat
-  sops ~/nix-secrets/secrets.yaml
+    just sops-update
+    echo "Editing ~/nix-secrets/secrets.yaml" | lolcat
+    sops ~/nix-secrets/secrets.yaml
 
 sops-update:
-  echo "Updating ~/nix-secrets/secrets.yaml" | lolcat
-  sops updatekeys ~/nix-secrets/secrets.yaml
-  echo "Updated Secrets!" | lolcat
+    echo "Updating ~/nix-secrets/secrets.yaml" | lolcat
+    cd ../nix-secrets && (\
+    sops updatekeys -y secrets.yaml && \
+    (pre-commit run --all-files || true) && \
+    git add -u && (git commit -m "chore: rekey" || true) && git push \
+    )
+    echo "Updated Secrets!" | lolcat
 
 sops-fix:
     just pre-home
+    just update-nix-secrets
     home-manager switch --refresh --flake ~/.dotfiles/.
     systemctl --user reset-failed
     just home
+
+update-nix-secrets:
+    just sops-update
+    (cd ../nix-secrets && git fetch && git rebase) || true
+    nix flake lock --update-input nix-secrets
 
 store-photo:
     nix-shell -p graphviz nix-du --run "nix-du -s=500MB | \dot -Tpng > store.png"
