@@ -50,6 +50,15 @@
     # direnv # direnv is enabled by default
     supertree
     quick-results
+    dua
+    # TRYING THESE OUT FROM https://blog.dalanmiller.com/my-favorite-command-line-tools/
+    dust
+    hwatch
+    hyperfine
+    mtr
+    restic
+    xsv
+    # ncdu # unneccecary due to the ability to use `dua i` for interactive better dua the only downside is that dua doesn't have a way of sorting folders at the top
     ################################################################
     ## look through and decide if these might be good to have then sort them throughout the configuration of the home files and the dotfiles, all new packages should start here for testing purposes if not used in a nix-shell -p command
     ################################################################

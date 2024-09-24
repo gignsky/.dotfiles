@@ -18,6 +18,21 @@
     ./home.nix
   ];
 
+  nixpkgs = {
+  # You can add overlays here
+    overlays = [
+      # Add overlays your own flake exports (from overlays and pkgs dir):
+      outputs.overlays.additions
+      # outputs.overlays.modifications
+      outputs.overlays.unstable-packages
+    ];
+  };
+
+  home.packages = with pkgs; [
+    # graphviz
+    # unstable.nix-du
+  ];
+
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   home.stateVersion = "24.05";
 }
