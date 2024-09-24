@@ -170,7 +170,7 @@ sops-update:
 
 sops-fix:
     just pre-home
-    home-manager switch --reset --flake ~/.dotfiles/.
+    home-manager switch --refresh --flake ~/.dotfiles/.
     systemctl --user reset-failed
     just home-core
     just post-home
