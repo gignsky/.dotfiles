@@ -55,6 +55,24 @@
         "type": "github"
       }
     },
+    "nix-secrets": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1727148584,
+        "narHash": "sha256-WoXjPGno4Sc462DlCT1Slms+nzJjCp0h3JuP+QgKoik=",
+        "ref": "main",
+        "rev": "71a722a1f9283aaf48232518f989111235963ad9",
+        "shallow": true,
+        "type": "git",
+        "url": "ssh://git@github.com/gignsky/nix-secrets.git"
+      },
+      "original": {
+        "ref": "main",
+        "shallow": true,
+        "type": "git",
+        "url": "ssh://git@github.com/gignsky/nix-secrets.git"
+      }
+    },
     "nixos-wsl": {
       "inputs": {
         "flake-compat": "flake-compat",
@@ -129,6 +147,7 @@
     "root": {
       "inputs": {
         "home-manager": "home-manager",
+        "nix-secrets": "nix-secrets",
         "nixos-wsl": "nixos-wsl",
         "nixpkgs": "nixpkgs",
         "nixpkgs-unstable": "nixpkgs-unstable",
