@@ -167,10 +167,10 @@ sops-update:
     echo "Updating ~/nix-secrets/secrets.yaml" | lolcat
     cd ../nix-secrets && (\
     sops updatekeys -y secrets.yaml && \
-    (pre-commit run --all-files || true) && \
     git add -u && (git commit -m "chore: rekey" || true) && git push \
     )
     echo "Updated Secrets!" | lolcat
+    # (pre-commit run --all-files || true) && \
 
 sops-fix:
     just pre-home
