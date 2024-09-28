@@ -1,6 +1,6 @@
-[submodule "resources/example-configs/nix-config"]
+[submodule "resources/example-configs/Misterio77/nix-config"]
 	path = resources/example-configs/Misterio77/nix-config
 	url = git@github.com:Misterio77/nix-config.git
-[submodule "EmergentMind"]
+[submodule "resources/example-configs/EmergentMind/nix-config"]
 	path = resources/example-configs/EmergentMind/nix-config
 	url = git@github.com:EmergentMind/nix-config.git
