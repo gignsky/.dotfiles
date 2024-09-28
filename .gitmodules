@@ -1,0 +1,3 @@
+[submodule "resources/example-configs/nix-config"]
+	path = resources/example-configs/Misterio77
+	url = git@github.com:Misterio77/nix-config.git
