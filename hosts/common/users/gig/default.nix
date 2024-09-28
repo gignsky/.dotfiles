@@ -65,11 +65,10 @@ in
           openssh.authorizedKeys.keys = config.users.users.${configVars.username}.openssh.authorizedKeys.keys;
         };
 
+        users.groups.${configVars.username} = {
+          gid = 1701;
+        };
       };
-
-  users.groups.${configVars.username} = {
-    gid = 1701;
-  };
   # decrypt gig-password to /run/secrets-for-users/ so it can be used to create the user
   # sops.secrets.gig-password.neededForUsers = true;
   # sops.secrets.root-password.neededForUsers = true;
