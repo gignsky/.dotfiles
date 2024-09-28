@@ -4,3 +4,6 @@
 [submodule "resources/example-configs/EmergentMind/nix-config"]
 	path = resources/example-configs/EmergentMind/nix-config
 	url = git@github.com:EmergentMind/nix-config.git
+[submodule "resources/ansible_files"]
+	path = resources/ansible_files
+	url = git@github.com:gignsky/ansible_files.git
