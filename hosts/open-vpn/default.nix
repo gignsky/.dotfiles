@@ -2,9 +2,9 @@
 # Use this to configure your system environment (it replaces /etc/nixos/configuration.nix)
 {
   inputs,
+  pkgs,
   lib,
   config,
-  pkgs,
   configLib,
   ...
 }: {
@@ -19,12 +19,13 @@
 
     # Import your generated (nixos-generate-config) hardware configuration
     ./hardware-configuration.nix
+
     # core utils
     (configLib.relativeToRoot "hosts/common/core")
 
     # optional
-    # ../common/optional/gui.nix
-    # ../common/optional/xrdp.nix
+    # (configLib.relativeToRoot "hosts/common/optional/gui.nix")
+    # (configLib.relativeToRoot "hosts/common/optional/sshd-with-passwords.nix")
 
     #gig users
     (configLib.relativeToRoot "hosts/common/users/gig")
@@ -34,7 +35,7 @@
 
   # Bootloader.
   boot.loader.grub.enable = true;
-  # boot.loader.grub.device = "/dev/sda";
+  boot.loader.grub.device = "/dev/sda";
   boot.loader.grub.useOSProber = true;
 
   # OpenVPN Configuration
@@ -60,6 +61,8 @@
     registry = lib.mapAttrs (_: flake: {inherit flake;}) flakeInputs;
     nixPath = lib.mapAttrsToList (n: _: "${n}=flake:${n}") flakeInputs;
   };
+
+  services.qemuGuest.enable = true;
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   system.stateVersion = "24.05";
