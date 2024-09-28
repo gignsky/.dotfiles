@@ -139,6 +139,14 @@
           ];
         };
 
+        # Open VPN Server
+        open-vpn = nixpkgs.lib.nixosSystem {
+          inherit system specialArgs;
+          modules = [
+            ./hosts/open-vpn
+          ];
+        };
+
         # # Merlin configuration entrypoint
         # merlin = nixpkgs.lib.nixosSystem {
         #   inherit system specialArgs;

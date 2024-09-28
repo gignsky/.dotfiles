@@ -53,6 +53,9 @@ in
           openssh.authorizedKeys.keys = lib.lists.forEach pubKeys (key: builtins.readFile key);
 
           shell = if configVars.isMinimal then pkgs.bash else pkgs.zsh; # default shell
+
+          # Adding this to configure user id to be 1701
+          uid = 1701;
         };
 
         # Proper root use required for borg and some other specific operations
