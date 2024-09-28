@@ -43,12 +43,13 @@ rekey:
     (pre-commit run --all-files || true) && \
     git add -u && (git commit -m "chore: rekey" || true) && git push \
   )
+
 check-sops:
   scripts/check-sops.sh
 
-update-nix-secrets:
-  (cd ../nix-secrets && git fetch && git rebase) || true
-  nix flake lock --update-input nix-secrets
+# update-nix-secrets:
+#   (cd ../nix-secrets && git fetch && git rebase) || true
+#   nix flake lock --update-input nix-secrets
 
 iso:
   # If we dont remove this folder, libvirtd VM doesnt run with the new iso...
