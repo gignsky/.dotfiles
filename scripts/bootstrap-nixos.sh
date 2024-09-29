@@ -7,6 +7,7 @@ target_destination=""
 target_user="gig"
 ssh_key="/home/gig/.ssh/id_rsa"
 ssh_port="22"
+always_yes="false"
 persist_dir=""
 # Create a temp directory for generated host keys
 temp=$(mktemp -d)
@@ -95,6 +96,9 @@ while [[ $# -gt 0 ]]; do
 		shift
 		ssh_key=$1
 		;;
+	--always-yes)
+		shift
+		always_yes=$1
 	--port)
 		shift
 		ssh_port=$1
@@ -250,36 +254,109 @@ function generate_user_age_key() {
 	fi
 }
 
-# Validate required options
-# FIXME: The ssh key and destination aren't required if only rekeying, so could be moved into specific sections?
-if [ -z "${target_hostname}" ] || [ -z "${target_destination}" ] || [ -z "${ssh_key}" ]; then
-	red "ERROR: -n, -d, and -k are all required"
-	echo
-	help_and_exit
-fi
+# Check for always_yes to be False and if so ask the questions
+if [ "$always_yes" == "false" ]; then
+	# Validate required options
+	# FIXME: The ssh key and destination aren't required if only rekeying, so could be moved into specific sections?
+	if [ -z "${target_hostname}" ] || [ -z "${target_destination}" ] || [ -z "${ssh_key}" ]; then
+		red "ERROR: -n, -d, and -k are all required"
+		echo
+		help_and_exit
+	fi
 
-if yes_or_no "Run nixos-anywhere installation?"; then
+	if yes_or_no "Run nixos-anywhere installation?"; then
+		nixos_anywhere
+	fi
+
+	if yes_or_no "Generate host (ssh-based) age key?"; then
+		generate_host_age_key
+		updated_age_keys=1
+	fi
+
+	if yes_or_no "Generate user age key?"; then
+		generate_user_age_key
+		updated_age_keys=1
+	fi
+
+	if [[ $updated_age_keys == 1 ]]; then
+		# Since we may update the sops.yaml file twice above, only rekey once at the end
+		just rekey
+		green "Updating flake input to pick up new .sops.yaml"
+		nix flake lock --update-input nix-secrets
+	fi
+
+	if yes_or_no "Add ssh host fingerprints for git{lab,hub}? If this is the first time running this script on $target_hostname, this will be required for the following steps?"; then
+		if [ "$target_user" == "root" ]; then
+			home_path="/root"
+			yellow "Home_Path: $home_path"
+		else
+			home_path="/home/$target_user"
+			yellow "Home_Path: $home_path"
+		fi
+		yellow "creating .ssh directory"
+		$ssh_cmd "mkdir -p $home_path/.ssh/"
+		# sync "$target_user" "$ssh_key" "$home_path/.ssh/$ssh_key"
+		yellow "Copying ssh_key to $home_path/.ssh/. on $target_hostname"
+		$scp_cmd "$ssh_key" "root"@"$target_destination":/"$ssh_key"
+		yellow "chown gig:users $home_path/.ssh/"
+		$ssh_cmd "sudo chown -R gig:users $home_path/.ssh/"
+		yellow "chmod 600 $ssh_key"
+		$ssh_cmd "sudo chmod 600 $ssh_key"
+		green "Adding ssh host fingerprints for git{lab,hub}"
+		# $ssh_cmd "ssh-keyscan -t $ssh_key gitlab.com github.com >>$home_path/.ssh/known_hosts"
+	fi
+
+	if yes_or_no "Do you want to copy your full .dotfiles and nix-secrets to $target_hostname?"; then
+		green "Adding ssh host fingerprint at $target_destination to ~/.ssh/known_hosts"
+		ssh-keyscan -p "$ssh_port" "$target_destination" >>~/.ssh/known_hosts || true
+		green "Copying full .dotfiles to $target_hostname"
+		sync "$target_user" "${git_root}"/../.dotfiles
+		green "Copying full nix-secrets to $target_hostname"
+		sync "$target_user" "${git_root}"/../nix-secrets
+
+	if yes_or_no "Do you want to rebuild immediately?"; then
+		green "Rebuilding .dotfiles on $target_hostname"
+		#FIXME there are still a gitlab fingerprint request happening during the rebuild
+		#$ssh_cmd -oForwardAgent=yes "cd .dotfiles && sudo nixos-rebuild --show-trace --flake .#$target_hostname" switch"
+		$ssh_cmd -oForwardAgent=yes "cd .dotfiles && direnv allow && just rebuild-full"
+	fi
+	else
+		echo
+		green "NixOS was successfully installed!"
+		echo "Post-install config build instructions:"
+		echo "To copy .dotfiles from this machine to the $target_hostname, run the following command from ~/.dotfiles"
+		echo "just sync $target_user $target_destination"
+		echo "To rebuild, sign into $target_hostname and run the following command from ~/.dotfiles"
+		echo "cd .dotfiles"
+		echo "just rebuild"
+		echo
+	fi
+	if yes_or_no "You can now commit and push the .dotfiles, which includes the hardware-configuration.nix for $target_hostname?"; then
+		(pre-commit run --all-files 2>/dev/null || true) &&
+			git add "$git_root/hosts/$target_hostname/hardware-configuration.nix" "$git_root/flake.lock" && (git commit -m "feat: hardware-configuration.nix for $target_hostname" || true) && git push
+	fi
+	if yes_or_no "Do you want to reboot $target_hostname?"; then
+		green "Rebooting $target_hostname"
+		$ssh_cmd "sudo reboot now"
+	fi
+fi
+else
+	if [ -z "${target_hostname}" ] || [ -z "${target_destination}" ] || [ -z "${ssh_key}" ]; then
+		red "ERROR: -n, -d, and -k are all required"
+		echo
+		help_and_exit
+	fi
 	nixos_anywhere
-fi
-
-if yes_or_no "Generate host (ssh-based) age key?"; then
 	generate_host_age_key
 	updated_age_keys=1
-fi
-
-if yes_or_no "Generate user age key?"; then
 	generate_user_age_key
 	updated_age_keys=1
-fi
-
-if [[ $updated_age_keys == 1 ]]; then
-	# Since we may update the sops.yaml file twice above, only rekey once at the end
-	just rekey
-	green "Updating flake input to pick up new .sops.yaml"
-	nix flake lock --update-input nix-secrets
-fi
-
-if yes_or_no "Add ssh host fingerprints for git{lab,hub}? If this is the first time running this script on $target_hostname, this will be required for the following steps?"; then
+	if [[ $updated_age_keys == 1 ]]; then
+		# Since we may update the sops.yaml file twice above, only rekey once at the end
+		just rekey
+		green "Updating flake input to pick up new .sops.yaml"
+		nix flake lock --update-input nix-secrets
+	fi
 	if [ "$target_user" == "root" ]; then
 		home_path="/root"
 		yellow "Home_Path: $home_path"
@@ -297,46 +374,19 @@ if yes_or_no "Add ssh host fingerprints for git{lab,hub}? If this is the first t
 	yellow "chmod 600 $ssh_key"
 	$ssh_cmd "sudo chmod 600 $ssh_key"
 	green "Adding ssh host fingerprints for git{lab,hub}"
-	# $ssh_cmd "ssh-keyscan -t $ssh_key gitlab.com github.com >>$home_path/.ssh/known_hosts"
-fi
-
-if yes_or_no "Do you want to copy your full .dotfiles and nix-secrets to $target_hostname?"; then
 	green "Adding ssh host fingerprint at $target_destination to ~/.ssh/known_hosts"
 	ssh-keyscan -p "$ssh_port" "$target_destination" >>~/.ssh/known_hosts || true
 	green "Copying full .dotfiles to $target_hostname"
 	sync "$target_user" "${git_root}"/../.dotfiles
 	green "Copying full nix-secrets to $target_hostname"
 	sync "$target_user" "${git_root}"/../nix-secrets
-
-if yes_or_no "Do you want to rebuild immediately?"; then
 	green "Rebuilding .dotfiles on $target_hostname"
 	#FIXME there are still a gitlab fingerprint request happening during the rebuild
 	#$ssh_cmd -oForwardAgent=yes "cd .dotfiles && sudo nixos-rebuild --show-trace --flake .#$target_hostname" switch"
 	$ssh_cmd -oForwardAgent=yes "cd .dotfiles && direnv allow && just rebuild-full"
-fi
-else
-	echo
-	green "NixOS was successfully installed!"
-	echo "Post-install config build instructions:"
-	echo "To copy .dotfiles from this machine to the $target_hostname, run the following command from ~/.dotfiles"
-	echo "just sync $target_user $target_destination"
-	echo "To rebuild, sign into $target_hostname and run the following command from ~/.dotfiles"
-	echo "cd .dotfiles"
-	echo "just rebuild"
-	echo
-fi
-
-if yes_or_no "You can now commit and push the .dotfiles, which includes the hardware-configuration.nix for $target_hostname?"; then
 	(pre-commit run --all-files 2>/dev/null || true) &&
 		git add "$git_root/hosts/$target_hostname/hardware-configuration.nix" "$git_root/flake.lock" && (git commit -m "feat: hardware-configuration.nix for $target_hostname" || true) && git push
-fi
-
-if yes_or_no "Do you want to reboot $target_hostname?"; then
-	green "Rebooting $target_hostname"
 	$ssh_cmd "sudo reboot now"
-fi
-
-#TODO prune all previous generations?
 
 green "Success!"
 green "If you are using a disko config with luks partitions, update luks to use non-temporary credentials."
