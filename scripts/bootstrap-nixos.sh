@@ -7,7 +7,7 @@ target_destination=""
 target_user="gig"
 ssh_key="/home/gig/.ssh/id_rsa"
 ssh_port="22"
-always_yes="false"
+always-yes="false"
 persist_dir=""
 # Create a temp directory for generated host keys
 temp=$(mktemp -d)
@@ -98,7 +98,7 @@ while [[ $# -gt 0 ]]; do
 		;;
 	--always-yes)
 		shift
-		always_yes=$1
+		always-yes=$1
 	--port)
 		shift
 		ssh_port=$1
@@ -254,8 +254,8 @@ function generate_user_age_key() {
 	fi
 }
 
-# Check for always_yes to be False and if so ask the questions
-if [ "$always_yes" == "false" ]; then
+# Check for always-yes to be False and if so ask the questions
+if [ "$always-yes" == "false" ]; then
 	# Validate required options
 	# FIXME: The ssh key and destination aren't required if only rekeying, so could be moved into specific sections?
 	if [ -z "${target_hostname}" ] || [ -z "${target_destination}" ] || [ -z "${ssh_key}" ]; then
