@@ -5,7 +5,7 @@ set -eo pipefail
 target_hostname=""
 target_destination=""
 target_user="gig"
-ssh_key="~/.ssh/id_rsa"
+ssh_key="/home/gig/.ssh/id_rsa"
 ssh_port="22"
 persist_dir=""
 # Create a temp directory for generated host keys
@@ -287,10 +287,17 @@ if yes_or_no "Add ssh host fingerprints for git{lab,hub}? If this is the first t
 		home_path="/home/$target_user"
 		yellow "Home_Path: $home_path"
 	fi
+	yellow "creating .ssh directory"
+	$ssh_cmd "mkdir -p $home_path/.ssh/"
+	# sync "$target_user" "$ssh_key" "$home_path/.ssh/$ssh_key"
 	yellow "Copying ssh_key to $home_path/.ssh/. on $target_hostname"
-	sync "$target_user" "$ssh_key" "$home_path/.ssh/$ssh_key"
+	$scp_cmd "$ssh_key" "root"@"$target_destination":/"$ssh_key"
+	yellow "chown gig:users $home_path/.ssh/"
+	$ssh_cmd "sudo chown -R gig:users $home_path/.ssh/"
+	yellow "chmod 600 $ssh_key"
+	$ssh_cmd "sudo chmod 600 $ssh_key"
 	green "Adding ssh host fingerprints for git{lab,hub}"
-	$ssh_cmd "mkdir -p $home_path/.ssh/; ssh-keyscan -t $ssh_key gitlab.com github.com >>$home_path/.ssh/known_hosts"
+	# $ssh_cmd "ssh-keyscan -t $ssh_key gitlab.com github.com >>$home_path/.ssh/known_hosts"
 fi
 
 if yes_or_no "Do you want to copy your full .dotfiles and nix-secrets to $target_hostname?"; then
