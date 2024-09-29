@@ -282,8 +282,10 @@ fi
 if yes_or_no "Add ssh host fingerprints for git{lab,hub}? If this is the first time running this script on $target_hostname, this will be required for the following steps?"; then
 	if [ "$target_user" == "root" ]; then
 		home_path="/root"
+		yellow "Home_Path: $home_path"
 	else
 		home_path="/home/$target_user"
+		yellow "Home_Path: $home_path"
 	fi
 	green "Adding ssh host fingerprints for git{lab,hub}"
 	$ssh_cmd "mkdir -p $home_path/.ssh/; ssh-keyscan -t ssh-ed25519 gitlab.com github.com >>$home_path/.ssh/known_hosts"
