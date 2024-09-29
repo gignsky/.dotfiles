@@ -160,7 +160,9 @@ diff:
 
 sops:
     echo "Editing ~/nix-secrets/secrets.yaml" | lolcat
+    nano ~/nix-secrets/.sops.yaml
     sops ~/nix-secrets/secrets.yaml
+    just rekey
 
 # Update the keys in the secrets file
 rekey:
