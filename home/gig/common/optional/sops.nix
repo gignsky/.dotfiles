@@ -17,9 +17,8 @@ in
 
     secrets = {
       "private_keys/dev" = {
-        path = "${homeDirectory}/.ssh/id_rsa";
+        path = "/home/gig/.ssh/id_rsa";
       };
     };
-
   };
 }
