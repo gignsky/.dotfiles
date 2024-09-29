@@ -166,19 +166,6 @@
           ];
         };
 
-        testbuzz1 = nixpkgs.lib.nixosSystem {
-          inherit system specialArgs;
-          # > Our main nixos configuration file <
-          modules = [
-            # home-manager.nixosModules.home-manager
-            # {
-            #   home-manager.extraSpecialArgs = specialArgs;
-            # }
-            ./hosts/testbuzz1
-          ];
-        };
-      };
-
       # Standalone home-manager configuration entrypoint
       # Available through 'home-manager --flake .#your-username@your-hostname'
       homeConfigurations = {
@@ -204,14 +191,6 @@
           extraSpecialArgs = {inherit inputs outputs configLib;};
           # > Our main home-manager configuration file <
           modules = [./home/gig/buzz.nix];
-        };
-
-        # testbuzz
-        "gig@testbuzz1" = home-manager.lib.homeManagerConfiguration {
-          inherit pkgs; # Home-manager requires 'pkgs' instance
-          extraSpecialArgs = {inherit inputs outputs configLib;};
-          # > Our main home-manager configuration file <
-          modules = [./home/gig/testbuzz1.nix];
         };
       };
   };
