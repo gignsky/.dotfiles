@@ -56,6 +56,11 @@
     nixPath = lib.mapAttrsToList (n: _: "${n}=flake:${n}") flakeInputs;
   };
 
+  fileSystems."/" =
+    { device = "/dev/disk/sda";
+      fsType = "ext4";
+    };
+
   services.qemuGuest.enable = true;
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
