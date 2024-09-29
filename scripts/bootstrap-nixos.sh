@@ -287,8 +287,10 @@ if yes_or_no "Add ssh host fingerprints for git{lab,hub}? If this is the first t
 		home_path="/home/$target_user"
 		yellow "Home_Path: $home_path"
 	fi
+	yellow "Copying ssh_key to $home_path/.ssh/. on $target_hostname"
+	sync "$target_user" "$ssh_key" "$home_path/.ssh/$ssh_key"
 	green "Adding ssh host fingerprints for git{lab,hub}"
-	$ssh_cmd "mkdir -p $home_path/.ssh/; ssh-keyscan -t ssh-ed25519 gitlab.com github.com >>$home_path/.ssh/known_hosts"
+	$ssh_cmd "mkdir -p $home_path/.ssh/; ssh-keyscan -t $ssh_key gitlab.com github.com >>$home_path/.ssh/known_hosts"
 fi
 
 if yes_or_no "Do you want to copy your full .dotfiles and nix-secrets to $target_hostname?"; then
