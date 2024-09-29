@@ -50,7 +50,7 @@
         # guppy = newConfig "guppy" "/dev/vda" false "0";
         # gusto = newConfig "gusto" "/dev/sda" true "8";
         # merlin = newConfig "merlin" "/dev/sda" true "16" false;
-        testbuzz = newConfig "testbuzz" "/dev/sda" true;
+        testbuzz1 = newConfig "testbuzz1" "/dev/sda" true;
 
         # Custom ISO
         #
