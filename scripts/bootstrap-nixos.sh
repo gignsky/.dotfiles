@@ -328,7 +328,7 @@ fi
 
 if yes_or_no "You can now commit and push the .dotfiles, which includes the hardware-configuration.nix for $target_hostname?"; then
 	(pre-commit run --all-files 2>/dev/null || true) &&
-		git add "$git_root/hosts/$target_hostname/hardware-configuration.nix" && (git commit -m "feat: hardware-configuration.nix for $target_hostname" || true) && git push
+		git add "$git_root/hosts/$target_hostname/hardware-configuration.nix" "$git_root/flake.lock" && (git commit -m "feat: hardware-configuration.nix for $target_hostname" || true) && git push
 fi
 
 #TODO prune all previous generations?
