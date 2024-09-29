@@ -170,6 +170,7 @@ sops:
 
 # Update the keys in the secrets file
 rekey:
+    just dont-fuck-my-build
     nix-shell -p lolcat --run 'echo "Updating ~/nix-secrets/secrets.yaml" | lolcat'
     cd ../nix-secrets && (\
     sops updatekeys -y secrets.yaml && \
