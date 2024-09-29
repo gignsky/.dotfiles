@@ -331,6 +331,11 @@ if yes_or_no "You can now commit and push the .dotfiles, which includes the hard
 		git add "$git_root/hosts/$target_hostname/hardware-configuration.nix" "$git_root/flake.lock" && (git commit -m "feat: hardware-configuration.nix for $target_hostname" || true) && git push
 fi
 
+if yes_or_no "Do you want to reboot $target_hostname?"; then
+	green "Rebooting $target_hostname"
+	$ssh_cmd "sudo reboot now"
+fi
+
 #TODO prune all previous generations?
 
 green "Success!"
