@@ -1,9 +1,12 @@
-[submodule "resources/example-configs/Misterio77/nix-config"]
-	path = resources/example-configs/Misterio77/nix-config
-	url = git@github.com:Misterio77/nix-config.git
-[submodule "resources/example-configs/EmergentMind/nix-config"]
-	path = resources/example-configs/EmergentMind/nix-config
-	url = git@github.com:EmergentMind/nix-config.git
-[submodule "resources/ansible_files"]
+[submodule "ansible_files"]
 	path = resources/ansible_files
 	url = git@github.com:gignsky/ansible_files.git
+[submodule "EmergentMind"]
+	path = resources/example-configs/EmergentMind/nix-config
+	url = git@github.com:EmergentMind/nix-config.git
+[submodule "Misterio77's Starter Configs"]
+	path = resources/example-configs/Misterio77/nix-starter-configs
+	url = git@github.com:Misterio77/nix-starter-configs.git
+[submodule "Misterio77's Personal Config"]
+	path = resources/example-configs/Misterio77/nix-config
+	url = git@github.com:Misterio77/nix-config.git
