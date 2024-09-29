@@ -53,6 +53,9 @@ in
               "networkmanager"
             ];
 
+          # sets the user's id to 1701
+          uid = 1701;
+
           # These get placed into /etc/ssh/authorized_keys.d/<name> on nixos
           openssh.authorizedKeys.keys = lib.lists.forEach pubKeys (key: builtins.readFile key);
 
