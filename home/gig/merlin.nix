@@ -18,6 +18,10 @@
     ./home.nix
   ];
 
+  home.packages = with pkgs; [
+    plex-media-player
+  ];
+
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   home.stateVersion = "24.05";
 }
