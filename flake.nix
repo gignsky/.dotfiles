@@ -142,17 +142,17 @@
           ];
         };
 
-        # # Merlin configuration entrypoint
-        # merlin = nixpkgs.lib.nixosSystem {
-        #   inherit system specialArgs;
-        #   modules = [
-        #     # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
-        #     # home-manager.nixosModules.home-manager {
-        #     #   home-manager.extraSpecialArgs = specialArgs;
-        #     # }
-        #     ./hosts/merlin
-        #   ];
-        # };
+        # Merlin configuration entrypoint
+        merlin = nixpkgs.lib.nixosSystem {
+          inherit system specialArgs;
+          modules = [
+            # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
+            # home-manager.nixosModules.home-manager {
+            #   home-manager.extraSpecialArgs = specialArgs;
+            # }
+            ./hosts/merlin
+          ];
+        };
 
         buzz = nixpkgs.lib.nixosSystem {
           inherit system specialArgs;
