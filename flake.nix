@@ -166,7 +166,7 @@
           ];
         };
 
-        testbuzz = nixpkgs.lib.nixosSystem {
+        testbuzz1 = nixpkgs.lib.nixosSystem {
           inherit system specialArgs;
           # > Our main nixos configuration file <
           modules = [
@@ -174,7 +174,7 @@
             # {
             #   home-manager.extraSpecialArgs = specialArgs;
             # }
-            ./hosts/testbuzz
+            ./hosts/testbuzz1
           ];
         };
       };
@@ -207,7 +207,7 @@
         };
 
         # testbuzz
-        "gig@testbuzz" = home-manager.lib.homeManagerConfiguration {
+        "gig@testbuzz1" = home-manager.lib.homeManagerConfiguration {
           inherit pkgs; # Home-manager requires 'pkgs' instance
           extraSpecialArgs = {inherit inputs outputs configLib;};
           # > Our main home-manager configuration file <
