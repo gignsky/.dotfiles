@@ -159,10 +159,8 @@ diff:
     git diff ':!flake.lock'
 
 sops:
-    just rekey
     echo "Editing ~/nix-secrets/secrets.yaml" | lolcat
     sops ~/nix-secrets/secrets.yaml
-    just rekey
 
 # Update the keys in the secrets file
 rekey:
