@@ -56,7 +56,7 @@
     nixPath = lib.mapAttrsToList (n: _: "${n}=flake:${n}") flakeInputs;
   };
 
-    fileSystems."/" =
+  fileSystems."/" =
     { device = "/dev/dm-0";
       fsType = "ext4";
     };
