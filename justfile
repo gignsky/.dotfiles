@@ -172,10 +172,10 @@ sops:
 rekey:
     just dont-fuck-my-build
     nix-shell -p lolcat --run 'echo "Updating ~/nix-secrets/secrets.yaml" | lolcat'
-    nix-shell -p sops --run "cd ../nix-secrets && (\
-    sops updatekeys -y secrets.yaml && \
+    cd ../nix-secrets && (\
+    nix-shell -p sops --run "sops updatekeys -y secrets.yaml" && \
     git add -u && (git commit -m "chore: rekey" || true) && git push \
-    )"
+    )
     nix-shell -p lolcat --run 'echo "Updated Secrets!" | lolcat'
     just dont-fuck-my-build
 
