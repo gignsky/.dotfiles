@@ -137,6 +137,11 @@ iso:
     ls ~/virtualization-boot-files/template/iso | grep nixos | lolcat
     rm -rfv result
 
+iso-keep:
+    just pre-build
+    nix build ./nixos-installer#nixosConfigurations.iso.config.system.build.isoImage
+    just post-build
+
 # rebuild-pre: update-nix-secrets
 #   git add *.nix
 #
