@@ -23,7 +23,7 @@
     (configLib.relativeToRoot "hosts/common/core")
 
     # optional
-    # ../common/optional/gui.nix
+    (configLib.relativeToRoot "hosts/common/optional/gui.nix")
     # ../common/optional/xrdp.nix
 
     #gig users
