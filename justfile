@@ -5,14 +5,14 @@ default:
 
 # Run before every rebuild, everytime
 rebuild-pre:
-    echo "[PRE] Rebuilding..."
+    echo "[PRE] Rebuilding..." | lolcat
     just dont-fuck-my-build
     # just rekey
 
 dont-fuck-my-build:
-    git ls-files --others --exclude-standard -- '*.nix' | xargs -r git add -v
+    git ls-files --others --exclude-standard -- '*.nix' | xargs -r git add -v | lolcat
     nix flake lock --update-input nix-secrets
-    echo "No chance your build is fucked! 👍"
+    echo "No chance your build is fucked! 👍" | lolcat
 
 switch args="":
     just rebuild {{args}}
@@ -21,7 +21,7 @@ switch args="":
 # Run after every rebuild, some of the time
 rebuild-post:
     # just check-sops
-    echo "[POST] Rebuilt."
+    echo "[POST] Rebuilt." | lolcat
 
 # Rebuild the system
 rebuild args="":
@@ -32,7 +32,7 @@ rebuild args="":
 rebuild-test args="":
     just rebuild-pre
     scripts/system-flake-rebuild-test.sh {{args}}
-    echo "[TEST] Finished."
+    echo "[TEST] Finished." | lolcat
 
 # Rebuild the system and check sops and home manager
 rebuild-full args="":
@@ -60,12 +60,12 @@ update-rebuild-full:
 check:
     just dont-fuck-my-build
     nix flake check --impure --no-build
-    echo "[CHECK] Finished."
+    echo "[CHECK] Finished." | lolcat
 
 check-iso:
     just dont-fuck-my-build
     nix flake check --impure --no-build nixos-installer/.
-    echo "[CHECK] Finished."
+    echo "[CHECK] Finished." | lolcat
 
 show args="":
     just dont-fuck-my-build
@@ -79,11 +79,11 @@ show args="":
 # Run before every home rebuild, on non-quick build
 pre-home:
     just dont-fuck-my-build
-    echo "[PRE-HOME] Finished."
+    echo "[PRE-HOME] Finished." | lolcat
 
 # Runs after every home rebuild
 post-home:
-    echo "[HOME] Finished."
+    echo "[HOME] Finished." | lolcat
 
 home:
     just pre-home
@@ -101,14 +101,14 @@ new home:
 home-trace:
     just dont-fuck-my-build
     home-manager switch --flake ~/.dotfiles/. --show-trace
-    echo "[HOME-TRACE] Finished."
+    echo "[HOME-TRACE] Finished." | lolcat
 
 gc:
-    nix-collect-garbage --delete-old
-    # nix store gc
+    nix-collect-garbage --delete-old | lolcat
+    # nix store gc | lolcat
 
 pre-build:
-    echo "Pre-Build Starting..."
+    echo "Pre-Build Starting..." | lolcat
     just dont-fuck-my-build
     rm -rfv result
 
@@ -118,7 +118,7 @@ build *args:
     just post-build
 
 post-build:
-    echo "Build Finished."
+    echo "Build Finished." | lolcat
     quick-results
 
 #
@@ -133,7 +133,7 @@ iso:
     nix build ./nixos-installer#nixosConfigurations.iso.config.system.build.isoImage
     just post-build
     cp result/iso/nixos* ~/virtualization-boot-files/template/iso/.
-    ls ~/virtualization-boot-files/template/iso | grep nixos
+    ls ~/virtualization-boot-files/template/iso | grep nixos | lolcat
     rm -rfv result
 
 iso-keep:
@@ -163,19 +163,19 @@ diff:
     git diff ':!flake.lock'
 
 sops:
-    echo "Editing ~/nix-secrets/secrets.yaml"
+    echo "Editing ~/nix-secrets/secrets.yaml" | lolcat
     nano ~/nix-secrets/.sops.yaml
     sops ~/nix-secrets/secrets.yaml
     just rekey
 
 # Update the keys in the secrets file
 rekey:
-    echo "Updating ~/nix-secrets/secrets.yaml"
+    echo "Updating ~/nix-secrets/secrets.yaml" | lolcat
     cd ../nix-secrets && (\
     sops updatekeys -y secrets.yaml && \
     git add -u && (git commit -m "chore: rekey" || true) && git push \
     )
-    echo "Updated Secrets!"
+    echo "Updated Secrets!" | lolcat
 
 sops-fix:
     just pre-home
