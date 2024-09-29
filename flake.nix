@@ -178,13 +178,13 @@
           modules = [./home/gig/wsl.nix];
         };
 
-        # # merlin
-        # "gig@merlin" = home-manager.lib.homeManagerConfiguration {
-        #   inherit pkgs; # Home-manager requires 'pkgs' instance
-        #   extraSpecialArgs = {inherit inputs outputs;};
-        #   # > Our main home-manager configuration file <
-        #   modules = [./home/gig/merlin.nix];
-        # };
+        # merlin
+        "gig@merlin" = home-manager.lib.homeManagerConfiguration {
+          inherit pkgs; # Home-manager requires 'pkgs' instance
+          extraSpecialArgs = {inherit inputs outputs configLib;};
+          # > Our main home-manager configuration file <
+          modules = [./home/gig/merlin.nix];
+        };
 
         # buzz
         "gig@buzz" = home-manager.lib.homeManagerConfiguration {
