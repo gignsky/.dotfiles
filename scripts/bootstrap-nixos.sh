@@ -292,8 +292,8 @@ fi
 if yes_or_no "Do you want to copy your full nix-config and nix-secrets to $target_hostname?"; then
 	green "Adding ssh host fingerprint at $target_destination to ~/.ssh/known_hosts"
 	ssh-keyscan -p "$ssh_port" "$target_destination" >>~/.ssh/known_hosts || true
-	green "Copying full nix-config to $target_hostname"
-	sync "$target_user" "${git_root}"/../nix-config
+	green "Copying full .dotfiles to $target_hostname"
+	sync "$target_user" "${git_root}"/../.dotfiles
 	green "Copying full nix-secrets to $target_hostname"
 	sync "$target_user" "${git_root}"/../nix-secrets
 
@@ -301,15 +301,15 @@ if yes_or_no "Do you want to rebuild immediately?"; then
 	green "Rebuilding nix-config on $target_hostname"
 	#FIXME there are still a gitlab fingerprint request happening during the rebuild
 	#$ssh_cmd -oForwardAgent=yes "cd nix-config && sudo nixos-rebuild --show-trace --flake .#$target_hostname" switch"
-	$ssh_cmd -oForwardAgent=yes "cd nix-config && just rebuild"
+	$ssh_cmd -oForwardAgent=yes "cd .dotfiles && just rebuild"
 fi
 else
 	echo
 	green "NixOS was successfully installed!"
 	echo "Post-install config build instructions:"
-	echo "To copy nix-config from this machine to the $target_hostname, run the following command from ~/nix-config"
+	echo "To copy nix-config from this machine to the $target_hostname, run the following command from ~/.dotfiles"
 	echo "just sync $target_user $target_destination"
-	echo "To rebuild, sign into $target_hostname and run the following command from ~/nix-config"
+	echo "To rebuild, sign into $target_hostname and run the following command from ~/.dotfiles"
 	echo "cd nix-config"
 	echo "just rebuild"
 	echo
