@@ -7,7 +7,7 @@
 {
   disko.devices = {
     disk.disk1 = {
-      device = lib.mkDefault "/dev/sda";
+      device = disk;
       type = "disk";
       content = {
         type = "gpt";
