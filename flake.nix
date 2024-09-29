@@ -211,7 +211,7 @@
           inherit pkgs; # Home-manager requires 'pkgs' instance
           extraSpecialArgs = {inherit inputs outputs configLib;};
           # > Our main home-manager configuration file <
-          modules = [./home/gig/testbuzz.nix];
+          modules = [./home/gig/testbuzz1.nix];
         };
       };
   };
