@@ -8,7 +8,7 @@ rebuild-pre:
     echo "[PRE] Rebuilding..." | lolcat
     # just update-nix-secrets
     just dont-fuck-my-build
-    just sops-update
+    just rekey
 
 dont-fuck-my-build:
     git ls-files --others --exclude-standard -- '*.nix' | xargs -r git add -v | lolcat
@@ -44,7 +44,7 @@ rebuild-full args="":
 # Update the flake
 update:
     just dont-fuck-my-build
-    just sops-update
+    just rekey
     nix flake update
 
 # Rebuild the system and update the flake
@@ -159,18 +159,19 @@ diff:
     git diff ':!flake.lock'
 
 sops:
-    just sops-update
+    just rekey
     echo "Editing ~/nix-secrets/secrets.yaml" | lolcat
     sops ~/nix-secrets/secrets.yaml
+    just rekey
 
-sops-update:
+# Update the keys in the secrets file
+rekey:
     echo "Updating ~/nix-secrets/secrets.yaml" | lolcat
     cd ../nix-secrets && (\
     sops updatekeys -y secrets.yaml && \
     git add -u && (git commit -m "chore: rekey" || true) && git push \
     )
     echo "Updated Secrets!" | lolcat
-    # (pre-commit run --all-files || true) && \
 
 sops-fix:
     just pre-home
@@ -180,7 +181,7 @@ sops-fix:
     just home
 
 update-nix-secrets:
-    just sops-update
+    just rekey
     (cd ../nix-secrets && git fetch && git rebase) || true
     nix flake lock --update-input nix-secrets
 
