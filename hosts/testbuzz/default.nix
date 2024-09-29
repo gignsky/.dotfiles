@@ -34,7 +34,7 @@
 
   # Bootloader.
   boot.loader.grub.enable = true;
-  boot.loader.grub.device = "/dev/pool/root";
+  boot.loader.grub.device = "/dev/dm-0";
   boot.loader.grub.useOSProber = true;
 
   nix = let
