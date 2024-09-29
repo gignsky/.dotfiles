@@ -320,6 +320,7 @@ if [ "$always_yes" == "false" ]; then
 		#FIXME there are still a gitlab fingerprint request happening during the rebuild
 		#$ssh_cmd -oForwardAgent=yes "cd .dotfiles && sudo nixos-rebuild --show-trace --flake .#$target_hostname" switch"
 		$ssh_cmd -oForwardAgent=yes "cd .dotfiles && direnv allow && just rebuild-full"
+		$ssh_cmd -oForwardAgent=yes "cd .dotfiles && just sops-fix"
 	fi
 	else
 		echo
@@ -387,6 +388,7 @@ else
 	$ssh_cmd -oForwardAgent=yes "cd .dotfiles && direnv allow && just rebuild-full"
 	(pre-commit run --all-files 2>/dev/null || true) &&
 		git add "$git_root/hosts/$target_hostname/hardware-configuration.nix" "$git_root/flake.lock" && (git commit -m "feat: hardware-configuration.nix for $target_hostname" || true) && git push
+	$ssh_cmd -oForwardAgent=yes "cd .dotfiles && just sops-fix"
 	$ssh_cmd "sudo reboot now"
 fi
 
