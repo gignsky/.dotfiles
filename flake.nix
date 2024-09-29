@@ -165,6 +165,7 @@
             ./hosts/buzz
           ];
         };
+      };
 
       # Standalone home-manager configuration entrypoint
       # Available through 'home-manager --flake .#your-username@your-hostname'
@@ -193,5 +194,5 @@
           modules = [./home/gig/buzz.nix];
         };
       };
-  };
+    };
 }
