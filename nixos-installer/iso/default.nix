@@ -13,7 +13,7 @@ in
   imports = [ (configLib.relativeToRoot "hosts/common/users/${configVars.username}") ];
 
   # The default compression-level is (6) and takes too long on some machines (>30m). 3 takes <2m
-  isoImage.squashfsCompression = "zstd -Xcompression-level 3";
+  # isoImage.squashfsCompression = "zstd -Xcompression-level 3";
 
   nixpkgs = {
     hostPlatform = lib.mkDefault "x86_64-linux";
