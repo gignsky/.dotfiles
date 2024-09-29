@@ -177,6 +177,7 @@ rekey:
     git add -u && (git commit -m "chore: rekey" || true) && git push \
     )
     nix-shell -p lolcat --run 'echo "Updated Secrets!" | lolcat'
+    just dont-fuck-my-build
 
 sops-fix:
     just pre-home
