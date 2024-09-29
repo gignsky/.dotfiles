@@ -4,6 +4,7 @@
   inputs,
   lib,
   config,
+  configLib,
   pkgs,
   ...
 }: {
@@ -33,7 +34,7 @@
 
   # Bootloader.
   boot.loader.grub.enable = true;
-  # boot.loader.grub.device = "/dev/sda";
+  boot.loader.grub.device = "/dev/nvme0n1";
   boot.loader.grub.useOSProber = true;
 
   nix = let
@@ -54,6 +55,11 @@
     registry = lib.mapAttrs (_: flake: {inherit flake;}) flakeInputs;
     nixPath = lib.mapAttrsToList (n: _: "${n}=flake:${n}") flakeInputs;
   };
+
+  fileSystems."/" =
+    { device = "/dev/dm-0";
+      fsType = "ext4";
+    };
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   system.stateVersion = "24.05";
