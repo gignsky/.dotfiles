@@ -30,7 +30,7 @@
     (configLib.relativeToRoot "hosts/common/users/gig")
   ];
 
-  networking.hostName = "testbuzz";
+  networking.hostName = "testbuzz1";
 
   # Bootloader.
   boot.loader.grub.enable = true;
