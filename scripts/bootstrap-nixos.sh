@@ -7,7 +7,7 @@ target_destination=""
 target_user="gig"
 ssh_key="/home/gig/.ssh/id_rsa"
 ssh_port="22"
-always-yes="false"
+always_yes="false"
 persist_dir=""
 # Create a temp directory for generated host keys
 temp=$(mktemp -d)
@@ -96,9 +96,10 @@ while [[ $# -gt 0 ]]; do
 		shift
 		ssh_key=$1
 		;;
-	--always-yes)
+	-always_yes)
 		shift
-		always-yes=$1
+		always_yes=$1
+		;;
 	--port)
 		shift
 		ssh_port=$1
@@ -254,8 +255,8 @@ function generate_user_age_key() {
 	fi
 }
 
-# Check for always-yes to be False and if so ask the questions
-if [ "$always-yes" == "false" ]; then
+# Check for always_yes to be False and if so ask the questions
+if [ "$always_yes" == "false" ]; then
 	# Validate required options
 	# FIXME: The ssh key and destination aren't required if only rekeying, so could be moved into specific sections?
 	if [ -z "${target_hostname}" ] || [ -z "${target_destination}" ] || [ -z "${ssh_key}" ]; then
@@ -339,7 +340,6 @@ if [ "$always-yes" == "false" ]; then
 		green "Rebooting $target_hostname"
 		$ssh_cmd "sudo reboot now"
 	fi
-fi
 else
 	if [ -z "${target_hostname}" ] || [ -z "${target_destination}" ] || [ -z "${ssh_key}" ]; then
 		red "ERROR: -n, -d, and -k are all required"
@@ -387,6 +387,7 @@ else
 	(pre-commit run --all-files 2>/dev/null || true) &&
 		git add "$git_root/hosts/$target_hostname/hardware-configuration.nix" "$git_root/flake.lock" && (git commit -m "feat: hardware-configuration.nix for $target_hostname" || true) && git push
 	$ssh_cmd "sudo reboot now"
+fi
 
 green "Success!"
 green "If you are using a disko config with luks partitions, update luks to use non-temporary credentials."
