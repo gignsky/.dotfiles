@@ -347,6 +347,7 @@ else
 		help_and_exit
 	fi
 	nixos_anywhere
+	yes_or_no "Has $target_hostname rebooted?"
 	generate_host_age_key
 	updated_age_keys=1
 	generate_user_age_key
