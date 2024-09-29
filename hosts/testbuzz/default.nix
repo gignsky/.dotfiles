@@ -34,7 +34,7 @@
 
   # Bootloader.
   boot.loader.grub.enable = true;
-  boot.loader.grub.device = "/dev/dm-0";
+  boot.loader.grub.device = "/dev/sda";
   boot.loader.grub.useOSProber = true;
 
   nix = let
@@ -57,7 +57,7 @@
   };
 
   fileSystems."/" =
-    { device = "/dev/disk/sda";
+    { device = "/dev/dm-0";
       fsType = "ext4";
     };
 
