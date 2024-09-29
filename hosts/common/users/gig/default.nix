@@ -33,6 +33,10 @@ in
     lib.recursiveUpdate fullUserConfig
       #this is the second argument to recursiveUpdate
       {
+        users.groups.${configVars.username} = {
+          gid = 1701;
+        };
+
         users.mutableUsers = false; # required for password to be set via sops during system activation
         users.users.${configVars.username} = {
           home = "/home/${configVars.username}";
@@ -63,10 +67,6 @@ in
           password = if configVars.isMinimal then "nixos" else null; # Overridden if sops is working
           # root's ssh keys are mainly used for remote deployment.
           openssh.authorizedKeys.keys = config.users.users.${configVars.username}.openssh.authorizedKeys.keys;
-        };
-
-        users.groups.${configVars.username} = {
-          gid = 1701;
         };
       };
   # decrypt gig-password to /run/secrets-for-users/ so it can be used to create the user
