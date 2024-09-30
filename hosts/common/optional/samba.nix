@@ -32,6 +32,7 @@ in
     (newMount "utility" "/home/gig/utility" "192.168.51.3" "1000" "100")
     (newMount "virtualization-boot-files" "/home/gig/virtualization-boot-files" "192.168.51.3" "1000" "100")
     (newMount "appraisals" "/home/gig/appraisals" "192.168.51.21" "1000" "100")
+    (newMount "vulcan" "/home/gig/vulcan" "192.168.51.3" "1000" "100")
   ];
 
   environment.systemPackages = [ pkgs.cifs-utils ];
