@@ -141,6 +141,12 @@ iso-keep:
     nix build ./nixos-installer#nixosConfigurations.iso.config.system.build.isoImage
     just post-build
 
+keygen:
+    echo "User Key @ ~/.config/sops/age/keys.txt"
+    nix-shell -p age --run 'mkdir -p ~/.config/sops/age && age-keygen -o ~/.config/sops/age/keys.txt'
+    echo "Host Key based on /etc/ssh/ssh_host_ed25519_key.pub"
+    nix-shell -p ssh-to-age --run 'cat /etc/ssh/ssh_host_ed25519_key.pub | ssh-to-age'
+
 # rebuild-pre: update-nix-secrets
 #   git add *.nix
 #
