@@ -51,7 +51,8 @@
         # gusto = newConfig "gusto" "/dev/sda" true "8";
         merlin = newConfig "merlin" "/dev/nvme0n1" false;
         # testbuzz1 = newConfig "testbuzz1" "/dev/sda" true;
-        buzz = newConfig "buzz" "/dev/sda" true;
+        # buzz = newConfig "buzz" "/dev/sda" true;
+        cams-countertop = newConfig "cams-countertop" "/dev/sda" true;
 
         # Custom ISO
         #
