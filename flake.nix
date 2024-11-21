@@ -154,7 +154,7 @@
           ];
         };
 
-        buzz = nixpkgs.lib.nixosSystem {
+        cams-countertop = nixpkgs.lib.nixosSystem {
           inherit system specialArgs;
           # > Our main nixos configuration file <
           modules = [
@@ -162,7 +162,7 @@
             # {
             #   home-manager.extraSpecialArgs = specialArgs;
             # }
-            ./hosts/buzz
+            ./hosts/cams-countertop
           ];
         };
       };
@@ -187,11 +187,11 @@
         };
 
         # buzz
-        "gig@buzz" = home-manager.lib.homeManagerConfiguration {
+        "gig@cams-countertop" = home-manager.lib.homeManagerConfiguration {
           inherit pkgs; # Home-manager requires 'pkgs' instance
           extraSpecialArgs = {inherit inputs outputs configLib;};
           # > Our main home-manager configuration file <
-          modules = [./home/gig/buzz.nix];
+          modules = [./home/gig/cams-countertop.nix];
         };
       };
     };

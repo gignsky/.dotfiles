@@ -16,6 +16,7 @@
     # ./nvim.nix
     #################### Required Configs ####################
     ./home.nix #required
+    
 
     #################### Host-specific Optional Configs ####################
 
