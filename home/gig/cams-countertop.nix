@@ -16,7 +16,7 @@
     # ./nvim.nix
     #################### Required Configs ####################
     ./home.nix #required
-    
+
 
     #################### Host-specific Optional Configs ####################
 
@@ -48,6 +48,9 @@
   home = {
     username = "gig";
     homeDirectory = "/home/gig";
+    pkgs = with pkgs; {
+      nodejs_22
+    }
   };
 
   # home.packages = with pkgs; [
