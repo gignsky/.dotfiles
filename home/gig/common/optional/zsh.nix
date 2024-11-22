@@ -70,7 +70,7 @@
     };
   };
 
-  home.file.".p10k.zsh".source = ../resources/.p10k.zsh;
+  home.file.".p10k.zsh".source = ../resources/.p10k.zsh.vm;
 
   home.packages = [ pkgs.direnv ];
 
