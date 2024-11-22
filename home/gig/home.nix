@@ -14,7 +14,7 @@
     # Or modules exported from other flakes (such as nix-colors):
     # inputs.nix-colors.homeManagerModules.default
 
-    # ./common/core
+    ./common/core
     ./common/optional/zsh.nix
     ./common/optional/sops.nix
   ];
