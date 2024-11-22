@@ -148,6 +148,8 @@ keygen:
     nix-shell -p age --run 'mkdir -p ~/.config/sops/age && age-keygen -o ~/.config/sops/age/keys.txt'
     echo "Host Key based on /etc/ssh/ssh_host_ed25519_key.pub"
     nix-shell -p ssh-to-age --run 'cat /etc/ssh/ssh_host_ed25519_key.pub | ssh-to-age'
+    echo "cat output from .config/sops/age/keys.txt"
+    bat ~/.config/sops/age/keys.txt
 
 # rebuild-pre: update-nix-secrets
 #   git add *.nix
