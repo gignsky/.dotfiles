@@ -154,6 +154,18 @@
           ];
         };
 
+	buzz = nixpkgs.lib.nixosSystem {
+          inherit system specialArgs;
+          # > Our main nixos configuration file <
+          modules = [
+            # home-manager.nixosModules.home-manager
+            # {
+            #   home-manager.extraSpecialArgs = specialArgs;
+            # }
+            ./hosts/buzz
+          ];
+        };
+
         cams-countertop = nixpkgs.lib.nixosSystem {
           inherit system specialArgs;
           # > Our main nixos configuration file <
