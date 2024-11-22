@@ -31,6 +31,8 @@
   ];
 
   networking.hostName = "cams-countertop";
+  networking.networkManager.enable = true;
+  networking.networkManager.dhcp = "dhcpcd";
 
   # Bootloader.
   boot.loader.grub.enable = true;
