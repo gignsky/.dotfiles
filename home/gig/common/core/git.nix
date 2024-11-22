@@ -11,4 +11,9 @@
             # pull.ff = "only";
         };
     };
+    # Debug statement to ensure the file is being processed
+    environment.etc."gitconfig".text = ''
+        [pull]
+            rebase = true
+    '';
 }
