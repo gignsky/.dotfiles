@@ -1,8 +1,8 @@
 { outputs, lib, configLib, ... }:
 
-let
-  homeDirectory = configLib.home.homeDirectory;
-in
+#let
+ # homeDirectory = configLib.home.homeDirectory;
+#in
 {
   programs.ssh = {
     enable = true;
@@ -11,7 +11,7 @@ in
       "github" = {
         host = "github.com";
         identitiesOnly = true;
-        identityFile = "${homeDirectory}/.ssh/id_rsa";
+        identityFile = "/home/gig/.ssh/id_rsa";
       };
     };
   };
