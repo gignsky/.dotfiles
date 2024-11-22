@@ -30,7 +30,27 @@
     (configLib.relativeToRoot "hosts/common/users/gig")
   ];
 
-  networking.hostName = "cams-countertop";
+  networking = {
+	hostName = "cams-countertop";
+	interfaces = {
+		ens18 = {
+			useDHCP = false;
+			ipv4.addresses = [
+				{ address = "192.168.51.52"; prefixLength = 24; }
+			];
+			# defaultGateway = "192.168.51.1";
+			ipv4.routes = [
+				{
+					address = "0.0.0.0";
+					via = "192.168.51.1";
+					# interface = "ens18";
+					prefixLength = 24;
+				}
+			];
+		};
+	};
+  };
+
 
   # Bootloader.
   boot.loader.grub.enable = true;
