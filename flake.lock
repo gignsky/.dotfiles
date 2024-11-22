@@ -58,10 +58,10 @@
     "nix-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1732246226,
-        "narHash": "sha256-VDzs3/MSR1OXMLBxEatWT0tilnX/PqxiXguiyF1k+Io=",
+        "lastModified": 1732263236,
+        "narHash": "sha256-LbZC0Gu0GxJa4mqy9cRc5QfO2opePMc/N5I4q7Nrcik=",
         "ref": "main",
-        "rev": "c15ed532029bcb9865ecb7b25f1de8a3033dc0d7",
+        "rev": "a9742a3eaee55b4af8dfa380b0be958b2f374b98",
         "shallow": true,
         "type": "git",
         "url": "ssh://git@github.com/gignsky/nix-secrets.git"
