@@ -174,6 +174,10 @@ sops:
     sops ~/nix-secrets/secrets.yaml
     just rekey
 
+sops-edit:
+    nix-shell -p lolcat --run 'echo "Editing ~/nix-secrets/secrets.yaml" | lolcat'
+    nano ~/nix-secrets/.sops.yaml
+
 # Update the keys in the secrets file
 rekey:
     just dont-fuck-my-build
