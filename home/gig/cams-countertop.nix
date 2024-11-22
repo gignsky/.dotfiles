@@ -48,9 +48,6 @@
   home = {
     username = "gig";
     homeDirectory = "/home/gig";
-    pkgs = with pkgs; {
-      nodejs_22
-    };
   };
 
   # home.packages = with pkgs; [
