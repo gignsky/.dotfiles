@@ -6,13 +6,13 @@
 }:
 
 let
-  pname = "als";
+  pname = "zsh-als-aliases";
   install_path = "share/zsh/${pname}";
 in
 pkgs.stdenv.mkDerivation {
 # {
   inherit pname;
-  version = "0.0.2";
+  version = "0.0.3";
   # Import src from github
   src = fetchgit {
     url = "https://github.com/ohmyzsh/ohmyzsh.git";
