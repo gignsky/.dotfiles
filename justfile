@@ -7,6 +7,8 @@ default:
 rebuild-pre:
     nix-shell -p lolcat --run 'echo "[PRE] Rebuilding..." | lolcat'
     just dont-fuck-my-build
+    nix-shell -p lolcat --run 'echo "Updateing Nix-Secrets Repo..." | lolcat'
+    cd ~/nix-secrets && git fetch && git pull && cd ~/.dotfiles
     # just rekey
 
 dont-fuck-my-build:
