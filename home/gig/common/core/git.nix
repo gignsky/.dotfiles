@@ -7,8 +7,8 @@
         user.useConfigOnly = true;
         user.name = "gignsky";
         user.email = "gig@gignsky.com";
-        pull.rebase = false;
-        pull.ff = "only";
+        # pull.rebase = true;
+        # pull.ff = "only";
         };
     };
 }
