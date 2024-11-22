@@ -11,7 +11,7 @@ in
 
   sops = {
     # This is the gig/dev key and needs ot have been copied to this location on the host
-    age.keyFile = "/home/gig/.config/sops/age/keys54321.txt";
+    age.keyFile = "/home/gig/.config/sops/age/keys.txt";
     defaultSopsFile = ("${secretsFile}");
     validateSopsFiles = false;
 
