@@ -19,6 +19,8 @@
                 bbenoist.nix
                 oderwat.indent-rainbow
                 ms-vscode-remote.remote-ssh
+                github.copilot
+                github.copilot-chat
             ];
         };
 
