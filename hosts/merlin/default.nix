@@ -24,6 +24,7 @@
 
     # optional
     (configLib.relativeToRoot "hosts/common/optional/gui.nix")
+    (configLib.relativeToRoot "hosts/common/optional/firefox.nix")
     # ../common/optional/xrdp.nix
 
     #gig users
