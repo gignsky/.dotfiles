@@ -28,6 +28,10 @@
 
     #gig users
     (configLib.relativeToRoot "hosts/common/users/gig")
+
+    #wiatt user
+    (configLib.relativeToRoot "hosts/common/users/wiatt")
+
   ];
 
   networking = {
