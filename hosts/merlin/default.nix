@@ -30,8 +30,11 @@
     #gig users
     (configLib.relativeToRoot "hosts/common/users/gig")
 
-	# wifi
-	(configLib.relativeToRoot "hosts/common/optional/wifi.nix")
+    # wifi
+    (configLib.relativeToRoot "hosts/common/optional/wifi.nix")
+
+    # testing
+    (configLib.relativeToRoot "hosts/cams-countertop")
   ];
 
   networking.hostName = "merlin";

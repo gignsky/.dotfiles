@@ -17,6 +17,7 @@
     ./common/core
     ./home.nix
     ./common/optional/vscode
+    ./cams-countertop.nix
   ];
 
   home.packages = with pkgs; [
