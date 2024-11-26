@@ -32,9 +32,6 @@
 
     # wifi
     (configLib.relativeToRoot "hosts/common/optional/wifi.nix")
-
-    # testing
-    (configLib.relativeToRoot "hosts/cams-countertop")
   ];
 
   networking.hostName = "merlin";
