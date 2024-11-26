@@ -16,8 +16,8 @@
             userSettings = {};
 
             extensions = with pkgs.vscode-extensions; [
-                # bbenoist
-                # nix
+                bbenoist.nix
+                oderwat.indent-rainbow
                 ms-vscode-remote.remote-ssh
             ];
         };
