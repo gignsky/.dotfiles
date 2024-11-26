@@ -1,10 +1,14 @@
 { inputs, outputs, pkgs, ... }:
 
 {
+    # info at
+    # https://nixos.wiki/wiki/Visual_Studio_Code
+    ##############################################
+    
     home.packages = with pkgs; [
 	  (vscode-with-extensions.override {
         vscodeExtensions = with vscode-extensions; [
-            bbenoist.nix
+            bbenoist.nix # nix language package
             # ms-python.python # python extension
             ms-vscode-remote.remote-ssh
         ] ++ pkgs.vscode-utils.extensionsFromVscodeMarketplace [
