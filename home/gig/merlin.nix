@@ -22,7 +22,7 @@
   home.packages = with pkgs; [
     plex-media-player
     remmina
-    bitwarden-cli
+    # bitwarden-cli
     bitwarden-desktop
     # anydesk
   ];
