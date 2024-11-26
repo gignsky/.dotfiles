@@ -17,6 +17,4 @@
       }
     ];
   };
-    
-  programs.firefox.enable = true;
 }
