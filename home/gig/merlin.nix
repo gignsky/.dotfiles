@@ -25,6 +25,7 @@
     remmina
     # bitwarden-cli
     bitwarden-desktop
+    discord
     # anydesk
   ];
 
