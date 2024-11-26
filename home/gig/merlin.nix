@@ -21,6 +21,10 @@
 
   home.packages = with pkgs; [
     plex-media-player
+    remmina
+    bitwarden-cli
+    bitwarden-desktop
+    # anydesk
   ];
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
