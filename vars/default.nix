@@ -12,4 +12,6 @@
   #workEmail = inputs.nix-secrets.work-email;
   persistFolder = "/persist";
   isMinimal = false; # Used to indicate nixos-installer build
+
+  wiatt_username = "wiatt";
 }
