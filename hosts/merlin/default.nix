@@ -28,6 +28,9 @@
 
     #gig users
     (configLib.relativeToRoot "hosts/common/users/gig")
+
+	# wifi
+	(configLib.relativeToRoot "hosts/common/optional/wifi.nix")
   ];
 
   networking.hostName = "merlin";
