@@ -9,6 +9,7 @@
             user.email = "gig@gignsky.com";
             pull.rebase = true;
             # pull.ff = "only";
+            init.defaultBranch = "main";
         };
     };
     # # Debug statement to ensure the file is being processed
