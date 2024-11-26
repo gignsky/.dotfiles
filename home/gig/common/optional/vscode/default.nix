@@ -3,7 +3,7 @@
 {
     imports = (configLib.scanPaths ./.);
 
-    home.packages = with pkgs; [
-	  vscode
-    ];
+    #home.packages = with pkgs; [
+	 # vscode
+    #];
 }
