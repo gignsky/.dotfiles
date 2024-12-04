@@ -24,7 +24,7 @@
 
     # optional
     # (configLib.relativeToRoot "hosts/common/optional/gui.nix")
-    # (configLib.relativeToRoot "hosts/common/optional/sshd-with-passwords.nix")
+    (configLib.relativeToRoot "hosts/common/optional/sshd-with-passwords.nix")
 
     #gig users
     (configLib.relativeToRoot "hosts/common/users/gig")
