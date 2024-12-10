@@ -15,6 +15,7 @@
         fzf
         magic-wormhole
         wget
+        screen
 
         # nixos-unstable packages
         unstable.just
