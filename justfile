@@ -3,21 +3,29 @@
 default:
     @just --list | bat --file-name "justfile"
 
+pre-pull-stash:
+    git stash push -m "pre-pull"
+    cd ~/nix-secrets
+    git stash push -m "pre-pull"
+    cd ~
+    cd .dotfiles
+    
 pull:
-git pull
-just pull-nix-secrets
+    just pre-pull-stash
+    git pull
+    just pull-nix-secrets
 
 pull-rebuild:
-just pull
-just rebuild
+    just pull
+    just rebuild
 
 pull-home:
-just pull
-just home
+    just pull
+    just home
 
 pull-rebuild-full:
-just pull-rebuild
-just pull-home
+    just pull-rebuild
+    just pull-home
 
 pull-nix-secrets:
     cd ~/nix-secrets && git fetch && git pull && cd ~/.dotfiles
