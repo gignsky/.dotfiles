@@ -4,27 +4,35 @@ default:
     @just --list | bat --file-name "justfile"
 
 pre-pull-stash:
+    nix-shell -p lolcat --run "echo 'Running pre-pull stash on all files in dotfiles and nix-secrets' | lolcat"
     git stash push -m "pre-pull"
     cd ~/nix-secrets
     git stash push -m "pre-pull"
     cd ~/.dotfiles
     
 pull:
+    nix-shell -p lolcat --run "echo 'Running git pull on all files in dotfiles and nix-secrets' | lolcat"
     just pre-pull-stash
     git pull
     just pull-nix-secrets
 
 pull-rebuild:
     just pull
+    nix-shell -p lolcat --run "echo 'Rebuilding...' | lolcat"
     just rebuild
+    nix-shell -p lolcat --run "echo 'Rebuilt.' | lolcat"
 
 pull-home:
+    nix-shell -p lolcat --run "echo 'Rebuilding Home-Manager...' | lolcat"
     just pull
     just home
+    nix-shell -p lolcat --run "echo 'Home-Manager Rebuilt.' | lolcat"
 
 pull-rebuild-full:
+    nix-shell -p lolcat --run "echo 'Full Rebuild Running...' | lolcat"
     just pull-rebuild
     just pull-home
+    nix-shell -p lolcat --run "echo 'Full Rebuild Complete.' | lolcat"
 
 pull-nix-secrets:
     cd ~/nix-secrets && git fetch && git pull && cd ~/.dotfiles
