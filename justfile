@@ -7,8 +7,7 @@ pre-pull-stash:
     git stash push -m "pre-pull"
     cd ~/nix-secrets
     git stash push -m "pre-pull"
-    cd ~
-    cd .dotfiles
+    cd ~/.dotfiles
     
 pull:
     just pre-pull-stash
