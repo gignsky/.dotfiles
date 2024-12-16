@@ -3,12 +3,30 @@
 default:
     @just --list | bat --file-name "justfile"
 
+pull:
+git pull
+just pull-nix-secrets
+
+pull-rebuild:
+just pull
+just rebuild
+
+pull-home:
+just pull
+just home
+
+pull-rebuild-full:
+just pull-rebuild
+just pull-home
+
+pull-nix-secrets:
+    cd ~/nix-secrets && git fetch && git pull && cd ~/.dotfiles
+
 # Run before every rebuild, everytime
 rebuild-pre:
     nix-shell -p lolcat --run 'echo "[PRE] Rebuilding..." | lolcat'
     just dont-fuck-my-build
     nix-shell -p lolcat --run 'echo "Updateing Nix-Secrets Repo..." | lolcat'
-    cd ~/nix-secrets && git fetch && git pull && cd ~/.dotfiles
     # just rekey
 
 dont-fuck-my-build:
