@@ -14,8 +14,11 @@
   #   package = pkgs.nix-ld-rs;
   # };
 
-  # Alternative that doesn't effect other files
-  # vscode-remote-workaround.enable = true;
+  # Alternative that doesn't effect other files -- depreciated and doesn't work
+  # inputs.vscode-remote-workaround.enable = true;
+
+  # NEW METHOD FOR VSCODE FROM: https://github.com/nix-community/nixos-vscode-server
+  
   
   wsl.enable = true;  # Redunent with nixosModules.default on the flake.nix level
   wsl.defaultUser = "gig";
