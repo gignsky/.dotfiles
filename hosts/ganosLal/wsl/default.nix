@@ -9,12 +9,14 @@
 
   networking.hostName = "nixos";
 
-  # fixes vscode remote wsl stuff
-  programs.nix-ld = {
-    enable = true;
-    package = pkgs.nix-ld-rs;
-  };
+  # programs.nix-ld = {
+  #   enable = true;
+  #   package = pkgs.nix-ld-rs;
+  # };
 
+  # Alternative that doesn't effect other files
+  # vscode-remote-workaround.enable = true;
+  
   wsl.enable = true;  # Redunent with nixosModules.default on the flake.nix level
   wsl.defaultUser = "gig";
 
