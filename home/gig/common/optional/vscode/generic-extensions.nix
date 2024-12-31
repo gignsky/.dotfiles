@@ -5,10 +5,14 @@
     # https://nixos.wiki/wiki/Visual_Studio_Code
     ##############################################
 
+    # search extentions at
+    # https://search.nixos.org/packages?type=packages&query=vscode-extensions
+    ##############################################
+
     # Home Manager Way
     programs = {
         vscode = {
-            enable = true;
+            enable = false;
             enableExtensionUpdateCheck = true;
             enableUpdateCheck = true;
             mutableExtensionsDir = false; # disallows vscode from installing its own extensions
