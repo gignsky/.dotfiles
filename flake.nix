@@ -123,12 +123,6 @@
       };
       # import ./shell.nix { inherit pkgs; };
 
-      modules = [
-        inputs.vscode-server.nixosModules.default
-        ({ config, pkgs, ...}: {
-          services.vscode-server.enable = true;
-        })
-      ];
 
       # TODO change this to something that has better looking output rules
       # Nix formatter available through 'nix fmt' https://nix-community.github.io/nixpkgs-fmt
@@ -141,6 +135,10 @@
         wsl = nixpkgs.lib.nixosSystem {
           inherit system specialArgs;
           modules = [
+            inputs.vscode-server.nixosModules.default
+              ({ config, pkgs, ...}: {
+                services.vscode-server.enable = true;
+              })
             inputs.nixos-wsl.nixosModules.default {
               system.stateVersion = "24.05";
               wsl.enable = true;
