@@ -24,10 +24,10 @@
             ];
         };
 
-        # A "wonderful CLI to track your time"
-        watson = {
-            enable = false;
-            enableZshIntegration = true;
-        };
+        # # A "wonderful CLI to track your time"
+        # watson = {
+        #     enable = false;
+        #     enableZshIntegration = true;
+        # };
     };
 }
