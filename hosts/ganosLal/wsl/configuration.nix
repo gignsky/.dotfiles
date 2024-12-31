@@ -16,14 +16,6 @@
   wsl.enable = true;
   wsl.defaultUser = "gig";
 
-  # programs.nix-ld = {
-  #   enable = true;
-  #   package = pkgs.nix-ld-rs;
-  # };
-
-  # Alternative that doesn't effect other files
-  vscode-remote-workaround.enable = true;
-
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
   nix.trustedUsers = [ "root" "gig" ];
 
