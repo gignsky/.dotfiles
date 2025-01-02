@@ -8,7 +8,10 @@
 
     nixos-wsl = {
       url = "github:nix-community/NixOS-WSL/main";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
+      };
     };
 
     # Haven't quite figured out how to use this yet
@@ -18,6 +21,9 @@
     # };
 
     #################### Utilities ####################
+    # Flake Utils (used internally by some other utilities and locked to this one version for sanities sake)
+    flake-utils.url = "github:numtide/flake-utils";
+
     # Home manager
     home-manager = {
       url = "github:nix-community/home-manager/release-24.05";
@@ -26,7 +32,10 @@
 
     vscode-server = {
       url = "github:nix-community/nixos-vscode-server";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
+      };
     };
 
     # treefmt-nix = {
