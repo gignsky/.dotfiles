@@ -19,6 +19,9 @@
     ./common/optional/vscode
   ];
 
+  #vscode option
+  vscodeIsWSL = true;
+
   nixpkgs = {
   # You can add overlays here
     overlays = [
