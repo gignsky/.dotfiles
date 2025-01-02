@@ -16,7 +16,7 @@
 
     # ./common/core
     ./home.nix
-    # ./common/optional/vscode
+    ./common/optional/vscode
   ];
 
   nixpkgs = {
