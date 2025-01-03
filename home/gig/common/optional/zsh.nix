@@ -56,9 +56,9 @@
         # { name = "zsh-users/zsh-autosuggestions";}
         # { name = "zsh-users/zsh-completions";}
         # { name = "djui/alias-tips";}
-        # { name = "zpm-zsh/ls";}
-        # { name = "zpm-zsh/colors";}
-        # { name = "zpm-zsh/dircolors-neutral";}
+        { name = "zpm-zsh/ls";}
+        { name = "zpm-zsh/colors";}
+        { name = "zpm-zsh/dircolors-neutral";}
         # { name = "dbz/kube-aliases";}
         # { name = "zsh-users"; plugin = "zsh-completions"; }
         # { name = "zsh-users"; plugin = "zsh-syntax-highlighting"; }
