@@ -22,6 +22,6 @@ rec {
   '';
 
   #################### Packages with external source ####################
-  zsh-als-aliases = pkgs.callPackage ./zsh-als-aliases { };
+  # zsh-als-aliases = pkgs.callPackage ./zsh-als-aliases { }; # Removed as unneccecary but left for help in the future
 
 }
