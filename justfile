@@ -1,8 +1,5 @@
 # SOPS_FILE := "../nix-secrets/secrets.yaml"
 
-single-update:
-    nix run github:vimjoyer/nix-update-input
-
 default:
     @just --list | bat --file-name "justfile"
 
@@ -77,6 +74,9 @@ rebuild-full args="":
     just rebuild {{args}}
     just rebuild-post
     just home
+
+single-update:
+    nix run github:vimjoyer/nix-update-input
 
 # Update the flake
 update:
