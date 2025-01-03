@@ -84,6 +84,16 @@ update:
     just rekey
     nix flake update --commit-lock-file
 
+update-no-commit:
+    just dont-fuck-my-build
+    just rekey
+    nix flake update --commit-lock-file
+
+# Rebuild the system and update the flake
+update-rebuild-no-commit:
+    just update-no-commit
+    just rebuild
+
 # Rebuild the system and update the flake
 update-rebuild:
     just update
