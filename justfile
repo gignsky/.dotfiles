@@ -82,7 +82,7 @@ rebuild-full args="":
 update:
     just dont-fuck-my-build
     just rekey
-    nix flake update
+    nix flake update --commit-lock-file
 
 # Rebuild the system and update the flake
 update-rebuild:
