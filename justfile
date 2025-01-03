@@ -1,5 +1,8 @@
 # SOPS_FILE := "../nix-secrets/secrets.yaml"
 
+single-update:
+    nix run github:vimjoyer/nix-update-input
+
 default:
     @just --list | bat --file-name "justfile"
 
