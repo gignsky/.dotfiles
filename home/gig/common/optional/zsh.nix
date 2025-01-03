@@ -46,7 +46,7 @@
         { name = "plugins/sudo"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
         { name = "plugins/colored-man-pages"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
         { name = "plugins/command-not-found"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
-        # { name = "plugins/aliases"; tags = ["from:oh-my-zsh"]; } # being substituted by custom package
+        { name = "plugins/aliases"; tags = ["from:oh-my-zsh"]; } # being substituted by custom package
         { name = "plugins/ansible"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
         # { name = "plugins/direnv"; tags = ["from:oh-my-zsh"]; } # Unneccecary
         # { name = "plugins/virtualenvwrapper"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
