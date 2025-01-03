@@ -16,6 +16,7 @@
         magic-wormhole
         wget
         screen
+        neofetch
 
         # nixos-unstable packages
         unstable.just
