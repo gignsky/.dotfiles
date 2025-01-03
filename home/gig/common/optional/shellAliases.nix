@@ -12,12 +12,10 @@
   cls = "clear";
   ccls = "clear && neofetch";
   md = "mkdir -p";
-  # als = "alias";
   syst = "systemctl";
   cat = "bat";
-  # supertree = "tree ..";
   alsmod = "nano $HOME/.dotfiles/home/gig/common/optional/shellAliases.nix";
-  als = "alias";
+  # als = "alias";
 
   # NIX Specific
   expo = "export NIXPKGS_ALLOW_UNFREE=1";
