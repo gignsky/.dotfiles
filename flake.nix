@@ -207,9 +207,9 @@
           extraSpecialArgs = {inherit inputs outputs configLib;};
           # > Our main home-manager configuration file <
           modules = [./home/gig/wsl.nix];
-          config = {
-            isWSL = true;
-          };
+          # config = {
+          #   isWSL = true;
+          # };
         };
 
         # merlin
