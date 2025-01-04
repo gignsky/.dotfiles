@@ -3,9 +3,10 @@
   _ = "sudo";
   dot = "cd ~/.dotfiles";
   work = "cd ~/workingFile";
-  ll = "ls -lh";
-  lla = "ls -lah";
-  cp = "cp -rv";
+  # ll = "ls -lh";
+  lla = "eza -gla";
+  # cp = "cp -rv";
+  cp = "cpv --progress -r -hhh";
   mv = "mv -v";
   rd = "rmdir";
   rdd = "rm -rfv";
