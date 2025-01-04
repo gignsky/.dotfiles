@@ -64,9 +64,9 @@
         { name = "zsh-users/zsh-autosuggestions"; }
         { name = "plugins/git"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
         { name = "plugins/git-auto-fetch"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
-        { name = "plugins/git-commit"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
+        # { name = "plugins/git-commit"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
         { name = "plugins/gitfast"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
-        { name = "plugins/git-flow"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh NOT SURE WHAT GIT FLOW IS BUT KEEPING THIS HERE IN CASE I USE IT IN THE FUTURE
+        # { name = "plugins/git-flow"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh NOT SURE WHAT GIT FLOW IS BUT KEEPING THIS HERE IN CASE I USE IT IN THE FUTURE
         { name = "plugins/gitignore"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh NOT SURE WHAT GIT FLOW IS BUT KEEPING THIS HERE IN CASE I USE IT IN THE FUTURE
         { name = "plugins/sudo"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
         # { name = "plugins/colorize"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
@@ -95,7 +95,7 @@
         { name = "plugins/rust"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
         { name = "plugins/screen"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
         { name = "plugins/ssh"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
-        { name = "plugins/thefuck"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
+        # { name = "plugins/thefuck"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
         { name = "plugins/vscode"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
         { name = "plugins/zoxide"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
         { name = "plugins/zsh-interactive-cd"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
@@ -130,7 +130,7 @@
     gitflow #needed for git-flow plugin
     git-lfs #needed for git-lfs plugin
     fortune #needed for hitchhiker plugin
-    strfile #needed for hitchhiker plugin
+    # strfile #needed for hitchhiker plugin
     zoxide #needed for zoxide plugin
     # chroma #needed for colorize plugin from oh-my-zsh
   ];
