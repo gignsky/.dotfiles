@@ -66,7 +66,7 @@
         { name = "plugins/git-auto-fetch"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
         # { name = "plugins/git-commit"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
         { name = "plugins/gitfast"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
-        # { name = "plugins/git-flow"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh NOT SURE WHAT GIT FLOW IS BUT KEEPING THIS HERE IN CASE I USE IT IN THE FUTURE
+        { name = "plugins/git-flow-avh"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh NOT SURE WHAT GIT FLOW IS BUT KEEPING THIS HERE IN CASE I USE IT IN THE FUTURE
         { name = "plugins/gitignore"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh NOT SURE WHAT GIT FLOW IS BUT KEEPING THIS HERE IN CASE I USE IT IN THE FUTURE
         { name = "plugins/sudo"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
         # { name = "plugins/colorize"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
