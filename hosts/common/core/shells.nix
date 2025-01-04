@@ -12,7 +12,6 @@
         tree
         git
         gedit
-        fzf
         magic-wormhole
         wget
         screen
