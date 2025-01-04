@@ -53,6 +53,9 @@
       zstyle ':omz:plugins:eza' 'show-group' yes
       zstyle ':omz:plugins:eza' 'icons' yes
       zstyle ':omz:plugins:eza' 'hyperlink' yes
+
+      # fzf config
+      export FZF_BASE=${pkgs.fzf}/bin/fzf
     '';
 
     zplug = {
@@ -80,6 +83,7 @@
         { name = "plugins/eza"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
         # { name = "z-shell/zsh-eza"; }
         { name = "plugins/fancy-ctrl-z"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
+        { name = "plugins/fzf"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
         # { name = "zsh-users/zsh-syntax-highlighting";}
         # { name = "zsh-users/zsh-autosuggestions";}
         # { name = "zsh-users/zsh-completions";}
@@ -104,6 +108,7 @@
     direnv
     python3 #needed for aliases plugin from oh-my-zsh and other alias plugin
     eza #needed for eza plugin
+    fzf #needed for fzf plugin
     # chroma #needed for colorize plugin from oh-my-zsh
   ];
 
