@@ -8,6 +8,7 @@
             user.name = "gignsky";
             user.email = "gig@gignsky.com";
             pull.rebase = true;
+            merge.ff = false;
             # pull.ff = "only";
             init.defaultBranch = "main";
         };
