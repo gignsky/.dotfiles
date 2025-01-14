@@ -218,14 +218,16 @@ keygen:
 diff:
     git diff ':!flake.lock'
 
+#edit all sops files then rekey
 sops:
     nix-shell -p lolcat --run 'echo "Editing ~/nix-secrets/secrets.yaml" | lolcat'
     nano ~/nix-secrets/.sops.yaml
     sops ~/nix-secrets/secrets.yaml
     just rekey
 
+#edit .sops.yaml only (no rekey)
 sops-edit:
-    nix-shell -p lolcat --run 'echo "Editing ~/nix-secrets/secrets.yaml" | lolcat'
+    nix-shell -p lolcat --run 'echo "Editing ~/nix-secrets/.sops.yaml" | lolcat'
     nano ~/nix-secrets/.sops.yaml
 
 # Update the keys in the secrets file
