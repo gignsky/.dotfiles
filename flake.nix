@@ -157,7 +157,7 @@
             # home-manager.nixosModules.home-manager {
             #   home-manager.extraSpecialArgs = specialArgs;
             # }
-            ./hosts/ganosLal/wsl
+            ./hosts/wsl
           ];
         };
 
