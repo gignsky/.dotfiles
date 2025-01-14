@@ -12,6 +12,7 @@
             # pull.ff = "only";
             init.defaultBranch = "main";
         };
+        lfs.enable = true;
     };
 
     home.packages = with pkgs; [
