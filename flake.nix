@@ -10,7 +10,7 @@
       url = "github:nix-community/NixOS-WSL/main";
       inputs = {
         nixpkgs.follows = "nixpkgs";
-        flake-utils.follows = "flake-utils";
+        # flake-utils.follows = "flake-utils"; # unneccary as of 2/13/25
       };
     };
 
