@@ -33,6 +33,9 @@ in
     (newMount "virtualization-boot-files" "/home/gig/virtualization-boot-files" "192.168.51.3" "1000" "100")
     (newMount "appraisals" "/home/gig/appraisals" "192.168.51.21" "1000" "100")
     (newMount "vulcan" "/home/gig/vulcan" "192.168.51.3" "1000" "100")
+    (newMount "vulcan" "/home/gig/new-vulcan" "192.168.51.118" "1000" "100")
+    (newMount "utility" "/home/gig/new-utility" "192.168.51.118" "1000" "100")
+    (newMount "risa" "/home/gig/new-risa" "192.168.51.118" "1000" "100")
     # (newMount "proxmox_backups_2" "/home/gig/proxmox_backups_2" "192.168.51.21" "1000" "100")
     # (newMount "proxmox-backup-share" "/home/gig/proxmox_backups" "192.168.51.3" "1000" "100")
   ];
