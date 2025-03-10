@@ -31,6 +31,7 @@
 
   home.packages = with pkgs; [
     unstable.yt-dlp
+    mosh
   ];
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
