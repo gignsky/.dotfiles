@@ -3,7 +3,7 @@
 
   inputs = {
     #################### Official NixOS and HM Package Sources ####################
-    nixpkgs.url = "github:NixOS/nixpkgs/release-24.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/release-24.11";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     nixos-wsl = {
