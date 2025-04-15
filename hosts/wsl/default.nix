@@ -31,6 +31,7 @@
       experimental-features = "nix-command flakes";
       # Opinionated: disable global registry
       flake-registry = "";
+      trusted-users = [ "gig" ];
 
     };
 
