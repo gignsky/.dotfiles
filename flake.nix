@@ -122,7 +122,7 @@
 
       # Shell configured with packages that are typically only needed when working on or with nix-config.
       devShells.${system}.default = pkgs.mkShell {
-        NIX_CONFIG = "extra-experimental-features = nix-command flakes repl-flake";
+        NIX_CONFIG = "extra-experimental-features = nix-command flakes ";
 
         # inherit (self.checks.${system}.pre-commit-check) shellHook;
         # buildInputs = self.checks.${system}.pre-commit-check.enabledPackages;
