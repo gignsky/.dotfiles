@@ -38,10 +38,23 @@
       };
     };
 
-    # treefmt-nix = {
-    #   url = "github:numtide/treefmt-nix";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
+    # Pre-commit hooks for managing Git hooks declaratively
+    git-hooks = {
+      url = "github:cachix/git-hooks.nix";
+      flake = false;
+    };
+
+    flake-parts = {
+      url = "github:hercules-ci/flake-parts";
+      inputs.nixpkgs-lib.follows = "nixpkgs";
+    };
+
+    # Dev tools
+    # treefmt-nix.url = "github:numtide/treefmt-nix";
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # Secrets management
     sops-nix = {
@@ -91,6 +104,15 @@
       };
     in
     {
+      flakeParts = inputs.flake-parts.lib.mkFlake {
+        systems = [system];
+
+        # See ./nix/modules/*.nix for the modules that are imported here.
+        imports = [
+          ./lib/pre-commit.nix
+        ];
+      };
+
       # Custom packages to be shared or upstreamed.
       # packages = forAllSystems (
       #   system:
