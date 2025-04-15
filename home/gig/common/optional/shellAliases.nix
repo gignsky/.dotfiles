@@ -28,7 +28,7 @@
   password = "mkpasswd -s";
 
   # Template commands
-  # rustup = ""
+  rustup = "nix --accept-flake-config run github:juspay/omnix -- init github:gignsky/rust-nix-template -o"
 
 #   # Cargo
 #   alias cb = "cargo build";
