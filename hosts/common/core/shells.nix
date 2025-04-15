@@ -54,7 +54,7 @@
     in
     {
       # enable = true;
-      completion.enable = true;
+      enableCompletion = true;
       enableLsColors = true;
       shellAliases = {
         ll = "ls -lh";
