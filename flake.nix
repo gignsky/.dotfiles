@@ -39,15 +39,7 @@
     };
 
     # Pre-commit hooks for managing Git hooks declaratively
-    git-hooks = {
-      url = "github:cachix/git-hooks.nix";
-      flake = false;
-    };
-
-    flake-parts = {
-      url = "github:hercules-ci/flake-parts";
-      inputs.nixpkgs-lib.follows = "nixpkgs";
-    };
+    pre-commit-hooks.url = "github:cachix/git-hooks.nix";
 
     # Dev tools
     # treefmt-nix.url = "github:numtide/treefmt-nix";
@@ -104,15 +96,6 @@
       };
     in
     {
-      flakeParts = inputs.flake-parts.lib.mkFlake {
-        systems = [system];
-
-        # See ./nix/modules/*.nix for the modules that are imported here.
-        imports = [
-          ./lib/pre-commit.nix
-        ];
-      };
-
       # Custom packages to be shared or upstreamed.
       # packages = forAllSystems (
       #   system:
@@ -128,6 +111,15 @@
       # Custom modifications/overrides to upstream packages.
       overlays = import ./overlays { inherit inputs; };
 
+      checks = {
+        pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
+          src = ./.;
+          hooks = {
+            nixpkgs-fmt.enable = true;
+          };
+        };
+      };
+
       # Shell configured with packages that are typically only needed when working on or with nix-config.
       devShells.${system}.default = pkgs.mkShell {
         NIX_CONFIG = "extra-experimental-features = nix-command flakes repl-flake";
@@ -135,9 +127,13 @@
         # inherit (self.checks.${system}.pre-commit-check) shellHook;
         # buildInputs = self.checks.${system}.pre-commit-check.enabledPackages;
 
+        inherit (self.checks.pre-commit-check) shellHook;
+        buildInputs = self.checks.pre-commit-check.enabledPackages;
+
         nativeBuildInputs = builtins.attrValues {
           inherit (pkgs)
             git
+            pre-commit
             lolcat
             nix
             nil
@@ -167,10 +163,11 @@
           inherit system specialArgs;
           modules = [
             inputs.vscode-server.nixosModules.default
-              ({ config, pkgs, ...}: {
-                services.vscode-server.enable = true;
-              })
-            inputs.nixos-wsl.nixosModules.default {
+            ({ config, pkgs, ... }: {
+              services.vscode-server.enable = true;
+            })
+            inputs.nixos-wsl.nixosModules.default
+            {
               system.stateVersion = "24.05";
               wsl.enable = true;
               # wsl.nativeSystemd = true;
@@ -195,7 +192,7 @@
         #   ];
         # };
 
-	      buzz = nixpkgs.lib.nixosSystem {
+        buzz = nixpkgs.lib.nixosSystem {
           inherit system specialArgs;
           # > Our main nixos configuration file <
           modules = [
@@ -226,9 +223,9 @@
         # ganoslalWSL
         "gig@nixos" = home-manager.lib.homeManagerConfiguration {
           inherit pkgs; # Home-manager requires 'pkgs' instance
-          extraSpecialArgs = {inherit inputs outputs configLib;};
+          extraSpecialArgs = { inherit inputs outputs configLib; };
           # > Our main home-manager configuration file <
-          modules = [./home/gig/wsl.nix];
+          modules = [ ./home/gig/wsl.nix ];
           # config = {
           #   isWSL = true;
           # };
@@ -245,12 +242,12 @@
         # buzz
         "gig@buzz" = home-manager.lib.homeManagerConfiguration {
           inherit pkgs; # Home-manager requires 'pkgs' instance
-          extraSpecialArgs = {inherit inputs outputs configLib;};
+          extraSpecialArgs = { inherit inputs outputs configLib; };
           # > Our main home-manager configuration file <
-          modules = [./home/gig/buzz.nix];
+          modules = [ ./home/gig/buzz.nix ];
         };
-	
-	      # # cams-countertop
+
+        # # cams-countertop
         # "gig@cams-countertop" = home-manager.lib.homeManagerConfiguration {
         #   inherit pkgs; # Home-manager requires 'pkgs' instance
         #   extraSpecialArgs = {inherit inputs outputs configLib;};
