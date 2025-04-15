@@ -8,10 +8,10 @@
 
     nixos-wsl = {
       url = "github:nix-community/NixOS-WSL/main";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        # flake-utils.follows = "flake-utils"; # unneccary as of 2/13/25
-      };
+      # inputs = {
+      # nixpkgs.follows = "nixpkgs";
+      # flake-utils.follows = "flake-utils"; # unneccary as of 2/13/25
+      # };
     };
 
     # Haven't quite figured out how to use this yet
@@ -26,7 +26,7 @@
 
     # Home manager
     home-manager = {
-      url = "github:nix-community/home-manager/release-24.05";
+      url = "github:nix-community/home-manager/release-24.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
