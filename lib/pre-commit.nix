@@ -7,7 +7,7 @@
     pre-commit.settings = {
       hooks = {
         nixpkgs-fmt.enable = true;
-        rustfmt.enable = true;
+        # rustfmt.enable = true;
       };
     };
   };
