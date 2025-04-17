@@ -2,7 +2,7 @@
 # This file defines overlays/custom modifications to upstream packages
 #
 
-{ inputs, ... }:
+{ inputs, configLib, ... }:
 {
   # This one brings our custom packages from the 'pkgs' directory
   additions = final: _prev: import ../pkgs { pkgs = final; };
@@ -24,4 +24,5 @@
       config.allowUnfree = true;
     };
   };
+  imports = (configLib.scanPaths ./.);
 }
