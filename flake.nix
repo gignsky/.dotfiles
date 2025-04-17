@@ -192,7 +192,7 @@
         #   ];
         # };
 
-        buzz = nixpkgs.lib.nixosSystem {
+        tdarr-node = nixpkgs.lib.nixosSystem {
           inherit system specialArgs;
           # > Our main nixos configuration file <
           modules = [
@@ -200,21 +200,9 @@
             # {
             #   home-manager.extraSpecialArgs = specialArgs;
             # }
-            ./hosts/buzz
+            ./hosts/tdarr-node
           ];
         };
-
-        # cams-countertop = nixpkgs.lib.nixosSystem {
-        #   inherit system specialArgs;
-        #   # > Our main nixos configuration file <
-        #   modules = [
-        #     # home-manager.nixosModules.home-manager
-        #     # {
-        #     #   home-manager.extraSpecialArgs = specialArgs;
-        #     # }
-        #     ./hosts/cams-countertop
-        #   ];
-        # };
       };
 
       # Standalone home-manager configuration entrypoint
@@ -239,21 +227,13 @@
         #   modules = [./home/gig/merlin.nix];
         # };
 
-        # buzz
-        "gig@buzz" = home-manager.lib.homeManagerConfiguration {
+        # tdarr-node
+        "gig@tdarr-node" = home-manager.lib.homeManagerConfiguration {
           inherit pkgs; # Home-manager requires 'pkgs' instance
           extraSpecialArgs = { inherit inputs outputs configLib; };
           # > Our main home-manager configuration file <
-          modules = [ ./home/gig/buzz.nix ];
+          modules = [ ./home/gig/tdarr-node.nix ];
         };
-
-        # # cams-countertop
-        # "gig@cams-countertop" = home-manager.lib.homeManagerConfiguration {
-        #   inherit pkgs; # Home-manager requires 'pkgs' instance
-        #   extraSpecialArgs = {inherit inputs outputs configLib;};
-        #   # > Our main home-manager configuration file <
-        #   modules = [./home/gig/cams-countertop.nix];
-        # };
       };
     };
 }
