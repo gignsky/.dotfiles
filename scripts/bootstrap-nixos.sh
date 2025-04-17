@@ -177,7 +177,7 @@ function nixos_anywhere() {
 	echo "Running: SHELL=/bin/sh nix run github:nix-community/nixos-anywhere -- --ssh-port $ssh_port --extra-files $temp --flake .#$target_hostname root@$target_destination"
 
 	# --extra-files here picks up the ssh host key we generated earlier and puts it onto the target machine
-	SHELL=/bin/sh nix run github:nix-community/nixos-anywhere -- --ssh-port "$ssh_port" --extra-files "$temp" --flake .#"$target_hostname" --system x86_64-linux root@"$target_destination"
+	SHELL=/bin/sh nix run github:nix-community/nixos-anywhere -- --ssh-port "$ssh_port" --extra-files "$temp" --flake .#"$target_hostname" root@"$target_destination"
 
 	yellow "Updating ssh host fingerprint at $target_destination to ~/.ssh/known_hosts"
 	ssh-keyscan -p "$ssh_port" "$target_destination" >>~/.ssh/known_hosts || true
