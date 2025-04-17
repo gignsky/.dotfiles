@@ -36,7 +36,8 @@
                 inherit disk;
               };
             }
-            ./minimal-configuration.nix { _module.args = { inherit qemuGuest; }; }
+            ./minimal-configuration.nix
+            { _module.args = { inherit qemuGuest; }; }
             { networking.hostName = name; }
             (configLib.relativeToRoot "hosts/${name}/hardware-configuration.nix")
           ];
@@ -52,7 +53,8 @@
         merlin = newConfig "merlin" "/dev/nvme0n1" false;
         # testbuzz1 = newConfig "testbuzz1" "/dev/sda" true;
         # buzz = newConfig "buzz" "/dev/sda" true;
-        cams-countertop = newConfig "cams-countertop" "/dev/sda" true;
+        # cams-countertop = newConfig "cams-countertop" "/dev/sda" true;
+        tdarr-node = newConfig "tdarr-node" "/dev/sda" true;
 
         # Custom ISO
         #
