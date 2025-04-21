@@ -193,17 +193,18 @@
         #   ];
         # };
 
-        tdarr-node = nixpkgs.lib.nixosSystem {
-          inherit system specialArgs;
-          # > Our main nixos configuration file <
-          modules = [
-            # home-manager.nixosModules.home-manager
-            # {
-            #   home-manager.extraSpecialArgs = specialArgs;
-            # }
-            ./hosts/tdarr-node
-          ];
-        };
+        # # Not yet working, but this is the entrypoint for a tdarr node
+        # tdarr-node = nixpkgs.lib.nixosSystem {
+        #   inherit system specialArgs;
+        #   # > Our main nixos configuration file <
+        #   modules = [
+        #     # home-manager.nixosModules.home-manager
+        #     # {
+        #     #   home-manager.extraSpecialArgs = specialArgs;
+        #     # }
+        #     ./hosts/tdarr-node
+        #   ];
+        # };
       };
 
       # Standalone home-manager configuration entrypoint
@@ -228,13 +229,13 @@
         #   modules = [./home/gig/merlin.nix];
         # };
 
-        # tdarr-node
-        "gig@tdarr-node" = home-manager.lib.homeManagerConfiguration {
-          inherit pkgs; # Home-manager requires 'pkgs' instance
-          extraSpecialArgs = { inherit inputs outputs configLib; };
-          # > Our main home-manager configuration file <
-          modules = [ ./home/gig/tdarr-node.nix ];
-        };
+        # # tdarr-node
+        # "gig@tdarr-node" = home-manager.lib.homeManagerConfiguration {
+        #   inherit pkgs; # Home-manager requires 'pkgs' instance
+        #   extraSpecialArgs = { inherit inputs outputs configLib; };
+        #   # > Our main home-manager configuration file <
+        #   modules = [ ./home/gig/tdarr-node.nix ];
+        # };
       };
     };
 }
