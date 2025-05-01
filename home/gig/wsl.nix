@@ -4,8 +4,8 @@
   # inputs,
   outputs
 , lib
-# , config,
-,  pkgs
+  # , config,
+, pkgs
 , ...
 }:
 {
@@ -20,7 +20,7 @@
   ];
 
   nixpkgs = {
-  # You can add overlays here
+    # You can add overlays here
     overlays = [
       # Add overlays your own flake exports (from overlays and pkgs dir):
       outputs.overlays.additions
@@ -32,6 +32,7 @@
   home.packages = with pkgs; [
     unstable.yt-dlp
     mosh
+    qdirstat
   ];
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
