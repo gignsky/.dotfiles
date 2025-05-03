@@ -87,7 +87,7 @@ update:
 update-no-commit:
     just dont-fuck-my-build
     just rekey
-    nix flake update --commit-lock-file
+    nix flake update
 
 # Rebuild the system and update the flake
 update-rebuild-no-commit:
