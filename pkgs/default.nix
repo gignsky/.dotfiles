@@ -21,7 +21,7 @@ rec {
         echo "Contents of $name directory:"
         if ["$dir" == "./target" ]; then
           echo "Contents of target directory:"
-          ${pkgs.tree}/bin/tree -L 2 "$dir" | ${pkgs.lolcat}/bin/lolcat
+          ${pkgs.tree}/bin/tree -L 1 "$dir" | ${pkgs.lolcat}/bin/lolcat
         else
           ${pkgs.tree}/bin/tree "$dir" | ${pkgs.lolcat}/bin/lolcat
         fi
