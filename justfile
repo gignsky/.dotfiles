@@ -115,9 +115,12 @@ check-iso:
     nix flake check --impure --no-build nixos-installer/.
     nix-shell -p lolcat --run 'echo "[CHECK] Finished." | lolcat'
 
-show args="":
+show:
     just dont-fuck-my-build
-    scripts/flake-show.sh {{args}}
+	just om show .
+
+om *ARGS:
+	nix run github:juspay/omnix -- {{ ARGS }}
 
 # switch:
 #     sudo nixos-rebuild switch --flake ~/.dotfiles/.
