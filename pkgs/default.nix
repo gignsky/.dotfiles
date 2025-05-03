@@ -19,7 +19,7 @@ rec {
       local name=$2
       if [ -d "$dir" ]; then
         echo "Contents of $name directory:"
-        ${pkgs.tree}/bin/tree "$dir"
+        ${pkgs.tree}/bin/tree -L 3 "$dir"
       else
         echo "No $name directory found" | ${pkgs.cowsay}/bin/cowsay | ${pkgs.lolcat}/bin/lolcat
       fi
