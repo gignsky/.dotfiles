@@ -10,5 +10,7 @@
         ".gitignore": true,
         "**/.direnv": true
     },
-    "explorerExclude.backup": {}
+    "explorerExclude.backup": {},
+    "nix.enableLanguageServer": true,
+    "nix.formatterPath": "nixfmt"
 }
