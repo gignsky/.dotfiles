@@ -153,6 +153,7 @@
 
             # personal packages
             quick-results
+            upjust
 
             #nececcary for bootstraping
             ripgrep
