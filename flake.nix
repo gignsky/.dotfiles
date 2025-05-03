@@ -69,6 +69,12 @@
       url = "git+ssh://git@github.com/gignsky/nix-secrets.git?ref=main&shallow=1";
       flake = false;
     };
+
+    # Recursive tarballs
+    tarballer = {
+      url = "github:gignsky/recursive-tarballs";
+      flake = true;
+    };
   };
 
   outputs = { self, nixpkgs, home-manager, ... } @ inputs:

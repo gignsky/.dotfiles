@@ -2,7 +2,10 @@
 
 {
   # unstable overlay
-  nixpkgs.overlays = [ outputs.overlays.unstable-packages ];
+  nixpkgs.overlays = [
+    outputs.overlays.unstable-packages
+    outputs.overlays.tarballer-packages
+  ];
 
 
   environment.systemPackages = with pkgs; [
@@ -19,6 +22,9 @@
 
     # nixos-unstable packages
     unstable.just
+
+    # Personal packages
+    tarballer.recursive-tarballs
   ];
 
   # # Direnv
