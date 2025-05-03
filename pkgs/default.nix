@@ -19,7 +19,12 @@ rec {
       local name=$2
       if [ -d "$dir" ]; then
         echo "Contents of $name directory:"
-        ${pkgs.tree}/bin/tree -L 3 "$dir"
+        if ["$dir" == "./target" ]; then
+          echo "Contents of target directory:"
+          ${pkgs.tree}/bin/tree -L 2 "$dir" | ${pkgs.lolcat}/bin/lolcat
+        else
+          ${pkgs.tree}/bin/tree "$dir" | ${pkgs.lolcat}/bin/lolcat
+        fi
       else
         echo "No $name directory found" | ${pkgs.cowsay}/bin/cowsay | ${pkgs.lolcat}/bin/lolcat
       fi
