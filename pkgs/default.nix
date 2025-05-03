@@ -14,11 +14,22 @@ rec {
   '';
 
   quick-results = pkgs.writeShellScriptBin "quick-results" ''
-    if [ -d ./result ]; then
-      ${pkgs.tree}/bin/tree ./result
-    else
-      echo "No result directory found" | ${pkgs.cowsay}/bin/cowsay | ${pkgs.lolcat}/bin/lolcat
-    fi
+    check_and_display() {
+      local dir=$1
+      local name=$2
+      if [ -d "$dir" ]; then
+        echo "Contents of $name directory:"
+        ${pkgs.tree}/bin/tree "$dir"
+      else
+        echo "No $name directory found" | ${pkgs.cowsay}/bin/cowsay | ${pkgs.lolcat}/bin/lolcat
+      fi
+    }
+
+    # Check nix result folder
+    check_and_display "./result" "nix result"
+
+    # Check cargo target folder
+    check_and_display "./target" "cargo target"
   '';
 
   upjust = pkgs.writeShellScriptBin "upjust" ''
