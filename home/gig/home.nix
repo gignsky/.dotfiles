@@ -47,9 +47,11 @@
 
   # Programs
   home.packages = with pkgs; [
-    # direnv # direnv is enabled by default
+    # shell packages defined in this repo
     supertree
     quick-results
+    upjust
+    # direnv # direnv is enabled by default
     dua
     # TRYING THESE OUT FROM https://blog.dalanmiller.com/my-favorite-command-line-tools/
     dust
