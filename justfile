@@ -1,122 +1,122 @@
 # SOPS_FILE := "../nix-secrets/secrets.yaml"
 
 default:
-    @just --list | bat --file-name "justfile"
+	@just --list | bat --file-name "justfile"
 
 pre-pull-stash:
-    nix-shell -p lolcat --run "echo 'Running pre-pull stash on all files in dotfiles and nix-secrets' | lolcat"
-    git stash push -m "pre-pull"
-    cd ~/nix-secrets
-    git stash push -m "pre-pull"
-    cd ~/.dotfiles
-    
+	nix-shell -p lolcat --run "echo 'Running pre-pull stash on all files in dotfiles and nix-secrets' | lolcat"
+	git stash push -m "pre-pull"
+	cd ~/nix-secrets
+	git stash push -m "pre-pull"
+	cd ~/.dotfiles
+	
 pull:
-    nix-shell -p lolcat --run "echo 'Running git pull on all files in dotfiles and nix-secrets' | lolcat"
-    just pre-pull-stash
-    git pull
-    just pull-nix-secrets
+	nix-shell -p lolcat --run "echo 'Running git pull on all files in dotfiles and nix-secrets' | lolcat"
+	just pre-pull-stash
+	git pull
+	just pull-nix-secrets
 
 pull-rebuild:
-    just pull
-    nix-shell -p lolcat --run "echo 'Rebuilding...' | lolcat"
-    just rebuild
-    nix-shell -p lolcat --run "echo 'Rebuilt.' | lolcat"
+	just pull
+	nix-shell -p lolcat --run "echo 'Rebuilding...' | lolcat"
+	just rebuild
+	nix-shell -p lolcat --run "echo 'Rebuilt.' | lolcat"
 
 pull-home:
-    nix-shell -p lolcat --run "echo 'Rebuilding Home-Manager...' | lolcat"
-    just pull
-    just home
-    nix-shell -p lolcat --run "echo 'Home-Manager Rebuilt.' | lolcat"
+	nix-shell -p lolcat --run "echo 'Rebuilding Home-Manager...' | lolcat"
+	just pull
+	just home
+	nix-shell -p lolcat --run "echo 'Home-Manager Rebuilt.' | lolcat"
 
 pull-rebuild-full:
-    nix-shell -p lolcat --run "echo 'Full Rebuild Running...' | lolcat"
-    just pull-rebuild
-    just pull-home
-    nix-shell -p lolcat --run "echo 'Full Rebuild Complete.' | lolcat"
+	nix-shell -p lolcat --run "echo 'Full Rebuild Running...' | lolcat"
+	just pull-rebuild
+	just pull-home
+	nix-shell -p lolcat --run "echo 'Full Rebuild Complete.' | lolcat"
 
 pull-nix-secrets:
-    cd ~/nix-secrets && git fetch && git pull && cd ~/.dotfiles
+	cd ~/nix-secrets && git fetch && git pull && cd ~/.dotfiles
 
 # Run before every rebuild, everytime
 rebuild-pre:
-    nix-shell -p lolcat --run 'echo "[PRE] Rebuilding..." | lolcat'
-    just dont-fuck-my-build
-    nix-shell -p lolcat --run 'echo "Updateing Nix-Secrets Repo..." | lolcat'
-    # just rekey
+	nix-shell -p lolcat --run 'echo "[PRE] Rebuilding..." | lolcat'
+	just dont-fuck-my-build
+	nix-shell -p lolcat --run 'echo "Updateing Nix-Secrets Repo..." | lolcat'
+	# just rekey
 
 dont-fuck-my-build:
-    git ls-files --others --exclude-standard -- '*.nix' | xargs -r git add -v
-    nix flake lock --update-input nix-secrets
-    nix-shell -p lolcat --run 'echo "Very little chance your build is fucked! 👍" | lolcat'
+	git ls-files --others --exclude-standard -- '*.nix' | xargs -r git add -v
+	nix flake lock --update-input nix-secrets
+	nix-shell -p lolcat --run 'echo "Very little chance your build is fucked! 👍" | lolcat'
 
 switch args="":
-    just rebuild {{args}}
-    just home
+	just rebuild {{args}}
+	just home
 
 # Run after every rebuild, some of the time
 rebuild-post:
-    # just check-sops
-    nix-shell -p lolcat --run 'echo "[POST] Rebuilt." | lolcat'
+	# just check-sops
+	nix-shell -p lolcat --run 'echo "[POST] Rebuilt." | lolcat'
 
 # Rebuild the system
 rebuild args="":
-    just rebuild-pre
-    scripts/system-flake-rebuild.sh {{args}}
+	just rebuild-pre
+	scripts/system-flake-rebuild.sh {{args}}
 
 # Test rebuilds the system
 rebuild-test args="":
-    just rebuild-pre
-    scripts/system-flake-rebuild-test.sh {{args}}
-    nix-shell -p lolcat --run 'echo "[TEST] Finished." | lolcat'
+	just rebuild-pre
+	scripts/system-flake-rebuild-test.sh {{args}}
+	nix-shell -p lolcat --run 'echo "[TEST] Finished." | lolcat'
 
 # Rebuild the system and check sops and home manager
 rebuild-full args="":
-    just rebuild {{args}}
-    just rebuild-post
-    just home
+	just rebuild {{args}}
+	just rebuild-post
+	just home
 
 single-update:
-    nix run github:vimjoyer/nix-update-input
+	nix run github:vimjoyer/nix-update-input
 
 # Update the flake
 update:
-    just dont-fuck-my-build
-    just rekey
-    nix flake update --commit-lock-file
+	just dont-fuck-my-build
+	just rekey
+	nix flake update --commit-lock-file
 
 update-no-commit:
-    just dont-fuck-my-build
-    just rekey
-    nix flake update
+	just dont-fuck-my-build
+	just rekey
+	nix flake update
 
 # Rebuild the system and update the flake
 update-rebuild-no-commit:
-    just update-no-commit
-    just rebuild
+	just update-no-commit
+	just rebuild
 
 # Rebuild the system and update the flake
 update-rebuild:
-    just update
-    just rebuild
+	just update
+	just rebuild
 
 # Rebuild the system and update the flake with rebuild-post
 update-rebuild-full:
-    just update
-    just rebuild
-    just home
+	just update
+	just rebuild
+	just home
 
 check:
-    just dont-fuck-my-build
-    nix flake check --impure --no-build
-    nix-shell -p lolcat --run 'echo "[CHECK] Finished." | lolcat'
+	just dont-fuck-my-build
+	nix flake check --impure --no-build
+	nix-shell -p lolcat --run 'echo "[CHECK] Finished." | lolcat'
 
 check-iso:
-    just dont-fuck-my-build
-    nix flake check --impure --no-build nixos-installer/.
-    nix-shell -p lolcat --run 'echo "[CHECK] Finished." | lolcat'
+	just dont-fuck-my-build
+	nix flake check --impure --no-build nixos-installer/.
+	nix-shell -p lolcat --run 'echo "[CHECK] Finished." | lolcat'
 
 show:
-    just dont-fuck-my-build
+	just dont-fuck-my-build
 	just om show .
 
 om *ARGS:
@@ -129,48 +129,48 @@ om *ARGS:
 
 # Run before every home rebuild, on non-quick build
 pre-home:
-    just dont-fuck-my-build
-    nix-shell -p lolcat --run 'echo "[PRE-HOME] Finished." | lolcat'
+	just dont-fuck-my-build
+	nix-shell -p lolcat --run 'echo "[PRE-HOME] Finished." | lolcat'
 
 # Runs after every home rebuild
 post-home:
-    nix-shell -p lolcat --run 'echo "[HOME] Finished." | lolcat'
+	nix-shell -p lolcat --run 'echo "[HOME] Finished." | lolcat'
 
 home:
-    just pre-home
-    home-manager switch --flake ~/.dotfiles/.
-    just post-home
+	just pre-home
+	home-manager switch --flake ~/.dotfiles/.
+	just post-home
 
 # Runs just home
 # home-core:
 
 # Runs just home and then zsh
 new home:
-    just home
-    zsh
+	just home
+	zsh
 
 home-trace:
-    just dont-fuck-my-build
-    home-manager switch --flake ~/.dotfiles/. --show-trace
-    nix-shell -p lolcat --run 'echo "[HOME-TRACE] Finished." | lolcat'
+	just dont-fuck-my-build
+	home-manager switch --flake ~/.dotfiles/. --show-trace
+	nix-shell -p lolcat --run 'echo "[HOME-TRACE] Finished." | lolcat'
 
 gc:
-    nix-shell -p lolcat --run 'nix-collect-garbage --delete-old | lolcat'
-    nix-shell -p lolcat --run '# nix store gc | lolcat'
+	nix-shell -p lolcat --run 'nix-collect-garbage --delete-old | lolcat'
+	nix-shell -p lolcat --run '# nix store gc | lolcat'
 
 pre-build:
-    nix-shell -p lolcat --run 'echo "Pre-Build Starting..." | lolcat'
-    just dont-fuck-my-build
-    rm -rfv result
+	nix-shell -p lolcat --run 'echo "Pre-Build Starting..." | lolcat'
+	just dont-fuck-my-build
+	rm -rfv result
 
 build *args:
-    just pre-build
-    scripts/flake-build.sh {{args}}
-    just post-build
+	just pre-build
+	scripts/flake-build.sh {{args}}
+	just post-build
 
 post-build:
-    nix-shell -p lolcat --run 'echo "Build Finished." | lolcat'
-    quick-results
+	nix-shell -p lolcat --run 'echo "Build Finished." | lolcat'
+	quick-results
 
 #
 # test:
@@ -178,27 +178,27 @@ post-build:
 #     home-manager switch --flake ~/.dotfiles/.
 
 iso:
-    # If we dont remove this folder, libvirtd VM doesnt run with the new iso...
-    # rm ~/virtualization-boot-files/template/iso/nixos*
-    just pre-build
-    nix build ./nixos-installer#nixosConfigurations.iso.config.system.build.isoImage
-    just post-build
-    cp result/iso/nixos* ~/virtualization-boot-files/template/iso/.
-    nix-shell -p lolcat --run 'ls ~/virtualization-boot-files/template/iso | grep nixos | lolcat'
-    rm -rfv result
+	# If we dont remove this folder, libvirtd VM doesnt run with the new iso...
+	# rm ~/virtualization-boot-files/template/iso/nixos*
+	just pre-build
+	nix build ./nixos-installer#nixosConfigurations.iso.config.system.build.isoImage
+	just post-build
+	cp result/iso/nixos* ~/virtualization-boot-files/template/iso/.
+	nix-shell -p lolcat --run 'ls ~/virtualization-boot-files/template/iso | grep nixos | lolcat'
+	rm -rfv result
 
 iso-keep:
-    just pre-build
-    nix build ./nixos-installer#nixosConfigurations.iso.config.system.build.isoImage
-    just post-build
+	just pre-build
+	nix build ./nixos-installer#nixosConfigurations.iso.config.system.build.isoImage
+	just post-build
 
 keygen:
-    echo "User Key @ ~/.config/sops/age/keys.txt"
-    nix-shell -p age --run 'mkdir -p ~/.config/sops/age && age-keygen -o ~/.config/sops/age/keys.txt'
-    echo "Host Key based on /etc/ssh/ssh_host_ed25519_key.pub"
-    nix-shell -p ssh-to-age --run 'cat /etc/ssh/ssh_host_ed25519_key.pub | ssh-to-age'
-    echo "cat output from .config/sops/age/keys.txt"
-    bat ~/.config/sops/age/keys.txt
+	echo "User Key @ ~/.config/sops/age/keys.txt"
+	nix-shell -p age --run 'mkdir -p ~/.config/sops/age && age-keygen -o ~/.config/sops/age/keys.txt'
+	echo "Host Key based on /etc/ssh/ssh_host_ed25519_key.pub"
+	nix-shell -p ssh-to-age --run 'cat /etc/ssh/ssh_host_ed25519_key.pub | ssh-to-age'
+	echo "cat output from .config/sops/age/keys.txt"
+	bat ~/.config/sops/age/keys.txt
 
 # rebuild-pre: update-nix-secrets
 #   git add *.nix
@@ -219,49 +219,49 @@ keygen:
 #   scripts/system-flake-rebuild-trace.sh
 #
 diff:
-    git diff ':!flake.lock'
+	git diff ':!flake.lock'
 
 #edit all sops files then rekey
 sops:
-    nix-shell -p lolcat --run 'echo "Editing ~/nix-secrets/secrets.yaml" | lolcat'
-    nano ~/nix-secrets/.sops.yaml
-    sops ~/nix-secrets/secrets.yaml
-    just rekey
+	nix-shell -p lolcat --run 'echo "Editing ~/nix-secrets/secrets.yaml" | lolcat'
+	nano ~/nix-secrets/.sops.yaml
+	sops ~/nix-secrets/secrets.yaml
+	just rekey
 
 #edit .sops.yaml only (no rekey)
 sops-edit:
-    nix-shell -p lolcat --run 'echo "Editing ~/nix-secrets/.sops.yaml" | lolcat'
-    nano ~/nix-secrets/.sops.yaml
+	nix-shell -p lolcat --run 'echo "Editing ~/nix-secrets/.sops.yaml" | lolcat'
+	nano ~/nix-secrets/.sops.yaml
 
 # Update the keys in the secrets file
 rekey:
-    just dont-fuck-my-build
-    nix-shell -p lolcat --run 'echo "Updating ~/nix-secrets/secrets.yaml" | lolcat'
-    cd ../nix-secrets && (\
-    nix-shell -p sops --run "sops updatekeys -y secrets.yaml" && \
-    git add -u && (git commit -m "chore: rekey" || true) && git push \
-    )
-    nix-shell -p lolcat --run 'echo "Updated Secrets!" | lolcat'
-    just dont-fuck-my-build
+	just dont-fuck-my-build
+	nix-shell -p lolcat --run 'echo "Updating ~/nix-secrets/secrets.yaml" | lolcat'
+	cd ../nix-secrets && (\
+	nix-shell -p sops --run "sops updatekeys -y secrets.yaml" && \
+	git add -u && (git commit -m "chore: rekey" || true) && git push \
+	)
+	nix-shell -p lolcat --run 'echo "Updated Secrets!" | lolcat'
+	just dont-fuck-my-build
 
 sops-fix:
-    just pre-home
-    just update-nix-secrets
-    home-manager switch --refresh --flake ~/.dotfiles/.
-    systemctl --user reset-failed
-    just home
+	just pre-home
+	just update-nix-secrets
+	home-manager switch --refresh --flake ~/.dotfiles/.
+	systemctl --user reset-failed
+	just home
 
 update-nix-secrets:
-    just rekey
-    (cd ../nix-secrets && git fetch && git rebase) || true
-    nix flake lock --update-input nix-secrets
+	just rekey
+	(cd ../nix-secrets && git fetch && git rebase) || true
+	nix flake lock --update-input nix-secrets
 
 store-photo:
-    nix-shell -p graphviz nix-du --run "nix-du -s=500MB | \dot -Tpng > store.png"
+	nix-shell -p graphviz nix-du --run "nix-du -s=500MB | \dot -Tpng > store.png"
 
 bootstrap *args:
-    just dont-fuck-my-build
-    ~/.dotfiles/scripts/bootstrap-nixos.sh {{args}}
+	just dont-fuck-my-build
+	~/.dotfiles/scripts/bootstrap-nixos.sh {{args}}
 
 #   echo $SOPS_FILE
 #   PS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
