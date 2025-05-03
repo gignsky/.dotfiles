@@ -1,7 +1,7 @@
 # You can build these directly using 'nix build .#example'
 
-{
-  pkgs ? import <nixpkgs> { },
+{ pkgs ? import <nixpkgs> { }
+,
 }:
 rec {
   #################### Example Packages #################################
@@ -19,6 +19,11 @@ rec {
     else
       echo "No result directory found" | ${pkgs.cowsay}/bin/cowsay | ${pkgs.lolcat}/bin/lolcat
     fi
+  '';
+
+  upjust = pkgs.writeShellScriptBin "upjust" ''
+    git add justfile
+    git commit -m "upjust - updated justfile"
   '';
 
   #################### Packages with external source ####################
