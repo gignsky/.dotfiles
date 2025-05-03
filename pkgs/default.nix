@@ -18,10 +18,9 @@ rec {
       local dir=$1
       local name=$2
       if [ -d "$dir" ]; then
-        echo "Contents of $name directory:"
-        if ["$dir" == "./target" ]; then
-          echo "Contents of target directory:"
-          ${pkgs.tree}/bin/tree -L 1 "$dir" | ${pkgs.lolcat}/bin/lolcat
+        echo "Contents of $name directory:" | ${pkgs.lolcat}/bin/lolcat
+        if [ "$dir" == "./target" ]; then
+          ${pkgs.tree}/bin/tree -L 2 "$dir" | ${pkgs.lolcat}/bin/lolcat
         else
           ${pkgs.tree}/bin/tree "$dir" | ${pkgs.lolcat}/bin/lolcat
         fi
@@ -30,11 +29,11 @@ rec {
       fi
     }
 
-    # Check nix result folder
-    check_and_display "./result" "nix result"
-
     # Check cargo target folder
     check_and_display "./target" "cargo target"
+
+    # Check nix result folder
+    check_and_display "./result" "nix result"
   '';
 
   upjust = pkgs.writeShellScriptBin "upjust" ''
