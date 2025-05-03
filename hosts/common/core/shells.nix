@@ -1,7 +1,7 @@
 { pkgs, outputs, configLib, ... }:
 
 {
-  # unstable overlay
+  # overlays
   nixpkgs.overlays = [
     outputs.overlays.unstable-packages
     outputs.overlays.tarballer-packages

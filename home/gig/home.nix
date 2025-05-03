@@ -49,8 +49,10 @@
   home.packages = with pkgs; [
     # shell packages defined in this repo
     supertree
-    quick-results
-    upjust
+    # quick-results
+    # upjust
+    # cargo-update
+
     # direnv # direnv is enabled by default
     dua
     # TRYING THESE OUT FROM https://blog.dalanmiller.com/my-favorite-command-line-tools/
