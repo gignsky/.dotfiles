@@ -300,22 +300,6 @@
         "type": "github"
       }
     },
-    "nixpkgs_6": {
-      "locked": {
-        "lastModified": 1725103162,
-        "narHash": "sha256-Ym04C5+qovuQDYL/rKWSR+WESseQBbNAe5DsXNx5trY=",
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "12228ff1752d7b7624a54e9c1af4b222b3c1073b",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nixos",
-        "ref": "nixos-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
     "pre-commit-hooks": {
       "inputs": {
         "flake-compat": "flake-compat_2",
@@ -466,11 +450,11 @@
         "treefmt-nix": "treefmt-nix"
       },
       "locked": {
-        "lastModified": 1746235588,
-        "narHash": "sha256-ThUTY7uQKKc1QtLmShqtGC+C0cxDRzaqYcqF/jDHAkc=",
+        "lastModified": 1746293408,
+        "narHash": "sha256-FSnVMpAo6uCLbiudzGhE0BvajErVTmWhfBzXLHckpdk=",
         "owner": "gignsky",
         "repo": "recursive-tarballs",
-        "rev": "39041f20e3a58d5107e9fa607849f717421dfa0f",
+        "rev": "8c75c165db3a372b5400fee3684e1164f99c6da4",
         "type": "github"
       },
       "original": {
@@ -481,7 +465,10 @@
     },
     "treefmt-nix": {
       "inputs": {
-        "nixpkgs": "nixpkgs_6"
+        "nixpkgs": [
+          "tarballer",
+          "nixpkgs"
+        ]
       },
       "locked": {
         "lastModified": 1725271838,
