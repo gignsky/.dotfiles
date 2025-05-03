@@ -24,4 +24,11 @@
       config.allowUnfree = true;
     };
   };
+
+  # Tarballer packages overlay
+  tarballer-packages = final: _prev: {
+    tarballer = {
+      recursive-tarballs = inputs.tarballer.packages.${final.system}.default;
+    };
+  };
 }
