@@ -82,7 +82,6 @@
       inherit (self) outputs;
       inherit (nixpkgs) lib;
       system = "x86_64-linux";
-      pkgs = nixpkgs.legacyPackages.${system};
       # forAllSystems = nixpkgs.lib.genAttrs [
       #   "x86_64-linux"
       #   "aarch64-linux"
@@ -101,6 +100,8 @@
           configLib
           ;
       };
+      customPkgs = import ./pkgs { inherit pkgs; };
+      pkgs = nixpkgs.legacyPackages.${system} // customPkgs;
     in
     {
       # Custom packages to be shared or upstreamed.
@@ -149,6 +150,9 @@
             sops
             home-manager
             just
+
+            # personal packages
+            quick-results
 
             #nececcary for bootstraping
             ripgrep
