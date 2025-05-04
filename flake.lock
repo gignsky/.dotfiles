@@ -900,11 +900,11 @@
         "treefmt-nix": "treefmt-nix_3"
       },
       "locked": {
-        "lastModified": 1746320598,
-        "narHash": "sha256-6KniMCPKtYatPPD7J64EuywXA/6u+f6UdKppVkVd3b0=",
+        "lastModified": 1746321112,
+        "narHash": "sha256-huVXpAdjrl1bx5hDL9qTP4MCwB1OSE0TgQsfZLBN4ug=",
         "owner": "gignsky",
         "repo": "recursive-tarballs",
-        "rev": "0e2f66bc41169c629629c395d917d66b32a09914",
+        "rev": "5ae4c20bf86f5faa93254d87de72bb0bcd12f581",
         "type": "github"
       },
       "original": {
