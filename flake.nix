@@ -75,6 +75,12 @@
       url = "github:gignsky/recursive-tarballs";
       flake = true;
     };
+
+    # tax-matrix - currently on develop branch
+    tax-matrix = {
+      url = "github:gignsky/tax-matrix/develop";
+      flake = true;
+    };
   };
 
   outputs = { self, nixpkgs, home-manager, ... } @ inputs:
