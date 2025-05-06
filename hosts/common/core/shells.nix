@@ -1,10 +1,10 @@
-{ pkgs, outputs, configLib, ... }:
+{ inputs, pkgs, outputs, configLib, ... }:
 
 {
   # overlays
   nixpkgs.overlays = [
     outputs.overlays.unstable-packages
-    outputs.overlays.tarballer-packages
+    # outputs.overlays.tarballer-packages # example for overlays
   ];
 
 
@@ -24,7 +24,9 @@
     unstable.just
 
     # Personal packages
-    tarballer.recursive-tarballs
+    # tarballer.recursive-tarballs # example for overlays
+    inputs.tarballer.packages.${system}.recursive-tarballs
+    # inputs.tax-matrix.packages.${system}.tax-matrix
   ];
 
   # # Direnv
