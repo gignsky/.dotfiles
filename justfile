@@ -60,7 +60,7 @@ rebuild-post:
 # Rebuild the system
 rebuild args="":
 	just rebuild-pre
-	nix-shell -p lolcat --run 'echo "[REBUILD] Attempting Rebuild." | lolcat' 
+	nix-shell -p lolcat --run 'echo "[REBUILD] Attempting Rebuild..." | lolcat' 
 	scripts/system-flake-rebuild.sh {{args}}
 
 # Rebuild the system verbosely
