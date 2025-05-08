@@ -24,8 +24,8 @@
     unstable.just
 
     # Personal packages
-    # tarballer.recursive-tarballs # example for overlays
-    inputs.tarballer.packages.${system}.tarballer
+    # tarballer.tarballer # example for overlays
+    # inputs.tarballer.packages.${system}.default
     inputs.tax-matrix.packages.${system}.tax-matrix
   ];
 
