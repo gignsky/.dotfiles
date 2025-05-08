@@ -62,11 +62,13 @@ rebuild args="":
 	just rebuild-pre
 	nix-shell -p lolcat --run 'echo "[REBUILD] Attempting Rebuild..." | lolcat' 
 	scripts/system-flake-rebuild.sh {{args}}
+	just rebuild-post
 
 # Rebuild the system verbosely
 rebuild-v args="":
 	just rebuild-pre
 	scripts/system-flake-rebuild-verbose.sh {{args}}
+	just rebuild-post
 
 # Test rebuilds the system
 rebuild-test args="":
@@ -77,7 +79,6 @@ rebuild-test args="":
 # Rebuild the system and check sops and home manager
 rebuild-full args="":
 	just rebuild {{args}}
-	just rebuild-post
 	just home
 
 single-update:
