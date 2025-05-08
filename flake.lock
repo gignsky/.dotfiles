@@ -1559,11 +1559,11 @@
         "treefmt-nix": "treefmt-nix_3"
       },
       "locked": {
-        "lastModified": 1746325396,
-        "narHash": "sha256-K+XWwdN+MZ9kpatWz4K1tcY7wfDQJF0ILqBsBPF6ys0=",
+        "lastModified": 1746667881,
+        "narHash": "sha256-q03V21553/6gU6IDKnf+1pfeCyw2AgrOHIuX2lU58HU=",
         "owner": "gignsky",
         "repo": "recursive-tarballs",
-        "rev": "f51ca192c9e7157f763f00b2640a69024928f726",
+        "rev": "58fce02c65274b50d8968f7fbafc939de6ebe055",
         "type": "github"
       },
       "original": {
