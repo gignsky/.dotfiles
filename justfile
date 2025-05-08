@@ -63,6 +63,11 @@ rebuild args="":
 	just rebuild-pre
 	scripts/system-flake-rebuild.sh {{args}}
 
+# Rebuild the system verbosely
+rebuild-v args="":
+	just rebuild-pre
+	scripts/system-flake-rebuild-verbose.sh {{args}}
+
 # Test rebuilds the system
 rebuild-test args="":
 	just rebuild-pre
