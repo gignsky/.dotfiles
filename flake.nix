@@ -71,10 +71,10 @@
     };
 
     # Recursive tarballs
-    # tarballer = {
-    #   url = "github:gignsky/tarballer/58fce02c65274b50d8968f7fbafc939de6ebe055";
-    #   flake = true;
-    # };
+    tarballer = {
+      url = "github:gignsky/tarballer/58fce02c65274b50d8968f7fbafc939de6ebe055";
+      flake = true;
+    };
 
     # tax-matrix - currently on develop branch
     tax-matrix = {
