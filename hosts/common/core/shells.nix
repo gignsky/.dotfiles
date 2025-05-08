@@ -25,7 +25,7 @@
 
     # Personal packages
     # tarballer.tarballer # example for overlays
-    # inputs.tarballer.packages.${system}.default
+    inputs.tarballer.packages.${system}.default
     inputs.tax-matrix.packages.${system}.tax-matrix
   ];
 
