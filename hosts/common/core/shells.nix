@@ -25,7 +25,7 @@
 
     # Personal packages
     # tarballer.recursive-tarballs # example for overlays
-    inputs.tarballer.packages.${system}.recursive-tarballs
+    inputs.tarballer.packages.${system}.tarballer
     inputs.tax-matrix.packages.${system}.tax-matrix
   ];
 
