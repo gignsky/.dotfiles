@@ -41,8 +41,7 @@ pull-nix-secrets:
 rebuild-pre:
 	nix-shell -p lolcat --run 'echo "[PRE] Rebuilding..." | lolcat'
 	just dont-fuck-my-build
-	nix-shell -p lolcat --run 'echo "Updateing Nix-Secrets Repo..." | lolcat'
-	# just rekey
+	nix-shell -p lolcat --run 'echo "Updating Nix-Secrets Repo..." | lolcat'
 
 dont-fuck-my-build:
 	git ls-files --others --exclude-standard -- '*.nix' | xargs -r git add -v
