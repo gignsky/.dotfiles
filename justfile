@@ -139,10 +139,11 @@ pre-home:
 
 # Runs after every home rebuild
 post-home:
-	nix-shell -p lolcat --run 'echo "[HOME] Finished." | lolcat'
+	nix-shell -p lolcat --run 'echo "[POST-HOME] Finished." | lolcat'
 
 home:
 	just pre-home
+	nix-shell -p lolcat --run 'echo "[HOME] Attempting Home Rebuild..." | lolcat'
 	home-manager switch --flake ~/.dotfiles/.
 	just post-home
 
