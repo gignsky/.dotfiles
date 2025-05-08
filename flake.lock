@@ -1562,13 +1562,13 @@
         "lastModified": 1746667881,
         "narHash": "sha256-q03V21553/6gU6IDKnf+1pfeCyw2AgrOHIuX2lU58HU=",
         "owner": "gignsky",
-        "repo": "recursive-tarballs",
+        "repo": "tarballer",
         "rev": "58fce02c65274b50d8968f7fbafc939de6ebe055",
         "type": "github"
       },
       "original": {
         "owner": "gignsky",
-        "repo": "recursive-tarballs",
+        "repo": "tarballer",
         "type": "github"
       }
     },

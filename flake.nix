@@ -72,7 +72,7 @@
 
     # Recursive tarballs
     tarballer = {
-      url = "github:gignsky/recursive-tarballs";
+      url = "github:gignsky/tarballer";
       flake = true;
     };
 
