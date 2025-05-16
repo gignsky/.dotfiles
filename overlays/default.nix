@@ -25,10 +25,10 @@
     };
   };
 
-  # # Tarballer packages overlay example
-  # tarballer-packages = final: _prev: {
-  #   tarballer = {
-  #     recursive-tarballs = inputs.tarballer.packages.${final.system}.default;
+  # # wrap packages overlay example
+  # wrap-packages = final: _prev: {
+  #   wrap = {
+  #     recursive-tarballs = inputs.wrap.packages.${final.system}.default;
   #   };
   # };
 }
