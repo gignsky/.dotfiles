@@ -71,8 +71,8 @@
     };
 
     # Recursive tarballs
-    tarballer = {
-      url = "github:gignsky/tarballer";
+    wrap = {
+      url = "github:gignsky/wrap";
       flake = true;
     };
 
