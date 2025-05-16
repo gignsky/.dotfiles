@@ -4,7 +4,7 @@
   # overlays
   nixpkgs.overlays = [
     outputs.overlays.unstable-packages
-    # outputs.overlays.tarballer-packages # example for overlays
+    # outputs.overlays.wrap-packages # example for overlays
   ];
 
 
@@ -24,8 +24,8 @@
     unstable.just
 
     # Personal packages
-    # tarballer.tarballer # example for overlays
-    inputs.tarballer.packages.${system}.default
+    # wrap.wrap # example for overlays
+    inputs.wrap.packages.${system}.default
     inputs.tax-matrix.packages.${system}.tax-matrix
   ];
 
