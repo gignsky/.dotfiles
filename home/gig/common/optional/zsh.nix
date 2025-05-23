@@ -1,6 +1,10 @@
 { pkgs, ... }:
 
 {
+  programs.starship = {
+    enable = true;
+  };
+
   programs.zsh = {
     enable = true;
     enableCompletion = true;
@@ -20,13 +24,14 @@
     #   path = "/home/gig/.zsh_history";
     # };
 
-    plugins = [
-      {
-        name = "powerlevel10k";
-        src = pkgs.zsh-powerlevel10k;
-        file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
-      }
-    ];
+    # Depreciated :(
+    # plugins = [
+    #   {
+    #     name = "powerlevel10k";
+    #     src = pkgs.zsh-powerlevel10k;
+    #     file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
+    #   }
+    # ];
 
     # Append custom content to the end of .zshrc
     initExtra = ''
