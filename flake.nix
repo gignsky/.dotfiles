@@ -61,9 +61,9 @@
     #   inputs.nixpkgs.follows = "nixpkgs";
     # };
 
-    neve = {
-      url = "github:redyf/Neve";
-    };
+    # neve = {
+    #   url = "github:redyf/Neve";
+    # };
 
     #################### Personal Repositories ####################
 
