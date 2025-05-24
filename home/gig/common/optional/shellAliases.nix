@@ -18,6 +18,9 @@
   alsmod = "nano $HOME/.dotfiles/home/gig/common/optional/shellAliases.nix";
   # als = "alias";
 
+  # Git
+  lg = "lazygit";
+
   # NIX Specific
   expo = "export NIXPKGS_ALLOW_UNFREE=1";
 
