@@ -168,6 +168,7 @@
             sops
             home-manager
             just
+            lazygit
 
             # personal packages
             quick-results
