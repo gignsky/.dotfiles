@@ -4,7 +4,7 @@
   home.packages = [
     # inputs.neve.packages.${pkgs.system}.default
     # pkgs.lunarvim
-    # pkgs.neovim
+    pkgs.neovim
   ];
   imports = [ inputs.nvf.homeManagerModules.default ];
 
