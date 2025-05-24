@@ -65,6 +65,8 @@
     #   url = "github:redyf/Neve";
     # };
 
+    nvf.url = "github:notashelf/nvf";
+
     #################### Personal Repositories ####################
 
     # Private secrets repo.  See ./docs/secretsmgmt.md
