@@ -61,6 +61,10 @@
     #   inputs.nixpkgs.follows = "nixpkgs";
     # };
 
+    neve = {
+      url = "github:redyf/Neve";
+    };
+
     #################### Personal Repositories ####################
 
     # Private secrets repo.  See ./docs/secretsmgmt.md
