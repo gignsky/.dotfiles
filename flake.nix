@@ -161,6 +161,7 @@
             lolcat
             nix
             nil
+            nixd
             age
             ssh-to-age
             sops
