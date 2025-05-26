@@ -1,14 +1,14 @@
 { pkgs, ... }:
 
 {
-  programs.starship = {
-    enable = true;
-    enableZshIntegration = true;
-    # presets = [
-    #   "nerd-font-symbols"
-    #   "bracketed-segments"
-    # ];
-  };
+  # programs.starship = {
+  #   enable = true;
+  #   enableZshIntegration = true;
+  #   # presets = [
+  #   #   "nerd-font-symbols"
+  #   #   "bracketed-segments"
+  #   # ];
+  # };
 
   programs.zsh = {
     enable = true;
@@ -30,13 +30,13 @@
     # };
 
     # Depreciated :(
-    # plugins = [
-    #   {
-    #     name = "powerlevel10k";
-    #     src = pkgs.zsh-powerlevel10k;
-    #     file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
-    #   }
-    # ];
+    plugins = [
+      {
+        name = "powerlevel10k";
+        src = pkgs.zsh-powerlevel10k;
+        file = "share/zsh-powerlevel10k/powerlevel10k.zsh-theme";
+      }
+    ];
 
     # Append custom content to the end of .zshrc
     initContent = ''
