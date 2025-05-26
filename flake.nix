@@ -51,8 +51,8 @@
 
     # Secrets management
     sops-nix = {
-      url = "github:mic92/sops-nix/3f2412536eeece783f0d0ad3861417f347219f4d";
-      #inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:mic92/sops-nix/master";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
     # # Declarative partitioning and formatting
