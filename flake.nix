@@ -55,6 +55,12 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
+    # Expandable neofetch
+    neofetch = {
+      url = "github:gignsky/nixos-neofetch";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+
     # # Declarative partitioning and formatting
     # disko = {
     #   url = "github:nix-community/disko";
