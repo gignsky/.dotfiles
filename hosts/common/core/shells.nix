@@ -18,10 +18,12 @@
     magic-wormhole
     wget
     screen
+    nmap
+    just
     # neofetch
 
     # nixos-unstable packages
-    just
+    # unstable.just
 
     # Personal packages
     # wrap.wrap # example for overlays
@@ -81,7 +83,7 @@
       };
 
       shellInit = ''
-        cat ${sword} | ${pkgs.lolcat}/bin/lolcat
+        cat ${sword} | ${pkgs.lolcat}/bin/lolcat 2> /dev/null
       '';
 
       # loginShellInit = ''
