@@ -21,7 +21,7 @@
     neofetch
 
     # nixos-unstable packages
-    unstable.just
+    just
 
     # Personal packages
     # wrap.wrap # example for overlays
