@@ -3,14 +3,14 @@
 
   inputs = {
     #################### Official NixOS and HM Package Sources ####################
-    nixpkgs.url = "github:NixOS/nixpkgs/release-24.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/release-25.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     # nixos-anywhere.url = "github:nix-community/nixos-anywhere";
 
     nixos-wsl = {
-      url = "github:nix-community/NixOS-WSL/60b4904a1390ac4c89e93d95f6ed928975e525ed";
+      url = "github:nix-community/NixOS-WSL/main";
       # inputs = {
-      # nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
       # flake-utils.follows = "flake-utils"; # unneccary as of 2/13/25
       # };
     };
@@ -27,7 +27,7 @@
 
     # Home manager
     home-manager = {
-      url = "github:nix-community/home-manager/release-24.05";
+      url = "github:nix-community/home-manager/release-25.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -51,8 +51,8 @@
 
     # Secrets management
     sops-nix = {
-      url = "github:mic92/sops-nix/3f2412536eeece783f0d0ad3861417f347219f4d";
-      #inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:mic92/sops-nix/master";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
     # # Declarative partitioning and formatting

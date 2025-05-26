@@ -21,7 +21,7 @@
     neofetch
 
     # nixos-unstable packages
-    unstable.just
+    just
 
     # Personal packages
     # wrap.wrap # example for overlays
@@ -62,7 +62,7 @@
     in
     {
       # enable = true;
-      enableCompletion = true;
+      completion.enable = true;
       enableLsColors = true;
       shellAliases = {
         ll = "ls -lh";
