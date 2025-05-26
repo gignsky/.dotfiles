@@ -4054,11 +4054,11 @@
         "treefmt-nix": "treefmt-nix_32"
       },
       "locked": {
-        "lastModified": 1748286912,
-        "narHash": "sha256-LxvdtXpUjBZrZ9p6KRBgcRtMlnb/nQkuAOKZf2fTqPc=",
+        "lastModified": 1748288233,
+        "narHash": "sha256-CR7Oc5HhtLRVRqWIZ6MB6nF0g9BWAlDruN7tnEaUGPs=",
         "owner": "gignsky",
         "repo": "nixos-neofetch",
-        "rev": "63959b86bdd677eacac02fee7485b80687b2ef81",
+        "rev": "aa7011e2e1f1f812c6e9fe7a6d999e7688f2966f",
         "type": "github"
       },
       "original": {
