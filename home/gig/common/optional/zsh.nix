@@ -10,6 +10,8 @@
   #   # ];
   # };
 
+  home.file.".p10k.zsh".source = ../resources/.p10k.zsh.vm;
+
   programs.zsh = {
     enable = true;
     enableCompletion = true;
@@ -129,8 +131,6 @@
       ];
     };
   };
-
-  home.file.".p10k.zsh".source = ../resources/.p10k.zsh.vm;
 
   home.packages = with pkgs; [
     direnv
