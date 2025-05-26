@@ -4054,15 +4054,16 @@
         "treefmt-nix": "treefmt-nix_32"
       },
       "locked": {
-        "lastModified": 1748283696,
-        "narHash": "sha256-9GjhGwQQdLmI24YeVYR+5RcYCH5ELguzUU5mfOnzjl4=",
+        "lastModified": 1748286912,
+        "narHash": "sha256-LxvdtXpUjBZrZ9p6KRBgcRtMlnb/nQkuAOKZf2fTqPc=",
         "owner": "gignsky",
         "repo": "nixos-neofetch",
-        "rev": "0babf8442fbdf92067e12d1f964f5dd20b60077d",
+        "rev": "63959b86bdd677eacac02fee7485b80687b2ef81",
         "type": "github"
       },
       "original": {
         "owner": "gignsky",
+        "ref": "feature/add-extensibility",
         "repo": "nixos-neofetch",
         "type": "github"
       }
