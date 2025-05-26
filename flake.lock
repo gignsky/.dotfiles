@@ -730,7 +730,7 @@
       },
       "original": {
         "owner": "gignsky",
-        "ref": "develop",
+        "ref": "feature/getting-config-working",
         "repo": "nixos-neofetch",
         "type": "github"
       }
