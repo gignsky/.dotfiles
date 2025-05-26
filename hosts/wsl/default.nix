@@ -3,7 +3,7 @@
     (configLib.relativeToRoot "hosts/common/core")
     (configLib.relativeToRoot "hosts/common/users/gig")
     (configLib.relativeToRoot "hosts/common/optional/samba.nix")
-    inputs.neofetch.nixosModules.default
+    (configLib.relativeToRoot "hosts/common/optional/neofetch.nix")
     # inputs.nixos-wsl.modules
     # inputs.home-manager.nixosModules.home-manager
   ];
