@@ -37,7 +37,7 @@ pull-rebuild-full:
 pull-nix-secrets:
 	cd ~/nix-secrets && git fetch && git pull && cd ~/.dotfiles
 
-# Run before every rebuild, everytime
+# Run before every rebuild, every time
 rebuild-pre:
 	nix-shell -p lolcat --run 'echo "[PRE] Rebuilding NixOS..." | lolcat 2> /dev/null'
 	just dont-fuck-my-build
@@ -45,12 +45,16 @@ rebuild-pre:
 
 dont-fuck-my-build:
 	git ls-files --others --exclude-standard -- '*.nix' | xargs -r git add -v
-	nix flake update nix-secrets
-	echo "Very little chance your build is fucked! 👍" | lolcat 2> /dev/null
+	nix flake lock --update-input nix-secrets
+	nix-shell -p lolcat --run 'echo "Very little chance your build is fucked! 👍" | lolcat 2> /dev/null'
 
 switch args="":
 	just rebuild {{args}}
 	just home
+
+clean:
+	rm -rfv result
+	quick-results
 
 # Run after every rebuild, some of the time
 rebuild-post:
@@ -184,8 +188,52 @@ post-build:
 #     sudo nixos-rebuild test --flake ~/.dotfiles/.
 #     home-manager switch --flake ~/.dotfiles/.
 
+# helper justfile arg
+setup-vm:
+	nix-shell -p lolcat --run 'echo "[VM] Cleaning Results dir..." | lolcat 2> /dev/null'
+	just clean
+	nix-shell -p lolcat --run 'echo "[VM] Building ISO..." | lolcat 2> /dev/null'
+	nix build ./nixos-installer#nixosConfigurations.iso.config.system.build.isoImage
+	nix-shell -p lolcat --run 'echo "[VM] Showing Results..." | lolcat 2> /dev/null'
+	quick-results
+	nix-shell -p lolcat --run 'echo "[VM] Making tmp-iso dir..." | lolcat 2> /dev/null'
+	mkdir -p ./tmp-iso/nixos-vm
+	nix-shell -p lolcat --run 'echo "[VM] Creating qemu img from ISO..." | lolcat 2> /dev/null'
+	nix shell nixpkgs#qemu --command bash -c 'qemu-img create -f qcow2 -q ./tmp-iso/nixos-vm/minimal-vm.img 16G'
+
+# cleanup vm files
+cleanup-vm:
+	nix-shell -p lolcat --run 'echo "[VM] Removing tmp-iso dir..." | lolcat 2> /dev/null'
+	rm -rfv ./tmp-iso
+	nix-shell -p lolcat --run 'echo "[VM] tmp-iso removed." | lolcat 2> /dev/null'
+	nix-shell -p lolcat --run 'echo "[VM] Cleaning Results dir..." | lolcat 2> /dev/null'
+	just clean
+	nix-shell -p lolcat --run 'echo "[VM] Finished." | lolcat 2> /dev/null'
+
+# helper justfile arg
+call-vm:
+	nix-shell -p lolcat --run 'echo "[VM] Running VM..." | lolcat 2> /dev/null'
+	- nix shell nixpkgs#qemu --command bash -c 'bash scripts/run-minimal-iso-vm.sh result/iso/*.iso ./tmp-iso/nixos-vm/minimal-vm.img'
+	nix-shell -p lolcat --run 'echo "[VM] VM Closed." | lolcat 2> /dev/null'
+
+# run vm with minimal iso - while not deleting files afterwards
+vm:
+	just setup-vm
+	just call-vm
+
+# reconnect to vm that has already been created
+vm-reconnect:
+	nix-shell -p lolcat --run 'echo "[VM] Reconnecting to VM..." | lolcat 2> /dev/null'
+	just call-vm
+
+# run vm with minimal iso - while deleting files afterwards
+vm-tmp:
+	just setup-vm
+	just call-vm
+	just cleanup-vm
+
 iso:
-	# If we dont remove this folder, libvirtd VM doesnt run with the new iso...
+	# If we dont remove this folder, libvirtd VM doesn't run with the new iso...
 	# rm ~/virtualization-boot-files/template/iso/nixos*
 	just pre-build
 	nix build ./nixos-installer#nixosConfigurations.iso.config.system.build.isoImage
@@ -254,14 +302,14 @@ rekey:
 sops-fix:
 	just pre-home
 	just update-nix-secrets
-	home-manager switch --refresh --flake ~/.dotfiles/.
 	systemctl --user reset-failed
+	home-manager switch --refresh --flake ~/.dotfiles/.
 	just home
 
 update-nix-secrets:
 	just rekey
 	(cd ../nix-secrets && git fetch && git rebase) || true
-	nix flake update nix-secrets
+	nix flake lock --update-input nix-secrets
 
 store-photo:
 	nix-shell -p graphviz nix-du --run "nix-du -s=500MB | \dot -Tpng > store.png"
@@ -290,7 +338,7 @@ bootstrap *args:
 #   nix flake update nix-secrets
 #
 # iso:
-#   # If we dont remove this folder, libvirtd VM doesnt run with the new iso...
+#   # If we dont remove this folder, libvirtd VM doesn't run with the new iso...
 #   rm -rf result
 #   nix build ./nixos-installer#nixosConfigurations.minimalIso.config.system.build.isoImage
 #

@@ -17,6 +17,7 @@
     ./common/core
     ./common/optional/zsh.nix
     ./common/optional/sops.nix
+    ./common/optional/neofetch.nix
   ];
   nix = {
     package = lib.mkDefault pkgs.nix;
@@ -60,6 +61,8 @@
     hwatch
     hyperfine
     mtr
+    lazygit
+    countryfetch
     # restic
     # xsv
     # ncdu # unneccecary due to the ability to use `dua i` for interactive better dua the only downside is that dua doesn't have a way of sorting folders at the top
