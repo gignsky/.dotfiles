@@ -721,11 +721,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1748272160,
-        "narHash": "sha256-yTlAboD7W3f/7LBIhnaBOz5FAPAk3nMlsLKIzEnZX+M=",
+        "lastModified": 1748275196,
+        "narHash": "sha256-Xxy7hGUYjrrZCJMVrb15hi89pgXXXc91sXr905K8gjg=",
         "owner": "gignsky",
         "repo": "nixos-neofetch",
-        "rev": "a3dbc769ba0b4cbf84820e2f1a9a6cbc4899344e",
+        "rev": "bc99af74787763bb746d375233d8789d5f187507",
         "type": "github"
       },
       "original": {
