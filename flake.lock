@@ -730,6 +730,7 @@
       },
       "original": {
         "owner": "gignsky",
+        "ref": "develop",
         "repo": "nixos-neofetch",
         "type": "github"
       }
