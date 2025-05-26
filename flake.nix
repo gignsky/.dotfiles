@@ -57,7 +57,7 @@
 
     # Expandable neofetch
     neofetch = {
-      url = "github:gignsky/nixos-neofetch/feature/getting-config-working";
+      url = "github:gignsky/nixos-neofetch/feature/all-systems";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 

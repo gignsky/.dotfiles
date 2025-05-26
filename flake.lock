@@ -721,16 +721,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1748275553,
-        "narHash": "sha256-5Iu0WBqVzUXw/9yhnH3krZF00A42E5UAYdBUmJKTLIQ=",
+        "lastModified": 1748272160,
+        "narHash": "sha256-yTlAboD7W3f/7LBIhnaBOz5FAPAk3nMlsLKIzEnZX+M=",
         "owner": "gignsky",
         "repo": "nixos-neofetch",
-        "rev": "4d9cd7d0ed600c0d0481dc9e0905fc673ffa9700",
+        "rev": "a3dbc769ba0b4cbf84820e2f1a9a6cbc4899344e",
         "type": "github"
       },
       "original": {
         "owner": "gignsky",
-        "ref": "feature/getting-config-working",
+        "ref": "feature/all-systems",
         "repo": "nixos-neofetch",
         "type": "github"
       }
