@@ -1530,16 +1530,16 @@
         "treefmt-nix": "treefmt-nix_8"
       },
       "locked": {
-        "lastModified": 1748277076,
-        "narHash": "sha256-HmT5Yl3P0JHtPPNXkqyLW1BUxfMhbLbhAVZFoBzVa9s=",
+        "lastModified": 1748278618,
+        "narHash": "sha256-PapMlxvy3jnyYqaOL2Jzlo9g4CrL9K5Q/LSQkOSthPI=",
         "owner": "gignsky",
         "repo": "nixos-neofetch",
-        "rev": "3fc28e4366743d9ca5522adb00f79ba0c973b24b",
+        "rev": "79e525fd7a130e5d0fc88a1898a4c789a1969f5f",
         "type": "github"
       },
       "original": {
         "owner": "gignsky",
-        "ref": "feature/all-systems",
+        "ref": "release/flake",
         "repo": "nixos-neofetch",
         "type": "github"
       }
