@@ -8,9 +8,9 @@
     # nixos-anywhere.url = "github:nix-community/nixos-anywhere";
 
     nixos-wsl = {
-      url = "github:nix-community/NixOS-WSL/60b4904a1390ac4c89e93d95f6ed928975e525ed";
+      url = "github:nix-community/NixOS-WSL/main";
       # inputs = {
-      # nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
       # flake-utils.follows = "flake-utils"; # unneccary as of 2/13/25
       # };
     };
