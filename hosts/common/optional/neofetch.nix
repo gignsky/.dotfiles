@@ -1,8 +1,13 @@
 { inputs, config, lib, ... }:
 {
-  imports = [
-    inputs.neofetch.nixosModules.neofetch
-  ];
+  # imports = [
+  #   inputs.neofetch.nixosModules.neofetch
+  # ];
 
-  config.username = "gig";
+  # config.username = "gig";
+
+  # programs.neofetch = {
+  #   public_ip = true;
+  #   os = false;
+  # };
 }
