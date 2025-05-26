@@ -18,6 +18,9 @@
   alsmod = "nano $HOME/.dotfiles/home/gig/common/optional/shellAliases.nix";
   # als = "alias";
 
+  # nmap
+  localnmap = "nmap -v -sn 192.168.51.0/24 | grep -v down";
+
   # Git
   lg = "lazygit";
 
@@ -32,6 +35,7 @@
 
   # Template commands
   rustup = "nix --accept-flake-config run github:juspay/omnix -- init github:gignsky/rust-nix-template -o";
+  nixup = "nix --accept-flake-config run github:juspay/omnix -- init github:gignsky/nix-template -o";
   om = "nix run github:juspay/omnix --";
   inspect = "nix run github:bluskript/nix-inspect";
 
@@ -76,7 +80,6 @@
   #   #cleanup
   #   alias cleanup = "sudo apt autoremove -y";
   #
-  #   alias localnmap = "nmap -v -sn 192.168.51.0/24 | grep -v down";
   #
   #   #nzbget
   #   alias nzbget = "/export/danger-fast-nzbget/nzbgetFiles/nzbget";
