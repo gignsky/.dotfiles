@@ -57,7 +57,7 @@
 
     # Expandable neofetch
     neofetch = {
-      url = "github:gignsky/nixos-neofetch";
+      url = "github:gignsky/nixos-neofetch/develop";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
