@@ -57,7 +57,7 @@
 
     # Expandable neofetch
     neofetch = {
-      url = "github:gignsky/nixos-neofetch/feature/all-systems";
+      url = "github:gignsky/nixos-neofetch/release/flake";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
