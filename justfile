@@ -45,7 +45,7 @@ rebuild-pre:
 
 dont-fuck-my-build:
 	git ls-files --others --exclude-standard -- '*.nix' | xargs -r git add -v
-	nix flake lock --update-input nix-secrets
+	nix flake update nix-secrets
 	nix-shell -p lolcat --run 'echo "Very little chance your build is fucked! 👍" | lolcat 2> /dev/null'
 
 switch args="":
@@ -261,7 +261,7 @@ sops-fix:
 update-nix-secrets:
 	just rekey
 	(cd ../nix-secrets && git fetch && git rebase) || true
-	nix flake lock --update-input nix-secrets
+	nix flake update nix-secrets
 
 store-photo:
 	nix-shell -p graphviz nix-du --run "nix-du -s=500MB | \dot -Tpng > store.png"
@@ -287,7 +287,7 @@ bootstrap *args:
 #
 # update-nix-secrets:
 #   (cd ../nix-secrets && git fetch && git rebase) || true
-#   nix flake lock --update-input nix-secrets
+#   nix flake update nix-secrets
 #
 # iso:
 #   # If we dont remove this folder, libvirtd VM doesnt run with the new iso...
