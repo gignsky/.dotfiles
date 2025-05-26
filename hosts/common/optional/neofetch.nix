@@ -1,6 +1,6 @@
 { inputs, config, lib, ... }:
 {
   imports = [
-    inputs.nufetch.nixosModules.neofetch
+    inputs.nufetch.nixosModules.nufetch
   ];
 }
