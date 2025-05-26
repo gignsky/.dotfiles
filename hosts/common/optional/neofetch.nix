@@ -1,6 +1,10 @@
 { inputs, config, lib, ... }:
 {
-  imports = [
-    inputs.nufetch.nixosModules.nufetch
-  ];
+  # imports = [
+  #   inputs.nufetch.nixosModules.nufetch
+  # ];
+
+  # programs.nufetch = {
+  #   enable = false;
+  # };
 }
