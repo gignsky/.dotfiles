@@ -1,11 +1,8 @@
 { inputs, config, lib, ... }:
 {
   imports = [
-    inputs.neofetch.nixosModules.default
+    inputs.neofetch.nixosModules.neofetch
   ];
 
-  options.username = lib.mkOption {
-    type = lib.types.str;
-    default = "gig";
-  };
+  config.username = "gig";
 }
