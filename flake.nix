@@ -159,7 +159,7 @@
             git
             pre-commit
             lolcat
-            nix
+            nixd
             nil
             age
             ssh-to-age
