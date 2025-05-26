@@ -60,6 +60,7 @@
     hwatch
     hyperfine
     mtr
+    lazygit
     # restic
     # xsv
     # ncdu # unneccecary due to the ability to use `dua i` for interactive better dua the only downside is that dua doesn't have a way of sorting folders at the top
