@@ -1070,8 +1070,8 @@
     },
     "nixpkgs_3": {
       "locked": {
-        "lastModified": 1748441220,
-        "narHash": "sha256-ERSmFgf3FhnNOX0g+1PtrYNhtoMQwXOATIdwvHYuab8=",
+        "lastModified": 1748470815,
+        "narHash": "sha256-aMsAsS9L9Cw1Sp8+fifRwcp1k4Azozrfevu2DTt1n5I=",
         "path": "/home/gig/local-repos/nixpkgs",
         "type": "path"
       },
