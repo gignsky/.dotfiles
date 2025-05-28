@@ -57,7 +57,7 @@
 
     # Expandable neofetch
     nufetch = {
-      url = "github:gignsky/nufetch/bugfix/fix-extraFields";
+      url = "github:gignsky/nufetch/develop";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
