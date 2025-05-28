@@ -17,6 +17,7 @@
     ./common/core
     ./common/optional/zsh.nix
     ./common/optional/sops.nix
+    ./common/optional/neofetch.nix
   ];
   nix = {
     package = lib.mkDefault pkgs.nix;
