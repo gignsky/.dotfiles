@@ -55,11 +55,11 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
-    # Expandable neofetch
-    nufetch = {
-      url = "github:gignsky/nufetch/develop";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
+    # # Expandable neofetch
+    # nufetch = {
+    #   url = "github:gignsky/nufetch/develop";
+    #   inputs.nixpkgs.follows = "nixpkgs-unstable";
+    # };
 
     # # Declarative partitioning and formatting
     # disko = {
