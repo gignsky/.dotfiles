@@ -1,7 +1,7 @@
-{ inputs, config, lib, ... }:
+{ inputs, ... }:
 {
   imports = [
-    inputs.nufetch.homeManagerModule.nufetch
+    inputs.nufetch.homeManagerModules.nufetch
   ];
 
   programs.nufetch = {
