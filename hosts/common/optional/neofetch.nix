@@ -6,7 +6,7 @@
 
   programs.nufetch = {
     enable = true;
-    public_ip = false;
+    public_ip = true;
     local_ip = false;
   };
 }
