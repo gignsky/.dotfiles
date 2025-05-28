@@ -1597,11 +1597,11 @@
         "treefmt-nix": "treefmt-nix_3"
       },
       "locked": {
-        "lastModified": 1748421274,
-        "narHash": "sha256-QyylQkGnfRgTx0SvFg4XA6mqG9guu16IhGptl4Udd6E=",
+        "lastModified": 1748421661,
+        "narHash": "sha256-RICtU3vhaR0zosnvgJi568XczMcFgrOowiu+7NImpb8=",
         "owner": "gignsky",
         "repo": "nufetch",
-        "rev": "f259267f90286afae393a107935a9e2e26a812bd",
+        "rev": "ce6a4c20e5134a2689d39862a2a16eb83be6bf05",
         "type": "github"
       },
       "original": {
