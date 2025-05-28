@@ -57,7 +57,7 @@
 
     # Expandable neofetch
     nufetch = {
-      url = "github:gignsky/nufetch/feature/get-nixos-module-working";
+      url = "github:gignsky/nufetch/feature/patch-neofetch";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 

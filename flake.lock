@@ -1597,16 +1597,16 @@
         "treefmt-nix": "treefmt-nix_3"
       },
       "locked": {
-        "lastModified": 1748305731,
-        "narHash": "sha256-ktVMJsjVoH6AuO9ZwETCOyOkcidONyGGASfn52LApGE=",
+        "lastModified": 1748308731,
+        "narHash": "sha256-ki7RrqeGonX3gP2CK4jjV7qOmaOm3KPO6PlNRBVKgdE=",
         "owner": "gignsky",
         "repo": "nufetch",
-        "rev": "17dcc7cf15e0656916b00a99e39e98a3fb679502",
+        "rev": "89ff865a3594423d1517c1a70f6ae2bddbbc4574",
         "type": "github"
       },
       "original": {
         "owner": "gignsky",
-        "ref": "feature/get-nixos-module-working",
+        "ref": "feature/patch-neofetch",
         "repo": "nufetch",
         "type": "github"
       }
