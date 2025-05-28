@@ -1,5 +1,4 @@
 {
-    "nixEnvSelector.nixFile": "${workspaceFolder}/shell.nix",
     "files.exclude": {
         "**/.git": true,
         "**/.svn": true,
