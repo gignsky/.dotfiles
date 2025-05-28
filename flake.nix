@@ -56,8 +56,8 @@
     };
 
     # Expandable neofetch
-    neofetch = {
-      url = "github:gignsky/nixos-neofetch";
+    nufetch = {
+      url = "github:gignsky/nufetch/develop";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
@@ -161,6 +161,7 @@
             lolcat
             nixd
             nil
+            nixd
             age
             ssh-to-age
             sops

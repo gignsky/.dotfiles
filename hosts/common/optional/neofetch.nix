@@ -1,8 +1,12 @@
 { inputs, config, lib, ... }:
 {
   imports = [
-    inputs.neofetch.nixosModules.neofetch
+    inputs.nufetch.nixosModules.nufetch
   ];
 
-  config.username = "gig";
+  programs.nufetch = {
+    enable = true;
+    public_ip = true;
+    local_ip = false;
+  };
 }
