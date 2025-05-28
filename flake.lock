@@ -1597,16 +1597,16 @@
         "treefmt-nix": "treefmt-nix_3"
       },
       "locked": {
-        "lastModified": 1748421832,
-        "narHash": "sha256-BYTfsGMiv55cOREwlFsvRbibjwv1olVGySqSfPEd56c=",
+        "lastModified": 1748422446,
+        "narHash": "sha256-65WJP1aXj2MCSyXGvuad682jzk9Ui4Nyl1+KSCMiqcQ=",
         "owner": "gignsky",
         "repo": "nufetch",
-        "rev": "347ab7c212e86e4717eb9061271a89867b311fc5",
+        "rev": "95e1a5f17af7b050ce151a92427c0d9352b6b506",
         "type": "github"
       },
       "original": {
         "owner": "gignsky",
-        "ref": "feature/patch-neofetch",
+        "ref": "feature/add-home-manager-module",
         "repo": "nufetch",
         "type": "github"
       }
