@@ -34,6 +34,9 @@ rec {
 
     # Check nix result folder
     check_and_display "./result" "nix result"
+    
+    # Check nix result-man folder
+    check_and_display "./result-man" "nix result-man"
   '';
 
   upjust = pkgs.writeShellScriptBin "upjust" ''
