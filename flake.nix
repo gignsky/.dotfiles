@@ -57,7 +57,7 @@
 
     # Expandable neofetch
     nufetch = {
-      url = "github:gignsky/nufetch/feature/patch-neofetch";
+      url = "github:gignsky/nufetch/feature/add-home-manager-module";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
