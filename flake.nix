@@ -91,9 +91,11 @@
       url = "github:gignsky/tax-matrix/develop";
       flake = true;
     };
+
+    nixos-installer.url = "./nixos-installer";
   };
 
-  outputs = { self, nixpkgs, home-manager, ... } @ inputs:
+  outputs = { self, nixpkgs, home-manager, nixos-installer, ... } @ inputs:
     let
       inherit (self) outputs;
       inherit (nixpkgs) lib;
@@ -187,6 +189,16 @@
       # NixOS configuration entrypoint
       # Available through 'nixos-rebuild --flake .#your-hostname'
       nixosConfigurations = {
+        minimal-iso-vm = nixpkgs.lib.nixosSystem {
+          inherit system;
+          modules = [
+            (configLib.relativeToRoot "hosts/minimal-iso-vm/default.nix")
+          ];
+          specialArgs = {
+            minimalIsoPath = "${nixos-installer.nixosConfigurations.iso.config.system.build.isoImage}";
+          };
+        };
+
         # WSL configuration entrypoint - name can not be channged from nixos without some extra work TODO
         wsl = nixpkgs.lib.nixosSystem {
           inherit system specialArgs;
