@@ -88,7 +88,7 @@
         # -virtfs local,path=${toString /path/to/your/bootstrapping/scripts},mount_tag=nix-scripts,security_model=passthrough
       ];
       # Autostart the VM when the host system starts (optional, useful for dedicated testers)
-      # autostart = true;
+      autostart = true;
     };
   };
 
