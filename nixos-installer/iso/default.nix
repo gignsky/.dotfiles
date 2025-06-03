@@ -55,9 +55,11 @@ in
     bat
   ];
 
-  cat = "bat";
-  ll = "ls -lh";
-  lla = "ls -lha";
+  environment.shellAliases = {
+    cat = "bat";
+    ll = "ls -lh";
+    lla = "ls -lha";
+  };
 
   systemd = {
     services.sshd.wantedBy = lib.mkForce [ "multi-user.target" ];
