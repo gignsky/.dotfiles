@@ -1,4 +1,5 @@
 # Custom Dictionary Words
+cachix
 disko
 doesnt
 dont
@@ -11,6 +12,8 @@ neve
 nixos
 nixpkgs
 nufetch
+numtide
 redyf
 secretsmgmt
 Tpng
+treefmt
