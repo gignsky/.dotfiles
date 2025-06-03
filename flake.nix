@@ -171,6 +171,7 @@
             # personal packages
             quick-results
             upjust
+            upspell
 
             #necessary for bootstrapping
             ripgrep
