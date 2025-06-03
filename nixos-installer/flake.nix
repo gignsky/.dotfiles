@@ -41,7 +41,7 @@
             {
               networking = {
                 hostName = name;
-                hostId = "a56f8db2";
+                hostId = "a56f8db2"; # Unique 8-character hex string, can be generated with `head -c4 /dev/urandom | od -An -tx1 | tr -d ' \n'`
               };
             }
             (configLib.relativeToRoot "hosts/${name}/hardware-configuration.nix")
