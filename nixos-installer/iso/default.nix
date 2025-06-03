@@ -41,6 +41,7 @@ in
     supportedFilesystems = lib.mkForce [
       "btrfs"
       "vfat"
+      "zfs"
     ];
   };
 
