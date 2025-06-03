@@ -21,8 +21,8 @@
     (configLib.relativeToRoot "hosts/common/core")
 
     # optional
-    (configLib.relativeToRoot "hosts/common/optional/gui.nix")
-    (configLib.relativeToRoot "hosts/common/optional/firefox.nix")
+    # (configLib.relativeToRoot "hosts/common/optional/gui.nix")
+    # (configLib.relativeToRoot "hosts/common/optional/firefox.nix")
     # ../common/optional/xrdp.nix
 
     #gig users
@@ -32,12 +32,20 @@
     (configLib.relativeToRoot "hosts/common/optional/wifi.nix")
   ];
 
-  networking.hostName = "merlin";
+  networking = {
+    hostName = "merlin";
+    # hostId should be a unique 8-character (hexadecimal) string, especially if using ZFS.
+    # You can generate one with: head -c4 /dev/urandom | od -An -tx1 | tr -d ' \n'
+    hostId = "81a45b83";
+  };
 
   # Bootloader.
-  boot.loader.grub.enable = true;
-  # boot.loader.grub.device = "/dev/nvme0n1";
-  boot.loader.grub.useOSProber = true;
+  boot.loader.grub = {
+    enable = true;
+    device = "nodev"; # Use "nodev" for UEFI
+    efiSupport = true;
+    efiInstallAsRemovable = true; # Optional
+  };
 
   nix =
     let
@@ -60,10 +68,20 @@
       nixPath = lib.mapAttrsToList (n: _: "${n}=flake:${n}") flakeInputs;
     };
 
-  # fileSystems."/" =
-  #   { device = "/dev/dm-0";
-  #     fsType = "ext4";
-  #   };
+  fileSystems = {
+    "/" = {
+      device = "zroot/root";
+      fsType = "zfs";
+    };
+    "/boot" = {
+      device = "/dev/nvme0n1p2";
+      fsType = "vfat";
+    };
+    "/nix/store" = {
+      device = "zroot/nix";
+      fsType = "zfs";
+    };
+  };
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   system.stateVersion = "25.05";
