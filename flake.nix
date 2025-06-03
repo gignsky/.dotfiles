@@ -235,16 +235,6 @@
         #     ./hosts/tdarr-node
         #   ];
         # };
-
-        minimal-iso-vm = nixpkgs.lib.nixosSystem {
-          inherit system specialArgs;
-          modules = [
-            ({ ... }: {
-              # This module is just a placeholder; the VM will boot from the ISO, not this config.
-              # You can add VM-specific settings here if needed.
-            })
-          ];
-        };
       };
 
       # Standalone home-manager configuration entrypoint
