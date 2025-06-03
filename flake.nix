@@ -76,7 +76,7 @@
     # Private secrets repo.  See ./docs/secretsmgmt.md
     # Authenticate via ssh and use shallow clone
     nix-secrets = {
-      url = "git+ssh://git@github.com/gignsky/nix-secrets.git?ref=main&shallow=1";
+      url = "git+ssh://git@github.com/gignsky/nix-secrets.git?ref=main&rev=d605c3d34007919b2e7d450882e9137002b8717a&shallow=1";
       flake = false;
     };
 
