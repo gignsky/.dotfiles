@@ -11,5 +11,13 @@
     },
     "explorerExclude.backup": {},
     "nix.enableLanguageServer": true,
-    "nix.formatterPath": "nixfmt"
+    "nix.formatterPath": "nixfmt",
+    "cSpell.customDictionaries": {
+        "custom-dictionary-workspace": {
+            "name": "custom-dictionary-workspace",
+            "path": "${workspaceFolder:.dotfiles}/.cspell/custom-dictionary-workspace.txt",
+            "addWords": true,
+            "scope": "workspace"
+        }
+    }
 }
