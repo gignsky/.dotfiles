@@ -44,6 +44,11 @@ rec {
     git commit -m "upjust - updated justfile"
   '';
 
+  upspell = pkgs.writeShellScriptBin "upspell" ''
+    git add .cspell/custom-dictionary-workspace.txt
+    git commit -m "upspell - updated spellfile"
+  '';
+
   cargo-update = pkgs.writeShellScriptBin "cargo-update" ''
     # Check for --no-commit flag
     NO_COMMIT=false
