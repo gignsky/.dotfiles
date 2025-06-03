@@ -72,6 +72,10 @@
       device = "/dev/nvme0n1p2";
       fsType = "vfat";
     };
+    "/nix/store" = {
+      device = "zroot/nix";
+      fsType = "zfs";
+    };
   };
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
