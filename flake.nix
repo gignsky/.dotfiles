@@ -91,11 +91,6 @@
       url = "github:gignsky/tax-matrix/develop";
       flake = true;
     };
-
-    # nixos-installer = {
-    #   url = "path:nixos-installer";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
   };
 
   outputs = { self, nixpkgs, home-manager, ... } @ inputs:
@@ -112,7 +107,6 @@
       # ];
       configVars = import ./vars { inherit inputs lib; };
       configLib = import ./lib { inherit lib; };
-      # minimalIsoPath = "${nixos-installer.nixosConfigurations.iso.config.system.build.isoImage}";
       specialArgs = {
         inherit
           inputs
@@ -179,7 +173,7 @@
             upjust
             upspell
 
-            #nececcary for bootstraping
+            #necessary for bootstrapping
             ripgrep
             ;
         };
@@ -195,7 +189,7 @@
       # Available through 'nixos-rebuild --flake .#your-hostname'
       nixosConfigurations = {
 
-        # WSL configuration entrypoint - name can not be channged from nixos without some extra work TODO
+        # WSL configuration entrypoint - name can not be changed from nixos without some extra work TODO
         wsl = nixpkgs.lib.nixosSystem {
           inherit system specialArgs;
           modules = [
@@ -218,16 +212,16 @@
         };
 
         # # Merlin configuration entrypoint - unused as merlin has a wsl instance
-        # merlin = nixpkgs.lib.nixosSystem {
-        #   inherit system specialArgs;
-        #   modules = [
-        #     # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
-        #     # home-manager.nixosModules.home-manager {
-        #     #   home-manager.extraSpecialArgs = specialArgs;
-        #     # }
-        #     ./hosts/merlin
-        #   ];
-        # };
+        merlin = nixpkgs.lib.nixosSystem {
+          inherit system specialArgs;
+          modules = [
+            # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
+            # home-manager.nixosModules.home-manager {
+            #   home-manager.extraSpecialArgs = specialArgs;
+            # }
+            ./hosts/merlin
+          ];
+        };
 
         # # Not yet working, but this is the entrypoint for a tdarr node
         # tdarr-node = nixpkgs.lib.nixosSystem {

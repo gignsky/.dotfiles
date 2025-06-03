@@ -3,7 +3,7 @@
 
   inputs = {
     #nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    nixpkgs.url = "github:NixOS/nixpkgs/release-24.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/release-25.05";
     # Declarative partitioning and formatting
     disko.url = "github:nix-community/disko";
   };
@@ -50,11 +50,12 @@
         # grief = newConfig "grief" "/dev/vda" false "0";
         # guppy = newConfig "guppy" "/dev/vda" false "0";
         # gusto = newConfig "gusto" "/dev/sda" true "8";
-        merlin = newConfig "merlin" "/dev/nvme0n1" false;
+        # merlin = newConfig "merlin" "/dev/nvme0n1" false;
         # testbuzz1 = newConfig "testbuzz1" "/dev/sda" true;
         # buzz = newConfig "buzz" "/dev/sda" true;
         # cams-countertop = newConfig "cams-countertop" "/dev/sda" true;
-        tdarr-node = newConfig "tdarr-node" "/dev/sda" true;
+        # tdarr-node = newConfig "tdarr-node" "/dev/sda" true;
+        merlin = newConfig "merlin" "/dev/sr0" true;
 
         # Custom ISO
         #
