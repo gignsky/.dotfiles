@@ -51,7 +51,12 @@ in
   environment.systemPackages = with pkgs; [
     magic-wormhole
     btop
+    bat
   ];
+
+  cat = "bat";
+  ll = "ls -lh";
+  lla = "ls -lha";
 
   systemd = {
     services.sshd.wantedBy = lib.mkForce [ "multi-user.target" ];
