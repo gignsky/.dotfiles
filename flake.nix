@@ -191,14 +191,6 @@
       # NixOS configuration entrypoint
       # Available through 'nixos-rebuild --flake .#your-hostname'
       nixosConfigurations = {
-        # minimal-iso-vm = nixpkgs.lib.nixosSystem {
-        #   inherit system;
-        #   modules = [
-        #     (configLib.relativeToRoot "hosts/minimal-iso-vm/default.nix")
-        #   ];
-        #   specialArgs = {
-        #   };
-        # };
 
         # WSL configuration entrypoint - name can not be channged from nixos without some extra work TODO
         wsl = nixpkgs.lib.nixosSystem {
@@ -246,6 +238,16 @@
         #     ./hosts/tdarr-node
         #   ];
         # };
+
+        minimal-iso-vm = nixpkgs.lib.nixosSystem {
+          inherit system specialArgs;
+          modules = [
+            ({ ... }: {
+              # This module is just a placeholder; the VM will boot from the ISO, not this config.
+              # You can add VM-specific settings here if needed.
+            })
+          ];
+        };
       };
 
       # Standalone home-manager configuration entrypoint
