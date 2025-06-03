@@ -188,7 +188,7 @@
       # Available through 'nixos-rebuild --flake .#your-hostname'
       nixosConfigurations = {
 
-        # WSL configuration entrypoint - name can not be channged from nixos without some extra work TODO
+        # WSL configuration entrypoint - name can not be changed from nixos without some extra work TODO
         wsl = nixpkgs.lib.nixosSystem {
           inherit system specialArgs;
           modules = [
