@@ -92,10 +92,10 @@
       flake = true;
     };
 
-    nixos-installer = {
-      url = "path:nixos-installer";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # nixos-installer = {
+    #   url = "path:nixos-installer";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
   };
 
   outputs = { self, nixpkgs, home-manager, nixos-installer, ... } @ inputs:
