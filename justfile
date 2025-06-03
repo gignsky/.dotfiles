@@ -188,8 +188,8 @@ post-build:
 #     sudo nixos-rebuild test --flake ~/.dotfiles/.
 #     home-manager switch --flake ~/.dotfiles/.
 
-# run vm with minimal iso
-vm:
+# helper justfile arg
+setup-vm:
 	nix-shell -p lolcat --run 'echo "[VM] Cleaning Results dir..." | lolcat 2> /dev/null'
 	just clean
 	nix-shell -p lolcat --run 'echo "[VM] Building ISO..." | lolcat 2> /dev/null'
@@ -200,15 +200,37 @@ vm:
 	mkdir -p ./tmp-iso/nixos-vm
 	nix-shell -p lolcat --run 'echo "[VM] Creating qemu img from ISO..." | lolcat 2> /dev/null'
 	nix shell nixpkgs#qemu --command bash -c 'qemu-img create -f qcow2 -q ./tmp-iso/nixos-vm/minimal-vm.img 16G'
-	nix-shell -p lolcat --run 'echo "[VM] Running VM..." | lolcat 2> /dev/null'
-	nix shell nixpkgs#qemu --command bash -c 'bash scripts/run-minimal-iso-vm.sh result/iso/*.iso ./tmp-iso/nixos-vm/minimal-vm.img'
-	nix-shell -p lolcat --run 'echo "[VM] VM Closed." | lolcat 2> /dev/null'
+
+# helper justfile arg
+cleanup-vm:
 	nix-shell -p lolcat --run 'echo "[VM] Removing tmp-iso dir..." | lolcat 2> /dev/null'
 	rm -rfv ./tmp-iso
 	nix-shell -p lolcat --run 'echo "[VM] tmp-iso removed." | lolcat 2> /dev/null'
 	nix-shell -p lolcat --run 'echo "[VM] Cleaning Results dir..." | lolcat 2> /dev/null'
 	just clean
 	nix-shell -p lolcat --run 'echo "[VM] Finished." | lolcat 2> /dev/null'
+
+# helper justfile arg
+call-vm:
+	nix-shell -p lolcat --run 'echo "[VM] Running VM..." | lolcat 2> /dev/null'
+	nix shell nixpkgs#qemu --command bash -c 'bash scripts/run-minimal-iso-vm.sh result/iso/*.iso ./tmp-iso/nixos-vm/minimal-vm.img'
+	nix-shell -p lolcat --run 'echo "[VM] VM Closed." | lolcat 2> /dev/null'
+
+# run vm with minimal iso - while not deleting files afterwards
+vm:
+	just setup-vm
+	just call-vm
+
+# reconnect to vm that has already been created
+vm-reconnect:
+	nix-shell -p lolcat --run 'echo "[VM] Reconnecting to VM..." | lolcat 2> /dev/null'
+	nix shell nixpkgs#qemu --command bash -c 'bash scripts/run-minimal-iso-vm.sh ./tmp-iso/nixos-vm/minimal-vm.img'
+
+# run vm with minimal iso - while deleting files afterwards
+vm-tmp:
+	just setup-vm
+	just call-vm
+	just cleanup-vm
 
 iso:
 	# If we dont remove this folder, libvirtd VM doesnt run with the new iso...
