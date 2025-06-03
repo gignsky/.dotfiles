@@ -1,10 +1,9 @@
-{
-  pkgs,
-  lib,
-  config,
-  configLib,
-  configVars,
-  ...
+{ pkgs
+, lib
+, config
+, configLib
+, configVars
+, ...
 }:
 let
   sshPort = configVars.networking.sshPort;
@@ -48,6 +47,11 @@ in
   networking = {
     hostName = "iso";
   };
+
+  environment.systemPackages = with pkgs; [
+    magic-wormhole
+    btop
+  ];
 
   systemd = {
     services.sshd.wantedBy = lib.mkForce [ "multi-user.target" ];
