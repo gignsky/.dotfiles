@@ -3,7 +3,9 @@ btop
 btrfs
 cachix
 cdrom
+cifs
 countertop
+creds
 direnv
 direnvrc
 disko
