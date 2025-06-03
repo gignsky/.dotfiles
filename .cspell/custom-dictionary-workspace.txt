@@ -29,6 +29,7 @@ nixos
 nixpkgs
 nmcli
 nmtui
+nodev
 nufetch
 numtide
 nvme
