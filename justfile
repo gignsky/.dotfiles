@@ -187,7 +187,8 @@ post-build:
 # run vm with minimal iso
 vm:
     nix build ./nixos-installer#nixosConfigurations.iso.config.system.build.isoImage
-    nix shell nixpkgs#qemu --command bash scripts/run-minimal-iso-vm.sh
+    quick-results
+    nix shell nixpkgs#qemu --command bash -c 'mkdir -p /tmp-iso/nixos-vm && qemu-img create -f qcow2 -q /tmp-iso/nixos-vm/minimal-vm.img 16G; bash scripts/run-minimal-iso-vm.sh result/iso/*.iso /tmp-iso/nixos-vm/minimal-vm.img'
 
 iso:
 	# If we dont remove this folder, libvirtd VM doesnt run with the new iso...
