@@ -6,6 +6,7 @@ cdrom
 countertop
 direnv
 direnvrc
+cachix
 disko
 dont
 ganoslal
