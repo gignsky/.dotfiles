@@ -1,8 +1,7 @@
 # NOTE: ... is needed because dikso passes diskoFile
-{
-  lib,
-  disk ? "/dev/sda",
-  ...
+{ lib
+, disk ? "/dev/sda"
+, ...
 }:
 {
   disko.devices = {
@@ -31,26 +30,26 @@
             name = "root";
             size = "100%";
             content = {
-              type = "lvm_pv";
-              vg = "pool";
+              type = "zfs";
+              pool = "zroot";
             };
           };
         };
       };
     };
-    lvm_vg = {
-      pool = {
-        type = "lvm_vg";
-        lvs = {
+    zpool = {
+      zroot = {
+        type = "zpool";
+        rootFsOptions = {
+          mountpoint = "none";
+        };
+        datasets = {
           root = {
-            size = "100%FREE";
-            content = {
-              type = "filesystem";
-              format = "ext4";
+            type = "zfs_fs";
+            mountpoint = "/";
+            options = {
+              canmount = "noauto";
               mountpoint = "/";
-              mountOptions = [
-                "defaults"
-              ];
             };
           };
         };
