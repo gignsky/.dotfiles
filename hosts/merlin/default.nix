@@ -65,7 +65,7 @@
 
   fileSystems = {
     "/" = {
-      device = "/dev/nvme0n1p3";
+      device = "zroot/root";
       fsType = "zfs";
     };
     "/boot" = {
