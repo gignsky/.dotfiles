@@ -49,6 +49,11 @@ rec {
     git commit -m "upspell - updated spellfile"
   '';
 
+  upflake = pkgs.writeShellScriptBin "upflake" ''
+    git add flake.lock
+    git commit -m "upflake - updated flake.lock"
+  '';
+
   cargo-update = pkgs.writeShellScriptBin "cargo-update" ''
     # Check for --no-commit flag
     NO_COMMIT=false

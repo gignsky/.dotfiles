@@ -1816,7 +1816,6 @@
       },
       "original": {
         "ref": "main",
-        "rev": "d605c3d34007919b2e7d450882e9137002b8717a",
         "shallow": true,
         "type": "git",
         "url": "ssh://git@github.com/gignsky/nix-secrets.git"
