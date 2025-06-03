@@ -41,7 +41,7 @@ in
         users.users.${configVars.username} = {
           home = "/home/${configVars.username}";
           isNormalUser = true;
-            password = if configVars.isMinimal then "nixos" else null; # Overridden if sops is working
+          password = if configVars.isMinimal then "nixos" else null; # Overridden if sops is working
 
           extraGroups =
             [ "wheel" "gig" ]

@@ -6,7 +6,7 @@
 , ...
 }:
 let
-  sshPort = configVars.networking.ports.tcp.ssh;
+  sshPort = configVars.networking.sshPort;
 in
 {
   imports = [ (configLib.relativeToRoot "hosts/common/users/${configVars.username}") ];

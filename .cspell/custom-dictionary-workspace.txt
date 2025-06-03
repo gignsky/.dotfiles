@@ -1,9 +1,13 @@
 # Custom Dictionary Words
+anydesk
+bitwarden
 btop
 btrfs
 cachix
 cdrom
+cifs
 countertop
+creds
 direnv
 direnvrc
 disko
@@ -20,6 +24,7 @@ keygen
 lazygit
 libvirtd
 luks
+mountpoint
 neofetch
 netdev
 networkmanager
@@ -29,6 +34,7 @@ nixos
 nixpkgs
 nmcli
 nmtui
+nodev
 nufetch
 numtide
 nvme
@@ -38,7 +44,9 @@ oport
 pkgs
 qcow
 redyf
+remmina
 secretsmgmt
+secretspath
 tdarr
 testbuzz
 toplevel
@@ -53,3 +61,4 @@ vimjoyer
 virtio
 xrdp
 yubikey
+zroot

@@ -97,7 +97,7 @@
   #
   home.sessionVariables = {
     # EDITOR = "emacs";
-    NIXPKGS_ALLOW_UNFREE=1;
+    NIXPKGS_ALLOW_UNFREE = 1;
   };
 
   # Let Home Manager install and manage itself.
