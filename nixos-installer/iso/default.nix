@@ -37,7 +37,7 @@ in
   };
 
   boot = {
-    kernelPackages = pkgs.linuxPackages_latest;
+    kernelPackages = pkgs.linuxPackages_6_1; # pinned to a specific kernel version to avoid zfs-kernel module being marked as broken
     supportedFilesystems = lib.mkForce [
       "btrfs"
       "vfat"
