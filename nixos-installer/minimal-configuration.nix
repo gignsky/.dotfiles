@@ -64,6 +64,7 @@ in
       lolcat
       magic-wormhole
       just
+      btop
       ;
   };
 
