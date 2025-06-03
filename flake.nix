@@ -171,6 +171,7 @@
             # personal packages
             quick-results
             upjust
+            upflake
             upspell
 
             #necessary for bootstrapping
