@@ -11,7 +11,7 @@
       url = "github:nix-community/NixOS-WSL/main";
       # inputs = {
       inputs.nixpkgs.follows = "nixpkgs-unstable";
-      # flake-utils.follows = "flake-utils"; # unneccary as of 2/13/25
+      # flake-utils.follows = "flake-utils"; # unnecessary as of 2/13/25
       # };
     };
 
