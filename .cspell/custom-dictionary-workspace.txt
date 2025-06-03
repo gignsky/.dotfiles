@@ -54,3 +54,4 @@ vimjoyer
 virtio
 xrdp
 yubikey
+zroot
