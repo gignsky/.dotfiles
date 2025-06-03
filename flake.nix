@@ -91,11 +91,6 @@
       url = "github:gignsky/tax-matrix/develop";
       flake = true;
     };
-
-    # nixos-installer = {
-    #   url = "path:nixos-installer";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
   };
 
   outputs = { self, nixpkgs, home-manager, ... } @ inputs:
@@ -112,7 +107,6 @@
       # ];
       configVars = import ./vars { inherit inputs lib; };
       configLib = import ./lib { inherit lib; };
-      # minimalIsoPath = "${nixos-installer.nixosConfigurations.iso.config.system.build.isoImage}";
       specialArgs = {
         inherit
           inputs
