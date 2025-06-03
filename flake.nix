@@ -98,7 +98,7 @@
     # };
   };
 
-  outputs = { self, nixpkgs, home-manager, nixos-installer, ... } @ inputs:
+  outputs = { self, nixpkgs, home-manager, ... } @ inputs:
     let
       inherit (self) outputs;
       inherit (nixpkgs) lib;
@@ -112,7 +112,7 @@
       # ];
       configVars = import ./vars { inherit inputs lib; };
       configLib = import ./lib { inherit lib; };
-      minimalIsoPath = "${nixos-installer.nixosConfigurations.iso.config.system.build.isoImage}";
+      # minimalIsoPath = "${nixos-installer.nixosConfigurations.iso.config.system.build.isoImage}";
       specialArgs = {
         inherit
           inputs
@@ -120,7 +120,6 @@
           nixpkgs
           configVars
           configLib
-          minimalIsoPath
           ;
       };
       customPkgs = import ./pkgs { inherit pkgs; };
