@@ -1,6 +1,5 @@
 { pkgs
 , lib
-, config
 , configLib
 , configVars
 , ...
@@ -37,10 +36,11 @@ in
   };
 
   boot = {
-    kernelPackages = pkgs.linuxPackages_latest;
+    kernelPackages = pkgs.linuxPackages_6_1; # pinned to a specific kernel version to avoid zfs-kernel module being marked as broken
     supportedFilesystems = lib.mkForce [
       "btrfs"
       "vfat"
+      "zfs"
     ];
   };
 
@@ -51,7 +51,14 @@ in
   environment.systemPackages = with pkgs; [
     magic-wormhole
     btop
+    bat
   ];
+
+  environment.shellAliases = {
+    cat = "bat";
+    ll = "ls -lh";
+    lla = "ls -lha";
+  };
 
   systemd = {
     services.sshd.wantedBy = lib.mkForce [ "multi-user.target" ];

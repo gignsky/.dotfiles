@@ -38,7 +38,12 @@
             }
             ./minimal-configuration.nix
             { _module.args = { inherit qemuGuest; }; }
-            { networking.hostName = name; }
+            {
+              networking = {
+                hostName = name;
+                hostId = "a56f8db2"; # Unique 8-character hex string, can be generated with `head -c4 /dev/urandom | od -An -tx1 | tr -d ' \n'`
+              };
+            }
             (configLib.relativeToRoot "hosts/${name}/hardware-configuration.nix")
           ];
         });
@@ -55,7 +60,7 @@
         # buzz = newConfig "buzz" "/dev/sda" true;
         # cams-countertop = newConfig "cams-countertop" "/dev/sda" true;
         # tdarr-node = newConfig "tdarr-node" "/dev/sda" true;
-        merlin = newConfig "merlin" "/dev/sr0" true;
+        merlin = newConfig "merlin" "/dev/nvme1n1" false;
 
         # Custom ISO
         #

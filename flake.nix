@@ -76,7 +76,7 @@
     # Private secrets repo.  See ./docs/secretsmgmt.md
     # Authenticate via ssh and use shallow clone
     nix-secrets = {
-      url = "git+ssh://git@github.com/gignsky/nix-secrets.git?ref=main&rev=d605c3d34007919b2e7d450882e9137002b8717a&shallow=1";
+      url = "git+ssh://git@github.com/gignsky/nix-secrets.git?ref=main&shallow=1";
       flake = false;
     };
 
@@ -171,6 +171,7 @@
             # personal packages
             quick-results
             upjust
+            upflake
             upspell
 
             #necessary for bootstrapping
@@ -212,16 +213,16 @@
         };
 
         # # Merlin configuration entrypoint - unused as merlin has a wsl instance
-        # merlin = nixpkgs.lib.nixosSystem {
-        #   inherit system specialArgs;
-        #   modules = [
-        #     # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
-        #     # home-manager.nixosModules.home-manager {
-        #     #   home-manager.extraSpecialArgs = specialArgs;
-        #     # }
-        #     ./hosts/merlin
-        #   ];
-        # };
+        merlin = nixpkgs.lib.nixosSystem {
+          inherit system specialArgs;
+          modules = [
+            # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
+            # home-manager.nixosModules.home-manager {
+            #   home-manager.extraSpecialArgs = specialArgs;
+            # }
+            ./hosts/merlin
+          ];
+        };
 
         # # Not yet working, but this is the entrypoint for a tdarr node
         # tdarr-node = nixpkgs.lib.nixosSystem {
@@ -251,13 +252,13 @@
           # };
         };
 
-        # # merlin - unused with merlin having a wsl instance
-        # "gig@merlin" = home-manager.lib.homeManagerConfiguration {
-        #   inherit pkgs; # Home-manager requires 'pkgs' instance
-        #   extraSpecialArgs = {inherit inputs outputs configLib;};
-        #   # > Our main home-manager configuration file <
-        #   modules = [./home/gig/merlin.nix];
-        # };
+        # merlin - unused with merlin having a wsl instance
+        "gig@merlin" = home-manager.lib.homeManagerConfiguration {
+          inherit pkgs; # Home-manager requires 'pkgs' instance
+          extraSpecialArgs = { inherit inputs outputs configLib; };
+          # > Our main home-manager configuration file <
+          modules = [ ./home/gig/merlin.nix ];
+        };
 
         # # tdarr-node
         # "gig@tdarr-node" = home-manager.lib.homeManagerConfiguration {
