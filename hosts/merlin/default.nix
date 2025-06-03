@@ -32,7 +32,12 @@
     (configLib.relativeToRoot "hosts/common/optional/wifi.nix")
   ];
 
-  networking.hostName = "merlin";
+  networking = {
+    hostName = "merlin";
+    # hostId should be a unique 8-character (hexadecimal) string, especially if using ZFS.
+    # You can generate one with: head -c4 /dev/urandom | od -An -tx1 | tr -d ' \n'
+    hostId = "81a45b83";
+  };
 
   # Bootloader.
   boot.loader.grub = {

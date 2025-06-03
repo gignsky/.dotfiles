@@ -41,7 +41,7 @@
             {
               networking = {
                 hostName = name;
-                hostId = name;
+                hostId = "a56f8db2";
               };
             }
             (configLib.relativeToRoot "hosts/${name}/hardware-configuration.nix")
