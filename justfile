@@ -45,7 +45,7 @@ rebuild-pre:
 
 dont-fuck-my-build:
 	git ls-files --others --exclude-standard -- '*.nix' | xargs -r git add -v
-	nix flake update nix-secrets
+	just update-nix-secrets
 	echo "Very little chance your build is fucked! 👍" | lolcat 2> /dev/null
 
 switch args="":
