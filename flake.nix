@@ -91,9 +91,11 @@
       url = "github:gignsky/tax-matrix/develop";
       flake = true;
     };
+
+    nixos-installer.url = "./nixos-installer";
   };
 
-  outputs = { self, nixpkgs, home-manager, ... } @ inputs:
+  outputs = { self, nixpkgs, home-manager, nixos-installer, ... } @ inputs:
     let
       inherit (self) outputs;
       inherit (nixpkgs) lib;
@@ -107,6 +109,7 @@
       # ];
       configVars = import ./vars { inherit inputs lib; };
       configLib = import ./lib { inherit lib; };
+      minimalIsoPath = "${nixos-installer.nixosConfigurations.iso.config.system.build.isoImage}";
       specialArgs = {
         inherit
           inputs
@@ -114,6 +117,7 @@
           nixpkgs
           configVars
           configLib
+          minimalIsoPath
           ;
       };
       customPkgs = import ./pkgs { inherit pkgs; };
@@ -187,6 +191,7 @@
       # NixOS configuration entrypoint
       # Available through 'nixos-rebuild --flake .#your-hostname'
       nixosConfigurations = {
+
         # WSL configuration entrypoint - name can not be channged from nixos without some extra work TODO
         wsl = nixpkgs.lib.nixosSystem {
           inherit system specialArgs;
@@ -233,6 +238,16 @@
         #     ./hosts/tdarr-node
         #   ];
         # };
+
+        minimal-iso-vm = nixpkgs.lib.nixosSystem {
+          inherit system specialArgs;
+          modules = [
+            ({ ... }: {
+              # This module is just a placeholder; the VM will boot from the ISO, not this config.
+              # You can add VM-specific settings here if needed.
+            })
+          ];
+        };
       };
 
       # Standalone home-manager configuration entrypoint
