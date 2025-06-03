@@ -9,7 +9,7 @@
     extraUpFlags = [
       "--ssh"
       "--accept-routes"
-      "--advertise-routes=172.29.118.0/20"
+      # "--advertise-routes=172.29.118.0/20"
     ];
   };
 }
