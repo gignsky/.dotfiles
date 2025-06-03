@@ -179,7 +179,7 @@
             quick-results
             upjust
 
-            #nececcary for bootstraping
+            #necessary for bootstrapping
             ripgrep
             ;
         };
