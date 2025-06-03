@@ -52,6 +52,10 @@ switch args="":
 	just rebuild {{args}}
 	just home
 
+clean:
+	rm -rfv result
+	quick-results
+
 # Run after every rebuild, some of the time
 rebuild-post:
 	# just check-sops
