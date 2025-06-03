@@ -44,7 +44,7 @@ rec {
     git commit -m "upjust - updated justfile"
   '';
 
-  upspell = pkgs.writeShellScriptBin "upjust" ''
+  upspell = pkgs.writeShellScriptBin "upspell" ''
     git add .cspell/custom-dictionary-workspace.txt
     git commit -m "upspell - updated spellfile"
   '';
