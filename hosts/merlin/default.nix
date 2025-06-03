@@ -21,8 +21,8 @@
     (configLib.relativeToRoot "hosts/common/core")
 
     # optional
-    (configLib.relativeToRoot "hosts/common/optional/gui.nix")
-    (configLib.relativeToRoot "hosts/common/optional/firefox.nix")
+    # (configLib.relativeToRoot "hosts/common/optional/gui.nix")
+    # (configLib.relativeToRoot "hosts/common/optional/firefox.nix")
     # ../common/optional/xrdp.nix
 
     #gig users
@@ -35,9 +35,12 @@
   networking.hostName = "merlin";
 
   # Bootloader.
-  boot.loader.grub.enable = true;
-  # boot.loader.grub.device = "/dev/nvme0n1";
-  boot.loader.grub.useOSProber = true;
+  boot.loader.grub = {
+    enable = true;
+    device = "nodev"; # Use "nodev" for UEFI
+    efiSupport = true;
+    efiInstallAsRemovable = true; # Optional
+  };
 
   nix =
     let
@@ -60,10 +63,16 @@
       nixPath = lib.mapAttrsToList (n: _: "${n}=flake:${n}") flakeInputs;
     };
 
-  # fileSystems."/" =
-  #   { device = "/dev/dm-0";
-  #     fsType = "ext4";
-  #   };
+  fileSystems = {
+    "/" = {
+      device = "/dev/nvme0n1p3";
+      fsType = "zfs";
+    };
+    "/boot" = {
+      device = "/dev/nvme0n1p2";
+      fsType = "vfat";
+    };
+  };
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   system.stateVersion = "25.05";
