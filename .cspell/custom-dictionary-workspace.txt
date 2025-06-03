@@ -6,13 +6,14 @@ cdrom
 countertop
 direnv
 direnvrc
-cachix
 disko
 dont
+downscript
 ganoslal
 gignsky
 graphviz
 hostfwd
+ifname
 juspay
 justfile
 keygen
@@ -20,6 +21,7 @@ lazygit
 libvirtd
 luks
 neofetch
+netdev
 networkmanager
 neve
 nixd
