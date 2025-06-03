@@ -74,7 +74,7 @@
       fsType = "zfs";
     };
     "/boot" = {
-      device = "/dev/nvme0n1p2";
+      device = "/dev/nvme1n1p2";
       fsType = "vfat";
     };
     "/nix/store" = {
