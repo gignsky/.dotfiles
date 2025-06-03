@@ -184,6 +184,11 @@ post-build:
 #     sudo nixos-rebuild test --flake ~/.dotfiles/.
 #     home-manager switch --flake ~/.dotfiles/.
 
+# run vm with minimal iso
+vm:
+    nix build ./nixos-installer#nixosConfigurations.iso.config.system.build.isoImage
+    bash scripts/run-minimal-iso-vm.sh
+
 iso:
 	# If we dont remove this folder, libvirtd VM doesnt run with the new iso...
 	# rm ~/virtualization-boot-files/template/iso/nixos*
