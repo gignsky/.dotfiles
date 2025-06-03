@@ -3,6 +3,7 @@ disko
 doesnt
 dont
 gignsky
+graphviz
 keygen
 libvirtd
 neofetch
@@ -12,3 +13,4 @@ nixpkgs
 nufetch
 redyf
 secretsmgmt
+Tpng
