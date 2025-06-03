@@ -1,4 +1,6 @@
 # Custom Dictionary Words
+anydesk
+bitwarden
 btop
 btrfs
 cachix
@@ -40,6 +42,7 @@ oport
 pkgs
 qcow
 redyf
+remmina
 secretsmgmt
 tdarr
 testbuzz
