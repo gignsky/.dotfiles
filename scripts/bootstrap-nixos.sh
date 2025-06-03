@@ -325,7 +325,7 @@ if [ "$always_yes" == "false" ]; then
 		green "Rebuilding .dotfiles on $target_hostname"
 		#FIXME there are still a gitlab fingerprint request happening during the rebuild
 		#$ssh_cmd -oForwardAgent=yes "cd .dotfiles && sudo nixos-rebuild --show-trace --flake .#$target_hostname" switch"
-		$ssh_cmd -oForwardAgent=yes "cd .dotfiles && direnv allow && just rebuild-full"
+		$ssh_cmd -oForwardAgent=yes "cd .dotfiles && direnv allow && nix develop && just rebuild-full"
 		$ssh_cmd -oForwardAgent=yes "cd .dotfiles && just sops-fix"
 	fi
 	else
