@@ -1,4 +1,5 @@
 # Custom Dictionary Words
+cachix
 cdrom
 countertop
 disko
@@ -11,6 +12,7 @@ nixd
 nixos
 nixpkgs
 nufetch
+numtide
 nvme
 pkgs
 qcow
@@ -20,3 +22,4 @@ tdarr
 testbuzz
 upjust
 virtio
+treefmt
