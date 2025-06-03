@@ -38,7 +38,12 @@
             }
             ./minimal-configuration.nix
             { _module.args = { inherit qemuGuest; }; }
-            { networking.hostName = name; }
+            {
+              networking = {
+                hostName = name;
+                hostId = name;
+              };
+            }
             (configLib.relativeToRoot "hosts/${name}/hardware-configuration.nix")
           ];
         });
