@@ -37,7 +37,7 @@ pull-rebuild-full:
 pull-nix-secrets:
 	cd ~/nix-secrets && git fetch && git pull && cd ~/.dotfiles
 
-# Run before every rebuild, everytime
+# Run before every rebuild, every time
 rebuild-pre:
 	nix-shell -p lolcat --run 'echo "[PRE] Rebuilding NixOS..." | lolcat 2> /dev/null'
 	just dont-fuck-my-build
@@ -224,7 +224,7 @@ vm:
 # reconnect to vm that has already been created
 vm-reconnect:
 	nix-shell -p lolcat --run 'echo "[VM] Reconnecting to VM..." | lolcat 2> /dev/null'
-	nix shell nixpkgs#qemu --command bash -c 'bash scripts/run-minimal-iso-vm.sh ./tmp-iso/nixos-vm/minimal-vm.img'
+	just call-vm
 
 # run vm with minimal iso - while deleting files afterwards
 vm-tmp:
@@ -233,7 +233,7 @@ vm-tmp:
 	just cleanup-vm
 
 iso:
-	# If we dont remove this folder, libvirtd VM doesnt run with the new iso...
+	# If we dont remove this folder, libvirtd VM doesn't run with the new iso...
 	# rm ~/virtualization-boot-files/template/iso/nixos*
 	just pre-build
 	nix build ./nixos-installer#nixosConfigurations.iso.config.system.build.isoImage
@@ -338,7 +338,7 @@ bootstrap *args:
 #   nix flake update nix-secrets
 #
 # iso:
-#   # If we dont remove this folder, libvirtd VM doesnt run with the new iso...
+#   # If we dont remove this folder, libvirtd VM doesn't run with the new iso...
 #   rm -rf result
 #   nix build ./nixos-installer#nixosConfigurations.minimalIso.config.system.build.isoImage
 #
