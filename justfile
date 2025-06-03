@@ -190,10 +190,19 @@ post-build:
 
 # run vm with minimal iso
 vm:
-    nix build ./nixos-installer#nixosConfigurations.iso.config.system.build.isoImage
-    quick-results
-    nix shell nixpkgs#qemu --command bash -c 'mkdir -p ./tmp-iso/nixos-vm && qemu-img create -f qcow2 -q ./tmp-iso/nixos-vm/minimal-vm.img 16G; bash scripts/run-minimal-iso-vm.sh result/iso/*.iso ./tmp-iso/nixos-vm/minimal-vm.img'
-    rm -rfv ./tmp-iso
+	nix-shell -p lolcat --run "[VM] Building ISO... | lolcat 2> /dev/null"
+	nix build ./nixos-installer#nixosConfigurations.iso.config.system.build.isoImage
+	nix-shell -p lolcat --run "[VM] Showing Results... | lolcat 2> /dev/null"
+	quick-results
+	nix-shell -p lolcat --run "[VM] Making tmp-iso dir... | lolcat 2> /dev/null"
+	nix shell nixpkgs#qemu --command bash -c 'mkdir -p ./tmp-iso/nixos-vm'
+	nix-shell -p lolcat --run "[VM] Creating qemu img from ISO... | lolcat 2> /dev/null"
+	nix shell nixpkgs#qemu --command bash -c 'qemu-img create -f qcow2 -q ./tmp-iso/nixos-vm/minimal-vm.img 16G'
+	nix-shell -p lolcat --run "[VM] Running VM... | lolcat 2> /dev/null"
+	nix shell nixpkgs#qemu --command bash -c 'bash scripts/run-minimal-iso-vm.sh result/iso/*.iso ./tmp-iso/nixos-vm/minimal-vm.img'
+	nix-shell -p lolcat --run "[VM] Removing tmp-iso dir... | lolcat 2> /dev/null"
+	rm -rfv ./tmp-iso
+	nix-shell -p lolcat --run "[VM] tmp-iso removed. | lolcat 2> /dev/null"
 
 iso:
 	# If we dont remove this folder, libvirtd VM doesnt run with the new iso...
