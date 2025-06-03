@@ -201,7 +201,7 @@ setup-vm:
 	nix-shell -p lolcat --run 'echo "[VM] Creating qemu img from ISO..." | lolcat 2> /dev/null'
 	nix shell nixpkgs#qemu --command bash -c 'qemu-img create -f qcow2 -q ./tmp-iso/nixos-vm/minimal-vm.img 16G'
 
-# helper justfile arg
+# cleanup vm files
 cleanup-vm:
 	nix-shell -p lolcat --run 'echo "[VM] Removing tmp-iso dir..." | lolcat 2> /dev/null'
 	rm -rfv ./tmp-iso
