@@ -43,6 +43,7 @@ pkgs
 qcow
 redyf
 secretsmgmt
+secretspath
 tdarr
 testbuzz
 toplevel
