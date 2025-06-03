@@ -1,10 +1,14 @@
 # Custom Dictionary Words
 disko
-neve
-nixpkgs
-nixos
-neofetch
-nufetch
+doesnt
+dont
 gignsky
+keygen
+libvirtd
+neofetch
+neve
+nixos
+nixpkgs
+nufetch
 redyf
 secretsmgmt
