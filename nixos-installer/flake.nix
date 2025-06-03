@@ -55,7 +55,7 @@
         # buzz = newConfig "buzz" "/dev/sda" true;
         # cams-countertop = newConfig "cams-countertop" "/dev/sda" true;
         # tdarr-node = newConfig "tdarr-node" "/dev/sda" true;
-        merlin = newConfig "merlin" "/dev/nvme0n1" true;
+        merlin = newConfig "merlin" "/dev/sr0" true;
 
         # Custom ISO
         #
