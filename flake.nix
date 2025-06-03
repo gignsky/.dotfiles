@@ -109,6 +109,7 @@
       # ];
       configVars = import ./vars { inherit inputs lib; };
       configLib = import ./lib { inherit lib; };
+      minimalIsoPath = "${nixos-installer.nixosConfigurations.iso.config.system.build.isoImage}";
       specialArgs = {
         inherit
           inputs
@@ -116,6 +117,7 @@
           nixpkgs
           configVars
           configLib
+          minimalIsoPath
           ;
       };
       customPkgs = import ./pkgs { inherit pkgs; };
@@ -189,15 +191,14 @@
       # NixOS configuration entrypoint
       # Available through 'nixos-rebuild --flake .#your-hostname'
       nixosConfigurations = {
-        minimal-iso-vm = nixpkgs.lib.nixosSystem {
-          inherit system;
-          modules = [
-            (configLib.relativeToRoot "hosts/minimal-iso-vm/default.nix")
-          ];
-          specialArgs = {
-            minimalIsoPath = "${nixos-installer.nixosConfigurations.iso.config.system.build.isoImage}";
-          };
-        };
+        # minimal-iso-vm = nixpkgs.lib.nixosSystem {
+        #   inherit system;
+        #   modules = [
+        #     (configLib.relativeToRoot "hosts/minimal-iso-vm/default.nix")
+        #   ];
+        #   specialArgs = {
+        #   };
+        # };
 
         # WSL configuration entrypoint - name can not be channged from nixos without some extra work TODO
         wsl = nixpkgs.lib.nixosSystem {
