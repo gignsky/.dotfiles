@@ -213,7 +213,7 @@ cleanup-vm:
 # helper justfile arg
 call-vm:
 	nix-shell -p lolcat --run 'echo "[VM] Running VM..." | lolcat 2> /dev/null'
-	nix shell nixpkgs#qemu --command bash -c 'bash scripts/run-minimal-iso-vm.sh result/iso/*.iso ./tmp-iso/nixos-vm/minimal-vm.img'
+	- nix shell nixpkgs#qemu --command bash -c 'bash scripts/run-minimal-iso-vm.sh result/iso/*.iso ./tmp-iso/nixos-vm/minimal-vm.img'
 	nix-shell -p lolcat --run 'echo "[VM] VM Closed." | lolcat 2> /dev/null'
 
 # run vm with minimal iso - while not deleting files afterwards
