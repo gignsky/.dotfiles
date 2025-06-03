@@ -1,10 +1,11 @@
 # Custom Dictionary Words
 disko
-neve
-nixpkgs
-nixos
-neofetch
-nufetch
 gignsky
+neofetch
+neve
+nixos
+nixpkgs
+nufetch
+qcow
 redyf
 secretsmgmt
