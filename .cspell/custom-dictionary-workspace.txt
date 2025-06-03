@@ -1,4 +1,5 @@
 # Custom Dictionary Words
+countertop
 disko
 gignsky
 neofetch
@@ -6,6 +7,9 @@ neve
 nixos
 nixpkgs
 nufetch
+nvme
 qcow
 redyf
 secretsmgmt
+tdarr
+testbuzz
