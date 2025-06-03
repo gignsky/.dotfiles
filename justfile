@@ -302,8 +302,8 @@ rekey:
 sops-fix:
 	just pre-home
 	just update-nix-secrets
-	home-manager switch --refresh --flake ~/.dotfiles/.
 	systemctl --user reset-failed
+	home-manager switch --refresh --flake ~/.dotfiles/.
 	just home
 
 update-nix-secrets:
