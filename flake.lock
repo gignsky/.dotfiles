@@ -1066,14 +1066,15 @@
         "nixpkgs": "nixpkgs_4"
       },
       "locked": {
-        "path": "./nixos-installer",
+        "lastModified": 1,
+        "narHash": "sha256-SiDPtfeUEBcS5jjYCPvn76WYF3iA9xoyjLh45uMgRIM=",
+        "path": "nixos-installer",
         "type": "path"
       },
       "original": {
-        "path": "./nixos-installer",
+        "path": "nixos-installer",
         "type": "path"
-      },
-      "parent": []
+      }
     },
     "nixos-wsl": {
       "inputs": {
