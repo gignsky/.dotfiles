@@ -52,6 +52,14 @@
               mountpoint = "/";
             };
           };
+          nix = {
+            type = "zfs_fs";
+            mountpoint = "/nix/store";
+            options = {
+              canmount = "on";
+              mountpoint = "/nix/store";
+            };
+          };
         };
       };
     };
