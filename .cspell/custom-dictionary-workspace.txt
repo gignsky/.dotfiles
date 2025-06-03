@@ -1,15 +1,22 @@
 # Custom Dictionary Words
+cdrom
 countertop
 disko
 gignsky
+hostfwd
+lazygit
 neofetch
 neve
+nixd
 nixos
 nixpkgs
 nufetch
 nvme
+pkgs
 qcow
 redyf
 secretsmgmt
 tdarr
 testbuzz
+upjust
+virtio
