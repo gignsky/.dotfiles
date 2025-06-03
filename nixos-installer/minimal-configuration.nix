@@ -1,10 +1,9 @@
-{
-  lib,
-  pkgs,
-  configLib,
-  configVars,
-  qemuGuest ? false,
-  ...
+{ lib
+, pkgs
+, configLib
+, configVars
+, qemuGuest ? false
+, ...
 }:
 let
   sshPort = configVars.networking.sshPort;
@@ -66,18 +65,18 @@ in
       magic-wormhole
       just
       ;
-    };
+  };
 
   programs.direnv = {
-    	enable = true;
-   	    package = pkgs.direnv;
-        silent = false;
-        loadInNixShell = true;
-        direnvrcExtra = "";
-        nix-direnv = {
-            enable = true;
-            package = pkgs.nix-direnv;
-        };
+    enable = true;
+    package = pkgs.direnv;
+    silent = false;
+    loadInNixShell = true;
+    direnvrcExtra = "";
+    nix-direnv = {
+      enable = true;
+      package = pkgs.nix-direnv;
+    };
   };
 
   nix.settings = {
@@ -87,5 +86,5 @@ in
     ];
     warn-dirty = false;
   };
-  system.stateVersion = "24.05";
+  system.stateVersion = "25.05";
 }
