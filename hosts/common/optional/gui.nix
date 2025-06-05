@@ -1,6 +1,6 @@
 { config, lib, pkgs, modulesPath, ... }:
 
-{  
+{
   # gui stuff
 
   # configure keymap in x11

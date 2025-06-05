@@ -39,7 +39,7 @@
     # ];
 
     # Append custom content to the end of .zshrc
-    initExtra = ''
+    initContent = ''
       # ~/.zshrc
 
       # # alias-finder plugin's options from https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/alias-finder

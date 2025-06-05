@@ -1,6 +1,6 @@
 { config, lib, pkgs, modulesPath, ... }:
 
-{  
+{
   # rdp stuff    
   services.xrdp = {
     enable = true;
@@ -12,7 +12,7 @@
   };
 
   # workaround for slow initalization and lack of clipboard support, clipboard not working still :(
-#  environment.etc = {
- #   "xrdp/sesman.ini".source = "${config.services.xrdp.confDir}/sesman.ini";
+  #  environment.etc = {
+  #   "xrdp/sesman.ini".source = "${config.services.xrdp.confDir}/sesman.ini";
   #};
 }

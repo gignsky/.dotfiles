@@ -4,8 +4,8 @@
   # inputs,
   outputs
 , lib
-# , config,
-,  pkgs
+  # , config,
+, pkgs
 , ...
 }:
 {
@@ -14,10 +14,9 @@
     # Or modules exported from other flakes (such as nix-colors):
     # inputs.nix-colors.homeManagerModules.default
 
-    ./common/core
     ./home.nix
-    ./common/optional/vscode
-    ./cams-countertop.nix
+    # ./common/optional/vscode
+    # ./cams-countertop.nix
   ];
 
   home.packages = with pkgs; [
@@ -30,5 +29,5 @@
   ];
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
-  home.stateVersion = "24.05";
+  home.stateVersion = "25.05";
 }

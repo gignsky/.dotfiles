@@ -1,7 +1,7 @@
 { outputs, lib, configLib, ... }:
 
 #let
- # homeDirectory = configLib.home.homeDirectory;
+# homeDirectory = configLib.home.homeDirectory;
 #in
 {
   programs.ssh = {

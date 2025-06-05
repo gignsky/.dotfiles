@@ -13,5 +13,5 @@
   persistFolder = "/persist";
   isMinimal = false; # Used to indicate nixos-installer build
 
-  wiatt_username = "wiatt";
+  # wiatt_username = "wiatt";
 }

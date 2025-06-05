@@ -10,4 +10,4 @@ else
 	fi
 fi
 
-sudo nixos-rebuild --impure --flake .#$HOST switch
+sudo nixos-rebuild --flake .#$HOST switch

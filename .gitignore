@@ -1,3 +1,4 @@
 .direnv/*
 .pre-commit-config.yaml
 /result
+tmp-iso/nixos-vm/minimal-vm.img

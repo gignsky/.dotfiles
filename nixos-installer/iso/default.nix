@@ -1,10 +1,8 @@
-{
-  pkgs,
-  lib,
-  config,
-  configLib,
-  configVars,
-  ...
+{ pkgs
+, lib
+, configLib
+, configVars
+, ...
 }:
 let
   sshPort = configVars.networking.sshPort;
@@ -38,15 +36,28 @@ in
   };
 
   boot = {
-    kernelPackages = pkgs.linuxPackages_latest;
+    kernelPackages = pkgs.linuxPackages_6_1; # pinned to a specific kernel version to avoid zfs-kernel module being marked as broken
     supportedFilesystems = lib.mkForce [
       "btrfs"
       "vfat"
+      "zfs"
     ];
   };
 
   networking = {
     hostName = "iso";
+  };
+
+  environment.systemPackages = with pkgs; [
+    magic-wormhole
+    btop
+    bat
+  ];
+
+  environment.shellAliases = {
+    cat = "bat";
+    ll = "ls -lh";
+    lla = "ls -lha";
   };
 
   systemd = {
