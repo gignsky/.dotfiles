@@ -13,6 +13,12 @@
     #   ~
     #   ~/local_repos
     # ];
+    dirHashes = {
+      work = "$HOME/workingFile";
+      dot = "$HOME/.dotfiles";
+      secrets = "$HOME/nix-secrets";
+      repos = "$HOME/local_repos";
+    };
     enableCompletion = true;
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
