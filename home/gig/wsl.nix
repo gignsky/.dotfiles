@@ -15,7 +15,8 @@
 
     # ./common/core
     ./home.nix
-    ./common/optional/vim.nix
+    # ./common/optional/vim.nix
+    ./common/optional/starship.nix
   ];
 
   nixpkgs = {
