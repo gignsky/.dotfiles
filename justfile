@@ -193,7 +193,6 @@ setup-vm-pre:
 	nix-shell -p lolcat --run 'echo "[VM] Running VM pre-setup..." | lolcat 2> /dev/null'
 	nix-shell -p lolcat --run 'echo "[VM] Cleaning Results dir..." | lolcat 2> /dev/null'
 	just clean
-	nix-shell -p lolcat --run 'echo "[VM] Building ISO..." | lolcat 2> /dev/null'
 	nix-shell -p lolcat --run 'echo "[VM] VM pre-setup complete." | lolcat 2> /dev/null'
 
 # helper justfile arg
@@ -211,12 +210,14 @@ setup-vm-post:
 # helper justfile arg
 setup-vm-minimal:
 	just setup-vm-pre
+	nix-shell -p lolcat --run 'echo "[VM] Building ISO..." | lolcat 2> /dev/null'
 	nix build ./nixos-installer#nixosConfigurations.iso.config.system.build.isoImage
 	just setup-vm-post
 
 # helper justfile arg
 setup-vm-full-vm:
 	just setup-vm-pre
+	nix-shell -p lolcat --run 'echo "[VM] Building ISO..." | lolcat 2> /dev/null'
 	nix-shell -p lolcat --run 'echo "[VM] Cleaning Results dir..." | lolcat 2> /dev/null'
 	just setup-vm-post
 
