@@ -71,6 +71,14 @@
       url = "github:redyf/Neve";
     };
 
+    # nixvim = {
+    #   url = "github:nix-community/nixvim/nixos-24.05";
+    #   # If you are not running an unstable channel of nixpkgs, select the corresponding branch of nixvim.
+    #   # url = "github:nix-community/nixvim/nixos-24.11";
+
+    #   # inputs.nixpkgs.follows = "nixpkgs";
+    # };
+
     #################### Personal Repositories ####################
 
     # Private secrets repo.  See ./docs/secretsmgmt.md
@@ -144,6 +152,19 @@
             #   home-manager.extraSpecialArgs = specialArgs;
             # }
             ./hosts/wsl
+          ];
+        };
+
+        #wsl based vm
+        full-vm = nixpkgs.lib.nixosSystem {
+          inherit system specialArgs;
+          modules = [
+            {
+              system.stateVersion = "25.05";
+            }
+            "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
+            "${nixpkgs}/nixos/modules/installer/cd-dvd/channel.nix"
+            ./hosts/full-vm
           ];
         };
 

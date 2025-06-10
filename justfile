@@ -189,17 +189,38 @@ post-build:
 #     home-manager switch --flake ~/.dotfiles/.
 
 # helper justfile arg
-setup-vm:
+setup-vm-pre:
+	nix-shell -p lolcat --run 'echo "[VM] Running VM pre-setup..." | lolcat 2> /dev/null'
 	nix-shell -p lolcat --run 'echo "[VM] Cleaning Results dir..." | lolcat 2> /dev/null'
 	just clean
-	nix-shell -p lolcat --run 'echo "[VM] Building ISO..." | lolcat 2> /dev/null'
-	nix build ./nixos-installer#nixosConfigurations.iso.config.system.build.isoImage
+	nix-shell -p lolcat --run 'echo "[VM] VM pre-setup complete." | lolcat 2> /dev/null'
+
+# helper justfile arg
+setup-vm-post:
+	nix-shell -p lolcat --run 'echo "[VM] Running VM post-setup..." | lolcat 2> /dev/null'
 	nix-shell -p lolcat --run 'echo "[VM] Showing Results..." | lolcat 2> /dev/null'
 	quick-results
 	nix-shell -p lolcat --run 'echo "[VM] Making tmp-iso dir..." | lolcat 2> /dev/null'
 	mkdir -p ./tmp-iso/nixos-vm
 	nix-shell -p lolcat --run 'echo "[VM] Creating qemu img from ISO..." | lolcat 2> /dev/null'
-	nix shell nixpkgs#qemu --command bash -c 'qemu-img create -f qcow2 -q ./tmp-iso/nixos-vm/minimal-vm.img 16G'
+	nix shell nixpkgs#qemu --command bash -c 'qemu-img create -f qcow2 -q ./tmp-iso/nixos-vm/vm.img 16G'
+	nix-shell -p lolcat --run 'echo "[VM] VM post-setup complete." | lolcat 2> /dev/null'
+
+
+# helper justfile arg
+setup-vm-minimal:
+	just setup-vm-pre
+	nix-shell -p lolcat --run 'echo "[VM] Building ISO..." | lolcat 2> /dev/null'
+	nix build ./nixos-installer#nixosConfigurations.iso.config.system.build.isoImage
+	just setup-vm-post
+
+# helper justfile arg
+setup-vm-full-vm:
+	just setup-vm-pre
+	nix-shell -p lolcat --run 'echo "[VM] Building ISO..." | lolcat 2> /dev/null'
+	nix build .#nixosConfigurations.full-vm.config.system.build.isoImage
+	nix-shell -p lolcat --run 'echo "[VM] Cleaning Results dir..." | lolcat 2> /dev/null'
+	just setup-vm-post
 
 # cleanup vm files
 cleanup-vm:
@@ -213,12 +234,17 @@ cleanup-vm:
 # helper justfile arg
 call-vm:
 	nix-shell -p lolcat --run 'echo "[VM] Running VM..." | lolcat 2> /dev/null'
-	- nix shell nixpkgs#qemu --command bash -c 'bash scripts/run-minimal-iso-vm.sh result/iso/*.iso ./tmp-iso/nixos-vm/minimal-vm.img'
+	- nix shell nixpkgs#qemu --command bash -c 'bash scripts/run-iso-vm.sh result/iso/*.iso ./tmp-iso/nixos-vm/vm.img'
 	nix-shell -p lolcat --run 'echo "[VM] VM Closed." | lolcat 2> /dev/null'
 
 # run vm with minimal iso - while not deleting files afterwards
-vm:
-	just setup-vm
+vm-minimal:
+	just setup-vm-minimal
+	just call-vm
+
+# run vm with full iso - while not deleting files afterwards
+vm-full:
+	just setup-vm-full-vm
 	just call-vm
 
 # reconnect to vm that has already been created
@@ -227,8 +253,14 @@ vm-reconnect:
 	just call-vm
 
 # run vm with minimal iso - while deleting files afterwards
-vm-tmp:
-	just setup-vm
+vm-tmp-minimal:
+	just setup-vm-minimal
+	just call-vm
+	just cleanup-vm
+
+# run vm with full iso - while deleting files afterwards
+vm-tmp-full:
+	just setup-vm-full-vm
 	just call-vm
 	just cleanup-vm
 
