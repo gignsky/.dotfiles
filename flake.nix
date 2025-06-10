@@ -155,6 +155,19 @@
           ];
         };
 
+        #wsl based vm
+        full-vm = nixpkgs.lib.nixosSystem {
+          inherit system specialArgs;
+          modules = [
+            {
+              system.stateVersion = "25.05";
+            }
+            "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
+            "${nixpkgs}/nixos/modules/installer/cd-dvd/channel.nix"
+            ./hosts/full-vm
+          ];
+        };
+
         # # # Merlin configuration entrypoint - unused as merlin has a wsl instance
         # merlin = nixpkgs.lib.nixosSystem {
         #   inherit system specialArgs;
