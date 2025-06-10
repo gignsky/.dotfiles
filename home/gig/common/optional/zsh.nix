@@ -15,15 +15,15 @@
 
     shellAliases = import ./shellAliases.nix;
 
-    # history = {
-    #   # save = true;
-    #   size = 10000;
-    #   # ignoreDuplicates = true;
-    #   # ignoreSpace = true;
-    #   # share = true;
-    #   # path = "${config.xdg.dataHome}/zsh/history"; # Suggested from https://nixos.wiki/wiki/Zsh
-    #   path = "/home/gig/.zsh_history";
-    # };
+    history = {
+      append = true;
+      extended = true;
+      ignoreSpace = false;
+      save = true;
+      size = 100000;
+      share = true;
+      path = "/home/gig/.zsh_history";
+    };
 
     # # Depreciated :(
     # plugins = [
