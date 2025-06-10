@@ -77,6 +77,7 @@
 
     zplug = {
       enable = true;
+      zplugHome = "~/.config/zsh/zplug";
       plugins = [
         { name = "zsh-users/zsh-autosuggestions"; }
         { name = "plugins/git"; tags = [ "from:oh-my-zsh" ]; } # Plugin from oh-my-zsh
