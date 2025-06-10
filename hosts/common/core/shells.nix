@@ -18,10 +18,11 @@
     magic-wormhole
     wget
     screen
+    just
     # neofetch
 
     # nixos-unstable packages
-    just
+    # unstable.just
 
     # Personal packages
     # wrap.wrap # example for overlays
