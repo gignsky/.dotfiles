@@ -10,10 +10,10 @@
 
   networking.hostName = "nixos";
 
-  # programs.nix-ld = {
-  #   enable = true;
-  #   package = pkgs.nix-ld-rs;
-  # };
+  programs.nix-ld = {
+    enable = true;
+    package = pkgs.nix-ld-rs;
+  };
 
   # Alternative that doesn't effect other files -- depreciated and doesn't work
   # inputs.vscode-remote-workaround.enable = true;
