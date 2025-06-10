@@ -19,8 +19,8 @@
       append = true;
       extended = true;
       ignoreSpace = false;
-      save = true;
-      # size = 100000;
+      save = 2000;
+      size = 100000;
       share = true;
       path = "/home/gig/.zsh_history";
     };
