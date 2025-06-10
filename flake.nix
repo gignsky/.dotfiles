@@ -120,6 +120,90 @@
       pkgs = nixpkgs.legacyPackages.${system} // customPkgs;
     in
     {
+
+      # NixOS configuration entrypoint
+      # Available through 'nixos-rebuild --flake .#your-hostname'
+      nixosConfigurations = {
+
+        # WSL configuration entrypoint - name can not be changed from nixos without some extra work TODO
+        wsl = nixpkgs.lib.nixosSystem {
+          inherit system specialArgs;
+          modules = [
+            inputs.vscode-server.nixosModules.default
+            ({ config, pkgs, ... }: {
+              services.vscode-server.enable = false;
+            })
+            inputs.nixos-wsl.nixosModules.default
+            {
+              system.stateVersion = "24.05";
+              wsl.enable = true;
+              # wsl.nativeSystemd = true;
+            }
+            # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
+            # home-manager.nixosModules.home-manager {
+            #   home-manager.extraSpecialArgs = specialArgs;
+            # }
+            ./hosts/wsl
+          ];
+        };
+
+        # # # Merlin configuration entrypoint - unused as merlin has a wsl instance
+        # merlin = nixpkgs.lib.nixosSystem {
+        #   inherit system specialArgs;
+        #   modules = [
+        #     # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
+        #     # home-manager.nixosModules.home-manager {
+        #     #   home-manager.extraSpecialArgs = specialArgs;
+        #     # }
+        #     ./hosts/merlin
+        #   ];
+        # };
+
+        # # Not yet working, but this is the entrypoint for a tdarr node
+        # tdarr-node = nixpkgs.lib.nixosSystem {
+        #   inherit system specialArgs;
+        #   # > Our main nixos configuration file <
+        #   modules = [
+        #     # home-manager.nixosModules.home-manager
+        #     # {
+        #     #   home-manager.extraSpecialArgs = specialArgs;
+        #     # }
+        #     ./hosts/tdarr-node
+        #   ];
+        # };
+      };
+
+      # Standalone home-manager configuration entrypoint
+      # Available through 'home-manager --flake .#your-username@your-hostname'
+      homeConfigurations = {
+        # ganoslalWSL
+        "gig@nixos" = home-manager.lib.homeManagerConfiguration {
+          inherit pkgs; # Home-manager requires 'pkgs' instance
+          extraSpecialArgs = { inherit inputs outputs configLib; };
+          # > Our main home-manager configuration file <
+          modules = [ ./home/gig/wsl.nix ];
+          # config = {
+          #   isWSL = true;
+          # };
+        };
+
+        # # merlin - unused with merlin having a wsl instance
+        # "gig@merlin" = home-manager.lib.homeManagerConfiguration {
+        #   inherit pkgs; # Home-manager requires 'pkgs' instance
+        #   extraSpecialArgs = { inherit inputs outputs configLib; };
+        #   # > Our main home-manager configuration file <
+        #   modules = [ ./home/gig/merlin.nix ];
+        # };
+
+        # # tdarr-node
+        # "gig@tdarr-node" = home-manager.lib.homeManagerConfiguration {
+        #   inherit pkgs; # Home-manager requires 'pkgs' instance
+        #   extraSpecialArgs = { inherit inputs outputs configLib; };
+        #   # > Our main home-manager configuration file <
+        #   modules = [ ./home/gig/tdarr-node.nix ];
+        # };
+      };
+
       # Custom packages to be shared or upstreamed.
       # packages = forAllSystems (
       #   system:
@@ -185,88 +269,5 @@
       # TODO change this to something that has better looking output rules
       # Nix formatter available through 'nix fmt' https://nix-community.github.io/nixpkgs-fmt
       formatter.${system} = pkgs.nixpkgs-fmt;
-
-      # NixOS configuration entrypoint
-      # Available through 'nixos-rebuild --flake .#your-hostname'
-      nixosConfigurations = {
-
-        # WSL configuration entrypoint - name can not be changed from nixos without some extra work TODO
-        wsl = nixpkgs.lib.nixosSystem {
-          inherit system specialArgs;
-          modules = [
-            inputs.vscode-server.nixosModules.default
-            ({ config, pkgs, ... }: {
-              services.vscode-server.enable = false;
-            })
-            inputs.nixos-wsl.nixosModules.default
-            {
-              system.stateVersion = "24.05";
-              wsl.enable = true;
-              # wsl.nativeSystemd = true;
-            }
-            # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
-            # home-manager.nixosModules.home-manager {
-            #   home-manager.extraSpecialArgs = specialArgs;
-            # }
-            ./hosts/wsl
-          ];
-        };
-
-        # # Merlin configuration entrypoint - unused as merlin has a wsl instance
-        merlin = nixpkgs.lib.nixosSystem {
-          inherit system specialArgs;
-          modules = [
-            # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
-            # home-manager.nixosModules.home-manager {
-            #   home-manager.extraSpecialArgs = specialArgs;
-            # }
-            ./hosts/merlin
-          ];
-        };
-
-        # # Not yet working, but this is the entrypoint for a tdarr node
-        # tdarr-node = nixpkgs.lib.nixosSystem {
-        #   inherit system specialArgs;
-        #   # > Our main nixos configuration file <
-        #   modules = [
-        #     # home-manager.nixosModules.home-manager
-        #     # {
-        #     #   home-manager.extraSpecialArgs = specialArgs;
-        #     # }
-        #     ./hosts/tdarr-node
-        #   ];
-        # };
-      };
-
-      # Standalone home-manager configuration entrypoint
-      # Available through 'home-manager --flake .#your-username@your-hostname'
-      homeConfigurations = {
-        # ganoslalWSL
-        "gig@nixos" = home-manager.lib.homeManagerConfiguration {
-          inherit pkgs; # Home-manager requires 'pkgs' instance
-          extraSpecialArgs = { inherit inputs outputs configLib; };
-          # > Our main home-manager configuration file <
-          modules = [ ./home/gig/wsl.nix ];
-          # config = {
-          #   isWSL = true;
-          # };
-        };
-
-        # merlin - unused with merlin having a wsl instance
-        "gig@merlin" = home-manager.lib.homeManagerConfiguration {
-          inherit pkgs; # Home-manager requires 'pkgs' instance
-          extraSpecialArgs = { inherit inputs outputs configLib; };
-          # > Our main home-manager configuration file <
-          modules = [ ./home/gig/merlin.nix ];
-        };
-
-        # # tdarr-node
-        # "gig@tdarr-node" = home-manager.lib.homeManagerConfiguration {
-        #   inherit pkgs; # Home-manager requires 'pkgs' instance
-        #   extraSpecialArgs = { inherit inputs outputs configLib; };
-        #   # > Our main home-manager configuration file <
-        #   modules = [ ./home/gig/tdarr-node.nix ];
-        # };
-      };
     };
 }
