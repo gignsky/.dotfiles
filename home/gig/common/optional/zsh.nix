@@ -8,9 +8,13 @@
 
   programs.zsh = {
     enable = true;
+    autocd = true;
+    # cdpath = [
+    #   ~
+    #   ~/local_repos
+    # ];
     enableCompletion = true;
     autosuggestion.enable = true;
-    autocd = true;
     syntaxHighlighting.enable = true;
 
     shellAliases = import ./shellAliases.nix;
