@@ -19,6 +19,7 @@
       secrets = "$HOME/nix-secrets";
       repos = "$HOME/local_repos";
     };
+    dotDir = ".config/zsh";
     enableCompletion = true;
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
