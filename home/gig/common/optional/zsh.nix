@@ -34,35 +34,35 @@
     #   }
     # ];
 
-    #   # Append custom content to the end of .zshrc
-    #   initContent = ''
-    #     # ~/.zshrc
+    # Append custom content to the end of .zshrc
+    initContent = ''
+      # ~/.zshrc
 
-    #     # # alias-finder plugin's options from https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/alias-finder
-    #     # zstyle ':omz:plugins:alias-finder' autoload yes # disabled by default
-    #     # zstyle ':omz:plugins:alias-finder' longer yes # disabled by default
-    #     # zstyle ':omz:plugins:alias-finder' exact no # disabled by default
-    #     # zstyle ':omz:plugins:alias-finder' cheaper no # disabled by default
+      # # alias-finder plugin's options from https://github.com/ohmyzsh/ohmyzsh/tree/master/plugins/alias-finder
+      # zstyle ':omz:plugins:alias-finder' autoload yes # disabled by default
+      # zstyle ':omz:plugins:alias-finder' longer yes # disabled by default
+      # zstyle ':omz:plugins:alias-finder' exact no # disabled by default
+      # zstyle ':omz:plugins:alias-finder' cheaper no # disabled by default
 
-    #     # # Colorize option
-    #     # ZSH_COLORIZE_TOOL=chroma
-    #     # ZSH_COLORIZE_STYLE="colorful"
+      # # Colorize option
+      # ZSH_COLORIZE_TOOL=chroma
+      # ZSH_COLORIZE_STYLE="colorful"
 
-    #     # docker options
-    #     zstyle ':completion:*:*:docker:*' option-stacking yes
-    #     zstyle ':completion:*:*:docker-*:*' option-stacking yes
+      # # docker options
+      # zstyle ':completion:*:*:docker:*' option-stacking yes
+      # zstyle ':completion:*:*:docker-*:*' option-stacking yes
 
-    #     # eza options
-    #     zstyle ':omz:plugins:eza' 'dirs-first' yes
-    #     zstyle ':omz:plugins:eza' 'git-status' yes
-    #     zstyle ':omz:plugins:eza' 'header' yes
-    #     zstyle ':omz:plugins:eza' 'show-group' yes
-    #     zstyle ':omz:plugins:eza' 'icons' yes
-    #     zstyle ':omz:plugins:eza' 'hyperlink' yes
+      # eza options
+      zstyle ':omz:plugins:eza' 'dirs-first' yes
+      zstyle ':omz:plugins:eza' 'git-status' yes
+      zstyle ':omz:plugins:eza' 'header' yes
+      zstyle ':omz:plugins:eza' 'show-group' yes
+      zstyle ':omz:plugins:eza' 'icons' yes
+      zstyle ':omz:plugins:eza' 'hyperlink' yes
 
-    #     # fzf config
-    #     export FZF_BASE=${pkgs.fzf}/bin/fzf
-    #   '';
+      # # fzf config
+      # export FZF_BASE=${pkgs.fzf}/bin/fzf
+    '';
 
     #   zplug = {
     #     enable = true;
@@ -129,7 +129,7 @@
   home.packages = with pkgs; [
     # direnv
     # python3 #needed for aliases plugin from oh-my-zsh and other alias plugin
-    # eza #needed for eza plugin
+    eza #needed for eza plugin
     # fzf #needed for fzf plugin
     # gitflow #needed for git-flow plugin
     # git-lfs #needed for git-lfs plugin
