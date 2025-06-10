@@ -140,7 +140,7 @@
 
   home.packages = with pkgs; [
     direnv
-    # python3 #needed for aliases plugin from oh-my-zsh and other alias plugin
+    python3 #needed for aliases plugin from oh-my-zsh and other alias plugin
     eza #needed for eza plugin
     fzf #needed for fzf plugin
     gitflow #needed for git-flow plugin
