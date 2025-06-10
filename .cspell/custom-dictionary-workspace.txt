@@ -1,9 +1,12 @@
 # Custom Dictionary Words
+alsmod
 anydesk
 bitwarden
+bluskript
 btop
 btrfs
 cachix
+ccls
 cdrom
 cifs
 countertop
@@ -14,6 +17,7 @@ disko
 dont
 downscript
 ganoslal
+gedit
 gignsky
 graphviz
 hostfwd
@@ -23,7 +27,9 @@ justfile
 keygen
 lazygit
 libvirtd
+localnmap
 luks
+mkpasswd
 mountpoint
 neofetch
 netdev
@@ -32,6 +38,8 @@ neve
 nixd
 nixos
 nixpkgs
+nixup
+nmap
 nmcli
 nmtui
 nodev
@@ -45,6 +53,7 @@ pkgs
 qcow
 redyf
 remmina
+rustup
 secretsmgmt
 secretspath
 tdarr
