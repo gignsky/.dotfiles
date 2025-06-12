@@ -23,4 +23,4 @@ qemu-system-x86_64 \
   # -enable-kvm \
   -net nic -net user,hostfwd=tcp::2222-:22 \
   -drive file="${DISK_IMG}",format=qcow2,if=virtio \
-  -drive file=${EXTRA_DISK},format=qcow2,if=scsi
+  -drive file=${EXTRA_DISK},format=qcow2,if=ide
