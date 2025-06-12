@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 ISO_PATH="$1"
 DISK_IMG="$2"
-CREATE_EXTRA_DISK="$3"
-CLEANUP_EXTRA_DISK="$4"
+CLEANUP_EXTRA_DISK="$3"
 
 # Uncomment the next line to enable KVM
 # -enable-kvm
