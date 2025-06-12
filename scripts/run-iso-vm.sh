@@ -15,8 +15,6 @@ if [[ "$CLEANUP_EXTRA_DISK" == "yes" ]]; then
   trap cleanup EXIT
 fi
 
-EXTRA_DRIVE_ARG="-drive file=${EXTRA_DISK},format=qcow2,if=scsi"
-
 qemu-system-x86_64 \
   -m 2048 \
   -smp 2 \
@@ -25,4 +23,4 @@ qemu-system-x86_64 \
   # -enable-kvm \
   -net nic -net user,hostfwd=tcp::2222-:22 \
   -drive file="${DISK_IMG}",format=qcow2,if=virtio \
-  $EXTRA_DRIVE_ARG
+  -drive file=${EXTRA_DISK},format=qcow2,if=scsi
