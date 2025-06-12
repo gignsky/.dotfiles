@@ -226,6 +226,8 @@ setup-vm-full-vm:
 cleanup-vm:
 	nix-shell -p lolcat --run 'echo "[VM] Removing tmp-iso dir..." | lolcat 2> /dev/null'
 	rm -rfv ./tmp-iso
+	nix-shell -p lolcat --run 'echo "[VM] Removing Extra 15G Disk..." | lolcat 2> /dev/null'
+	rm -rfv /tmp/vm-extra.qcow2
 	nix-shell -p lolcat --run 'echo "[VM] tmp-iso removed." | lolcat 2> /dev/null'
 	nix-shell -p lolcat --run 'echo "[VM] Cleaning Results dir..." | lolcat 2> /dev/null'
 	just clean
