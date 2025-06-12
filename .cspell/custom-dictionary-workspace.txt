@@ -16,6 +16,7 @@ direnvrc
 disko
 dont
 downscript
+extradisk
 ganoslal
 gedit
 gignsky
