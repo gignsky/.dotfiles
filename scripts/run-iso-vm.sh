@@ -1,14 +1,12 @@
 #!/usr/bin/env bash
 ISO_PATH="$1"
 DISK_IMG="$2"
-CREATE_EXTRA_DISK="$3"
-CLEANUP_EXTRA_DISK="$4"
+CLEANUP_EXTRA_DISK="$3"
 
 EXTRA_DISK="/tmp/vm-extra.qcow2"
 
-if [[ "$CREATE_EXTRA_DISK" == "yes" && ! -f "$EXTRA_DISK" ]]; then
-  qemu-img create -f qcow2 "$EXTRA_DISK" 15G
-fi
+# create the extra disk
+qemu-img create -f qcow2 -q "$EXTRA_DISK" 15G
 
 if [[ "$CLEANUP_EXTRA_DISK" == "yes" ]]; then
   cleanup() {
@@ -17,10 +15,7 @@ if [[ "$CLEANUP_EXTRA_DISK" == "yes" ]]; then
   trap cleanup EXIT
 fi
 
-EXTRA_DRIVE_ARG=""
-if [[ -f "$EXTRA_DISK" ]]; then
-  EXTRA_DRIVE_ARG="-drive file=${EXTRA_DISK},format=qcow2,if=virtio"
-fi
+EXTRA_DRIVE_ARG="-drive file=${EXTRA_DISK},format=qcow2,if=virtio"
 
 qemu-system-x86_64 \
   -m 2048 \
