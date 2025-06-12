@@ -237,31 +237,43 @@ call-vm:
 	- nix shell nixpkgs#qemu --command bash -c 'bash scripts/run-iso-vm.sh result/iso/*.iso ./tmp-iso/nixos-vm/vm.img'
 	nix-shell -p lolcat --run 'echo "[VM] VM Closed." | lolcat 2> /dev/null'
 
+# helper justfile arg
+call-vm use-extra-disk="no":
+    nix-shell -p lolcat --run 'echo "[VM] Running VM..." | lolcat 2> /dev/null'
+    - nix shell nixpkgs#qemu --command bash -c 'bash scripts/run-iso-vm.sh result/iso/*.iso ./tmp-iso/nixos-vm/vm.img {{use-extra-disk}}'
+    nix-shell -p lolcat --run 'echo "[VM] VM Closed." | lolcat 2> /dev/null'
+
+# helper justfile arg
+call-vm create-extra-disk="yes" cleanup-extra-disk="no":
+    nix-shell -p lolcat --run 'echo "[VM] Running VM..." | lolcat 2> /dev/null'
+    - nix shell nixpkgs#qemu --command bash -c 'bash scripts/run-iso-vm.sh result/iso/*.iso ./tmp-iso/nixos-vm/vm.img {{create-extra-disk}} {{cleanup-extra-disk}}'
+    nix-shell -p lolcat --run 'echo "[VM] VM Closed." | lolcat 2> /dev/null'
+
 # run vm with minimal iso - while not deleting files afterwards
 vm-minimal:
 	just setup-vm-minimal
-	just call-vm
+	just call-vm yes no
 
 # run vm with full iso - while not deleting files afterwards
 vm-full:
 	just setup-vm-full-vm
-	just call-vm
+	just call-vm yes no
 
 # reconnect to vm that has already been created
 vm-reconnect:
 	nix-shell -p lolcat --run 'echo "[VM] Reconnecting to VM..." | lolcat 2> /dev/null'
-	just call-vm
+	just call-vm yes no
 
 # run vm with minimal iso - while deleting files afterwards
 vm-tmp-minimal:
 	just setup-vm-minimal
-	just call-vm
+	just call-vm yes yes
 	just cleanup-vm
 
 # run vm with full iso - while deleting files afterwards
 vm-tmp-full:
 	just setup-vm-full-vm
-	just call-vm
+	just call-vm yes yes
 	just cleanup-vm
 
 iso:
