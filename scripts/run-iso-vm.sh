@@ -6,7 +6,7 @@ CLEANUP_EXTRA_DISK="$3"
 EXTRA_DISK="/tmp/vm-extra.qcow2"
 
 # create the extra disk
-qemu-img create -f qcow2 -q "$EXTRA_DISK" 15G
+qemu-img create -f raw "$EXTRA_DISK" 15G
 
 if [[ "$CLEANUP_EXTRA_DISK" == "yes" ]]; then
   cleanup() {
