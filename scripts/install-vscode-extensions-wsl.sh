@@ -26,10 +26,10 @@ print_summary() {
     done
     printf '\n'
   fi
-  if [ ${#removed_exts[@]} -gt 0 ]; then
-    printf '\033[1;31m🗑️  Removed (not in declarative list):\033[0m\n'
-    for ext in "${removed_exts[@]}"; do
-      printf '  \033[1;31m🗑️  %s\033[0m\n' "$ext"
+  if [ ${#skipped_already_installed[@]} -gt 0 ]; then
+    printf '\033[1;36m⏭️  Skipped (already installed and up-to-date):\033[0m\n'
+    for ext in "${skipped_already_installed[@]}"; do
+      printf '  \033[1;36m⏭️  %s\033[0m\n' "$ext"
     done
     printf '\n'
   fi
@@ -37,6 +37,13 @@ print_summary() {
     printf '\033[1;33m❓ Skipped (not found or could not be installed):\033[0m\n'
     for ext in "${skipped_not_found[@]}"; do
       printf '  \033[1;33m❓ %s\033[0m\n' "$ext"
+    done
+    printf '\n'
+  fi
+  if [ ${#removed_exts[@]} -gt 0 ]; then
+    printf '\033[1;31m🗑️  Removed (not in declarative list):\033[0m\n'
+    for ext in "${removed_exts[@]}"; do
+      printf '  \033[1;31m🗑️  %s\033[0m\n' "$ext"
     done
     printf '\n'
   fi
@@ -137,7 +144,7 @@ fi
 # debug "DL_CMD_RAW: $DL_CMD_RAW"
 
 # debug "Getting list of already installed extensions..."
-mapfile -t already_installed < <($CODE_CMD --list-extensions 2>/dev/null)
+mapfile -t already_installed < <("$CODE_CMD" --list-extensions 2>/dev/null)
 # debug "Already installed: ${already_installed[*]}"
 
 failover=0
@@ -221,39 +228,101 @@ function download_openvsx_vsix() {
 CACHE_DIR="$HOME/.cache/vscode-vsix"
 mkdir -p "$CACHE_DIR"
 
-VSCODE_CLI_USER_DATA_DIR="$HOME/.vscode-cli"
-mkdir -p "$VSCODE_CLI_USER_DATA_DIR"
-CODE_CMD="$CODE_BIN --user-data-dir $VSCODE_CLI_USER_DATA_DIR"
+# Remove custom user data dir, use default
+CODE_CMD="$CODE_BIN"
 
 # Get list of already installed extensions and their versions
-mapfile -t already_installed < <($CODE_CMD --list-extensions 2>/dev/null)
+mapfile -t already_installed < <("$CODE_CMD" --list-extensions 2>/dev/null)
 declare -A installed_versions
 while read -r line; do
   extid="${line%% *}"
-  ver=$($CODE_CMD --show-versions | grep "^$extid@" | cut -d'@' -f2)
+  ver=$("$CODE_CMD" --show-versions | grep "^$extid@" | cut -d'@' -f2)
   [ -n "$ver" ] && installed_versions[$extid]="$ver"
-done < <($CODE_CMD --list-extensions 2>/dev/null)
+done < <("$CODE_CMD" --list-extensions 2>/dev/null)
+
+# Pre-process extension list
+mapfile -t declared_exts < <(jq -r '.[]' "$EXT_LIST_FILE" | tr -d '\0')
+to_install=()
+to_update=()
+skipped_already_installed=()
+skipped_not_found=()
+
+is_extension_available() {
+  publisher="$1"
+  name="$2"
+  # Check Open VSX
+  if curl -sS -A 'Mozilla/5.0' "https://open-vsx.org/api/$publisher/$name" | jq -e '.name' >/dev/null; then
+    return 0
+  fi
+  # Check Marketplace
+  local api_url="https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery"
+  local extid="$publisher.$name"
+  local payload='{ "filters": [ { "criteria": [ { "filterType": 7, "value": "'"$extid"'" } ] } ], "flags": 914 }'
+  local response
+  response=$(curl -sS -A 'Mozilla/5.0' -fSL "$api_url" \
+    -H "Content-Type: application/json" \
+    -H "Accept: application/json;api-version=3.0-preview.1" \
+    --data-binary @- <<< "$payload")
+  if echo "$response" | jq -e '.results[0].extensions[0].extensionName' >/dev/null; then
+    return 0
+  fi
+  return 1
+}
+
+for ext in "${declared_exts[@]}"; do
+  publisher="${ext%%.*}"
+  name="${ext#*.}"
+  # Check if extension is available
+  if ! is_extension_available "$publisher" "$name"; then
+    skipped_not_found+=("$ext (not available on Open VSX or Marketplace)")
+    continue
+  fi
+  # Get installed version
+  current_version="${installed_versions[$ext]}"
+  # Get latest version from Open VSX
+  latest_version_ovsx=$(curl -sS -A 'Mozilla/5.0' "https://open-vsx.org/api/$publisher/$name" | jq -r '.version // empty')
+  # Get latest version from Marketplace
+  latest_version_marketplace=""
+  response=$(curl -sS -A 'Mozilla/5.0' -fSL "https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery" \
+    -H "Content-Type: application/json" \
+    -H "Accept: application/json;api-version=3.0-preview.1" \
+    --data-binary @- <<< '{ "filters": [ { "criteria": [ { "filterType": 7, "value": "'$publisher.$name'" } ] } ], "flags": 914 }')
+  latest_version_marketplace=$(echo "$response" | jq -r '.results[0].extensions[0].versions[0].version // empty')
+  # Determine latest version from either source
+  latest_version="$latest_version_ovsx"
+  if [ -n "$latest_version_marketplace" ]; then
+    latest_version="$latest_version_marketplace"
+  fi
+  # If not installed, add to install
+  if [ -z "$current_version" ]; then
+    to_install+=("$ext")
+    continue
+  fi
+  # If installed and up-to-date, skip
+  if [ -n "$current_version" ] && [ -n "$latest_version" ] && [ "$current_version" = "$latest_version" ]; then
+    skipped_already_installed+=("$ext")
+    continue
+  fi
+  # If installed but outdated, add to update
+  if [ -n "$current_version" ] && [ -n "$latest_version" ] && [ "$current_version" != "$latest_version" ]; then
+    to_update+=("$ext|$current_version|$latest_version")
+    continue
+  fi
+done
 
 # Use temp files for parallel-safe result collection
 TMPDIR=$(mktemp -d)
 trap 'rm -rf "$TMPDIR"; print_summary' EXIT
 
-# Function to install a single extension (to be run in parallel)
+INSTALLED_EXTS_FILE="$TMPDIR/installed_exts"
+
 install_extension() {
   ext="$1"
   publisher="${ext%%.*}"
   name="${ext#*.}"
-  vsix_file=""
-  # Check if already installed
-  if printf '%s\n' "${already_installed[@]}" | grep -qx "$ext"; then
-    echo "$ext" >> "$TMPDIR/skipped_already_installed"
-    return
-  fi
-  # Try to use cached VSIX first
-  latest_version=""
-  vsix_file="$CACHE_DIR/$publisher.$name-latest.vsix"
-  # Get latest version from Open VSX (faster, no auth)
   latest_version=$(curl -sS -A 'Mozilla/5.0' "https://open-vsx.org/api/$publisher/$name" | jq -r '.version // empty')
+  vsix_file=""
+  # Try Open VSX first
   if [ -n "$latest_version" ]; then
     vsix_file="$CACHE_DIR/$publisher.$name-$latest_version.vsix"
     if [ ! -f "$vsix_file" ]; then
@@ -261,7 +330,12 @@ install_extension() {
       $DL_CMD "$vsix_file" "$url" >/dev/null 2>&1
     fi
     if [ -f "$vsix_file" ] && file "$vsix_file" | grep -q 'Zip archive data'; then
-      $CODE_CMD --install-extension "$vsix_file" --force >/dev/null 2>&1 && echo "$ext" >> "$TMPDIR/installed" || echo "$ext (install failed)" >> "$TMPDIR/failed"
+      install_output=$("$CODE_CMD" --install-extension "$vsix_file" --force 2>&1)
+      if echo "$install_output" | grep -qi 'success'; then
+        echo "$ext" >> "$TMPDIR/installed"
+      else
+        echo "$ext (install failed)" >> "$TMPDIR/failed"
+      fi
       return
     fi
   fi
@@ -272,32 +346,86 @@ install_extension() {
     [ -n "$mp_vsix" ] && mv "$mp_vsix" "$vsix_file"
   fi
   if [ -f "$vsix_file" ] && file "$vsix_file" | grep -q 'Zip archive data'; then
-    $CODE_CMD --install-extension "$vsix_file" --force >/dev/null 2>&1 && echo "$ext" >> "$TMPDIR/installed" || echo "$ext (install failed)" >> "$TMPDIR/failed"
+    install_output=$("$CODE_CMD" --install-extension "$vsix_file" --force 2>&1)
+    if echo "$install_output" | grep -qi 'success'; then
+      echo "$ext" >> "$TMPDIR/installed"
+    else
+      echo "$ext (install failed)" >> "$TMPDIR/failed"
+    fi
     return
   fi
-  echo "$ext" >> "$TMPDIR/skipped_not_found"
+  echo "$ext (not found)" >> "$TMPDIR/skipped_not_found"
 }
 
-# Parallel install loop with concurrency limit
+# Add update_extension function
+update_extension() {
+  ext="$1"
+  oldver="$2"
+  newver="$3"
+  publisher="${ext%%.*}"
+  name="${ext#*.}"
+  vsix_file="$CACHE_DIR/$publisher.$name-$newver.vsix"
+  if [ ! -f "$vsix_file" ]; then
+    url="https://open-vsx.org/api/$publisher/$name/$newver/file/$publisher.$name-$newver.vsix"
+    $DL_CMD "$vsix_file" "$url" >/dev/null 2>&1
+  fi
+  if [ -f "$vsix_file" ] && file "$vsix_file" | grep -q 'Zip archive data'; then
+    install_output=$("$CODE_CMD" --install-extension "$vsix_file" --force 2>&1)
+    if echo "$install_output" | grep -qi 'success'; then
+      echo "$ext ($oldver -> $newver)" >> "$TMPDIR/updated_exts"
+    else
+      echo "$ext (update failed)" >> "$TMPDIR/failed"
+    fi
+    return
+  fi
+  # Fallback: try Marketplace
+  vsix_file="$CACHE_DIR/$publisher.$name-marketplace.vsix"
+  if [ ! -f "$vsix_file" ]; then
+    mp_vsix=$(download_marketplace_vsix "$publisher" "$name")
+    [ -n "$mp_vsix" ] && mv "$mp_vsix" "$vsix_file"
+  fi
+  if [ -f "$vsix_file" ] && file "$vsix_file" | grep -q 'Zip archive data'; then
+    install_output=$("$CODE_CMD" --install-extension "$vsix_file" --force 2>&1)
+    if echo "$install_output" | grep -qi 'success'; then
+      echo "$ext ($oldver -> $newver)" >> "$TMPDIR/updated_exts"
+    else
+      echo "$ext (update failed)" >> "$TMPDIR/failed"
+    fi
+    return
+  fi
+  echo "$ext (update not found)" >> "$TMPDIR/skipped_not_found"
+}
+
+# Only install/update missing or outdated extensions
 CONCURRENCY=16
 pids=()
-while IFS= read -r ext; do
+# Install new extensions
+for ext in "${to_install[@]}"; do
   install_extension "$ext" &
   pids+=("$!")
-  # Limit concurrency
   if (( ${#pids[@]} >= CONCURRENCY )); then
     wait "${pids[0]}"
     pids=("${pids[@]:1}")
   fi
-done < <(jq -r '.[]' "$EXT_LIST_FILE" | tr -d '\0')
+done
+# Update outdated extensions
+for extinfo in "${to_update[@]}"; do
+  IFS='|' read -r ext oldver newver <<< "$extinfo"
+  update_extension "$ext" "$oldver" "$newver" &
+  pids+=("$!")
+  if (( ${#pids[@]} >= CONCURRENCY )); then
+    wait "${pids[0]}"
+    pids=("${pids[@]:1}")
+  fi
+done
 # Wait for remaining jobs
 for pid in "${pids[@]}"; do
   wait "$pid"
 done
 
+
 # Remove extensions not in the declarative list
-mapfile -t declared_exts < <(jq -r '.[]' "$EXT_LIST_FILE" | tr -d '\0')
-mapfile -t current_exts < <($CODE_CMD --list-extensions 2>/dev/null)
+mapfile -t current_exts < <("$CODE_CMD" --list-extensions 2>/dev/null)
 for ext in "${current_exts[@]}"; do
   found=0
   for declared in "${declared_exts[@]}"; do
@@ -313,24 +441,6 @@ for ext in "${current_exts[@]}"; do
 
 done
 
-# Only update extensions if version is out of date
-for ext in "${declared_exts[@]}"; do
-  publisher="${ext%%.*}"
-  name="${ext#*.}"
-  latest_version=$(curl -sS -A 'Mozilla/5.0' "https://open-vsx.org/api/$publisher/$name" | jq -r '.version // empty')
-  current_version="${installed_versions[$ext]}"
-  if [ -n "$latest_version" ] && [ "$latest_version" != "$current_version" ]; then
-    vsix_file="$CACHE_DIR/$publisher.$name-$latest_version.vsix"
-    if [ ! -f "$vsix_file" ]; then
-      url="https://open-vsx.org/api/$publisher/$name/$latest_version/file/$publisher.$name-$latest_version.vsix"
-      $DL_CMD "$vsix_file" "$url" >/dev/null 2>&1
-    fi
-    if [ -f "$vsix_file" ] && file "$vsix_file" | grep -q 'Zip archive data'; then
-      $CODE_CMD --install-extension "$vsix_file" --force >/dev/null 2>&1 && echo "$ext" >> "$TMPDIR/updated_exts"
-    fi
-  fi
-done
-
 # Aggregate results from temp files into arrays for summary
 installed=(); [ -f "$TMPDIR/installed" ] && mapfile -t installed < "$TMPDIR/installed"
 skipped_already_installed=(); [ -f "$TMPDIR/skipped_already_installed" ] && mapfile -t skipped_already_installed < "$TMPDIR/skipped_already_installed"
@@ -338,3 +448,4 @@ skipped_not_found=(); [ -f "$TMPDIR/skipped_not_found" ] && mapfile -t skipped_n
 failed=(); [ -f "$TMPDIR/failed" ] && mapfile -t failed < "$TMPDIR/failed"
 removed_exts=(); [ -f "$TMPDIR/removed_exts" ] && mapfile -t removed_exts < "$TMPDIR/removed_exts"
 updated_exts=(); [ -f "$TMPDIR/updated_exts" ] && mapfile -t updated_exts < "$TMPDIR/updated_exts"
+
