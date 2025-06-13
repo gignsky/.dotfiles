@@ -1,4 +1,4 @@
-_:
+{ config, pkgs, ... }:
 
 {
   services.tailscale = {
