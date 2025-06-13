@@ -66,8 +66,18 @@ set +e  # Use manual error handling throughout the script
 
 # set -euo pipefail  # Removed to avoid conflict with set +e
 
-DEBUG=1
-function debug() { echo -e "[DEBUG] $@"; }
+DEBUG="${DEBUG:-0}"
+# Enhanced debug function with levels
+function debug() {
+  local level=1
+  if [[ "$1" =~ ^[0-9]+$ ]]; then
+    level="$1"
+    shift
+  fi
+  if [ "$DEBUG" -ge "$level" ]; then
+    echo -e "[DEBUG] $@"
+  fi
+}
 
 export PATH="/bin:/usr/bin:$PATH"
 
