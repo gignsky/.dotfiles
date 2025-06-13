@@ -61,12 +61,6 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
-    # # Declarative partitioning and formatting
-    # disko = {
-    #   url = "github:nix-community/disko";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
-
     neve = {
       url = "github:redyf/Neve";
     };
