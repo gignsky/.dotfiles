@@ -69,11 +69,11 @@ fi
 # debug "Final CODE_BIN: $CODE_BIN"
 
 if command -v curl >/dev/null 2>&1; then
-  DL_CMD="curl -A 'Mozilla/5.0' -fSL -o"
-  DL_CMD_RAW="curl -A 'Mozilla/5.0' -fSL"
+  DL_CMD="curl -s -A 'Mozilla/5.0' -fSL -o"
+  DL_CMD_RAW="curl -s -A 'Mozilla/5.0' -fSL"
 elif command -v wget >/dev/null 2>&1; then
-  DL_CMD="wget --user-agent='Mozilla/5.0' -O"
-  DL_CMD_RAW="wget --user-agent='Mozilla/5.0' -O-"
+  DL_CMD="wget -q --user-agent='Mozilla/5.0' -O"
+  DL_CMD_RAW="wget -q --user-agent='Mozilla/5.0' -O-"
 else
   echo "Neither curl nor wget found. Please install one to download VSIX files."
   exit 1
@@ -102,7 +102,7 @@ function download_marketplace_vsix() {
   local response
   # debug "Querying Marketplace for $extid ..."
   # debug "Marketplace API URL: $api_url"
-  response=$(curl -A 'Mozilla/5.0' -fSL "$api_url" \
+  response=$(curl -sS -A 'Mozilla/5.0' -fSL "$api_url" \
     -H "Content-Type: application/json" \
     -H "Accept: application/json;api-version=3.0-preview.1" \
     --data-binary @- <<< "$payload")
@@ -118,7 +118,7 @@ function download_marketplace_vsix() {
   fi
   local vsix_file="/tmp/$publisher.$name-$version.vsix"
   # debug "Downloading from Marketplace: $vsix_url -> $vsix_file"
-  curl -A 'Mozilla/5.0' -fSL -o "$vsix_file" "$vsix_url"
+  curl -sS -A 'Mozilla/5.0' -fSL -o "$vsix_file" "$vsix_url" >/dev/null 2>&1
   if [ $? -eq 0 ] && file "$vsix_file" | grep -q 'Zip archive data'; then
     # debug "Downloaded valid VSIX from Marketplace: $vsix_file"
     echo "$vsix_file"
@@ -142,7 +142,7 @@ function download_openvsx_vsix() {
   # debug "Querying Open VSX for $publisher.$name ..."
   # debug "Open VSX API URL: $api_url"
   local latest_version
-  latest_version=$(curl -A 'Mozilla/5.0' -S "$api_url" | jq -r '.version // empty')
+  latest_version=$(curl -sS -A 'Mozilla/5.0' "$api_url" | jq -r '.version // empty')
   # debug "Open VSX version for $publisher.$name: $latest_version"
   if [ -z "$latest_version" ]; then
     # debug "[OPENVSX] No version found for $publisher.$name on Open VSX. Skipping download."
@@ -152,7 +152,7 @@ function download_openvsx_vsix() {
   # debug "Constructed Open VSX VSIX URL: $vsix_url"
   local vsix_file="/tmp/$publisher.$name-$latest_version.vsix"
   # debug "Downloading from Open VSX: $vsix_url -> $vsix_file"
-  $DL_CMD "$vsix_file" "$vsix_url"
+  $DL_CMD "$vsix_file" "$vsix_url" >/dev/null 2>&1
   if [ $? -eq 0 ] && file "$vsix_file" | grep -q 'Zip archive data'; then
     # debug "Downloaded valid VSIX from Open VSX: $vsix_file"
     echo "$vsix_file"
