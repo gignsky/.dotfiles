@@ -191,8 +191,7 @@ post-build:
 # helper justfile arg
 setup-vm-pre:
 	nix-shell -p lolcat --run 'echo "[VM] Running VM pre-setup..." | lolcat 2> /dev/null'
-	nix-shell -p lolcat --run 'echo "[VM] Cleaning Results dir..." | lolcat 2> /dev/null'
-	just clean
+	just cleanup-vm
 	nix-shell -p lolcat --run 'echo "[VM] VM pre-setup complete." | lolcat 2> /dev/null'
 
 # helper justfile arg
