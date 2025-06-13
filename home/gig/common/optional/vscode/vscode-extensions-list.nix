@@ -11,7 +11,7 @@
   "donjayamanne.githistory"
   "duniul.git-stage"
   "dustypomerleau.rust-syntax"
-  "fill-labs.dependi"
+  # "fill-labs.dependi"
   "github.copilot"
   "github.copilot-chat"
   "github.vscode-github-actions"
