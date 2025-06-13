@@ -1,10 +1,6 @@
 #!/usr/bin/env bash
 ISO_PATH="$1"
 DISK_IMG="$2"
-CLEANUP_EXTRA_DISK="$3"
-
-# Uncomment the next line to enable KVM
-# -enable-kvm
 
 qemu-system-x86_64 \
   -m 2048 \
