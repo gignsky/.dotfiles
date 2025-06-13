@@ -158,48 +158,6 @@ fi
 debug 4 "DL_CMD: $DL_CMD"
 debug 4 "DL_CMD_RAW: $DL_CMD_RAW"
 
-function download_marketplace_vsix() {
-  debug 1 "[MARKETPLACE] Entered download_marketplace_vsix for $1.$2"
-  local publisher="$1"
-  local name="$2"
-  local extid="$publisher.$name"
-  local api_url="https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery"
-  local vsix_url version
-  local payload='{ "filters": [ { "criteria": [ { "filterType": 7, "value": "'"$extid"'" } ] } ], "flags": 914 }'
-  local response
-  debug 2 "Querying Marketplace for $extid ..."
-  debug 3 "Marketplace API URL: $api_url"
-  response=$(curl -sS -A 'Mozilla/5.0' -fSL "$api_url" \
-    -H "Content-Type: application/json" \
-    -H "Accept: application/json;api-version=3.0-preview.1" \
-    --data-binary @- <<< "$payload")
-  version=$(echo "$response" | jq -r '.results[0].extensions[0].versions[0].version // empty')
-  debug 2 "Marketplace version for $extid: $version"
-  if [ -z "$version" ]; then
-    return 1
-  fi
-  vsix_url=$(echo "$response" | jq -r '.results[0].extensions[0].versions[0].assetUri + "/Microsoft.VisualStudio.Services.VSIXPackage"')
-  debug 3 "Marketplace VSIX URL for $extid: $vsix_url"
-  if [ -z "$vsix_url" ]; then
-    return 1
-  fi
-  local vsix_file="/tmp/$publisher.$name-$version.vsix"
-  debug 3 "Downloading from Marketplace: $vsix_url -> $vsix_file"
-  curl -sS -A 'Mozilla/5.0' -fSL -o "$vsix_file" "$vsix_url" >/dev/null 2>&1
-  if [ $? -eq 0 ] && file "$vsix_file" | grep -q 'Zip archive data'; then
-    debug 2 "Downloaded valid VSIX from Marketplace: $vsix_file"
-    echo "$vsix_file"
-    return 0
-  else
-    debug 1 "Failed to download valid VSIX from Marketplace for $extid"
-    [ -f "$vsix_file" ] && {
-      debug 4 "First 10 lines of failed VSIX file:"
-      # head -10 "$vsix_file"
-      rm -f "$vsix_file"
-    }
-    return 1
-  fi
-}
 
 function download_openvsx_vsix() {
   debug 1 "[OPENVSX] Entered download_openvsx_vsix for $1.$2"
@@ -493,25 +451,15 @@ install_extension() {
   ext="$1"
   publisher="${ext%%.*}"
   name="${ext#*.}"
-  # Try Marketplace first
-  debug 2 "[install_extension] Checking Marketplace for $publisher.$name"
-  vsix_file="$CACHE_DIR/$publisher.$name-marketplace.vsix"
-  if [ ! -f "$vsix_file" ]; then
-    debug 2 "[install_extension] Downloading Marketplace VSIX for $publisher.$name"
-    mp_vsix=$(download_marketplace_vsix "$publisher" "$name")
-    [ -n "$mp_vsix" ] && mv "$mp_vsix" "$vsix_file"
-  fi
-  if [ -f "$vsix_file" ] && file "$vsix_file" | grep -q 'Zip archive data'; then
-    debug 2 "[install_extension] Installing from Marketplace VSIX: $vsix_file"
-    install_output=$("$CODE_CMD" --install-extension "$vsix_file" --force 2>&1)
-    if echo "$install_output" | grep -qi 'success'; then
-      debug 1 "[install_extension] Successfully installed $ext from Marketplace"
-      echo "$ext" >> "$TMPDIR/installed"
-    else
-      debug 1 "[install_extension] Failed to install $ext from Marketplace"
-      echo "$ext (install failed)" >> "$TMPDIR/failed"
-    fi
+  # Use code CLI directly instead of downloading VSIX
+  install_output=$("$CODE_CMD" --install-extension "$publisher.$name" --force 2>&1)
+  if echo "$install_output" | grep -qi 'success'; then
+    debug 1 "[install_extension] Successfully installed $ext via code CLI"
+    echo "$ext" >> "$TMPDIR/installed"
     return
+  else
+    debug 1 "[install_extension] Failed to install $ext via code CLI"
+    echo "$ext (install failed)" >> "$TMPDIR/failed"
   fi
   # Fallback: try Open VSX
   debug 2 "[install_extension] Checking Open VSX for $publisher.$name"
@@ -540,29 +488,19 @@ update_extension() {
   newver="$3"
   publisher="${ext%%.*}"
   name="${ext#*.}"
-  # Try Marketplace first
-  debug 2 "[update_extension] Checking Marketplace for $publisher.$name"
-  vsix_file="$CACHE_DIR/$publisher.$name-marketplace.vsix"
-  if [ ! -f "$vsix_file" ]; then
-    debug 2 "[update_extension] Downloading Marketplace VSIX for $publisher.$name"
-    mp_vsix=$(download_marketplace_vsix "$publisher" "$name")
-    [ -n "$mp_vsix" ] && mv "$mp_vsix" "$vsix_file"
-  fi
-  if [ -f "$vsix_file" ] && file "$vsix_file" | grep -q 'Zip archive data'; then
-    debug 2 "[update_extension] Installing from Marketplace VSIX: $vsix_file"
-    install_output=$("$CODE_CMD" --install-extension "$vsix_file" --force 2>&1)
-    if echo "$install_output" | grep -qi 'success'; then
-      debug 1 "[update_extension] Successfully updated $ext from Marketplace"
-      echo "$ext ($oldver -> $newver)" >> "$TMPDIR/updated_exts"
-      return
-    else
-      debug 1 "[update_extension] Failed to update $ext from Marketplace"
-    fi
+  # Use code CLI directly instead of downloading VSIX
+  install_output=$("$CODE_CMD" --install-extension "$publisher.$name" --force 2>&1)
+  if echo "$install_output" | grep -qi 'success'; then
+    debug 1 "[update_extension] Successfully updated $ext via code CLI"
+    echo "$ext ($oldver -> $newver)" >> "$TMPDIR/updated_exts"
+    return
+  else
+    debug 1 "[update_extension] Failed to update $ext via code CLI"
+    echo "$ext (update failed)" >> "$TMPDIR/failed"
   fi
   # Fallback: try Open VSX, but only if the version is different
   debug 2 "[update_extension] Checking Open VSX for $publisher.$name"
   ovsx_vsix=$(download_openvsx_vsix "$publisher" "$name")
-  # Get Open VSX version
   ovsx_version=$(curl -sS -A 'Mozilla/5.0' "https://open-vsx.org/api/$publisher/$name" | jq -r '.version // empty')
   if [ "$ovsx_version" = "$oldver" ]; then
     debug 1 "[update_extension] Open VSX version $ovsx_version is same as installed $oldver; marking as failed update."
