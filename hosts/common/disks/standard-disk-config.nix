@@ -23,6 +23,7 @@
               type = "filesystem";
               format = "vfat";
               mountpoint = "/boot";
+              label = "BOOT"; # Add this line
             };
           };
           root = {
