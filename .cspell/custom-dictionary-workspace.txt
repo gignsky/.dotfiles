@@ -16,6 +16,7 @@ direnvrc
 disko
 dont
 downscript
+extid
 ganoslal
 gedit
 gignsky
@@ -48,7 +49,10 @@ numtide
 nvme
 oflag
 omnix
+openvsx
+OPENVSX
 oport
+pids
 pkgs
 qcow
 redyf
