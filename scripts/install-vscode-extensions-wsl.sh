@@ -218,64 +218,74 @@ function download_openvsx_vsix() {
   fi
 }
 
-# debug "Starting extension install loop..."
-set +e  # Disable exit on error for the loop
-while IFS= read -r ext; do
-  # debug "Processing $ext ..."
-  if printf '%s\n' "${already_installed[@]}" | grep -qx "$ext"; then
-    # debug "$ext is already installed, skipping."
-    skipped_already_installed+=("$ext")
-    continue
-  fi
+CACHE_DIR="$HOME/.cache/vscode-vsix"
+mkdir -p "$CACHE_DIR"
+
+# Get list of already installed extensions and their versions
+mapfile -t already_installed < <("$CODE_BIN" --list-extensions 2>/dev/null)
+declare -A installed_versions
+while read -r line; do
+  extid="${line%% *}"
+  ver=$("$CODE_BIN" --show-versions | grep "^$extid@" | cut -d'@' -f2)
+  [ -n "$ver" ] && installed_versions[$extid]="$ver"
+done < <("$CODE_BIN" --list-extensions 2>/dev/null)
+
+# Function to install a single extension (to be run in parallel)
+install_extension() {
+  ext="$1"
   publisher="${ext%%.*}"
   name="${ext#*.}"
   vsix_file=""
-  install_error=""
-  if [ "$failover" -eq 0 ]; then
-    vsix_file=$(download_marketplace_vsix "$publisher" "$name" | tr -d '\0') || true
-    if [ -n "$vsix_file" ] && [ -f "$vsix_file" ]; then
-      # debug "Installing $ext from Marketplace VSIX: $vsix_file"
-      install_output=$("$CODE_BIN" --install-extension "$vsix_file" --force 2>&1)
-      if echo "$install_output" | grep -qi 'Signature verification failed'; then
-        failed+=("$ext (Signature verification failed)")
-      elif echo "$install_output" | grep -qi 'Failed Installing Extensions'; then
-        failed+=("$ext (Failed installing extension)")
-      elif echo "$install_output" | grep -qi 'error'; then
-        failed+=("$ext (Unknown error)")
-      elif [ $? -eq 0 ]; then
-        installed+=("$ext")
-      else
-        failed+=("$ext (Unknown error)")
-      fi
-      rm -f "$vsix_file"
-      continue
-    fi
-    # debug "Marketplace failed for $ext, switching to failover."
-    failover=1
+  # Check if already installed
+  if printf '%s\n' "${already_installed[@]}" | grep -qx "$ext"; then
+    skipped_already_installed+=("$ext")
+    return
   fi
-  download_openvsx_vsix "$publisher" "$name"
-  vsix_file=$(ls /tmp/"$publisher.$name"-*.vsix 2>/dev/null | head -n1)
-  if [ -n "$vsix_file" ] && [ -f "$vsix_file" ]; then
-    # debug "Installing $ext from Open VSX VSIX: $vsix_file"
-    install_output=$("$CODE_BIN" --install-extension "$vsix_file" --force 2>&1)
-    if echo "$install_output" | grep -qi 'Signature verification failed'; then
-      failed+=("$ext (Signature verification failed)")
-    elif echo "$install_output" | grep -qi 'Failed Installing Extensions'; then
-      failed+=("$ext (Failed installing extension)")
-    elif echo "$install_output" | grep -qi 'error'; then
-      failed+=("$ext (Unknown error)")
-    elif [ $? -eq 0 ]; then
-      installed+=("$ext")
-    else
-      failed+=("$ext (Unknown error)")
+  # Try to use cached VSIX first
+  latest_version=""
+  vsix_file="$CACHE_DIR/$publisher.$name-latest.vsix"
+  # Get latest version from Open VSX (faster, no auth)
+  latest_version=$(curl -sS -A 'Mozilla/5.0' "https://open-vsx.org/api/$publisher/$name" | jq -r '.version // empty')
+  if [ -n "$latest_version" ]; then
+    vsix_file="$CACHE_DIR/$publisher.$name-$latest_version.vsix"
+    if [ ! -f "$vsix_file" ]; then
+      url="https://open-vsx.org/api/$publisher/$name/$latest_version/file/$publisher.$name-$latest_version.vsix"
+      $DL_CMD "$vsix_file" "$url" >/dev/null 2>&1
     fi
-    rm -f "$vsix_file"
-    continue
+    if [ -f "$vsix_file" ] && file "$vsix_file" | grep -q 'Zip archive data'; then
+      "$CODE_BIN" --install-extension "$vsix_file" --force >/dev/null 2>&1 && installed+=("$ext") || failed+=("$ext (install failed)")
+      return
+    fi
   fi
-  # debug "Failed to install $ext from both sources."
+  # Fallback: try Marketplace
+  vsix_file="$CACHE_DIR/$publisher.$name-marketplace.vsix"
+  if [ ! -f "$vsix_file" ]; then
+    mp_vsix=$(download_marketplace_vsix "$publisher" "$name")
+    [ -n "$mp_vsix" ] && mv "$mp_vsix" "$vsix_file"
+  fi
+  if [ -f "$vsix_file" ] && file "$vsix_file" | grep -q 'Zip archive data'; then
+    "$CODE_BIN" --install-extension "$vsix_file" --force >/dev/null 2>&1 && installed+=("$ext") || failed+=("$ext (install failed)")
+    return
+  fi
   skipped_not_found+=("$ext")
+}
+
+# Parallel install loop with concurrency limit
+CONCURRENCY=6
+pids=()
+while IFS= read -r ext; do
+  install_extension "$ext" &
+  pids+=("$!")
+  # Limit concurrency
+  if (( ${#pids[@]} >= CONCURRENCY )); then
+    wait "${pids[0]}"
+    pids=("${pids[@]:1}")
+  fi
 done < <(jq -r '.[]' "$EXT_LIST_FILE" | tr -d '\0')
-set -e  # Re-enable exit on error
+# Wait for remaining jobs
+for pid in "${pids[@]}"; do
+  wait "$pid"
+done
 
 # Remove extensions not in the declarative list
 mapfile -t declared_exts < <(jq -r '.[]' "$EXT_LIST_FILE" | tr -d '\0')
@@ -295,43 +305,20 @@ for ext in "${current_exts[@]}"; do
 
 done
 
-# Update extensions if a new version is available
+# Only update extensions if version is out of date
 for ext in "${declared_exts[@]}"; do
-  if printf '%s\n' "${current_exts[@]}" | grep -qx "$ext"; then
-    # Try to update the extension; VS Code CLI will update if a new version is available
-    update_output=$("$CODE_BIN" --install-extension "$ext" --force 2>&1)
-    if echo "$update_output" | grep -qE 'updated to|Updating the extension|was successfully installed'; then
-      updated_exts+=("$ext")
-    elif echo "$update_output" | grep -qi 'Signature verification failed'; then
-      # Try failover update from Open VSX if signature verification fails
-      publisher="${ext%%.*}"
-      name="${ext#*.}"
-      download_openvsx_vsix "$publisher" "$name"
-      vsix_file=$(ls /tmp/"$publisher.$name"-*.vsix 2>/dev/null | head -n1)
-      if [ -n "$vsix_file" ] && [ -f "$vsix_file" ]; then
-        failover_update_output=$("$CODE_BIN" --install-extension "$vsix_file" --force 2>&1)
-        if echo "$failover_update_output" | grep -q 'updated to'; then
-          updated_exts+=("$ext (updated via failover)")
-        elif echo "$failover_update_output" | grep -qi 'Signature verification failed'; then
-          failed+=("$ext (Signature verification failed during update from both sources)")
-        elif echo "$failover_update_output" | grep -qi 'Failed Installing Extensions'; then
-          failed+=("$ext (Failed installing extension during update from Open VSX)")
-        elif echo "$failover_update_output" | grep -qi 'error'; then
-          failed+=("$ext (Unknown error during update from Open VSX)")
-        else
-          failed+=("$ext (Unknown error during update from Open VSX)")
-        fi
-        rm -f "$vsix_file"
-      else
-        failed+=("$ext (Signature verification failed during update, and not found on Open VSX)")
-      fi
-    elif echo "$update_output" | grep -qi 'Failed Installing Extensions'; then
-      failed+=("$ext (Failed installing extension during update)")
-    elif echo "$update_output" | grep -qi 'error'; then
-      failed+=("$ext (Unknown error during update)")
+  publisher="${ext%%.*}"
+  name="${ext#*.}"
+  latest_version=$(curl -sS -A 'Mozilla/5.0' "https://open-vsx.org/api/$publisher/$name" | jq -r '.version // empty')
+  current_version="${installed_versions[$ext]}"
+  if [ -n "$latest_version" ] && [ "$latest_version" != "$current_version" ]; then
+    vsix_file="$CACHE_DIR/$publisher.$name-$latest_version.vsix"
+    if [ ! -f "$vsix_file" ]; then
+      url="https://open-vsx.org/api/$publisher/$name/$latest_version/file/$publisher.$name-$latest_version.vsix"
+      $DL_CMD "$vsix_file" "$url" >/dev/null 2>&1
+    fi
+    if [ -f "$vsix_file" ] && file "$vsix_file" | grep -q 'Zip archive data'; then
+      "$CODE_BIN" --install-extension "$vsix_file" --force >/dev/null 2>&1 && updated_exts+=("$ext")
     fi
   fi
-
 done
-
-# debug "Extension install loop complete."
