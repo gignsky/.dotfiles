@@ -4,8 +4,8 @@
 
 set -euo pipefail
 
-DEBUG=${DEBUG:-1}
-function debug() { [ "$DEBUG" = 1 ] && echo -e "[DEBUG] $@"; }
+DEBUG=1
+function debug() { echo -e "[DEBUG] $@"; }
 
 export PATH="/bin:/usr/bin:$PATH"
 
@@ -29,7 +29,6 @@ if [ ! -f "$EXT_LIST_FILE" ]; then
   exit 1
 fi
 
-# Try to find the VS Code CLI
 CODE_BIN="$(command -v code 2>/dev/null || true)"
 
 debug "CODE_BIN resolved to: $CODE_BIN"
@@ -69,23 +68,12 @@ fi
 
 debug "Final CODE_BIN: $CODE_BIN"
 
-# Set download commands based on DEBUG
 if command -v curl >/dev/null 2>&1; then
-  if [ "$DEBUG" = 1 ]; then
-    DL_CMD="curl -A 'Mozilla/5.0' -fSL -o"
-    DL_CMD_RAW="curl -A 'Mozilla/5.0' -fSL"
-  else
-    DL_CMD="curl -A 'Mozilla/5.0' -fsSL -o"
-    DL_CMD_RAW="curl -A 'Mozilla/5.0' -fsSL"
-  fi
+  DL_CMD="curl -A 'Mozilla/5.0' -fSL -o"
+  DL_CMD_RAW="curl -A 'Mozilla/5.0' -fSL"
 elif command -v wget >/dev/null 2>&1; then
-  if [ "$DEBUG" = 1 ]; then
-    DL_CMD="wget --user-agent='Mozilla/5.0' -O"
-    DL_CMD_RAW="wget --user-agent='Mozilla/5.0' -O-"
-  else
-    DL_CMD="wget --user-agent='Mozilla/5.0' -qO"
-    DL_CMD_RAW="wget --user-agent='Mozilla/5.0' -qO-"
-  fi
+  DL_CMD="wget --user-agent='Mozilla/5.0' -O"
+  DL_CMD_RAW="wget --user-agent='Mozilla/5.0' -O-"
 else
   echo "Neither curl nor wget found. Please install one to download VSIX files."
   exit 1
@@ -114,29 +102,10 @@ function download_marketplace_vsix() {
   local response
   debug "Querying Marketplace for $extid ..."
   debug "Marketplace API URL: $api_url"
-  if command -v curl >/dev/null 2>&1; then
-    if [ "$DEBUG" = 1 ]; then
-      response=$(curl -A 'Mozilla/5.0' -fSL "$api_url" \
-        -H "Content-Type: application/json" \
-        -H "Accept: application/json;api-version=3.0-preview.1" \
-        --data-binary @- <<< "$payload")
-    else
-      response=$(curl -A 'Mozilla/5.0' -fsSL "$api_url" \
-        -H "Content-Type: application/json" \
-        -H "Accept: application/json;api-version=3.0-preview.1" \
-        --data-binary @- <<< "$payload" 2>/dev/null)
-    fi
-  elif command -v wget >/dev/null 2>&1; then
-    if [ "$DEBUG" = 1 ]; then
-      debug "[WARN] Marketplace API with wget may not support POST."
-      response=$(wget --user-agent='Mozilla/5.0' --header="Content-Type: application/json" --header="Accept: application/json;api-version=3.0-preview.1" --post-data="$payload" "$api_url" -O -)
-    else
-      response=$(wget --user-agent='Mozilla/5.0' --header="Content-Type: application/json" --header="Accept: application/json;api-version=3.0-preview.1" --post-data="$payload" "$api_url" -qO-)
-    fi
-  else
-    debug "No curl or wget found for Marketplace API call."
-    return 1
-  fi
+  response=$(curl -A 'Mozilla/5.0' -fSL "$api_url" \
+    -H "Content-Type: application/json" \
+    -H "Accept: application/json;api-version=3.0-preview.1" \
+    --data-binary @- <<< "$payload")
   version=$(echo "$response" | jq -r '.results[0].extensions[0].versions[0].version // empty')
   debug "Marketplace version for $extid: $version"
   if [ -z "$version" ]; then
@@ -149,11 +118,7 @@ function download_marketplace_vsix() {
   fi
   local vsix_file="/tmp/$publisher.$name-$version.vsix"
   debug "Downloading from Marketplace: $vsix_url -> $vsix_file"
-  if [ "$DEBUG" = 1 ]; then
-    curl -A 'Mozilla/5.0' -fSL -o "$vsix_file" "$vsix_url"
-  else
-    curl -A 'Mozilla/5.0' -fsSL -o "$vsix_file" "$vsix_url" 2>/dev/null
-  fi
+  curl -A 'Mozilla/5.0' -fSL -o "$vsix_file" "$vsix_url"
   if [ $? -eq 0 ] && file "$vsix_file" | grep -q 'Zip archive data'; then
     debug "Downloaded valid VSIX from Marketplace: $vsix_file"
     echo "$vsix_file"
@@ -177,19 +142,7 @@ function download_openvsx_vsix() {
   debug "Querying Open VSX for $publisher.$name ..."
   debug "Open VSX API URL: $api_url"
   local latest_version
-  if command -v curl >/dev/null 2>&1; then
-    if [ "$DEBUG" = 1 ]; then
-      latest_version=$(curl -A 'Mozilla/5.0' -S "$api_url" | jq -r '.version // empty')
-    else
-      latest_version=$(curl -A 'Mozilla/5.0' -s "$api_url" | jq -r '.version // empty')
-    fi
-  else
-    if [ "$DEBUG" = 1 ]; then
-      latest_version=$(wget --user-agent='Mozilla/5.0' "$api_url" -O - | jq -r '.version // empty')
-    else
-      latest_version=$(wget --user-agent='Mozilla/5.0' -qO- "$api_url" | jq -r '.version // empty')
-    fi
-  fi
+  latest_version=$(curl -A 'Mozilla/5.0' -S "$api_url" | jq -r '.version // empty')
   debug "Open VSX version for $publisher.$name: $latest_version"
   if [ -z "$latest_version" ]; then
     debug "[OPENVSX] No version found for $publisher.$name on Open VSX. Skipping download."
@@ -199,11 +152,7 @@ function download_openvsx_vsix() {
   debug "Constructed Open VSX VSIX URL: $vsix_url"
   local vsix_file="/tmp/$publisher.$name-$latest_version.vsix"
   debug "Downloading from Open VSX: $vsix_url -> $vsix_file"
-  if [ "$DEBUG" = 1 ]; then
-    $DL_CMD "$vsix_file" "$vsix_url"
-  else
-    $DL_CMD "$vsix_file" "$vsix_url" 2>/dev/null
-  fi
+  $DL_CMD "$vsix_file" "$vsix_url"
   if [ $? -eq 0 ] && file "$vsix_file" | grep -q 'Zip archive data'; then
     debug "Downloaded valid VSIX from Open VSX: $vsix_file"
     echo "$vsix_file"
