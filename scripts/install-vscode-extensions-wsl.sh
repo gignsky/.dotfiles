@@ -245,12 +245,21 @@ for line in "${show_versions_lines[@]}"; do
   [ -n "$extid" ] && [ -n "$ver" ] && installed_versions[$extid]="$ver"
   [ -n "$extid" ] && [ -n "$ver" ] && normalized_installed_versions[$norm_extid]="$ver"
 done
-
 debug "Raw code --list-extensions --show-versions output: ${show_versions_lines[*]}"
-debug "Normalized installed extension IDs:"
+debug "Normalized installed extension IDs (with versions):"
 for k in "${!normalized_installed_versions[@]}"; do
   debug "  $k -> ${normalized_installed_versions[$k]}"
 done
+
+# Get normalized list of installed extensions (no versions)
+mapfile -t installed_exts_raw < <("$CODE_CMD" --list-extensions 2>/dev/null)
+normalized_installed=()
+for ext in "${installed_exts_raw[@]}"; do
+  normalized_installed+=("${ext,,}")
+  done
+
+debug "Raw installed extensions (no versions): ${installed_exts_raw[*]}"
+debug "Normalized installed extensions (no versions): ${normalized_installed[*]}"
 
 # Pre-process extension list
 mapfile -t declared_exts < <(jq -r '.[]' "$EXT_LIST_FILE" | tr -d '\0')
@@ -288,15 +297,14 @@ is_extension_available() {
   return 1
 }
 
-process_extension() {
-  debug "[process_extension] Processing extension: $1"
+process_declared_ext() {
   local ext="$1"
+  local result_file="$2"
   local publisher="${ext%%.*}"
   local name="${ext#*.}"
   local norm_ext="${ext,,}"
-  local result_file="$2"
-  debug "Processing extension: $ext (publisher: $publisher, name: $name, normalized: $norm_ext)"
-  # Check if extension is available
+  debug "[process_declared_ext] $ext (publisher: $publisher, name: $name, normalized: $norm_ext)"
+  # Check if extension is available on Open VSX or Marketplace
   if ! is_extension_available "$publisher" "$name"; then
     debug "Extension $ext is NOT available on Open VSX or Marketplace"
     echo "SKIP_NOT_FOUND|$ext (not available on Open VSX or Marketplace)" >> "$result_file"
@@ -342,14 +350,76 @@ process_extension() {
   fi
 }
 
-debug "Checking availability for all declared extensions (in parallel)..."
+process_installed_ext() {
+  local ext="$1"
+  local result_file="$2"
+  local norm_ext="$ext"
+  debug "[process_installed_ext] $ext (normalized: $norm_ext)"
+  local found=0
+  for declared in "${declared_exts_normalized[@]}"; do
+    if [ "$norm_ext" = "$declared" ]; then
+      found=1
+      break
+    fi
+  done
+  if [ $found -eq 0 ]; then
+    debug "Extension $ext is installed but not declared; marking for removal."
+    echo "REMOVE|$ext" >> "$result_file"
+  fi
+}
+
+process_extension() {
+  debug "[process_extension] Processing extension: $1 (mode: $3)"
+  local ext="$1"
+  local result_file="$2"
+  local mode="$3"
+  case "$mode" in
+    declared_exts)
+      process_declared_ext "$ext" "$result_file"
+      ;;
+    installed_exts)
+      process_installed_ext "$ext" "$result_file"
+      ;;
+    *)
+      debug "[process_extension] Unknown mode: $mode"
+      ;;
+  esac
+}
+
+# Now process installed extensions in parallel
+debug "Processing installed extensions (in parallel)..."
+TMP_PROCESS_INSTALLED=$(mktemp)
+> "$TMP_PROCESS_INSTALLED"
+pids=()
+CONCURRENCY=16
+for ext in "${normalized_installed[@]}"; do
+  process_extension "$ext" "$TMP_PROCESS_INSTALLED" installed_exts &
+  pids+=("$!")
+  if (( ${#pids[@]} >= CONCURRENCY )); then
+    wait "${pids[0]}"
+    pids=("${pids[@]:1}")
+  fi
+done
+for pid in "${pids[@]}"; do
+  wait "$pid"
+done
+# Collect REMOVE results
+while IFS= read -r line; do
+  IFS='|' read -r action ext <<< "$line"
+  case "$action" in
+    REMOVE) to_remove+=("$ext") ;;
+  esac
+done < "$TMP_PROCESS_INSTALLED"
+rm -f "$TMP_PROCESS_INSTALLED"
+
 # Parallelize extension processing
-TMP_PROCESS_EXT=$(mktemp)
-> "$TMP_PROCESS_EXT"
+debug "Checking availability for all declared extensions (in parallel)..."
+TMP_PROCESS_DECLARED=$(mktemp)
+> "$TMP_PROCESS_DECLARED"
 CONCURRENCY=16
 pids=()
 for ext in "${declared_exts[@]}"; do
-  process_extension "$ext" "$TMP_PROCESS_EXT" &
+  process_extension "$ext" "$TMP_PROCESS_DECLARED" declared_exts &
   pids+=("$!")
   if (( ${#pids[@]} >= CONCURRENCY )); then
     wait "${pids[0]}"
@@ -369,9 +439,8 @@ while IFS= read -r line; do
     SKIP_ALREADY_INSTALLED) skipped_already_installed+=("$ext") ;;
     SKIP_NOT_FOUND) skipped_not_found+=("$ext") ;;
   esac
-done < "$TMP_PROCESS_EXT"
-rm -f "$TMP_PROCESS_EXT"
-
+done < "$TMP_PROCESS_DECLARED"
+rm -f "$TMP_PROCESS_DECLARED"
 
 debug "to_install:"
 for ext in "${to_install[@]}"; do
@@ -532,11 +601,18 @@ for pid in "${pids[@]}"; do
   wait "$pid"
 done
 
-# Aggregate results from temp files into arrays for summary
+# Aggregate final results from temp files into arrays for summary
 installed=(); [ -f "$TMPDIR/installed" ] && mapfile -t installed < "$TMPDIR/installed"
 skipped_already_installed=(); [ -f "$TMPDIR/skipped_already_installed" ] && mapfile -t skipped_already_installed < "$TMPDIR/skipped_already_installed"
 skipped_not_found=(); [ -f "$TMPDIR/skipped_not_found" ] && mapfile -t skipped_not_found < "$TMPDIR/skipped_not_found"
 failed=(); [ -f "$TMPDIR/failed" ] && mapfile -t failed < "$TMPDIR/failed"
 removed_exts=(); [ -f "$TMPDIR/removed_exts" ] && mapfile -t removed_exts < "$TMPDIR/removed_exts"
 updated_exts=(); [ -f "$TMPDIR/updated_exts" ] && mapfile -t updated_exts < "$TMPDIR/updated_exts"
+
+# Final summary
+debug "Final summary:"
+print_summary
+
+# Cleanup
+rm -rf "$TMPDIR"
 
