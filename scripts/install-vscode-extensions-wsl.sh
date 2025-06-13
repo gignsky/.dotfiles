@@ -87,6 +87,7 @@ skipped_already_installed=()
 skipped_not_found=()
 failed=()
 removed_exts=()
+updated_exts=()
 
 # debug "Getting list of already installed extensions..."
 mapfile -t already_installed < <("$CODE_BIN" --list-extensions 2>/dev/null)
@@ -182,11 +183,23 @@ while IFS= read -r ext; do
   publisher="${ext%%.*}"
   name="${ext#*.}"
   vsix_file=""
+  install_error=""
   if [ "$failover" -eq 0 ]; then
     vsix_file=$(download_marketplace_vsix "$publisher" "$name" | tr -d '\0') || true
     if [ -n "$vsix_file" ] && [ -f "$vsix_file" ]; then
       # debug "Installing $ext from Marketplace VSIX: $vsix_file"
-      "$CODE_BIN" --install-extension "$vsix_file" --force >/dev/null 2>&1 && installed+=("$ext") || failed+=("$ext")
+      install_output=$("$CODE_BIN" --install-extension "$vsix_file" --force 2>&1)
+      if echo "$install_output" | grep -qi 'Signature verification failed'; then
+        failed+=("$ext (Signature verification failed)")
+      elif echo "$install_output" | grep -qi 'Failed Installing Extensions'; then
+        failed+=("$ext (Failed installing extension)")
+      elif echo "$install_output" | grep -qi 'error'; then
+        failed+=("$ext (Unknown error)")
+      elif [ $? -eq 0 ]; then
+        installed+=("$ext")
+      else
+        failed+=("$ext (Unknown error)")
+      fi
       rm -f "$vsix_file"
       continue
     fi
@@ -197,7 +210,18 @@ while IFS= read -r ext; do
   vsix_file=$(ls /tmp/"$publisher.$name"-*.vsix 2>/dev/null | head -n1)
   if [ -n "$vsix_file" ] && [ -f "$vsix_file" ]; then
     # debug "Installing $ext from Open VSX VSIX: $vsix_file"
-    "$CODE_BIN" --install-extension "$vsix_file" --force >/dev/null 2>&1 && installed+=("$ext") || failed+=("$ext")
+    install_output=$("$CODE_BIN" --install-extension "$vsix_file" --force 2>&1)
+    if echo "$install_output" | grep -qi 'Signature verification failed'; then
+      failed+=("$ext (Signature verification failed)")
+    elif echo "$install_output" | grep -qi 'Failed Installing Extensions'; then
+      failed+=("$ext (Failed installing extension)")
+    elif echo "$install_output" | grep -qi 'error'; then
+      failed+=("$ext (Unknown error)")
+    elif [ $? -eq 0 ]; then
+      installed+=("$ext")
+    else
+      failed+=("$ext (Unknown error)")
+    fi
     rm -f "$vsix_file"
     continue
   fi
@@ -224,6 +248,24 @@ for ext in "${current_exts[@]}"; do
 
 done
 
+# Update extensions if a new version is available
+for ext in "${declared_exts[@]}"; do
+  if printf '%s\n' "${current_exts[@]}" | grep -qx "$ext"; then
+    # Try to update the extension; VS Code CLI will update if a new version is available
+    update_output=$("$CODE_BIN" --install-extension "$ext" --force 2>&1)
+    if echo "$update_output" | grep -q 'updated to'; then
+      updated_exts+=("$ext")
+    elif echo "$update_output" | grep -qi 'Signature verification failed'; then
+      failed+=("$ext (Signature verification failed during update)")
+    elif echo "$update_output" | grep -qi 'Failed Installing Extensions'; then
+      failed+=("$ext (Failed installing extension during update)")
+    elif echo "$update_output" | grep -qi 'error'; then
+      failed+=("$ext (Unknown error during update)")
+    fi
+  fi
+
+done
+
 # debug "Extension install loop complete."
 
 # # Troubleshooting: print if output is a terminal
@@ -241,6 +283,13 @@ print_summary() {
     printf '\033[1;32m✅ Installed:\033[0m\n'
     for ext in "${installed[@]}"; do
       printf '  \033[1;32m✔️ %s\033[0m\n' "$ext"
+    done
+    printf '\n'
+  fi
+  if [ ${#updated_exts[@]} -gt 0 ]; then
+    printf '\033[1;34m⬆️  Updated (new version installed):\033[0m\n'
+    for ext in "${updated_exts[@]}"; do
+      printf '  \033[1;34m⬆️  %s\033[0m\n' "$ext"
     done
     printf '\n'
   fi
