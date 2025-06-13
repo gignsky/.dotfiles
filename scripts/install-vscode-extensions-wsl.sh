@@ -232,16 +232,33 @@ mkdir -p "$CACHE_DIR"
 CODE_CMD="$CODE_BIN"
 
 # Get list of already installed extensions and their versions
-mapfile -t already_installed < <("$CODE_CMD" --list-extensions 2>/dev/null)
+# Use code --list-extensions --show-versions and parse it efficiently
+mapfile -t show_versions_lines < <("$CODE_CMD" --list-extensions --show-versions 2>/dev/null)
 declare -A installed_versions
-while read -r line; do
-  extid="${line%% *}"
-  ver=$("$CODE_CMD" --show-versions | grep "^$extid@" | cut -d'@' -f2)
-  [ -n "$ver" ] && installed_versions[$extid]="$ver"
-done < <("$CODE_CMD" --list-extensions 2>/dev/null)
+declare -A normalized_installed_versions
+for line in "${show_versions_lines[@]}"; do
+  # Each line is like: extid@version
+  extid="${line%%@*}"
+  ver="${line#*@}"
+  norm_extid="${extid,,}"
+  [ -n "$extid" ] && [ -n "$ver" ] && installed_versions[$extid]="$ver"
+  [ -n "$extid" ] && [ -n "$ver" ] && normalized_installed_versions[$norm_extid]="$ver"
+done
+
+debug "Raw code --list-extensions --show-versions output: ${show_versions_lines[*]}"
+debug "Normalized installed extension IDs:"
+for k in "${!normalized_installed_versions[@]}"; do
+  debug "  $k -> ${normalized_installed_versions[$k]}"
+done
 
 # Pre-process extension list
 mapfile -t declared_exts < <(jq -r '.[]' "$EXT_LIST_FILE" | tr -d '\0')
+declared_exts_normalized=()
+for ext in "${declared_exts[@]}"; do
+  declared_exts_normalized+=("${ext,,}")
+done
+debug "Normalized declared extension IDs: ${declared_exts_normalized[*]}"
+
 to_install=()
 to_update=()
 skipped_already_installed=()
@@ -272,15 +289,20 @@ is_extension_available() {
 for ext in "${declared_exts[@]}"; do
   publisher="${ext%%.*}"
   name="${ext#*.}"
+  norm_ext="${ext,,}"
+  debug "Processing extension: $ext (publisher: $publisher, name: $name, normalized: $norm_ext)"
   # Check if extension is available
   if ! is_extension_available "$publisher" "$name"; then
+    debug "Extension $ext is NOT available on Open VSX or Marketplace"
     skipped_not_found+=("$ext (not available on Open VSX or Marketplace)")
     continue
   fi
-  # Get installed version
-  current_version="${installed_versions[$ext]}"
+  # Get installed version using normalized ID
+  current_version="${normalized_installed_versions[$norm_ext]}"
+  debug "Installed version for $ext: ${current_version:-<not installed>}"
   # Get latest version from Open VSX
   latest_version_ovsx=$(curl -sS -A 'Mozilla/5.0' "https://open-vsx.org/api/$publisher/$name" | jq -r '.version // empty')
+  debug "Latest version on Open VSX for $ext: ${latest_version_ovsx:-<none>}"
   # Get latest version from Marketplace
   latest_version_marketplace=""
   response=$(curl -sS -A 'Mozilla/5.0' -fSL "https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery" \
@@ -288,27 +310,39 @@ for ext in "${declared_exts[@]}"; do
     -H "Accept: application/json;api-version=3.0-preview.1" \
     --data-binary @- <<< '{ "filters": [ { "criteria": [ { "filterType": 7, "value": "'$publisher.$name'" } ] } ], "flags": 914 }')
   latest_version_marketplace=$(echo "$response" | jq -r '.results[0].extensions[0].versions[0].version // empty')
+  debug "Latest version on Marketplace for $ext: ${latest_version_marketplace:-<none>}"
   # Determine latest version from either source
   latest_version="$latest_version_ovsx"
   if [ -n "$latest_version_marketplace" ]; then
     latest_version="$latest_version_marketplace"
   fi
+  debug "Selected latest version for $ext: ${latest_version:-<none>}"
   # If not installed, add to install
   if [ -z "$current_version" ]; then
+    debug "Adding $ext to to_install"
     to_install+=("$ext")
     continue
   fi
   # If installed and up-to-date, skip
   if [ -n "$current_version" ] && [ -n "$latest_version" ] && [ "$current_version" = "$latest_version" ]; then
+    debug "Skipping $ext (already installed and up-to-date)"
     skipped_already_installed+=("$ext")
     continue
   fi
   # If installed but outdated, add to update
   if [ -n "$current_version" ] && [ -n "$latest_version" ] && [ "$current_version" != "$latest_version" ]; then
+    debug "Adding $ext to to_update ($current_version -> $latest_version)"
     to_update+=("$ext|$current_version|$latest_version")
     continue
   fi
+
 done
+
+debug "to_install: ${to_install[*]}"
+debug "to_update: ${to_update[*]}"
+debug "skipped_already_installed: ${skipped_already_installed[*]}"
+debug "skipped_not_found: ${skipped_not_found[*]}"
+# exit 0 # used for debugging
 
 # Use temp files for parallel-safe result collection
 TMPDIR=$(mktemp -d)
