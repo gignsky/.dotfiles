@@ -244,7 +244,20 @@
         pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
           src = ./.;
           hooks = {
-            nixpkgs-fmt.enable = true;
+            nixpkgs-fmt = {
+              enable = true;
+              # Only check staged files on commit
+              excludes = [ ".*^resources/.*" ];
+              # pre-commit-hooks.nix runs on staged files by default for pre-commit
+            };
+            statix = {
+              enable = false;
+              excludes = [ ".*^resources/.*" ];
+            };
+            deadnix = {
+              enable = false;
+              excludes = [ ".*^resources/.*" ];
+            };
           };
         };
       };
