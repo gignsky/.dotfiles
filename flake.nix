@@ -253,9 +253,6 @@
       devShells.${system}.default = pkgs.mkShell {
         NIX_CONFIG = "extra-experimental-features = nix-command flakes ";
 
-        # inherit (self.checks.${system}.pre-commit-check) shellHook;
-        # buildInputs = self.checks.${system}.pre-commit-check.enabledPackages;
-
         inherit (self.checks.pre-commit-check) shellHook;
         buildInputs = self.checks.pre-commit-check.enabledPackages;
 
@@ -272,6 +269,8 @@
             home-manager
             just
             lazygit
+            statix
+            deadnix
 
             # personal packages
             quick-results
