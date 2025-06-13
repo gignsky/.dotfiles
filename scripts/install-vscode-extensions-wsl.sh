@@ -389,6 +389,10 @@ debug "skipped_not_found:"
 for ext in "${skipped_not_found[@]}"; do
   debug "  $ext"
 done
+debug "to_remove:"
+for ext in "${to_remove[@]}"; do
+  debug "  $ext"
+done
 # exit 0 # used for debugging
 
 # Use temp files for parallel-safe result collection
