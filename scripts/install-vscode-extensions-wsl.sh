@@ -225,13 +225,13 @@ print_summary() {
     done
     printf '\n'
   fi
-  if [ ${#skipped_already_installed[@]} -gt 0 ]; then
-    printf '\033[1;33m⏭️  Skipped (already installed):\033[0m\n'
-    for ext in "${skipped_already_installed[@]}"; do
-      printf '  \033[1;33m⏭️  %s\033[0m\n' "$ext"
-    done
-    printf '\n'
-  fi
+  # if [ ${#skipped_already_installed[@]} -gt 0 ]; then
+  #   printf '\033[1;33m⏭️  Skipped (already installed):\033[0m\n'
+  #   for ext in "${skipped_already_installed[@]}"; do
+  #     printf '  \033[1;33m⏭️  %s\033[0m\n' "$ext"
+  #   done
+  #   printf '\n'
+  # fi
   if [ ${#skipped_not_found[@]} -gt 0 ]; then
     printf '\033[1;33m❓ Skipped (not found or could not be installed):\033[0m\n'
     for ext in "${skipped_not_found[@]}"; do
