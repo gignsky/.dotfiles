@@ -83,7 +83,8 @@ fi
 # debug "DL_CMD_RAW: $DL_CMD_RAW"
 
 installed=()
-skipped=()
+skipped_already_installed=()
+skipped_not_found=()
 failed=()
 
 # debug "Getting list of already installed extensions..."
@@ -174,7 +175,7 @@ while IFS= read -r ext; do
   # debug "Processing $ext ..."
   if printf '%s\n' "${already_installed[@]}" | grep -qx "$ext"; then
     # debug "$ext is already installed, skipping."
-    skipped+=("$ext (already installed)")
+    skipped_already_installed+=("$ext")
     continue
   fi
   publisher="${ext%%.*}"
@@ -200,7 +201,7 @@ while IFS= read -r ext; do
     continue
   fi
   # debug "Failed to install $ext from both sources."
-  skipped+=("$ext")
+  skipped_not_found+=("$ext")
 done < <(jq -r '.[]' "$EXT_LIST_FILE" | tr -d '\0')
 set -e  # Re-enable exit on error
 
@@ -224,10 +225,17 @@ print_summary() {
     done
     printf '\n'
   fi
-  if [ ${#skipped[@]} -gt 0 ]; then
-    printf '\033[1;33m⚠️  Skipped (already installed or not found):\033[0m\n'
-    for ext in "${skipped[@]}"; do
+  if [ ${#skipped_already_installed[@]} -gt 0 ]; then
+    printf '\033[1;33m⏭️  Skipped (already installed):\033[0m\n'
+    for ext in "${skipped_already_installed[@]}"; do
       printf '  \033[1;33m⏭️  %s\033[0m\n' "$ext"
+    done
+    printf '\n'
+  fi
+  if [ ${#skipped_not_found[@]} -gt 0 ]; then
+    printf '\033[1;33m❓ Skipped (not found or could not be installed):\033[0m\n'
+    for ext in "${skipped_not_found[@]}"; do
+      printf '  \033[1;33m❓ %s\033[0m\n' "$ext"
     done
     printf '\n'
   fi
