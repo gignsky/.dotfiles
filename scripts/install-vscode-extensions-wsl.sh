@@ -256,6 +256,7 @@ for k in "${!normalized_installed_versions[@]}"; do
 done
 
 # Get normalized list of installed extensions (no versions)
+# Use code --list-extensions and parse it efficiently
 mapfile -t installed_exts_raw < <("$CODE_CMD" --list-extensions 2>/dev/null)
 normalized_installed=()
 for ext in "${installed_exts_raw[@]}"; do
