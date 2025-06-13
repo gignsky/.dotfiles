@@ -6,6 +6,7 @@ bluskript
 btop
 btrfs
 cachix
+canmount
 ccls
 cdrom
 cifs
@@ -43,6 +44,7 @@ nixup
 nmap
 nmcli
 nmtui
+noauto
 nodev
 nufetch
 numtide
