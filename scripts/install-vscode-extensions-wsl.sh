@@ -8,6 +8,11 @@ failed=()
 removed_exts=()
 updated_exts=()
 
+# Option to skip showing already installed extensions in summary
+SKIP_ALREADY_INSTALLED_SUMMARY="${SKIP_ALREADY_INSTALLED_SUMMARY:-0}"
+# echo "SKIP_ALREADY_INSTALLED_SUMMARY is set to $SKIP_ALREADY_INSTALLED_SUMMARY"
+# exit 0 # used for debugging
+
 print_summary() {
   printf '\n\033[1;35m==============================\033[0m\n'
   printf '\033[1;35m✨ VS Code Extension Installation Summary ✨\033[0m\n'
@@ -26,7 +31,7 @@ print_summary() {
     done
     printf '\n'
   fi
-  if [ ${#skipped_already_installed[@]} -gt 0 ]; then
+  if [ "$SKIP_ALREADY_INSTALLED_SUMMARY" != "1" ] && [ ${#skipped_already_installed[@]} -gt 0 ]; then
     printf '\033[1;36m⏭️  Skipped (already installed and up-to-date):\033[0m\n'
     for ext in "${skipped_already_installed[@]}"; do
       printf '  \033[1;36m⏭️  %s\033[0m\n' "$ext"
@@ -445,10 +450,20 @@ while IFS= read -r line; do
   case "$action" in
     INSTALL) to_install+=("$ext") ;;
     UPDATE) to_update+=("$ext|$oldver|$newver") ;;
-    SKIP_ALREADY_INSTALLED) skipped_already_installed+=("$ext") ;;
-    SKIP_NOT_FOUND) skipped_not_found+=("$ext") ;;
+    SKIP_ALREADY_INSTALLED) skipped_already_installed+=("$ext");;
+    SKIP_NOT_FOUND) skipped_not_found+=("$ext");;
   esac
 done < "$TMP_PROCESS_DECLARED"
+# Use temp files for parallel-safe result collection
+TMPDIR=$(mktemp -d)
+trap 'rm -rf "$TMPDIR"; print_summary' EXIT
+
+INSTALLED_EXTS_FILE="$TMPDIR/installed_exts"
+
+# Write skipped_already_installed to TMPDIR for summary
+if [ ${#skipped_already_installed[@]} -gt 0 ]; then
+  printf "%s\n" "${skipped_already_installed[@]}" > "$TMPDIR/skipped_already_installed"
+fi
 rm -f "$TMP_PROCESS_DECLARED"
 
 debug 1 "to_install:"
@@ -472,12 +487,6 @@ for ext in "${to_remove[@]}"; do
   debug 1 "  $ext"
 done
 # exit 0 # used for debugging
-
-# Use temp files for parallel-safe result collection
-TMPDIR=$(mktemp -d)
-trap 'rm -rf "$TMPDIR"; print_summary' EXIT
-
-INSTALLED_EXTS_FILE="$TMPDIR/installed_exts"
 
 install_extension() {
   debug 1 "[install_extension] Installing extension: $1"
