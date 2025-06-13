@@ -496,6 +496,7 @@ remove_extension() {
   fi
 }
 
+debug "Installing/Updating/Removing all extensions (in parallel)..."
 CONCURRENCY=16
 pids=()
 # Install new extensions
@@ -517,7 +518,16 @@ for extinfo in "${to_update[@]}"; do
     pids=("${pids[@]:1}")
   fi
 done
-# Wait for remaining jobs
+# Now run removals, also in parallel
+for ext in "${to_remove[@]}"; do
+  remove_extension "$ext" &
+  pids+=("$!")
+  if (( ${#pids[@]} >= CONCURRENCY )); then
+    wait "${pids[0]}"
+    pids=("${pids[@]:1}")
+  fi
+done
+# Wait for all install/update/remove jobs to finish
 for pid in "${pids[@]}"; do
   wait "$pid"
 done
