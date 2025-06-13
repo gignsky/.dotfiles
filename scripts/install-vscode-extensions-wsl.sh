@@ -341,10 +341,22 @@ for ext in "${declared_exts[@]}"; do
 
 done
 
-debug "to_install: ${to_install[*]}"
-debug "to_update: ${to_update[*]}"
-debug "skipped_already_installed: ${skipped_already_installed[*]}"
-debug "skipped_not_found: ${skipped_not_found[*]}"
+debug "to_install:"
+for ext in "${to_install[@]}"; do
+  debug "  $ext"
+done
+debug "to_update:"
+for ext in "${to_update[@]}"; do
+  debug "  $ext"
+done
+debug "skipped_already_installed:"
+for ext in "${skipped_already_installed[@]}"; do
+  debug "  $ext"
+done
+debug "skipped_not_found:"
+for ext in "${skipped_not_found[@]}"; do
+  debug "  $ext"
+done
 # exit 0 # used for debugging
 
 # Use temp files for parallel-safe result collection
