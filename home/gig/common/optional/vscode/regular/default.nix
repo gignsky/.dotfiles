@@ -1,5 +1,5 @@
 { inputs, outputs, configLib, pkgs, ... }:
 
 {
-  imports = (configLib.scanPaths ./.);
+  imports = configLib.scanPaths ./.;
 }
