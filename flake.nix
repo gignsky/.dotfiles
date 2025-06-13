@@ -138,7 +138,7 @@
           inherit system specialArgs;
           modules = [
             inputs.vscode-server.nixosModules.default
-            ({ config, pkgs, ... }: {
+            ({ ... }: {
               services.vscode-server.enable = true;
             })
             inputs.nixos-wsl.nixosModules.default

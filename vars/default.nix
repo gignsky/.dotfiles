@@ -1,4 +1,4 @@
-{ inputs, lib }:
+{ lib, inputs ? { }, ... }:
 {
   networking = import ./networking.nix { inherit lib; };
 
