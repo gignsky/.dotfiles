@@ -1,7 +1,7 @@
 { config, lib, pkgs, isWSL ? false, ... }:
 
 let
-  extensionIds = import ./vscode-extensions-list.nix;
+  extensionIds = import ./extensions { rust = false; python = false; };
   extensions = builtins.map (id: pkgs.vscode-extensions.${id}) extensionIds;
   scriptPath = "${config.home.homeDirectory}/.dotfiles/scripts/install-vscode-extensions-wsl.sh";
   wslpathBin = "${pkgs.wslu}/bin";
