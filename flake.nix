@@ -246,15 +246,33 @@
           hooks = {
             nixpkgs-fmt = {
               enable = true;
-              # Only check staged files on commit
               excludes = [ ".*^resources/.*" ];
-              # pre-commit-hooks.nix runs on staged files by default for pre-commit
             };
             statix = {
               enable = false;
               excludes = [ ".*^resources/.*" ];
             };
             deadnix = {
+              enable = false;
+              excludes = [ ".*^resources/.*" ];
+            };
+            shellcheck = {
+              enable = false;
+              excludes = [ ".*^resources/.*" ];
+            };
+            markdownlint = {
+              enable = false;
+              excludes = [ ".*^resources/.*" ];
+            };
+            yamllint = {
+              enable = false;
+              excludes = [ ".*^resources/.*" ];
+            };
+            trailing-whitespace = {
+              enable = false;
+              excludes = [ ".*^resources/.*" ];
+            };
+            end-of-file-fixer = {
               enable = false;
               excludes = [ ".*^resources/.*" ];
             };
