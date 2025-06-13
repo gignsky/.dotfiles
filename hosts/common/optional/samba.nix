@@ -1,9 +1,4 @@
-{ inputs
-, configLib
-, lib
-, pkgs
-, ...
-}:
+{ lib, pkgs, ... }:
 
 let
   newMount =

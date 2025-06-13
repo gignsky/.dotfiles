@@ -1,8 +1,3 @@
-{ outputs, lib, configLib, ... }:
-
-#let
-# homeDirectory = configLib.home.homeDirectory;
-#in
 {
   programs.ssh = {
     enable = true;
