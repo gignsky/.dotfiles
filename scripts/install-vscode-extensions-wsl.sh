@@ -127,7 +127,7 @@ function download_marketplace_vsix() {
     # debug "Failed to download valid VSIX from Marketplace for $extid"
     [ -f "$vsix_file" ] && {
       # debug "First 10 lines of failed VSIX file:"
-      head -10 "$vsix_file"
+      # head -10 "$vsix_file"
       rm -f "$vsix_file"
     }
     return 1
@@ -161,7 +161,7 @@ function download_openvsx_vsix() {
     # debug "Failed to download valid VSIX from Open VSX for $publisher.$name"
     [ -f "$vsix_file" ] && {
       # debug "First 10 lines of failed VSIX file:"
-      head -10 "$vsix_file"
+      # head -10 "$vsix_file"
       rm -f "$vsix_file"
     }
     return 1
