@@ -25,7 +25,7 @@ lib.mkMerge [
       # echo "[DEBUG] ls wgetBin: $(ls -l ${wgetBin})"
       # echo "[DEBUG] ls fileBin: $(ls -l ${fileBin})"
       # echo "[DEBUG] ls jqBin: $(ls -l ${jqBin})"
-      export DEBUG=3
+      export DEBUG=1
       export SKIP_ALREADY_INSTALLED_SUMMARY=1
       echo '${builtins.toJSON extensionIds}' > /tmp/vscode-extensions.json
       ${scriptPath} /tmp/vscode-extensions.json || true
