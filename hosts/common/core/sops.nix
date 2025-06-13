@@ -9,7 +9,7 @@ in
   ];
 
   sops = {
-    defaultSopsFile = ("${secretspath}/secrets.yaml");
+    defaultSopsFile = "${secretspath}/secrets.yaml";
     validateSopsFiles = true;
 
     age = {
