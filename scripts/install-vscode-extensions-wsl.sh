@@ -150,6 +150,7 @@ debug "Already installed: ${already_installed[*]}"
 failover=0
 
 function download_marketplace_vsix() {
+  debug "[MARKETPLACE] Entered download_marketplace_vsix for $1.$2"
   local publisher="$1"
   local name="$2"
   local extid="$publisher.$name"
@@ -265,6 +266,7 @@ skipped_already_installed=()
 skipped_not_found=()
 
 is_extension_available() {
+  debug "Checking availability for extension: $1.$2"
   publisher="$1"
   name="$2"
   # Check Open VSX
@@ -286,6 +288,7 @@ is_extension_available() {
   return 1
 }
 
+debug "Checking availability for all declared extensions..."
 for ext in "${declared_exts[@]}"; do
   publisher="${ext%%.*}"
   name="${ext#*.}"
@@ -351,12 +354,14 @@ trap 'rm -rf "$TMPDIR"; print_summary' EXIT
 INSTALLED_EXTS_FILE="$TMPDIR/installed_exts"
 
 install_extension() {
+  debug "[install_extension] Installing extension: $1"
   ext="$1"
   publisher="${ext%%.*}"
   name="${ext#*.}"
   latest_version=$(curl -sS -A 'Mozilla/5.0' "https://open-vsx.org/api/$publisher/$name" | jq -r '.version // empty')
   vsix_file=""
   # Try Open VSX first
+  debug "[install_extension] Checking Open VSX for $publisher.$name version $latest_version"
   if [ -n "$latest_version" ]; then
     vsix_file="$CACHE_DIR/$publisher.$name-$latest_version.vsix"
     if [ ! -f "$vsix_file" ]; then
@@ -374,6 +379,7 @@ install_extension() {
     fi
   fi
   # Fallback: try Marketplace
+  debug "[install_extension] Checking Marketplace for $publisher.$name"
   vsix_file="$CACHE_DIR/$publisher.$name-marketplace.vsix"
   if [ ! -f "$vsix_file" ]; then
     mp_vsix=$(download_marketplace_vsix "$publisher" "$name")
@@ -393,6 +399,7 @@ install_extension() {
 
 # Add update_extension function
 update_extension() {
+  debug "[update_extension] Updating extension: $1 from $2 to $3"
   ext="$1"
   oldver="$2"
   newver="$3"
