@@ -1,4 +1,4 @@
-{ pkgs, config, lib, inputs, configLib, configVars, ... }:
+{ pkgs, config, lib, inputs, configVars, ... }:
 
 let
   ifTheyExist = groups: builtins.filter (group: builtins.hasAttr group config.users.groups) groups;
