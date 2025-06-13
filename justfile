@@ -249,7 +249,8 @@ vm-full:
 # reconnect to vm that has already been created
 vm-reconnect:
 	nix-shell -p lolcat --run 'echo "[VM] Reconnecting to VM..." | lolcat 2> /dev/null'
-	just call-vm
+	- nix shell nixpkgs#qemu --command bash -c 'bash scripts/run-iso-vm.sh result/iso/*.iso ./tmp-iso/nixos-vm/vm.img --choose'
+	nix-shell -p lolcat --run 'echo "[VM] VM Closed." | lolcat 2> /dev/null'
 
 # run vm with minimal iso - while deleting files afterwards
 vm-tmp-minimal:
