@@ -11,6 +11,7 @@ cdrom
 cifs
 countertop
 creds
+deadnix
 direnv
 direnvrc
 disko
@@ -39,6 +40,7 @@ nixd
 nixos
 nixpkgs
 nixup
+nixvim
 nmap
 nmcli
 nmtui
@@ -56,6 +58,8 @@ remmina
 rustup
 secretsmgmt
 secretspath
+shellcheck
+statix
 tdarr
 testbuzz
 toplevel
