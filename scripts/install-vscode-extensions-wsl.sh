@@ -206,36 +206,39 @@ set -e  # Re-enable exit on error
 
 # debug "Extension install loop complete."
 
-# Troubleshooting: print if output is a terminal
-if [ -t 1 ]; then
-  # debug "[SUMMARY] Output is a terminal. Colors should work."
-else
-  # debug "[SUMMARY] Output is NOT a terminal. Colors may not display."
-fi
+# # Troubleshooting: print if output is a terminal
+# if [ -t 1 ]; then
+#   # debug "[SUMMARY] Output is a terminal. Colors should work."
+# else
+#   # debug "[SUMMARY] Output is NOT a terminal. Colors may not display."
+# fi
 
-# Beautified summary with spacing, headers, and emojis
-printf '\n\033[1;35m==============================\033[0m\n'
-printf '\033[1;35m✨ VS Code Extension Installation Summary ✨\033[0m\n'
-printf '\033[1;35m==============================\033[0m\n\n'
-if [ ${#installed[@]} -gt 0 ]; then
-  printf '\033[1;32m✅ Installed:\033[0m\n'
-  for ext in "${installed[@]}"; do
-    printf '  \033[1;32m✔️ %s\033[0m\n' "$ext"
-  done
-  printf '\n'
-fi
-if [ ${#skipped[@]} -gt 0 ]; then
-  printf '\033[1;33m⚠️  Skipped (already installed or not found):\033[0m\n'
-  for ext in "${skipped[@]}"; do
-    printf '  \033[1;33m⏭️  %s\033[0m\n' "$ext"
-  done
-  printf '\n'
-fi
-if [ ${#failed[@]} -gt 0 ]; then
-  printf '\033[1;31m❌ Failed:\033[0m\n'
-  for ext in "${failed[@]}"; do
-    printf '  \033[1;31m✖️ %s\033[0m\n' "$ext"
-  done
-  printf '\n'
-fi
-printf '\033[1;35m==============================\033[0m\n'
+print_summary() {
+  printf '\n\033[1;35m==============================\033[0m\n'
+  printf '\033[1;35m✨ VS Code Extension Installation Summary ✨\033[0m\n'
+  printf '\033[1;35m==============================\033[0m\n\n'
+  if [ ${#installed[@]} -gt 0 ]; then
+    printf '\033[1;32m✅ Installed:\033[0m\n'
+    for ext in "${installed[@]}"; do
+      printf '  \033[1;32m✔️ %s\033[0m\n' "$ext"
+    done
+    printf '\n'
+  fi
+  if [ ${#skipped[@]} -gt 0 ]; then
+    printf '\033[1;33m⚠️  Skipped (already installed or not found):\033[0m\n'
+    for ext in "${skipped[@]}"; do
+      printf '  \033[1;33m⏭️  %s\033[0m\n' "$ext"
+    done
+    printf '\n'
+  fi
+  if [ ${#failed[@]} -gt 0 ]; then
+    printf '\033[1;31m❌ Failed:\033[0m\n'
+    for ext in "${failed[@]}"; do
+      printf '  \033[1;31m✖️ %s\033[0m\n' "$ext"
+    done
+    printf '\n'
+  fi
+  printf '\033[1;35m==============================\033[0m\n'
+}
+
+trap print_summary EXIT
