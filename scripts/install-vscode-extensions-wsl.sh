@@ -300,7 +300,7 @@ for ext in "${declared_exts[@]}"; do
   if printf '%s\n' "${current_exts[@]}" | grep -qx "$ext"; then
     # Try to update the extension; VS Code CLI will update if a new version is available
     update_output=$("$CODE_BIN" --install-extension "$ext" --force 2>&1)
-    if echo "$update_output" | grep -q 'updated to'; then
+    if echo "$update_output" | grep -qE 'updated to|Updating the extension|was successfully installed'; then
       updated_exts+=("$ext")
     elif echo "$update_output" | grep -qi 'Signature verification failed'; then
       # Try failover update from Open VSX if signature verification fails
