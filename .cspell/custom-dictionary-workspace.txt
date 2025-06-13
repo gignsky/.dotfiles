@@ -19,6 +19,7 @@ disko
 dont
 downscript
 extid
+extinfo
 ganoslal
 gedit
 gignsky
@@ -38,6 +39,7 @@ neofetch
 netdev
 networkmanager
 neve
+newver
 nixd
 nixos
 nixpkgs
@@ -51,11 +53,13 @@ nufetch
 numtide
 nvme
 oflag
+oldver
 omnix
 openvsx
 OPENVSX
 oport
 passthru
+ovsx
 pids
 pkgs
 qcow
