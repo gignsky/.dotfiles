@@ -137,7 +137,7 @@ fi
 # debug "DL_CMD_RAW: $DL_CMD_RAW"
 
 # debug "Getting list of already installed extensions..."
-mapfile -t already_installed < <("$CODE_BIN" --list-extensions 2>/dev/null)
+mapfile -t already_installed < <($CODE_CMD --list-extensions 2>/dev/null)
 # debug "Already installed: ${already_installed[*]}"
 
 failover=0
@@ -221,14 +221,22 @@ function download_openvsx_vsix() {
 CACHE_DIR="$HOME/.cache/vscode-vsix"
 mkdir -p "$CACHE_DIR"
 
+VSCODE_CLI_USER_DATA_DIR="$HOME/.vscode-cli"
+mkdir -p "$VSCODE_CLI_USER_DATA_DIR"
+CODE_CMD="$CODE_BIN --user-data-dir $VSCODE_CLI_USER_DATA_DIR"
+
 # Get list of already installed extensions and their versions
-mapfile -t already_installed < <("$CODE_BIN" --list-extensions 2>/dev/null)
+mapfile -t already_installed < <($CODE_CMD --list-extensions 2>/dev/null)
 declare -A installed_versions
 while read -r line; do
   extid="${line%% *}"
-  ver=$("$CODE_BIN" --show-versions | grep "^$extid@" | cut -d'@' -f2)
+  ver=$($CODE_CMD --show-versions | grep "^$extid@" | cut -d'@' -f2)
   [ -n "$ver" ] && installed_versions[$extid]="$ver"
-done < <("$CODE_BIN" --list-extensions 2>/dev/null)
+done < <($CODE_CMD --list-extensions 2>/dev/null)
+
+# Use temp files for parallel-safe result collection
+TMPDIR=$(mktemp -d)
+trap 'rm -rf "$TMPDIR"; print_summary' EXIT
 
 # Function to install a single extension (to be run in parallel)
 install_extension() {
@@ -238,7 +246,7 @@ install_extension() {
   vsix_file=""
   # Check if already installed
   if printf '%s\n' "${already_installed[@]}" | grep -qx "$ext"; then
-    skipped_already_installed+=("$ext")
+    echo "$ext" >> "$TMPDIR/skipped_already_installed"
     return
   fi
   # Try to use cached VSIX first
@@ -253,7 +261,7 @@ install_extension() {
       $DL_CMD "$vsix_file" "$url" >/dev/null 2>&1
     fi
     if [ -f "$vsix_file" ] && file "$vsix_file" | grep -q 'Zip archive data'; then
-      "$CODE_BIN" --install-extension "$vsix_file" --force >/dev/null 2>&1 && installed+=("$ext") || failed+=("$ext (install failed)")
+      $CODE_CMD --install-extension "$vsix_file" --force >/dev/null 2>&1 && echo "$ext" >> "$TMPDIR/installed" || echo "$ext (install failed)" >> "$TMPDIR/failed"
       return
     fi
   fi
@@ -264,10 +272,10 @@ install_extension() {
     [ -n "$mp_vsix" ] && mv "$mp_vsix" "$vsix_file"
   fi
   if [ -f "$vsix_file" ] && file "$vsix_file" | grep -q 'Zip archive data'; then
-    "$CODE_BIN" --install-extension "$vsix_file" --force >/dev/null 2>&1 && installed+=("$ext") || failed+=("$ext (install failed)")
+    $CODE_CMD --install-extension "$vsix_file" --force >/dev/null 2>&1 && echo "$ext" >> "$TMPDIR/installed" || echo "$ext (install failed)" >> "$TMPDIR/failed"
     return
   fi
-  skipped_not_found+=("$ext")
+  echo "$ext" >> "$TMPDIR/skipped_not_found"
 }
 
 # Parallel install loop with concurrency limit
@@ -289,7 +297,7 @@ done
 
 # Remove extensions not in the declarative list
 mapfile -t declared_exts < <(jq -r '.[]' "$EXT_LIST_FILE" | tr -d '\0')
-mapfile -t current_exts < <("$CODE_BIN" --list-extensions 2>/dev/null)
+mapfile -t current_exts < <($CODE_CMD --list-extensions 2>/dev/null)
 for ext in "${current_exts[@]}"; do
   found=0
   for declared in "${declared_exts[@]}"; do
@@ -299,8 +307,8 @@ for ext in "${current_exts[@]}"; do
     fi
   done
   if [ $found -eq 0 ]; then
-    "$CODE_BIN" --uninstall-extension "$ext" --force >/dev/null 2>&1
-    removed_exts+=("$ext")
+    $CODE_CMD --uninstall-extension "$ext" --force >/dev/null 2>&1
+    echo "$ext" >> "$TMPDIR/removed_exts"
   fi
 
 done
@@ -318,7 +326,15 @@ for ext in "${declared_exts[@]}"; do
       $DL_CMD "$vsix_file" "$url" >/dev/null 2>&1
     fi
     if [ -f "$vsix_file" ] && file "$vsix_file" | grep -q 'Zip archive data'; then
-      "$CODE_BIN" --install-extension "$vsix_file" --force >/dev/null 2>&1 && updated_exts+=("$ext")
+      $CODE_CMD --install-extension "$vsix_file" --force >/dev/null 2>&1 && echo "$ext" >> "$TMPDIR/updated_exts"
     fi
   fi
 done
+
+# Aggregate results from temp files into arrays for summary
+installed=(); [ -f "$TMPDIR/installed" ] && mapfile -t installed < "$TMPDIR/installed"
+skipped_already_installed=(); [ -f "$TMPDIR/skipped_already_installed" ] && mapfile -t skipped_already_installed < "$TMPDIR/skipped_already_installed"
+skipped_not_found=(); [ -f "$TMPDIR/skipped_not_found" ] && mapfile -t skipped_not_found < "$TMPDIR/skipped_not_found"
+failed=(); [ -f "$TMPDIR/failed" ] && mapfile -t failed < "$TMPDIR/failed"
+removed_exts=(); [ -f "$TMPDIR/removed_exts" ] && mapfile -t removed_exts < "$TMPDIR/removed_exts"
+updated_exts=(); [ -f "$TMPDIR/updated_exts" ] && mapfile -t updated_exts < "$TMPDIR/updated_exts"
