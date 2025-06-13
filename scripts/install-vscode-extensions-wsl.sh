@@ -86,6 +86,7 @@ installed=()
 skipped_already_installed=()
 skipped_not_found=()
 failed=()
+removed_exts=()
 
 # debug "Getting list of already installed extensions..."
 mapfile -t already_installed < <("$CODE_BIN" --list-extensions 2>/dev/null)
@@ -205,6 +206,24 @@ while IFS= read -r ext; do
 done < <(jq -r '.[]' "$EXT_LIST_FILE" | tr -d '\0')
 set -e  # Re-enable exit on error
 
+# Remove extensions not in the declarative list
+mapfile -t declared_exts < <(jq -r '.[]' "$EXT_LIST_FILE" | tr -d '\0')
+mapfile -t current_exts < <("$CODE_BIN" --list-extensions 2>/dev/null)
+for ext in "${current_exts[@]}"; do
+  found=0
+  for declared in "${declared_exts[@]}"; do
+    if [ "$ext" = "$declared" ]; then
+      found=1
+      break
+    fi
+  done
+  if [ $found -eq 0 ]; then
+    "$CODE_BIN" --uninstall-extension "$ext" --force >/dev/null 2>&1
+    removed_exts+=("$ext")
+  fi
+
+done
+
 # debug "Extension install loop complete."
 
 # # Troubleshooting: print if output is a terminal
@@ -222,6 +241,13 @@ print_summary() {
     printf '\033[1;32m✅ Installed:\033[0m\n'
     for ext in "${installed[@]}"; do
       printf '  \033[1;32m✔️ %s\033[0m\n' "$ext"
+    done
+    printf '\n'
+  fi
+  if [ ${#removed_exts[@]} -gt 0 ]; then
+    printf '\033[1;31m🗑️  Removed (not in declarative list):\033[0m\n'
+    for ext in "${removed_exts[@]}"; do
+      printf '  \033[1;31m🗑️  %s\033[0m\n' "$ext"
     done
     printf '\n'
   fi
