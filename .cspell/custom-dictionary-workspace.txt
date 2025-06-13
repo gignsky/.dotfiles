@@ -16,6 +16,7 @@ direnvrc
 disko
 dont
 downscript
+extentions
 extid
 extinfo
 ganoslal
@@ -76,6 +77,8 @@ upstreamed
 vfat
 vimjoyer
 virtio
+wslpath
+wslu
 xrdp
 yubikey
 zroot
