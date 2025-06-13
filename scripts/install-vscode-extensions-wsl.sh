@@ -618,10 +618,6 @@ failed=(); [ -f "$TMPDIR/failed" ] && mapfile -t failed < "$TMPDIR/failed"
 removed_exts=(); [ -f "$TMPDIR/removed_exts" ] && mapfile -t removed_exts < "$TMPDIR/removed_exts"
 updated_exts=(); [ -f "$TMPDIR/updated_exts" ] && mapfile -t updated_exts < "$TMPDIR/updated_exts"
 
-# Final summary
-debug 2 "Final summary:"
-print_summary
-
 # Cleanup
 rm -rf "$TMPDIR"
 
