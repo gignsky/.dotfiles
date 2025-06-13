@@ -335,7 +335,7 @@ process_declared_ext() {
     -H "Content-Type: application/json" \
     -H "Accept: application/json;api-version=3.0-preview.1" \
     --data-binary @- <<< '{ "filters": [ { "criteria": [ { "filterType": 7, "value": "'$publisher.$name'" } ] } ], "flags": 914 }')
-  latest_version_marketplace=$(echo "$response" | jq -r '.results[0].extensions[0].versions[0].version // empty')
+  latest_version_marketplace=$(echo "$response" | jq -r '.results[0].extensions[0].versions[].version' | sort -V | tail -n1)
   debug 3 "Latest version on Marketplace for $ext: ${latest_version_marketplace:-<none>}"
   # Determine latest version from either source
   latest_version="$latest_version_ovsx"
