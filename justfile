@@ -167,7 +167,8 @@ home-trace:
 
 gc:
 	nix-shell -p lolcat --run 'nix-collect-garbage --delete-old | lolcat 2> /dev/null'
-	nix-shell -p lolcat --run '# nix store gc | lolcat 2> /dev/null'
+	nix-shell -p lolcat --run 'nix store gc | lolcat 2> /dev/null'
+	nix-shell -p lolcat --run 'rm -rfv $HOME/.cache/vscode-vsix | lolcat 2> /dev/null'
 
 pre-build:
 	nix-shell -p lolcat --run 'echo "Pre-Build Starting..." | lolcat 2> /dev/null'
