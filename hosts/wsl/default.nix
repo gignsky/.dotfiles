@@ -1,4 +1,4 @@
-{ inputs, lib, configLib, pkgs, ... }: {
+{ inputs, lib, configLib, ... }: {
   imports = [
     (configLib.relativeToRoot "hosts/common/core")
     (configLib.relativeToRoot "hosts/common/users/gig")
@@ -24,23 +24,14 @@
   wsl.enable = true; # Redunent with nixosModules.default on the flake.nix level
   wsl.defaultUser = "gig";
 
-  nix =
-    let
-      _flakeInputs = lib.filterAttrs (_: lib.isType "flake") inputs;
-    in
-    {
-      settings = {
-        # Enable flakes and new 'nix' command
-        experimental-features = "nix-command flakes";
-        # Opinionated: disable global registry
-        flake-registry = "";
-        trusted-users = [ "gig" ];
+  nix.settings = {
+    # Enable flakes and new 'nix' command
+    experimental-features = "nix-command flakes";
+    # Opinionated: disable global registry
+    flake-registry = "";
+    trusted-users = [ "gig" ];
 
-      };
-
-      channel.enable = false;
-
-    };
+  };
 
   #   # I think this is unneccecary if I'm going with standalone home-manager rather than flake os module home-manager
   #   home-manager = {

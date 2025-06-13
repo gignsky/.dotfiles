@@ -1,4 +1,4 @@
-{ inputs, config, configLib, ... }:
+{ inputs, ... }:
 
 let
   secretsDirectory = builtins.toString inputs.nix-secrets;

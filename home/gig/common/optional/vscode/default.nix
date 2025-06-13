@@ -1,4 +1,4 @@
-{ inputs, outputs, configLib, pkgs, lib, ... }:
+{ ... }:
 
 {
   options.isWSL = lib.mkOption {
