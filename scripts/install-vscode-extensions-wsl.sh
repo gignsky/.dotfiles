@@ -554,21 +554,27 @@ update_extension() {
     if echo "$install_output" | grep -qi 'success'; then
       debug 1 "[update_extension] Successfully updated $ext from Marketplace"
       echo "$ext ($oldver -> $newver)" >> "$TMPDIR/updated_exts"
+      return
     else
       debug 1 "[update_extension] Failed to update $ext from Marketplace"
-      echo "$ext (update failed)" >> "$TMPDIR/failed"
     fi
-    return
   fi
-  # Fallback: try Open VSX
+  # Fallback: try Open VSX, but only if the version is different
   debug 2 "[update_extension] Checking Open VSX for $publisher.$name"
   ovsx_vsix=$(download_openvsx_vsix "$publisher" "$name")
+  # Get Open VSX version
+  ovsx_version=$(curl -sS -A 'Mozilla/5.0' "https://open-vsx.org/api/$publisher/$name" | jq -r '.version // empty')
+  if [ "$ovsx_version" = "$oldver" ]; then
+    debug 1 "[update_extension] Open VSX version $ovsx_version is same as installed $oldver; marking as failed update."
+    echo "$ext (update failed)" >> "$TMPDIR/failed"
+    return
+  fi
   if [ -n "$ovsx_vsix" ] && [ -f "$ovsx_vsix" ] && file "$ovsx_vsix" | grep -q 'Zip archive data'; then
     debug 2 "[update_extension] Installing from Open VSX VSIX: $ovsx_vsix"
     install_output=$("$CODE_CMD" --install-extension "$ovsx_vsix" --force 2>&1)
     if echo "$install_output" | grep -qi 'success'; then
       debug 1 "[update_extension] Successfully updated $ext from Open VSX"
-      echo "$ext ($oldver -> $newver)" >> "$TMPDIR/updated_exts"
+      echo "$ext ($oldver -> $ovsx_version)" >> "$TMPDIR/updated_exts"
     else
       debug 1 "[update_extension] Failed to update $ext from Open VSX"
       echo "$ext (update failed)" >> "$TMPDIR/failed"
