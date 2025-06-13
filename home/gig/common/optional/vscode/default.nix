@@ -1,15 +1,33 @@
 { config, lib, pkgs, isWSL ? false, ... }:
 
 let
-  extensionIds = import ../vscode-extensions-list.nix;
+  extensionIds = import ./vscode-extensions-list.nix;
   extensions = builtins.map (id: pkgs.vscode-extensions.${id}) extensionIds;
   scriptPath = "${config.home.homeDirectory}/.dotfiles/scripts/install-vscode-extensions-wsl.sh";
+  wslpathBin = "${pkgs.wslu}/bin";
+  curlBin = "${pkgs.curl}/bin";
+  wgetBin = "${pkgs.wget}/bin";
+  fileBin = "${pkgs.file}/bin";
+  jqBin = "${pkgs.jq}/bin";
 in
 lib.mkMerge [
   (lib.mkIf isWSL {
     home.activation.vscodeExtensionsWSL = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
       chmod +x ${scriptPath} || true
-      ${scriptPath} || true
+      export PATH=${wslpathBin}:${curlBin}:${wgetBin}:${fileBin}:${jqBin}:$PATH
+      # echo "[DEBUG] PATH: $PATH"
+      # echo "[DEBUG] wslpath: $(command -v wslpath || echo not found)"
+      # echo "[DEBUG] curl: $(command -v curl || echo not found)"
+      # echo "[DEBUG] wget: $(command -v wget || echo not found)"
+      # echo "[DEBUG] file: $(command -v file || echo not found)"
+      # echo "[DEBUG] ls wslpathBin: $(ls -l ${wslpathBin})"
+      # echo "[DEBUG] ls curlBin: $(ls -l ${curlBin})"
+      # echo "[DEBUG] ls wgetBin: $(ls -l ${wgetBin})"
+      # echo "[DEBUG] ls fileBin: $(ls -l ${fileBin})"
+      # echo "[DEBUG] ls jqBin: $(ls -l ${jqBin})"
+      export DEBUG=1
+      echo '${builtins.toJSON extensionIds}' > /tmp/vscode-extensions.json
+      ${scriptPath} /tmp/vscode-extensions.json || true
     '';
   })
   (lib.mkIf (!isWSL) {
