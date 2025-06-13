@@ -1,5 +1,9 @@
 { ... }:
 
+let
+  extensionIds = import ../vscode-extensions-list.nix;
+  extensions = builtins.map (id: pkgs.vscode-extensions.${id}) extensionIds;
+in
 {
   options.isWSL = lib.mkOption {
     type = lib.types.bool;
@@ -7,5 +11,32 @@
     description = "Set to true if running in WSL.";
   };
 
-  imports = config: if config.isWSL then ./wsl else ./regular;
+  config = config: if config.isWSL then { } else {
+    # info at
+    # https://nixos.wiki/wiki/Visual_Studio_Code
+    ##############################################
+
+    # search extentions at
+    # https://search.nixos.org/packages?type=packages&query=vscode-extensions
+    ##############################################
+
+    # Home Manager Way
+    programs = {
+      vscode = {
+        enable = false;
+        enableExtensionUpdateCheck = true;
+        enableUpdateCheck = true;
+        mutableExtensionsDir = false; # disallows vscode from installing its own extensions
+        # copy and paste user settings into the field below
+        userSettings = { };
+        extensions = extensions;
+      };
+
+      # # A "wonderful CLI to track your time"
+      # watson = {
+      #     enable = false;
+      #     enableZshIntegration = true;
+      # };
+    };
+  };
 }
