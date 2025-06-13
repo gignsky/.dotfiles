@@ -288,17 +288,19 @@ is_extension_available() {
   return 1
 }
 
-debug "Checking availability for all declared extensions..."
-for ext in "${declared_exts[@]}"; do
-  publisher="${ext%%.*}"
-  name="${ext#*.}"
-  norm_ext="${ext,,}"
+process_extension() {
+  debug "[process_extension] Processing extension: $1"
+  local ext="$1"
+  local publisher="${ext%%.*}"
+  local name="${ext#*.}"
+  local norm_ext="${ext,,}"
+  local result_file="$2"
   debug "Processing extension: $ext (publisher: $publisher, name: $name, normalized: $norm_ext)"
   # Check if extension is available
   if ! is_extension_available "$publisher" "$name"; then
     debug "Extension $ext is NOT available on Open VSX or Marketplace"
-    skipped_not_found+=("$ext (not available on Open VSX or Marketplace)")
-    continue
+    echo "SKIP_NOT_FOUND|$ext (not available on Open VSX or Marketplace)" >> "$result_file"
+    return
   fi
   # Get installed version using normalized ID
   current_version="${normalized_installed_versions[$norm_ext]}"
@@ -323,23 +325,53 @@ for ext in "${declared_exts[@]}"; do
   # If not installed, add to install
   if [ -z "$current_version" ]; then
     debug "Adding $ext to to_install"
-    to_install+=("$ext")
-    continue
+    echo "INSTALL|$ext" >> "$result_file"
+    return
   fi
   # If installed and up-to-date, skip
   if [ -n "$current_version" ] && [ -n "$latest_version" ] && [ "$current_version" = "$latest_version" ]; then
     debug "Skipping $ext (already installed and up-to-date)"
-    skipped_already_installed+=("$ext")
-    continue
+    echo "SKIP_ALREADY_INSTALLED|$ext" >> "$result_file"
+    return
   fi
   # If installed but outdated, add to update
   if [ -n "$current_version" ] && [ -n "$latest_version" ] && [ "$current_version" != "$latest_version" ]; then
     debug "Adding $ext to to_update ($current_version -> $latest_version)"
-    to_update+=("$ext|$current_version|$latest_version")
-    continue
+    echo "UPDATE|$ext|$current_version|$latest_version" >> "$result_file"
+    return
   fi
+}
 
+debug "Checking availability for all declared extensions (in parallel)..."
+# Parallelize extension processing
+TMP_PROCESS_EXT=$(mktemp)
+> "$TMP_PROCESS_EXT"
+CONCURRENCY=16
+pids=()
+for ext in "${declared_exts[@]}"; do
+  process_extension "$ext" "$TMP_PROCESS_EXT" &
+  pids+=("$!")
+  if (( ${#pids[@]} >= CONCURRENCY )); then
+    wait "${pids[0]}"
+    pids=("${pids[@]:1}")
+  fi
 done
+for pid in "${pids[@]}"; do
+  wait "$pid"
+done
+
+# Collect results
+while IFS= read -r line; do
+  IFS='|' read -r action ext oldver newver <<< "$line"
+  case "$action" in
+    INSTALL) to_install+=("$ext") ;;
+    UPDATE) to_update+=("$ext|$oldver|$newver") ;;
+    SKIP_ALREADY_INSTALLED) skipped_already_installed+=("$ext") ;;
+    SKIP_NOT_FOUND) skipped_not_found+=("$ext") ;;
+  esac
+done < "$TMP_PROCESS_EXT"
+rm -f "$TMP_PROCESS_EXT"
+
 
 debug "to_install:"
 for ext in "${to_install[@]}"; do
