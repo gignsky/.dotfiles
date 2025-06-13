@@ -153,12 +153,6 @@ fi
 debug "DL_CMD: $DL_CMD"
 debug "DL_CMD_RAW: $DL_CMD_RAW"
 
-debug "Getting list of already installed extensions..."
-mapfile -t already_installed < <("$CODE_CMD" --list-extensions 2>/dev/null)
-debug "Already installed: ${already_installed[*]}"
-
-failover=0
-
 function download_marketplace_vsix() {
   debug "[MARKETPLACE] Entered download_marketplace_vsix for $1.$2"
   local publisher="$1"
