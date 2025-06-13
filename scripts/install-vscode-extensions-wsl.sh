@@ -81,18 +81,18 @@ function debug() {
 
 export PATH="/bin:/usr/bin:$PATH"
 
-debug "VSCode extension install script started at $(date)"
-debug "Script started."
-debug "PATH: $PATH"
-debug "User: $(whoami)"
-debug "Current directory: $(pwd)"
-debug "VS Code CLI: $(command -v code || echo not found)"
-debug "curl: $(command -v curl || echo not found)"
-debug "wget: $(command -v wget || echo not found)"
-debug "file: $(command -v file || echo not found)"
-debug "jq: $(command -v jq || echo not found)"
+debug 1 "VSCode extension install script started at $(date)"
+debug 2 "Script started."
+debug 4 "PATH: $PATH"
+debug 4 "User: $(whoami)"
+debug 4 "Current directory: $(pwd)"
+debug 4 "VS Code CLI: $(command -v code || echo not found)"
+debug 4 "curl: $(command -v curl || echo not found)"
+debug 4 "wget: $(command -v wget || echo not found)"
+debug 4 "file: $(command -v file || echo not found)"
+debug 4 "jq: $(command -v jq || echo not found)"
 
-debug "Extension list file: $1"
+debug 3 "Extension list file: $1"
 
 if [ ! -f "$1" ]; then
   skipped_not_found+=("Extension list not found: $1")
@@ -102,7 +102,7 @@ fi
 EXT_LIST_FILE="$1"
 CODE_BIN="$(command -v code 2>/dev/null || true)"
 
-debug "CODE_BIN resolved to: $CODE_BIN"
+debug 3 "CODE_BIN resolved to: $CODE_BIN"
 
 if [ -z "$CODE_BIN" ]; then
   for username in gig admin; do
@@ -111,10 +111,10 @@ if [ -z "$CODE_BIN" ]; then
       "/mnt/c/Users/$username/AppData/Local/Programs/Microsoft VS Code Insiders/bin/code" \
       "/mnt/c/Users/$username/scoop/apps/vscode/current/bin/code"
     do
-      debug "Checking candidate: $candidate"
+      debug 3 "Checking candidate: $candidate"
       if [ -x "$candidate" ]; then
         CODE_BIN="$candidate"
-        debug "Found code binary at: $candidate"
+        debug 2 "Found code binary at: $candidate"
         break 2
       fi
     done
@@ -123,10 +123,10 @@ if [ -z "$CODE_BIN" ]; then
     "/mnt/c/Program Files/Microsoft VS Code/bin/code" \
     "/mnt/c/Program Files (x86)/Microsoft VS Code/bin/code"
   do
-    debug "Checking candidate: $candidate"
+    debug 3 "Checking candidate: $candidate"
     if [ -x "$candidate" ]; then
       CODE_BIN="$candidate"
-      debug "Found code binary at: $candidate"
+      debug 2 "Found code binary at: $candidate"
       break
     fi
   done
@@ -137,7 +137,7 @@ if [ -z "$CODE_BIN" ]; then
   exit 0
 fi
 
-debug "Final CODE_BIN: $CODE_BIN"
+debug 1 "Final CODE_BIN: $CODE_BIN"
 
 if command -v curl >/dev/null 2>&1; then
   DL_CMD="curl -s -A 'Mozilla/5.0' -fSL -o"
@@ -150,11 +150,11 @@ else
   exit 1
 fi
 
-debug "DL_CMD: $DL_CMD"
-debug "DL_CMD_RAW: $DL_CMD_RAW"
+debug 4 "DL_CMD: $DL_CMD"
+debug 4 "DL_CMD_RAW: $DL_CMD_RAW"
 
 function download_marketplace_vsix() {
-  debug "[MARKETPLACE] Entered download_marketplace_vsix for $1.$2"
+  debug 1 "[MARKETPLACE] Entered download_marketplace_vsix for $1.$2"
   local publisher="$1"
   local name="$2"
   local extid="$publisher.$name"
@@ -162,33 +162,33 @@ function download_marketplace_vsix() {
   local vsix_url version
   local payload='{ "filters": [ { "criteria": [ { "filterType": 7, "value": "'"$extid"'" } ] } ], "flags": 914 }'
   local response
-  debug "Querying Marketplace for $extid ..."
-  debug "Marketplace API URL: $api_url"
+  debug 2 "Querying Marketplace for $extid ..."
+  debug 3 "Marketplace API URL: $api_url"
   response=$(curl -sS -A 'Mozilla/5.0' -fSL "$api_url" \
     -H "Content-Type: application/json" \
     -H "Accept: application/json;api-version=3.0-preview.1" \
     --data-binary @- <<< "$payload")
   version=$(echo "$response" | jq -r '.results[0].extensions[0].versions[0].version // empty')
-  debug "Marketplace version for $extid: $version"
+  debug 2 "Marketplace version for $extid: $version"
   if [ -z "$version" ]; then
     return 1
   fi
   vsix_url=$(echo "$response" | jq -r '.results[0].extensions[0].versions[0].assetUri + "/Microsoft.VisualStudio.Services.VSIXPackage"')
-  debug "Marketplace VSIX URL for $extid: $vsix_url"
+  debug 3 "Marketplace VSIX URL for $extid: $vsix_url"
   if [ -z "$vsix_url" ]; then
     return 1
   fi
   local vsix_file="/tmp/$publisher.$name-$version.vsix"
-  debug "Downloading from Marketplace: $vsix_url -> $vsix_file"
+  debug 3 "Downloading from Marketplace: $vsix_url -> $vsix_file"
   curl -sS -A 'Mozilla/5.0' -fSL -o "$vsix_file" "$vsix_url" >/dev/null 2>&1
   if [ $? -eq 0 ] && file "$vsix_file" | grep -q 'Zip archive data'; then
-    debug "Downloaded valid VSIX from Marketplace: $vsix_file"
+    debug 2 "Downloaded valid VSIX from Marketplace: $vsix_file"
     echo "$vsix_file"
     return 0
   else
-    debug "Failed to download valid VSIX from Marketplace for $extid"
+    debug 2 "Failed to download valid VSIX from Marketplace for $extid"
     [ -f "$vsix_file" ] && {
-      debug "First 10 lines of failed VSIX file:"
+      debug 4 "First 10 lines of failed VSIX file:"
       # head -10 "$vsix_file"
       rm -f "$vsix_file"
     }
@@ -197,32 +197,32 @@ function download_marketplace_vsix() {
 }
 
 function download_openvsx_vsix() {
-  debug "[OPENVSX] Entered download_openvsx_vsix for $1.$2"
+  debug 1 "[OPENVSX] Entered download_openvsx_vsix for $1.$2"
   local publisher="$1"
   local name="$2"
   local api_url="https://open-vsx.org/api/$publisher/$name"
-  debug "Querying Open VSX for $publisher.$name ..."
-  debug "Open VSX API URL: $api_url"
+  debug 2 "Querying Open VSX for $publisher.$name ..."
+  debug 3 "Open VSX API URL: $api_url"
   local latest_version
   latest_version=$(curl -sS -A 'Mozilla/5.0' "$api_url" | jq -r '.version // empty')
-  debug "Open VSX version for $publisher.$name: $latest_version"
+  debug 2 "Open VSX version for $publisher.$name: $latest_version"
   if [ -z "$latest_version" ]; then
-    debug "[OPENVSX] No version found for $publisher.$name on Open VSX. Skipping download."
+    debug 2 "[OPENVSX] No version found for $publisher.$name on Open VSX. Skipping download."
     return 1
   fi
   local vsix_url="https://open-vsx.org/api/$publisher/$name/$latest_version/file/$publisher.$name-$latest_version.vsix"
-  debug "Constructed Open VSX VSIX URL: $vsix_url"
+  debug 3 "Constructed Open VSX VSIX URL: $vsix_url"
   local vsix_file="/tmp/$publisher.$name-$latest_version.vsix"
-  debug "Downloading from Open VSX: $vsix_url -> $vsix_file"
+  debug 2 "Downloading from Open VSX: $vsix_url -> $vsix_file"
   $DL_CMD "$vsix_file" "$vsix_url" >/dev/null 2>&1
   if [ $? -eq 0 ] && file "$vsix_file" | grep -q 'Zip archive data'; then
-    debug "Downloaded valid VSIX from Open VSX: $vsix_file"
+    debug 1 "Downloaded valid VSIX from Open VSX: $vsix_file"
     echo "$vsix_file"
     return 0
   else
-    debug "Failed to download valid VSIX from Open VSX for $publisher.$name"
+    debug 1 "Failed to download valid VSIX from Open VSX for $publisher.$name"
     [ -f "$vsix_file" ] && {
-      debug "First 10 lines of failed VSIX file:"
+      debug 4 "First 10 lines of failed VSIX file:"
       # head -10 "$vsix_file"
       rm -f "$vsix_file"
     }
@@ -249,10 +249,10 @@ for line in "${show_versions_lines[@]}"; do
   [ -n "$extid" ] && [ -n "$ver" ] && installed_versions[$extid]="$ver"
   [ -n "$extid" ] && [ -n "$ver" ] && normalized_installed_versions[$norm_extid]="$ver"
 done
-debug "Raw code --list-extensions --show-versions output: ${show_versions_lines[*]}"
-debug "Normalized installed extension IDs (with versions):"
+debug 2 "Raw code --list-extensions --show-versions output: ${show_versions_lines[*]}"
+debug 1 "Normalized installed extension IDs (with versions):"
 for k in "${!normalized_installed_versions[@]}"; do
-  debug "  $k -> ${normalized_installed_versions[$k]}"
+  debug 1 "  $k -> ${normalized_installed_versions[$k]}"
 done
 
 # Get normalized list of installed extensions (no versions)
@@ -263,8 +263,11 @@ for ext in "${installed_exts_raw[@]}"; do
   normalized_installed+=("${ext,,}")
   done
 
-debug "Raw installed extensions (no versions): ${installed_exts_raw[*]}"
-debug "Normalized installed extensions (no versions): ${normalized_installed[*]}"
+debug 2 "Raw installed extensions (no versions): ${installed_exts_raw[*]}"
+debug 1 "Normalized installed extensions (no versions):"
+for ext in "${normalized_installed[@]}"; do
+  debug 1 "  $ext"
+done
 
 # Pre-process extension list
 mapfile -t declared_exts < <(jq -r '.[]' "$EXT_LIST_FILE" | tr -d '\0')
@@ -272,7 +275,7 @@ declared_exts_normalized=()
 for ext in "${declared_exts[@]}"; do
   declared_exts_normalized+=("${ext,,}")
 done
-debug "Normalized declared extension IDs: ${declared_exts_normalized[*]}"
+debug 2 "Normalized declared extension IDs: ${declared_exts_normalized[*]}"
 
 to_install=()
 to_update=()
@@ -280,7 +283,7 @@ skipped_already_installed=()
 skipped_not_found=()
 
 is_extension_available() {
-  debug "Checking availability for extension: $1.$2"
+  debug 2 "Checking availability for extension: $1.$2"
   publisher="$1"
   name="$2"
   # Check Open VSX
@@ -308,7 +311,7 @@ process_declared_ext() {
   local publisher="${ext%%.*}"
   local name="${ext#*.}"
   local norm_ext="${ext,,}"
-  debug "[process_declared_ext] $ext (publisher: $publisher, name: $name, normalized: $norm_ext)"
+  debug 1 "[process_declared_ext] $ext (publisher: $publisher, name: $name, normalized: $norm_ext)"
   # Check if extension is available on Open VSX or Marketplace
   if ! is_extension_available "$publisher" "$name"; then
     debug "Extension $ext is NOT available on Open VSX or Marketplace"
@@ -317,10 +320,10 @@ process_declared_ext() {
   fi
   # Get installed version using normalized ID
   current_version="${normalized_installed_versions[$norm_ext]}"
-  debug "Installed version for $ext: ${current_version:-<not installed>}"
+  debug 2 "Installed version for $ext: ${current_version:-<not installed>}"
   # Get latest version from Open VSX
   latest_version_ovsx=$(curl -sS -A 'Mozilla/5.0' "https://open-vsx.org/api/$publisher/$name" | jq -r '.version // empty')
-  debug "Latest version on Open VSX for $ext: ${latest_version_ovsx:-<none>}"
+  debug 3 "Latest version on Open VSX for $ext: ${latest_version_ovsx:-<none>}"
   # Get latest version from Marketplace
   latest_version_marketplace=""
   response=$(curl -sS -A 'Mozilla/5.0' -fSL "https://marketplace.visualstudio.com/_apis/public/gallery/extensionquery" \
@@ -328,13 +331,13 @@ process_declared_ext() {
     -H "Accept: application/json;api-version=3.0-preview.1" \
     --data-binary @- <<< '{ "filters": [ { "criteria": [ { "filterType": 7, "value": "'$publisher.$name'" } ] } ], "flags": 914 }')
   latest_version_marketplace=$(echo "$response" | jq -r '.results[0].extensions[0].versions[0].version // empty')
-  debug "Latest version on Marketplace for $ext: ${latest_version_marketplace:-<none>}"
+  debug 3 "Latest version on Marketplace for $ext: ${latest_version_marketplace:-<none>}"
   # Determine latest version from either source
   latest_version="$latest_version_ovsx"
   if [ -n "$latest_version_marketplace" ]; then
     latest_version="$latest_version_marketplace"
   fi
-  debug "Selected latest version for $ext: ${latest_version:-<none>}"
+  debug 1 "Selected latest version for $ext: ${latest_version:-<none>}"
   # If not installed, add to install
   if [ -z "$current_version" ]; then
     debug "Adding $ext to to_install"
@@ -343,13 +346,13 @@ process_declared_ext() {
   fi
   # If installed and up-to-date, skip
   if [ -n "$current_version" ] && [ -n "$latest_version" ] && [ "$current_version" = "$latest_version" ]; then
-    debug "Skipping $ext (already installed and up-to-date)"
+    debug 1 "Skipping $ext (already installed and up-to-date)"
     echo "SKIP_ALREADY_INSTALLED|$ext" >> "$result_file"
     return
   fi
   # If installed but outdated, add to update
   if [ -n "$current_version" ] && [ -n "$latest_version" ] && [ "$current_version" != "$latest_version" ]; then
-    debug "Adding $ext to to_update ($current_version -> $latest_version)"
+    debug 1 "Adding $ext to to_update ($current_version -> $latest_version)"
     echo "UPDATE|$ext|$current_version|$latest_version" >> "$result_file"
     return
   fi
@@ -359,23 +362,23 @@ process_installed_ext() {
   local ext="$1"
   local result_file="$2"
   local norm_ext="$ext"
-  debug "[process_installed_ext] $ext (normalized: $norm_ext)"
+  debug 1 "[process_installed_ext] $ext (normalized: $norm_ext)"
   local found=0
   for declared in "${declared_exts_normalized[@]}"; do
     if [ "$norm_ext" = "$declared" ]; then
-      debug "[process_installed_ext] Extension $ext is declared; skipping removal."
+      debug 1 "[process_installed_ext] Extension $ext is declared; skipping removal."
       found=1
       break
     fi
   done
   if [ $found -eq 0 ]; then
-    debug "[process_installed_ext] Extension $ext is installed but not declared; marking for removal."
+    debug 1 "[process_installed_ext] Extension $ext is installed but not declared; marking for removal."
     echo "REMOVE|$ext" >> "$result_file"
   fi
 }
 
 process_extension() {
-  debug "[process_extension] Processing extension: $1 (mode: $3)"
+  debug 2 "[process_extension] Processing extension: $1 (mode: $3)"
   local ext="$1"
   local result_file="$2"
   local mode="$3"
@@ -393,7 +396,7 @@ process_extension() {
 }
 
 # Now process installed extensions in parallel
-debug "Processing installed extensions (in parallel)..."
+debug 1 "Processing installed extensions (in parallel)..."
 TMP_PROCESS_INSTALLED=$(mktemp)
 > "$TMP_PROCESS_INSTALLED"
 pids=()
@@ -419,7 +422,7 @@ done < "$TMP_PROCESS_INSTALLED"
 rm -f "$TMP_PROCESS_INSTALLED"
 
 # Parallelize extension processing
-debug "Checking availability for all declared extensions (in parallel)..."
+debug 1 "Checking availability for all declared extensions (in parallel)..."
 TMP_PROCESS_DECLARED=$(mktemp)
 > "$TMP_PROCESS_DECLARED"
 CONCURRENCY=16
@@ -448,25 +451,25 @@ while IFS= read -r line; do
 done < "$TMP_PROCESS_DECLARED"
 rm -f "$TMP_PROCESS_DECLARED"
 
-debug "to_install:"
+debug 1 "to_install:"
 for ext in "${to_install[@]}"; do
-  debug "  $ext"
+  debug 1 "  $ext"
 done
-debug "to_update:"
+debug 1 "to_update:"
 for ext in "${to_update[@]}"; do
-  debug "  $ext"
+  debug 1 "  $ext"
 done
-debug "skipped_already_installed:"
+debug 1 "skipped_already_installed:"
 for ext in "${skipped_already_installed[@]}"; do
-  debug "  $ext"
+  debug 1 "  $ext"
 done
-debug "skipped_not_found:"
+debug 1 "skipped_not_found:"
 for ext in "${skipped_not_found[@]}"; do
-  debug "  $ext"
+  debug 1 "  $ext"
 done
-debug "to_remove:"
+debug 1 "to_remove:"
 for ext in "${to_remove[@]}"; do
-  debug "  $ext"
+  debug 1 "  $ext"
 done
 # exit 0 # used for debugging
 
@@ -477,14 +480,14 @@ trap 'rm -rf "$TMPDIR"; print_summary' EXIT
 INSTALLED_EXTS_FILE="$TMPDIR/installed_exts"
 
 install_extension() {
-  debug "[install_extension] Installing extension: $1"
+  debug 1 "[install_extension] Installing extension: $1"
   ext="$1"
   publisher="${ext%%.*}"
   name="${ext#*.}"
   latest_version=$(curl -sS -A 'Mozilla/5.0' "https://open-vsx.org/api/$publisher/$name" | jq -r '.version // empty')
   vsix_file=""
   # Try Open VSX first
-  debug "[install_extension] Checking Open VSX for $publisher.$name version $latest_version"
+  debug 2 "[install_extension] Checking Open VSX for $publisher.$name version $latest_version"
   if [ -n "$latest_version" ]; then
     vsix_file="$CACHE_DIR/$publisher.$name-$latest_version.vsix"
     if [ ! -f "$vsix_file" ]; then
@@ -502,7 +505,7 @@ install_extension() {
     fi
   fi
   # Fallback: try Marketplace
-  debug "[install_extension] Checking Marketplace for $publisher.$name"
+  debug 2 "[install_extension] Checking Marketplace for $publisher.$name"
   vsix_file="$CACHE_DIR/$publisher.$name-marketplace.vsix"
   if [ ! -f "$vsix_file" ]; then
     mp_vsix=$(download_marketplace_vsix "$publisher" "$name")
@@ -522,7 +525,7 @@ install_extension() {
 
 # Add update_extension function
 update_extension() {
-  debug "[update_extension] Updating extension: $1 from $2 to $3"
+  debug 1 "[update_extension] Updating extension: $1 from $2 to $3"
   ext="$1"
   oldver="$2"
   newver="$3"
@@ -562,7 +565,7 @@ update_extension() {
 
 # remove an extension
 remove_extension() {
-  debug "[remove_extension] Removing extension: $1"
+  debug 1 "[remove_extension] Removing extension: $1"
   ext="$1"
   if "$CODE_CMD" --uninstall-extension "$ext" --force >/dev/null 2>&1; then
     echo "$ext" >> "$TMPDIR/removed_exts"
@@ -571,7 +574,7 @@ remove_extension() {
   fi
 }
 
-debug "Installing/Updating/Removing all extensions (in parallel)..."
+debug 1 "Installing/Updating/Removing all extensions (in parallel)..."
 CONCURRENCY=16
 pids=()
 # Install new extensions
@@ -616,7 +619,7 @@ removed_exts=(); [ -f "$TMPDIR/removed_exts" ] && mapfile -t removed_exts < "$TM
 updated_exts=(); [ -f "$TMPDIR/updated_exts" ] && mapfile -t updated_exts < "$TMPDIR/updated_exts"
 
 # Final summary
-debug "Final summary:"
+debug 2 "Final summary:"
 print_summary
 
 # Cleanup
