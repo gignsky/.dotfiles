@@ -186,7 +186,7 @@ function download_marketplace_vsix() {
     echo "$vsix_file"
     return 0
   else
-    debug 2 "Failed to download valid VSIX from Marketplace for $extid"
+    debug 1 "Failed to download valid VSIX from Marketplace for $extid"
     [ -f "$vsix_file" ] && {
       debug 4 "First 10 lines of failed VSIX file:"
       # head -10 "$vsix_file"
@@ -484,42 +484,42 @@ install_extension() {
   ext="$1"
   publisher="${ext%%.*}"
   name="${ext#*.}"
-  latest_version=$(curl -sS -A 'Mozilla/5.0' "https://open-vsx.org/api/$publisher/$name" | jq -r '.version // empty')
-  vsix_file=""
-  # Try Open VSX first
-  debug 2 "[install_extension] Checking Open VSX for $publisher.$name version $latest_version"
-  if [ -n "$latest_version" ]; then
-    vsix_file="$CACHE_DIR/$publisher.$name-$latest_version.vsix"
-    if [ ! -f "$vsix_file" ]; then
-      url="https://open-vsx.org/api/$publisher/$name/$latest_version/file/$publisher.$name-$latest_version.vsix"
-      $DL_CMD "$vsix_file" "$url" >/dev/null 2>&1
-    fi
-    if [ -f "$vsix_file" ] && file "$vsix_file" | grep -q 'Zip archive data'; then
-      install_output=$("$CODE_CMD" --install-extension "$vsix_file" --force 2>&1)
-      if echo "$install_output" | grep -qi 'success'; then
-        echo "$ext" >> "$TMPDIR/installed"
-      else
-        echo "$ext (install failed)" >> "$TMPDIR/failed"
-      fi
-      return
-    fi
-  fi
-  # Fallback: try Marketplace
+  # Try Marketplace first
   debug 2 "[install_extension] Checking Marketplace for $publisher.$name"
   vsix_file="$CACHE_DIR/$publisher.$name-marketplace.vsix"
   if [ ! -f "$vsix_file" ]; then
+    debug 2 "[install_extension] Downloading Marketplace VSIX for $publisher.$name"
     mp_vsix=$(download_marketplace_vsix "$publisher" "$name")
     [ -n "$mp_vsix" ] && mv "$mp_vsix" "$vsix_file"
   fi
   if [ -f "$vsix_file" ] && file "$vsix_file" | grep -q 'Zip archive data'; then
+    debug 2 "[install_extension] Installing from Marketplace VSIX: $vsix_file"
     install_output=$("$CODE_CMD" --install-extension "$vsix_file" --force 2>&1)
     if echo "$install_output" | grep -qi 'success'; then
+      debug 1 "[install_extension] Successfully installed $ext from Marketplace"
       echo "$ext" >> "$TMPDIR/installed"
     else
+      debug 1 "[install_extension] Failed to install $ext from Marketplace"
       echo "$ext (install failed)" >> "$TMPDIR/failed"
     fi
     return
   fi
+  # Fallback: try Open VSX
+  debug 2 "[install_extension] Checking Open VSX for $publisher.$name"
+  ovsx_vsix=$(download_openvsx_vsix "$publisher" "$name")
+  if [ -n "$ovsx_vsix" ] && [ -f "$ovsx_vsix" ] && file "$ovsx_vsix" | grep -q 'Zip archive data'; then
+    debug 2 "[install_extension] Installing from Open VSX VSIX: $ovsx_vsix"
+    install_output=$("$CODE_CMD" --install-extension "$ovsx_vsix" --force 2>&1)
+    if echo "$install_output" | grep -qi 'success'; then
+      debug 1 "[install_extension] Successfully installed $ext from Open VSX"
+      echo "$ext" >> "$TMPDIR/installed"
+    else
+      debug 1 "[install_extension] Failed to install $ext from Open VSX"
+      echo "$ext (install failed)" >> "$TMPDIR/failed"
+    fi
+    return
+  fi
+  debug 1 "[install_extension] $ext not found on Marketplace or Open VSX"
   echo "$ext (not found)" >> "$TMPDIR/skipped_not_found"
 }
 
@@ -531,35 +531,42 @@ update_extension() {
   newver="$3"
   publisher="${ext%%.*}"
   name="${ext#*.}"
-  vsix_file="$CACHE_DIR/$publisher.$name-$newver.vsix"
-  if [ ! -f "$vsix_file" ]; then
-    url="https://open-vsx.org/api/$publisher/$name/$newver/file/$publisher.$name-$newver.vsix"
-    $DL_CMD "$vsix_file" "$url" >/dev/null 2>&1
-  fi
-  if [ -f "$vsix_file" ] && file "$vsix_file" | grep -q 'Zip archive data'; then
-    install_output=$("$CODE_CMD" --install-extension "$vsix_file" --force 2>&1)
-    if echo "$install_output" | grep -qi 'success'; then
-      echo "$ext ($oldver -> $newver)" >> "$TMPDIR/updated_exts"
-    else
-      echo "$ext (update failed)" >> "$TMPDIR/failed"
-    fi
-    return
-  fi
-  # Fallback: try Marketplace
+  # Try Marketplace first
+  debug 2 "[update_extension] Checking Marketplace for $publisher.$name"
   vsix_file="$CACHE_DIR/$publisher.$name-marketplace.vsix"
   if [ ! -f "$vsix_file" ]; then
+    debug 2 "[update_extension] Downloading Marketplace VSIX for $publisher.$name"
     mp_vsix=$(download_marketplace_vsix "$publisher" "$name")
     [ -n "$mp_vsix" ] && mv "$mp_vsix" "$vsix_file"
   fi
   if [ -f "$vsix_file" ] && file "$vsix_file" | grep -q 'Zip archive data'; then
+    debug 2 "[update_extension] Installing from Marketplace VSIX: $vsix_file"
     install_output=$("$CODE_CMD" --install-extension "$vsix_file" --force 2>&1)
     if echo "$install_output" | grep -qi 'success'; then
+      debug 1 "[update_extension] Successfully updated $ext from Marketplace"
       echo "$ext ($oldver -> $newver)" >> "$TMPDIR/updated_exts"
     else
+      debug 1 "[update_extension] Failed to update $ext from Marketplace"
       echo "$ext (update failed)" >> "$TMPDIR/failed"
     fi
     return
   fi
+  # Fallback: try Open VSX
+  debug 2 "[update_extension] Checking Open VSX for $publisher.$name"
+  ovsx_vsix=$(download_openvsx_vsix "$publisher" "$name")
+  if [ -n "$ovsx_vsix" ] && [ -f "$ovsx_vsix" ] && file "$ovsx_vsix" | grep -q 'Zip archive data'; then
+    debug 2 "[update_extension] Installing from Open VSX VSIX: $ovsx_vsix"
+    install_output=$("$CODE_CMD" --install-extension "$ovsx_vsix" --force 2>&1)
+    if echo "$install_output" | grep -qi 'success'; then
+      debug 1 "[update_extension] Successfully updated $ext from Open VSX"
+      echo "$ext ($oldver -> $newver)" >> "$TMPDIR/updated_exts"
+    else
+      debug 1 "[update_extension] Failed to update $ext from Open VSX"
+      echo "$ext (update failed)" >> "$TMPDIR/failed"
+    fi
+    return
+  fi
+  debug 1 "[update_extension] $ext not found on Marketplace or Open VSX"
   echo "$ext (update not found)" >> "$TMPDIR/skipped_not_found"
 }
 
