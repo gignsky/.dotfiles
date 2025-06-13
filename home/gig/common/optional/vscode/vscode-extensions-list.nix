@@ -16,7 +16,6 @@
   "github.copilot-chat"
   "github.vscode-github-actions"
   "github.vscode-pull-request-github"
-  "google.geminicodeassist"
   "gruntfuggly.todo-tree"
   "jnoortheen.nix-ide"
   "kevinkassimo.cargo-toml-snippets"
