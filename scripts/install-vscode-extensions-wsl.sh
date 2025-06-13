@@ -485,7 +485,17 @@ update_extension() {
   echo "$ext (update not found)" >> "$TMPDIR/skipped_not_found"
 }
 
-# Only install/update missing or outdated extensions
+# remove an extension
+remove_extension() {
+  debug "[remove_extension] Removing extension: $1"
+  ext="$1"
+  if "$CODE_CMD" --uninstall-extension "$ext" --force >/dev/null 2>&1; then
+    echo "$ext" >> "$TMPDIR/removed_exts"
+  else
+    echo "$ext (remove failed)" >> "$TMPDIR/failed"
+  fi
+}
+
 CONCURRENCY=16
 pids=()
 # Install new extensions
@@ -510,24 +520,6 @@ done
 # Wait for remaining jobs
 for pid in "${pids[@]}"; do
   wait "$pid"
-done
-
-
-# Remove extensions not in the declarative list
-mapfile -t current_exts < <("$CODE_CMD" --list-extensions 2>/dev/null)
-for ext in "${current_exts[@]}"; do
-  found=0
-  for declared in "${declared_exts[@]}"; do
-    if [ "$ext" = "$declared" ]; then
-      found=1
-      break
-    fi
-  done
-  if [ $found -eq 0 ]; then
-    $CODE_CMD --uninstall-extension "$ext" --force >/dev/null 2>&1
-    echo "$ext" >> "$TMPDIR/removed_exts"
-  fi
-
 done
 
 # Aggregate results from temp files into arrays for summary
