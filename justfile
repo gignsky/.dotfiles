@@ -236,7 +236,7 @@ cleanup-vm:
 # helper justfile arg
 call-vm create-extra-disk="yes" cleanup-extra-disk="no":
     nix-shell -p lolcat --run 'echo "[VM] Running VM..." | lolcat 2> /dev/null'
-    - nix shell nixpkgs#qemu --command bash -c 'bash scripts/run-iso-vm.sh result/iso/*.iso ./tmp-iso/nixos-vm/vm.img {{create-extra-disk}} {{cleanup-extra-disk}}'
+    - nix shell nixpkgs#qemu --command bash -c 'bash scripts/run-iso-vm.sh result/iso/*.iso ./tmp-iso/nixos-vm/vm.img {{cleanup-extra-disk}}'
     nix-shell -p lolcat --run 'echo "[VM] VM Closed." | lolcat 2> /dev/null'
 
 # run vm with minimal iso - while not deleting files afterwards
