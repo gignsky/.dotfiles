@@ -18,14 +18,7 @@ let
       packages = [ pkgs.home-manager ];
     };
 
-    users.users.root = {
-      hashedPasswordFile = sopsRootHashedPasswordFile;
-    };
-
-    # # Import this user's personal/home configurations
-    # home-manager.users.${configVars.username} = import (
-    #   configLib.relativeToRoot "home/${configVars.username}/${config.networking.hostName}.nix"
-    # );
+    # Removed users.users.root here to avoid duplicate password options
   };
 in
 {
@@ -63,11 +56,18 @@ in
         };
 
         # Proper root use required for borg and some other specific operations
-        users.users.root = {
-          password = if configVars.isMinimal then "nixos" else null; # Overridden if sops is working
-          # root's ssh keys are mainly used for remote deployment.
-          openssh.authorizedKeys.keys = config.users.users.${configVars.username}.openssh.authorizedKeys.keys;
-        };
+        users.users.root = lib.mkMerge [
+          (lib.optionalAttrs configVars.isMinimal {
+            password = "nixos";
+          })
+          (lib.optionalAttrs (!configVars.isMinimal) {
+            hashedPasswordFile = sopsRootHashedPasswordFile;
+          })
+          {
+            hashedPassword = null;
+            openssh.authorizedKeys.keys = config.users.users.${configVars.username}.openssh.authorizedKeys.keys;
+          }
+        ];
       };
   # decrypt gig-password to /run/secrets-for-users/ so it can be used to create the user
   # sops.secrets.gig-password.neededForUsers = true;
