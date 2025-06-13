@@ -1,8 +1,63 @@
 #!/usr/bin/env bash
+
+# Initialize summary arrays at the very top so they are always available
+installed=()
+skipped_already_installed=()
+skipped_not_found=()
+failed=()
+removed_exts=()
+updated_exts=()
+
+print_summary() {
+  printf '\n\033[1;35m==============================\033[0m\n'
+  printf '\033[1;35m✨ VS Code Extension Installation Summary ✨\033[0m\n'
+  printf '\033[1;35m==============================\033[0m\n\n'
+  if [ ${#installed[@]} -gt 0 ]; then
+    printf '\033[1;32m✅ Installed:\033[0m\n'
+    for ext in "${installed[@]}"; do
+      printf '  \033[1;32m✔️ %s\033[0m\n' "$ext"
+    done
+    printf '\n'
+  fi
+  if [ ${#updated_exts[@]} -gt 0 ]; then
+    printf '\033[1;34m⬆️  Updated (new version installed):\033[0m\n'
+    for ext in "${updated_exts[@]}"; do
+      printf '  \033[1;34m⬆️  %s\033[0m\n' "$ext"
+    done
+    printf '\n'
+  fi
+  if [ ${#removed_exts[@]} -gt 0 ]; then
+    printf '\033[1;31m🗑️  Removed (not in declarative list):\033[0m\n'
+    for ext in "${removed_exts[@]}"; do
+      printf '  \033[1;31m🗑️  %s\033[0m\n' "$ext"
+    done
+    printf '\n'
+  fi
+  if [ ${#skipped_not_found[@]} -gt 0 ]; then
+    printf '\033[1;33m❓ Skipped (not found or could not be installed):\033[0m\n'
+    for ext in "${skipped_not_found[@]}"; do
+      printf '  \033[1;33m❓ %s\033[0m\n' "$ext"
+    done
+    printf '\n'
+  fi
+  if [ ${#failed[@]} -gt 0 ]; then
+    printf '\033[1;31m❌ Failed:\033[0m\n'
+    for ext in "${failed[@]}"; do
+      printf '  \033[1;31m✖️ %s\033[0m\n' "$ext"
+    done
+    printf '\n'
+  fi
+  printf '\033[1;35m==============================\033[0m\n'
+}
+
+trap print_summary EXIT
+
+set +e  # Use manual error handling throughout the script
+
 # Install VS Code extensions from a JSON file (for WSL)
 # Usage: ./install-vscode-extensions-wsl.sh /path/to/extensions.json
 
-set -euo pipefail
+# set -euo pipefail  # Removed to avoid conflict with set +e
 
 DEBUG=1
 function debug() { echo -e "[DEBUG] $@"; }
@@ -22,13 +77,12 @@ export PATH="/bin:/usr/bin:$PATH"
 
 # debug "Extension list file: $1"
 
-EXT_LIST_FILE="$1"
-
-if [ ! -f "$EXT_LIST_FILE" ]; then
-  echo "Extension list not found: $EXT_LIST_FILE"
+if [ ! -f "$1" ]; then
+  skipped_not_found+=("Extension list not found: $1")
   exit 1
 fi
 
+EXT_LIST_FILE="$1"
 CODE_BIN="$(command -v code 2>/dev/null || true)"
 
 # debug "CODE_BIN resolved to: $CODE_BIN"
@@ -62,7 +116,7 @@ if [ -z "$CODE_BIN" ]; then
 fi
 
 if [ -z "$CODE_BIN" ]; then
-  echo "VS Code CLI (code) not found in PATH or common locations. Extensions will not be installed."
+  failed+=("VS Code CLI (code) not found in PATH or common locations. Extensions will not be installed.")
   exit 0
 fi
 
@@ -81,13 +135,6 @@ fi
 
 # debug "DL_CMD: $DL_CMD"
 # debug "DL_CMD_RAW: $DL_CMD_RAW"
-
-installed=()
-skipped_already_installed=()
-skipped_not_found=()
-failed=()
-removed_exts=()
-updated_exts=()
 
 # debug "Getting list of already installed extensions..."
 mapfile -t already_installed < <("$CODE_BIN" --list-extensions 2>/dev/null)
@@ -256,7 +303,28 @@ for ext in "${declared_exts[@]}"; do
     if echo "$update_output" | grep -q 'updated to'; then
       updated_exts+=("$ext")
     elif echo "$update_output" | grep -qi 'Signature verification failed'; then
-      failed+=("$ext (Signature verification failed during update)")
+      # Try failover update from Open VSX if signature verification fails
+      publisher="${ext%%.*}"
+      name="${ext#*.}"
+      download_openvsx_vsix "$publisher" "$name"
+      vsix_file=$(ls /tmp/"$publisher.$name"-*.vsix 2>/dev/null | head -n1)
+      if [ -n "$vsix_file" ] && [ -f "$vsix_file" ]; then
+        failover_update_output=$("$CODE_BIN" --install-extension "$vsix_file" --force 2>&1)
+        if echo "$failover_update_output" | grep -q 'updated to'; then
+          updated_exts+=("$ext (updated via failover)")
+        elif echo "$failover_update_output" | grep -qi 'Signature verification failed'; then
+          failed+=("$ext (Signature verification failed during update from both sources)")
+        elif echo "$failover_update_output" | grep -qi 'Failed Installing Extensions'; then
+          failed+=("$ext (Failed installing extension during update from Open VSX)")
+        elif echo "$failover_update_output" | grep -qi 'error'; then
+          failed+=("$ext (Unknown error during update from Open VSX)")
+        else
+          failed+=("$ext (Unknown error during update from Open VSX)")
+        fi
+        rm -f "$vsix_file"
+      else
+        failed+=("$ext (Signature verification failed during update, and not found on Open VSX)")
+      fi
     elif echo "$update_output" | grep -qi 'Failed Installing Extensions'; then
       failed+=("$ext (Failed installing extension during update)")
     elif echo "$update_output" | grep -qi 'error'; then
@@ -267,61 +335,3 @@ for ext in "${declared_exts[@]}"; do
 done
 
 # debug "Extension install loop complete."
-
-# # Troubleshooting: print if output is a terminal
-# if [ -t 1 ]; then
-#   # debug "[SUMMARY] Output is a terminal. Colors should work."
-# else
-#   # debug "[SUMMARY] Output is NOT a terminal. Colors may not display."
-# fi
-
-print_summary() {
-  printf '\n\033[1;35m==============================\033[0m\n'
-  printf '\033[1;35m✨ VS Code Extension Installation Summary ✨\033[0m\n'
-  printf '\033[1;35m==============================\033[0m\n\n'
-  if [ ${#installed[@]} -gt 0 ]; then
-    printf '\033[1;32m✅ Installed:\033[0m\n'
-    for ext in "${installed[@]}"; do
-      printf '  \033[1;32m✔️ %s\033[0m\n' "$ext"
-    done
-    printf '\n'
-  fi
-  if [ ${#updated_exts[@]} -gt 0 ]; then
-    printf '\033[1;34m⬆️  Updated (new version installed):\033[0m\n'
-    for ext in "${updated_exts[@]}"; do
-      printf '  \033[1;34m⬆️  %s\033[0m\n' "$ext"
-    done
-    printf '\n'
-  fi
-  if [ ${#removed_exts[@]} -gt 0 ]; then
-    printf '\033[1;31m🗑️  Removed (not in declarative list):\033[0m\n'
-    for ext in "${removed_exts[@]}"; do
-      printf '  \033[1;31m🗑️  %s\033[0m\n' "$ext"
-    done
-    printf '\n'
-  fi
-  # if [ ${#skipped_already_installed[@]} -gt 0 ]; then
-  #   printf '\033[1;33m⏭️  Skipped (already installed):\033[0m\n'
-  #   for ext in "${skipped_already_installed[@]}"; do
-  #     printf '  \033[1;33m⏭️  %s\033[0m\n' "$ext"
-  #   done
-  #   printf '\n'
-  # fi
-  if [ ${#skipped_not_found[@]} -gt 0 ]; then
-    printf '\033[1;33m❓ Skipped (not found or could not be installed):\033[0m\n'
-    for ext in "${skipped_not_found[@]}"; do
-      printf '  \033[1;33m❓ %s\033[0m\n' "$ext"
-    done
-    printf '\n'
-  fi
-  if [ ${#failed[@]} -gt 0 ]; then
-    printf '\033[1;31m❌ Failed:\033[0m\n'
-    for ext in "${failed[@]}"; do
-      printf '  \033[1;31m✖️ %s\033[0m\n' "$ext"
-    done
-    printf '\n'
-  fi
-  printf '\033[1;35m==============================\033[0m\n'
-}
-
-trap print_summary EXIT
