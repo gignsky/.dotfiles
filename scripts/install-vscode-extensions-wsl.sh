@@ -75,7 +75,7 @@ function debug() {
     shift
   fi
   if [ "$DEBUG" -ge "$level" ]; then
-    echo -e "[DEBUG] $@"
+    echo -e "[DEBUG] $@" >&2
   fi
 }
 
