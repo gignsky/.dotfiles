@@ -358,12 +358,13 @@ process_installed_ext() {
   local found=0
   for declared in "${declared_exts_normalized[@]}"; do
     if [ "$norm_ext" = "$declared" ]; then
+      debug "[process_installed_ext] Extension $ext is declared; skipping removal."
       found=1
       break
     fi
   done
   if [ $found -eq 0 ]; then
-    debug "Extension $ext is installed but not declared; marking for removal."
+    debug "[process_installed_ext] Extension $ext is installed but not declared; marking for removal."
     echo "REMOVE|$ext" >> "$result_file"
   fi
 }
