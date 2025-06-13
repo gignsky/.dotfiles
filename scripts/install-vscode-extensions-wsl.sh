@@ -271,7 +271,7 @@ install_extension() {
 }
 
 # Parallel install loop with concurrency limit
-CONCURRENCY=6
+CONCURRENCY=16
 pids=()
 while IFS= read -r ext; do
   install_extension "$ext" &
