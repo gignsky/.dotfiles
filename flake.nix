@@ -270,48 +270,41 @@
               hooks = {
                 nixpkgs-fmt = {
                   enable = true;
-                  excludes = [ ".*^resources/.*" ];
                 };
                 statix = {
                   enable = true;
-                  excludes = [ ".*^resources/.*" ];
-                  entry = "statix fix";
-                  pass_filenames = true;
+                  # entry = "scripts/bin/statix-wrapper.sh fix";
+                  # pass_filenames = true;
+                  # language = "system";
                 };
                 deadnix = {
                   enable = true;
-                  excludes = [ ".*^resources/.*" "home/gig/common/optional/starship.nix" ];
+                  excludes = [ "home/gig/common/optional/starship.nix" ];
                 };
                 shellcheck = {
                   enable = true;
-                  excludes = [ ".*^resources/.*" ];
                 };
                 markdownlint = {
                   enable = true;
-                  excludes = [ ".*^resources/.*" ];
                 };
                 yamllint = {
                   enable = true;
-                  excludes = [ ".*^resources/.*" ];
                 };
-                # trailing-whitespace = {
-                #   enable = true;
-                #   excludes = [ ".*^resources/.*" ];
-                # };
                 end-of-file-fixer = {
                   enable = true;
-                  excludes = [ ".*^resources/.*" ];
                 };
-                flake-check = {
-                  enable = true;
-                  entry = "nix flake check --no-build";
-                  language = "system";
-                  pass_filenames = false;
-                };
+                # flake-check = {
+                #   enable = true;
+                #   entry = "scripts/bin/nix-wrapper.sh flake check --no-build";
+                #   language = "system";
+                #   pass_filenames = false;
+                #   # requiredPackages removed, not supported for system hooks
+                # };
               };
             };
           };
       };
+
       # Shell configured with packages that are typically only needed when working on or with nix-config.
       devShells.${system}.default = pkgs.mkShell {
         NIX_CONFIG = "extra-experimental-features = nix-command flakes ";
@@ -334,6 +327,7 @@
             lazygit
             statix
             deadnix
+            nix
 
             #unstable packages
             # unstable.statix

@@ -1,4 +1,4 @@
-{ ... }:
+_:
 
 {
   # Debug line to check if this file is being accessed
