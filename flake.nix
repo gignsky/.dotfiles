@@ -273,9 +273,6 @@
                 };
                 statix = {
                   enable = true;
-                  # entry = "scripts/bin/statix-wrapper.sh fix";
-                  # pass_filenames = true;
-                  # language = "system";
                 };
                 deadnix = {
                   enable = true;
@@ -293,13 +290,6 @@
                 end-of-file-fixer = {
                   enable = true;
                 };
-                # flake-check = {
-                #   enable = true;
-                #   entry = "scripts/bin/nix-wrapper.sh flake check --no-build";
-                #   language = "system";
-                #   pass_filenames = false;
-                #   # requiredPackages removed, not supported for system hooks
-                # };
               };
             };
           };
