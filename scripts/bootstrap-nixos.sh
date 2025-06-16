@@ -51,7 +51,7 @@ function yes_or_no() {
 
 function sync() {
 	# $1 = user, $2 = source, $3 = destination
-	rsync -av --filter=':- .gitignore' -e "ssh -l $1 -oport=${ssh_port}" $2 $1@${target_destination}:
+	rsync -av --filter=':- .gitignore' -e "ssh -l $1 -oport=${ssh_port}" "$2" "$1"@"${target_destination}":
 }
 
 function help_and_exit() {
@@ -82,31 +82,31 @@ while [[ $# -gt 0 ]]; do
 	case "$1" in
 	-n)
 		shift
-		target_hostname=$1
+		target_hostname="$1"
 		;;
 	-d)
 		shift
-		target_destination=$1
+		target_destination="$1"
 		;;
 	-u)
 		shift
-		target_user=$1
+		target_user="$1"
 		;;
 	-k)
 		shift
-		ssh_key=$1
+		ssh_key="$1"
 		;;
 	-always_yes)
 		shift
-		always_yes=$1
+		always_yes="$1"
 		;;
 	--port)
 		shift
-		ssh_port=$1
+		ssh_port="$1"
 		;;
 	--temp-override)
 		shift
-		temp=$1
+		temp="$1"
 		;;
 	--impermanence)
 		persist_dir="/persist"
@@ -124,9 +124,9 @@ while [[ $# -gt 0 ]]; do
 done
 
 # SSH commands
-ssh_cmd="ssh -oport=${ssh_port} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i $ssh_key -t $target_user@$target_destination"
-ssh_root_cmd=$(echo "$ssh_cmd" | sed "s|${target_user}@|root@|") # uses @ in the sed switch to avoid it triggering on the $ssh_key value
-scp_cmd="scp -oport=${ssh_port} -o StrictHostKeyChecking=no -i $ssh_key"
+ssh_cmd="ssh -oport=${ssh_port} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ${ssh_key} -t ${target_user}@${target_destination}"
+ssh_root_cmd="${ssh_cmd/@${target_user}@/root@}" # uses @ in the sed switch to avoid it triggering on the $ssh_key value
+scp_cmd="scp -oport=${ssh_port} -o StrictHostKeyChecking=no -i ${ssh_key}"
 
 git_root=$(git rev-parse --show-toplevel)
 
@@ -304,7 +304,7 @@ if [ "$always_yes" == "false" ]; then
 		$ssh_cmd "mkdir -p $home_path/.ssh/"
 		# sync "$target_user" "$ssh_key" "$home_path/.ssh/$ssh_key"
 		yellow "Copying ssh_key to $home_path/.ssh/. on $target_hostname"
-		$scp_cmd "$ssh_key" "root"@"$target_destination":/"$ssh_key"
+		$scp_cmd "$ssh_key" "root@$target_destination:/$ssh_key"
 		yellow "chown gig:users $home_path/.ssh/"
 		$ssh_cmd "sudo chown -R gig:users $home_path/.ssh/"
 		yellow "chmod 600 $ssh_key"
@@ -376,7 +376,7 @@ else
 	$ssh_cmd "mkdir -p $home_path/.ssh/"
 	# sync "$target_user" "$ssh_key" "$home_path/.ssh/$ssh_key"
 	yellow "Copying ssh_key to $home_path/.ssh/. on $target_hostname"
-	$scp_cmd "$ssh_key" "root"@"$target_destination":/"$ssh_key"
+	$scp_cmd "$ssh_key" "root@$target_destination:/$ssh_key"
 	yellow "chown gig:users $home_path/.ssh/"
 	$ssh_cmd "sudo chown -R gig:users $home_path/.ssh/"
 	yellow "chmod 600 $ssh_key"

@@ -1,7 +1,7 @@
 { pkgs, ... }:
 
 {
-  # home.file.".p10k.zsh".source = ../resources/.p10k.zsh.vm;
+  # home.file.".p10k.zsh".source = ../.p10k.zsh.vm;
   imports = [
     ./starship.nix
   ];
