@@ -62,6 +62,7 @@ toplevel
 Tpng
 treefmt
 updatekeys
+upflake
 upjust
 upspell
 upstreamed
