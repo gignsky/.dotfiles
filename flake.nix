@@ -138,7 +138,7 @@
           inherit system specialArgs;
           modules = [
             inputs.vscode-server.nixosModules.default
-            ({ ... }: {
+            (_: {
               services.vscode-server.enable = true;
             })
             inputs.nixos-wsl.nixosModules.default
@@ -241,51 +241,83 @@
       overlays = import ./overlays { inherit inputs; };
 
       checks = {
-        pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
-          src = ./.;
-          hooks = {
-            nixpkgs-fmt = {
-              enable = true;
-              excludes = [ ".*^resources/.*" ];
-            };
-            statix = {
-              enable = false;
-              excludes = [ ".*^resources/.*" ];
-            };
-            deadnix = {
-              enable = false;
-              excludes = [ ".*^resources/.*" ];
-            };
-            shellcheck = {
-              enable = false;
-              excludes = [ ".*^resources/.*" ];
-            };
-            markdownlint = {
-              enable = false;
-              excludes = [ ".*^resources/.*" ];
-            };
-            yamllint = {
-              enable = false;
-              excludes = [ ".*^resources/.*" ];
-            };
-            trailing-whitespace = {
-              enable = false;
-              excludes = [ ".*^resources/.*" ];
-            };
-            end-of-file-fixer = {
-              enable = false;
-              excludes = [ ".*^resources/.*" ];
+        ${system} =
+          let
+            nixosTests = nixpkgs.lib.filterAttrs (_: v: v != null) (
+              nixpkgs.lib.mapAttrs'
+                (name: config: {
+                  name = "nixosTest-${name}";
+                  value = config.config.system.build.vmTest or null;
+                })
+                self.nixosConfigurations
+            );
+            homeManagerChecks = nixpkgs.lib.mapAttrs'
+              (name: cfg: {
+                name = "homeManager-${name}";
+                value = cfg.activationPackage;
+              })
+              self.homeConfigurations;
+            packageBuilds = nixpkgs.lib.mapAttrs'
+              (name: pkg: {
+                name = "build-${name}";
+                value = pkg;
+              })
+              (import ./pkgs { inherit pkgs; });
+          in
+          nixosTests // homeManagerChecks // packageBuilds // {
+            pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
+              src = ./.;
+              hooks = {
+                nixpkgs-fmt = {
+                  enable = true;
+                  excludes = [ ".*^resources/.*" ];
+                };
+                statix = {
+                  enable = true;
+                  excludes = [ ".*^resources/.*" ];
+                  entry = "statix fix";
+                  pass_filenames = true;
+                };
+                deadnix = {
+                  enable = true;
+                  excludes = [ ".*^resources/.*" "home/gig/common/optional/starship.nix" ];
+                };
+                shellcheck = {
+                  enable = true;
+                  excludes = [ ".*^resources/.*" ];
+                };
+                markdownlint = {
+                  enable = true;
+                  excludes = [ ".*^resources/.*" ];
+                };
+                yamllint = {
+                  enable = true;
+                  excludes = [ ".*^resources/.*" ];
+                };
+                # trailing-whitespace = {
+                #   enable = true;
+                #   excludes = [ ".*^resources/.*" ];
+                # };
+                end-of-file-fixer = {
+                  enable = true;
+                  excludes = [ ".*^resources/.*" ];
+                };
+                flake-check = {
+                  enable = true;
+                  entry = "nix flake check --no-build";
+                  language = "system";
+                  pass_filenames = false;
+                };
+              };
             };
           };
-        };
       };
-
       # Shell configured with packages that are typically only needed when working on or with nix-config.
       devShells.${system}.default = pkgs.mkShell {
         NIX_CONFIG = "extra-experimental-features = nix-command flakes ";
 
-        inherit (self.checks.pre-commit-check) shellHook;
-        buildInputs = self.checks.pre-commit-check.enabledPackages;
+        inherit (self.checks.${system}.pre-commit-check) shellHook;
+        buildInputs = self.checks.${system}.pre-commit-check.enabledPackages;
 
         nativeBuildInputs = builtins.attrValues {
           inherit (pkgs)
@@ -302,6 +334,9 @@
             lazygit
             statix
             deadnix
+
+            #unstable packages
+            # unstable.statix
 
             # personal packages
             quick-results
