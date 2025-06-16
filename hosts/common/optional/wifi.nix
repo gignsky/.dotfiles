@@ -1,4 +1,4 @@
-{ ... }:
+_:
 
 {
   # enables network manager to help with wifi
