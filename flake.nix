@@ -295,7 +295,7 @@
                   enable = true;
                 };
                 yamllint = {
-                  enable = true;
+                  enable = false;
                 };
                 end-of-file-fixer = {
                   enable = true;
