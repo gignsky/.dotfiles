@@ -1,4 +1,7 @@
-{ pkgs, lib, ... }:
+# deadnix: skip-file
+# NOTE: Home Manager modules must use { config, pkgs, ... } even if unused.
+#       Ignore deadnix warnings about unused arguments here.
+{ config, pkgs, ... }:
 {
   programs.starship = {
     enable = true;

@@ -11,7 +11,9 @@ ccls
 cdrom
 cifs
 countertop
+cowsay
 creds
+deadnix
 direnv
 direnvrc
 disko
@@ -41,6 +43,7 @@ nixd
 nixos
 nixpkgs
 nixup
+nixvim
 nmap
 nmcli
 nmtui
@@ -52,6 +55,7 @@ nvme
 oflag
 omnix
 oport
+passthru
 pkgs
 qcow
 redyf
@@ -59,6 +63,10 @@ remmina
 rustup
 secretsmgmt
 secretspath
+shellcheck
+spellfile
+statix
+supertree
 spacedock
 tdarr
 testbuzz
@@ -67,6 +75,7 @@ Tpng
 treefmt
 UEFI
 updatekeys
+upflake
 upjust
 upspell
 upstreamed

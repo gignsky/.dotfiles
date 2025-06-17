@@ -120,6 +120,14 @@
       };
       customPkgs = import ./pkgs { inherit pkgs; };
       pkgs = nixpkgs.legacyPackages.${system} // customPkgs;
+      assertAllHostsHaveVmTest = configs:
+        let
+          missing = nixpkgs.lib.filterAttrs (_: config: (config.config.system.build.vmTest or null) == null) configs;
+        in
+        if missing != { } then
+          throw ''\nSome nixosConfigurations are missing a vmTest!\nOffending hosts: ${builtins.concatStringsSep ", " (builtins.attrNames missing)}\nEach host must define config.system.build.vmTest.''
+        else
+          true;
     in
     {
 
@@ -132,7 +140,7 @@
           inherit system specialArgs;
           modules = [
             inputs.vscode-server.nixosModules.default
-            ({ config, pkgs, ... }: {
+            (_: {
               services.vscode-server.enable = true;
             })
             inputs.nixos-wsl.nixosModules.default
@@ -255,23 +263,76 @@
       overlays = import ./overlays { inherit inputs; };
 
       checks = {
-        pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
-          src = ./.;
-          hooks = {
-            nixpkgs-fmt.enable = true;
+        ${system} =
+          let
+            nixosTests =
+              assert assertAllHostsHaveVmTest self.nixosConfigurations;
+              nixpkgs.lib.filterAttrs (_: v: v != null) (
+                nixpkgs.lib.mapAttrs'
+                  (name: config: {
+                    name = "nixosTest-${name}";
+                    value = config.config.system.build.vmTest or null;
+                  })
+                  self.nixosConfigurations
+              );
+            homeManagerChecks = nixpkgs.lib.mapAttrs'
+              (name: cfg: {
+                name = "homeManager-${name}";
+                value = cfg.activationPackage;
+              })
+              self.homeConfigurations;
+            packageBuilds = nixpkgs.lib.mapAttrs'
+              (name: pkg: {
+                name = "build-${name}";
+                value = pkg;
+              })
+              (import ./pkgs { inherit pkgs; });
+          in
+          nixosTests // homeManagerChecks // packageBuilds // {
+            pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
+              src = ./.;
+              hooks = {
+                nixpkgs-fmt = {
+                  enable = true;
+                };
+                statix = {
+                  enable = true;
+                };
+                deadnix = {
+                  enable = true;
+                  excludes = [ "home/gig/common/optional/starship.nix" ];
+                };
+                shellcheck = {
+                  enable = true;
+                };
+                markdownlint = {
+                  enable = true;
+                };
+                yamllint = {
+                  enable = true;
+                };
+                end-of-file-fixer = {
+                  enable = true;
+                };
+                nix-flake-check-main-develop = {
+                  enable = true;
+                  name = "nix flake check on develop/main";
+                  entry = "./scripts/pre-commit-flake-check.sh";
+                  language = "script";
+                  pass_filenames = false;
+                  stages = [ "pre-commit" "pre-merge-commit" ];
+                };
+              };
+            };
           };
-        };
       };
 
       # Shell configured with packages that are typically only needed when working on or with nix-config.
       devShells.${system}.default = pkgs.mkShell {
         NIX_CONFIG = "extra-experimental-features = nix-command flakes ";
 
-        # inherit (self.checks.${system}.pre-commit-check) shellHook;
-        # buildInputs = self.checks.${system}.pre-commit-check.enabledPackages;
-
-        inherit (self.checks.pre-commit-check) shellHook;
-        buildInputs = self.checks.pre-commit-check.enabledPackages;
+        inherit (self.checks.${system}.pre-commit-check) shellHook;
+        buildInputs = self.checks.${system}.pre-commit-check.enabledPackages;
 
         nativeBuildInputs = builtins.attrValues {
           inherit (pkgs)
@@ -286,6 +347,12 @@
             home-manager
             just
             lazygit
+            statix
+            deadnix
+            nix
+
+            #unstable packages
+            # unstable.statix
 
             # personal packages
             quick-results

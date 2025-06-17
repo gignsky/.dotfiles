@@ -117,7 +117,7 @@ update-rebuild-full:
 
 check:
 	just dont-fuck-my-build
-	nix flake check --impure --no-build
+	nix flake check
 	nix-shell -p lolcat --run 'echo "[CHECK] Finished." | lolcat 2> /dev/null'
 
 check-iso:
