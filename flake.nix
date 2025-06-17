@@ -126,6 +126,14 @@
       };
       customPkgs = import ./pkgs { inherit pkgs; };
       pkgs = nixpkgs.legacyPackages.${system} // customPkgs;
+      assertAllHostsHaveVmTest = configs:
+        let
+          missing = nixpkgs.lib.filterAttrs (_: config: (config.config.system.build.vmTest or null) == null) configs;
+        in
+        if missing != { } then
+          throw ''\nSome nixosConfigurations are missing a vmTest!\nOffending hosts: ${builtins.concatStringsSep ", " (builtins.attrNames missing)}\nEach host must define config.system.build.vmTest.''
+        else
+          true;
     in
     {
 
@@ -243,14 +251,16 @@
       checks = {
         ${system} =
           let
-            nixosTests = nixpkgs.lib.filterAttrs (_: v: v != null) (
-              nixpkgs.lib.mapAttrs'
-                (name: config: {
-                  name = "nixosTest-${name}";
-                  value = config.config.system.build.vmTest or null;
-                })
-                self.nixosConfigurations
-            );
+            nixosTests =
+              assert assertAllHostsHaveVmTest self.nixosConfigurations;
+              nixpkgs.lib.filterAttrs (_: v: v != null) (
+                nixpkgs.lib.mapAttrs'
+                  (name: config: {
+                    name = "nixosTest-${name}";
+                    value = config.config.system.build.vmTest or null;
+                  })
+                  self.nixosConfigurations
+              );
             homeManagerChecks = nixpkgs.lib.mapAttrs'
               (name: cfg: {
                 name = "homeManager-${name}";
