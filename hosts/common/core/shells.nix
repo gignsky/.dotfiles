@@ -60,7 +60,7 @@
     };
     bash =
       let
-        sword = configLib.relativeToRoot "resources/sword.art";
+        sword = configLib.relativeToRoot "hosts/common/resources/sword.art";
       in
       {
         # enable = true;
