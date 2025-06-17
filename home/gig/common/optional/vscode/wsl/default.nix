@@ -1,4 +1,4 @@
-{ inputs, outputs, configLib, pkgs, ... }:
+_:
 
 {
   # Debug line to check if this file is being accessed
