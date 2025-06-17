@@ -83,7 +83,7 @@
       };
 
       shellInit = ''
-        cat ${sword} | ${pkgs.lolcat}/bin/lolcat 2> /dev/null
+        cat ${sword} | ${pkgs.lolcat}/bin/lolcat
       '';
 
       # loginShellInit = ''

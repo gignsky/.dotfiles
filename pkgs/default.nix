@@ -6,7 +6,7 @@
 rec {
   #################### Example Packages #################################
   # example = pkgs.writeShellScriptBin "example" ''
-  #   ${pkgs.cowsay}/bin/cowsay "hello world" | ${pkgs.lolcat}/bin/lolcat 2> /dev/null
+  #   ${pkgs.cowsay}/bin/cowsay "hello world" | ${pkgs.lolcat}/bin/lolcat
   # '';
 
   supertree = pkgs.writeShellScriptBin "supertree" ''
@@ -18,14 +18,14 @@ rec {
       local dir=$1
       local name=$2
       if [ -d "$dir" ]; then
-        echo "Contents of $name directory:" | ${pkgs.lolcat}/bin/lolcat 2> /dev/null
+        echo "Contents of $name directory:" | ${pkgs.lolcat}/bin/lolcat
         if [ "$dir" == "./target" ]; then
-          ${pkgs.tree}/bin/tree -L 2 "$dir" | ${pkgs.lolcat}/bin/lolcat 2> /dev/null
+          ${pkgs.tree}/bin/tree -L 2 "$dir" | ${pkgs.lolcat}/bin/lolcat
         else
-          ${pkgs.tree}/bin/tree "$dir" | ${pkgs.lolcat}/bin/lolcat 2> /dev/null
+          ${pkgs.tree}/bin/tree "$dir" | ${pkgs.lolcat}/bin/lolcat
         fi
       else
-        echo "No $name directory found" | ${pkgs.cowsay}/bin/cowsay | ${pkgs.lolcat}/bin/lolcat 2> /dev/null
+        echo "No $name directory found" | ${pkgs.cowsay}/bin/cowsay | ${pkgs.lolcat}/bin/lolcat
       fi
     }
 
