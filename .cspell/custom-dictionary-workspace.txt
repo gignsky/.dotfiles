@@ -10,6 +10,7 @@ ccls
 cdrom
 cifs
 countertop
+cowsay
 creds
 deadnix
 direnv
@@ -51,6 +52,7 @@ nvme
 oflag
 omnix
 oport
+passthru
 pkgs
 qcow
 redyf
@@ -59,7 +61,9 @@ rustup
 secretsmgmt
 secretspath
 shellcheck
+spellfile
 statix
+supertree
 tdarr
 testbuzz
 toplevel
