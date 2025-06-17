@@ -40,12 +40,13 @@
   };
 
   # Bootloader.
-  boot.loader.grub = {
-    enable = true;
-    device = "nodev"; # Use "nodev" for UEFI
-    efiSupport = true;
-    efiInstallAsRemovable = true; # Optional
-  };
+  # boot.loader.grub = {
+  #   enable = true;
+  #   device = "nodev"; # Use "nodev" for UEFI
+  #   efiSupport = true;
+  #   efiInstallAsRemovable = true; # Optional
+  # };
+  bootloader.kind = "systemd-boot";
 
   nix =
     let
