@@ -5,9 +5,9 @@ let
   sopsHashedPasswordFile =
     lib.optionalString (lib.hasAttr "sops-nix" inputs)
       config.sops.secrets."${configVars.username}-password".path;
-  sopsRootHashedPasswordFile =
-    lib.optionalString (lib.hasAttr "sops-nix" inputs)
-      config.sops.secrets."root-password".path;
+  # sopsRootHashedPasswordFile =
+  #   lib.optionalString (lib.hasAttr "sops-nix" inputs)
+  #     config.sops.secrets."root-password".path;
   pubKeys = lib.filesystem.listFilesRecursive (./keys);
 
   # these are values we don't want to set if the environment is minimal. E.g. ISO or nixos-installer
