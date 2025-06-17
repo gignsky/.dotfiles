@@ -52,7 +52,6 @@
       nixosConfigurations = {
         # host = newConfig "name" disk" "qemuGuest";
         # Swap size is in GiB
-        # tdarr-node = newConfig "tdarr-node" "/dev/sda" true;
         # merlin = newConfig "merlin" "/dev/nvme1n1" false;
         spacedock-test = newConfig "spacedock-test" "/dev/vda" true;
 
