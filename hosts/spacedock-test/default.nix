@@ -39,14 +39,8 @@
     hostId = "e641d98d";
   };
 
-  # Bootloader.
-  # boot.loader.grub = {
-  #   enable = true;
-  #   device = "nodev"; # Use "nodev" for UEFI
-  #   efiSupport = true;
-  #   efiInstallAsRemovable = true; # Optional
-  # };
-  bootloader.kind = "systemd-boot";
+  # Bootloader configuration
+  bootloader.kind = "grub";
 
   nix =
     let
