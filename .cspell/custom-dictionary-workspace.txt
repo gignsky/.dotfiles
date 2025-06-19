@@ -59,15 +59,16 @@ passthru
 pkgs
 qcow
 redyf
+refind
 remmina
 rustup
 secretsmgmt
 secretspath
 shellcheck
+spacedock
 spellfile
 statix
 supertree
-spacedock
 tdarr
 testbuzz
 toplevel
