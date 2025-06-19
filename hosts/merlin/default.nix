@@ -30,6 +30,9 @@
 
     # wifi
     (configLib.relativeToRoot "hosts/common/optional/wifi.nix")
+
+    # # Bootloader.
+    # (configLib.relativeToRoot "hosts/common/core/bootloader.nix")
   ];
 
   networking = {
@@ -39,14 +42,8 @@
     hostId = "81a45b83";
   };
 
-  # Bootloader.
-  # boot.loader.grub = {
-  #   enable = true;
-  #   device = "nodev"; # Use "nodev" for UEFI
-  #   efiSupport = true;
-  #   efiInstallAsRemovable = true; # Optional
-  # };
-  bootloader.kind = "refind";
+  # Bootloader configuration
+  bootloader.kind = "systemd-boot";
 
   nix =
     let
