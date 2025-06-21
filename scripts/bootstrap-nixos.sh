@@ -168,7 +168,8 @@ function nixos_anywhere() {
 	$ssh_root_cmd "nixos-generate-config --no-filesystems --root /mnt"
 	$scp_cmd root@"$target_destination":/mnt/etc/nixos/hardware-configuration.nix "${git_root}"/hosts/"$target_hostname"/hardware-configuration.nix
 
-	just dont-fuck-my-build
+	git ls-files --others --exclude-standard -- '*.nix' | xargs -r git add -v
+	nix-shell -p lolcat --run 'echo "Very little chance your build is fucked! 👍" | lolcat 2> /dev/null'
 
 	echo "Hostname: $target_hostname"
 	echo "IP: $target_destination"
