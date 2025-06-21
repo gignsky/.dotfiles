@@ -45,7 +45,7 @@ rebuild-pre:
 
 dont-fuck-my-build:
 	git ls-files --others --exclude-standard -- '*.nix' | xargs -r git add -v
-	nix flake lock --update-input nix-secrets
+	nix flake update nix-secrets
 	nix-shell -p lolcat --run 'echo "Very little chance your build is fucked! 👍" | lolcat 2> /dev/null'
 
 switch args="":
@@ -117,7 +117,7 @@ update-rebuild-full:
 
 check:
 	just dont-fuck-my-build
-	nix flake check --impure --no-build
+	nix flake check
 	nix-shell -p lolcat --run 'echo "[CHECK] Finished." | lolcat 2> /dev/null'
 
 check-iso:
@@ -157,6 +157,8 @@ home:
 
 # Runs just home and then zsh
 new home:
+	nix-shell -p lolcat --run 'echo "Cleaning zplug directory..." | lolcat 2> /dev/null'
+	rm -rfv ~/.config/zsh/zplug
 	just home
 	zsh
 
@@ -341,7 +343,7 @@ sops-fix:
 update-nix-secrets:
 	just rekey
 	(cd ../nix-secrets && git fetch && git rebase) || true
-	nix flake lock --update-input nix-secrets
+	nix flake update nix-secrets
 
 store-photo:
 	nix-shell -p graphviz nix-du --run "nix-du -s=500MB | \dot -Tpng > store.png"
