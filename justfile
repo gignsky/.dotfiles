@@ -157,6 +157,8 @@ home:
 
 # Runs just home and then zsh
 new home:
+	nix-shell -p lolcat --run 'echo "Cleaning zplug directory..." | lolcat 2> /dev/null'
+	rm -rfv ~/.config/zsh/zplug
 	just home
 	zsh
 

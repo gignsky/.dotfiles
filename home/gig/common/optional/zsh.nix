@@ -115,8 +115,8 @@
         { name = "plugins/ssh"; tags = [ "from:oh-my-zsh" ]; } # Plugin from oh-my-zsh
         # { name = "plugins/thefuck"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
         # { name = "plugins/vscode"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh - not working as of 2/13/25
-        # { name = "plugins/zoxide"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
-        # { name = "plugins/zsh-interactive-cd"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh
+        { name = "plugins/zoxide"; tags = [ "from:oh-my-zsh" ]; } # Plugin from oh-my-zsh
+        { name = "plugins/zsh-interactive-cd"; tags = [ "from:oh-my-zsh" ]; } # Plugin from oh-my-zsh
         # { name = "plugins/pre-commit"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh; not using pre-commits yet so this is disabled
         # { name = "plugins/lxd"; tags = ["from:oh-my-zsh"]; } # Plugin from oh-my-zsh; not implemented because I haven't gotten home-manager working on proxmox yet
         # { name = "zsh-users/zsh-history-substring-search";}
