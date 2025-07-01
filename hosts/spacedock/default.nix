@@ -39,6 +39,16 @@
     hostId = "e641d98d";
   };
 
+  # Allow unfree packages specifically for broadcom-sta driver
+  nixpkgs.config = {
+    # This is an explicit override for the specific package we need
+    allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
+      "broadcom-sta"
+    ];
+    # Explicitly set allowUnfree to true as a fallback
+    allowUnfree = true;
+  };
+
   # Bootloader configuration
   bootloader.kind = "grub";
 
