@@ -90,5 +90,18 @@ in
     ];
     warn-dirty = false;
   };
+
+  # Explicitly allow unfree packages for the installation
+  nixpkgs.config = {
+    allowUnfree = true;
+    # Specifically allow broadcom-sta to be installed
+    allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
+      "broadcom-sta"
+    ];
+  };
+
+  # Enable redistributable firmware for hardware support
+  hardware.enableRedistributableFirmware = true;
+
   system.stateVersion = "25.05";
 }
