@@ -413,7 +413,16 @@ else
 	green "Rebuilding .dotfiles on $target_hostname"
 	#FIXME there are still a gitlab fingerprint request happening during the rebuild
 	#$ssh_cmd -oForwardAgent=yes "cd .dotfiles && sudo nixos-rebuild --show-trace --flake .#$target_hostname" switch"
-	$ssh_cmd -oForwardAgent=yes "cd .dotfiles && direnv allow && just rebuild-full"
+	
+	# Check if direnv is available, if not, skip it (fresh NixOS install may not have it yet)
+	yellow "Checking if direnv is available on remote system..."
+	if $ssh_cmd "command -v direnv >/dev/null 2>&1"; then
+		green "direnv found, running direnv allow..."
+		$ssh_cmd -oForwardAgent=yes "cd .dotfiles && direnv allow && just rebuild-full"
+	else
+		yellow "direnv not found on remote system, skipping direnv allow and running rebuild directly..."
+		$ssh_cmd -oForwardAgent=yes "cd .dotfiles && just rebuild-full"
+	fi
 	(pre-commit run --all-files 2>/dev/null || true) &&
 		git add "$git_root/hosts/$target_hostname/hardware-configuration.nix" "$git_root/flake.lock" && (git commit -m "feat: hardware-configuration.nix for $target_hostname" || true) && git push
 	$ssh_cmd -oForwardAgent=yes "cd .dotfiles && just sops-fix"
