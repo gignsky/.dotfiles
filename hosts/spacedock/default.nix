@@ -50,7 +50,17 @@
   };
 
   # Bootloader configuration
-  bootloader.kind = "grub";
+  # bootloader.kind = "grub";
+  boot.loader = {
+    grub = {
+      enable = true;
+      useOSProber = true;
+      efiSupport = true;
+      efiInstallAsRemovable = true;
+      device = "nodev";
+    };
+    systemd-boot.enable = false;
+  };
 
   nix =
     let
