@@ -242,7 +242,12 @@ function generate_host_age_key() {
 				exit 1
 			)
 	)
-	host_age_key=$(nix shell nixpkgs#ssh-to-age.out -c sh -c "echo $target_key | ssh-to-age")
+	
+	yellow "Debug: Retrieved SSH key: $target_key"
+	
+	host_age_key=$(nix shell nixpkgs#ssh-to-age.out -c sh -c "echo '$target_key' | ssh-to-age")
+	
+	yellow "Debug: Generated age key: $host_age_key"
 
 	if grep -qv '^age1' <<<"$host_age_key"; then
 		red "The result from generated age key does not match the expected format."
