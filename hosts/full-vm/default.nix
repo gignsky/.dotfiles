@@ -1,13 +1,11 @@
 { pkgs
 , lib
 , configLib
-, configVars
-, inputs
 , ...
 }:
-let
-  sshPort = configVars.networking.sshPort;
-in
+# let
+#   inherit (configVars.networking) sshPort;
+# in
 {
   # The default compression-level is (6) and takes too long on some machines (>30m). 3 takes <2m
   # isoImage.squashfsCompression = "zstd -Xcompression-level 3";
@@ -62,9 +60,6 @@ in
     # inputs.home-manager.nixosModules.home-manager
   ];
   nix =
-    let
-      _flakeInputs = lib.filterAttrs (_: lib.isType "flake") inputs;
-    in
     {
       settings = {
         # Enable flakes and new 'nix' command

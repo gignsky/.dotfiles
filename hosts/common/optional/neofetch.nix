@@ -1,4 +1,4 @@
-{ inputs, config, lib, ... }:
+{ inputs, ... }:
 {
   imports = [
     inputs.nufetch.nixosModules.nufetch

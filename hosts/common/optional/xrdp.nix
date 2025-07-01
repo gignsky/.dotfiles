@@ -1,5 +1,3 @@
-{ config, lib, pkgs, modulesPath, ... }:
-
 {
   # rdp stuff    
   services.xrdp = {

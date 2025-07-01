@@ -1,4 +1,4 @@
-{ inputs, outputs, pkgs, ... }:
+_:
 
 {
   # info at

@@ -1,21 +1,22 @@
 #!/usr/bin/env bash
 
-if [ ! -z $1 ]; then
-	if [ $1 == "file" ]; then
-		export PATH_USED=TRUE
-		export PATH=$(pwd)/$2
+if [ -n "$1" ]; then
+	if [ "$1" = "file" ]; then
+		PATH_USED=TRUE
+		FLAKE_PATH="$(pwd)/$2"
 	else
-		export PATH_USED=FALSE
-		export PACKAGE=$1
+		PATH_USED=FALSE
+		PACKAGE="$1"
 	fi
 else
-	export PATH_USED=FALSE
-	export PACKAGE=""
+	PATH_USED=FALSE
+	PACKAGE=""
 fi
+export PATH_USED PACKAGE FLAKE_PATH
 
-if [ $PATH_USED == TRUE ]; then
-	echo "Building flake at $PATH"
-	# nix build --file $PATH
+if [ "$PATH_USED" = TRUE ]; then
+	echo "Building flake at $FLAKE_PATH"
+	# nix build --file "$FLAKE_PATH"
 else
-	nix build .#$PACKAGE
+	nix build .#"$PACKAGE"
 fi

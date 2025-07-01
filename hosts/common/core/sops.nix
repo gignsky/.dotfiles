@@ -1,4 +1,4 @@
-{ inputs, configLib, ... }:
+{ inputs, ... }:
 
 let
   secretspath = builtins.toString inputs.nix-secrets;
@@ -9,7 +9,7 @@ in
   ];
 
   sops = {
-    defaultSopsFile = ("${secretspath}/secrets.yaml");
+    defaultSopsFile = "${secretspath}/secrets.yaml";
     validateSopsFiles = true;
 
     age = {
