@@ -61,12 +61,6 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
-    # # Declarative partitioning and formatting
-    # disko = {
-    #   url = "github:nix-community/disko";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
-
     neve = {
       url = "github:redyf/Neve";
     };
@@ -176,6 +170,18 @@
           ];
         };
 
+        # # spacedock configuration entrypoint - unused as spacedock has a wsl instance
+        # spacedock = nixpkgs.lib.nixosSystem {
+        #   inherit system specialArgs;
+        #   modules = [
+        #     # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
+        #     # home-manager.nixosModules.home-manager {
+        #     #   home-manager.extraSpecialArgs = specialArgs;
+        #     # }
+        #     ./hosts/spacedock
+        #   ];
+        # };
+
         # # # Merlin configuration entrypoint - unused as merlin has a wsl instance
         # merlin = nixpkgs.lib.nixosSystem {
         #   inherit system specialArgs;
@@ -215,6 +221,14 @@
           #   isWSL = true;
           # };
         };
+
+        # # spacedock - unused with spacedock having a wsl instance
+        # "gig@spacedock" = home-manager.lib.homeManagerConfiguration {
+        #   inherit pkgs; # Home-manager requires 'pkgs' instance
+        #   extraSpecialArgs = { inherit inputs outputs configLib; };
+        #   # > Our main home-manager configuration file <
+        #   modules = [ ./home/gig/spacedock.nix ];
+        # };
 
         # # merlin - unused with merlin having a wsl instance
         # "gig@merlin" = home-manager.lib.homeManagerConfiguration {

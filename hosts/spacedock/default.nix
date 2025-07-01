@@ -17,26 +17,30 @@
 
     # Import your generated (nixos-generate-config) hardware configuration
     ./hardware-configuration.nix
-
     # core utils
     (configLib.relativeToRoot "hosts/common/core")
 
     # optional
     # (configLib.relativeToRoot "hosts/common/optional/gui.nix")
-    (configLib.relativeToRoot "hosts/common/optional/sshd-with-passwords.nix")
+    # (configLib.relativeToRoot "hosts/common/optional/firefox.nix")
+    # ../common/optional/xrdp.nix
 
     #gig users
     (configLib.relativeToRoot "hosts/common/users/gig")
+
+    # wifi
+    (configLib.relativeToRoot "hosts/common/optional/wifi.nix")
   ];
 
-  networking.hostName = "tdarr-node";
-
-  # Bootloader.
-  boot.loader.grub = {
-    enable = true;
-    device = "/dev/sda";
-    useOSProber = true;
+  networking = {
+    hostName = "spacedock";
+    # hostId should be a unique 8-character (hexadecimal) string, especially if using ZFS.
+    # You can generate one with: head -c4 /dev/urandom | od -An -tx1 | tr -d ' \n'
+    hostId = "e641d98d";
   };
+
+  # Bootloader configuration
+  bootloader.kind = "grub";
 
   nix =
     let
@@ -59,14 +63,21 @@
       nixPath = lib.mapAttrsToList (n: _: "${n}=flake:${n}") flakeInputs;
     };
 
-  fileSystems."/" =
-    {
-      device = "/dev/dm-0";
-      fsType = "ext4";
+  fileSystems = {
+    "/" = {
+      device = "zroot/root";
+      fsType = "zfs";
     };
-
-  services.qemuGuest.enable = true;
+    "/boot" = {
+      device = "/dev/disk/by-label/BOOT";
+      fsType = "vfat";
+    };
+    "/nix/store" = {
+      device = "zroot/nix";
+      fsType = "zfs";
+    };
+  };
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
-  system.stateVersion = "24.05";
+  system.stateVersion = "25.05";
 }
