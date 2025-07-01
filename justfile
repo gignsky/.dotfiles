@@ -315,23 +315,23 @@ sops:
 	nix-shell -p lolcat --run 'echo "Editing ~/nix-secrets/secrets.yaml" | lolcat 2> /dev/null'
 	nano ~/nix-secrets/.sops.yaml
 	sops ~/nix-secrets/secrets.yaml
-	just rekey
+	just rekey-no-hooks
 
 #edit .sops.yaml only (no rekey)
 sops-edit:
 	nix-shell -p lolcat --run 'echo "Editing ~/nix-secrets/.sops.yaml" | lolcat 2> /dev/null'
 	nano ~/nix-secrets/.sops.yaml
 
-# Update the keys in the secrets file
-rekey:
-	just dont-fuck-my-build
-	nix-shell -p lolcat --run 'echo "Updating ~/nix-secrets/secrets.yaml" | lolcat 2> /dev/null'
-	cd ../nix-secrets && (\
-	nix-shell -p sops --run "sops updatekeys -y secrets.yaml" && \
-	git add -u && (git commit -m "chore: rekey" || true) && git push \
-	)
-	nix-shell -p lolcat --run 'echo "Updated Secrets!" | lolcat 2> /dev/null'
-	just dont-fuck-my-build
+# # Update the keys in the secrets file
+# rekey:
+# 	just dont-fuck-my-build
+# 	nix-shell -p lolcat --run 'echo "Updating ~/nix-secrets/secrets.yaml" | lolcat 2> /dev/null'
+# 	cd ../nix-secrets && (\
+# 	nix-shell -p sops --run "sops updatekeys -y secrets.yaml" && \
+# 	git add -u && (git commit -m "chore: rekey" || true) && git push \
+# 	)
+# 	nix-shell -p lolcat --run 'echo "Updated Secrets!" | lolcat 2> /dev/null'
+# 	just dont-fuck-my-build
 
 # Update the keys in the secrets file without pre-commit hooks (for bootstrap)
 rekey-no-hooks:
