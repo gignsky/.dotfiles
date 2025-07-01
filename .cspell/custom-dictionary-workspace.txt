@@ -6,6 +6,7 @@ bluskript
 btop
 btrfs
 cachix
+canmount
 ccls
 cdrom
 cifs
@@ -18,6 +19,7 @@ direnvrc
 disko
 dont
 downscript
+extradisk
 ganoslal
 gedit
 gignsky
@@ -45,6 +47,7 @@ nixvim
 nmap
 nmcli
 nmtui
+noauto
 nodev
 nufetch
 numtide
@@ -56,11 +59,13 @@ passthru
 pkgs
 qcow
 redyf
+refind
 remmina
 rustup
 secretsmgmt
 secretspath
 shellcheck
+spacedock
 spellfile
 statix
 supertree
@@ -69,11 +74,13 @@ testbuzz
 toplevel
 Tpng
 treefmt
+UEFI
 updatekeys
 upflake
 upjust
 upspell
 upstreamed
+urandom
 vfat
 vimjoyer
 virtio
