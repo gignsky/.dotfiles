@@ -168,9 +168,11 @@ function nixos_anywhere() {
 	green "Preparing a temporary password for disko."
 	
 	# Remove any existing disko-password file that might be owned by another user
+	yellow "Removing any existing /tmp/disko-password file on $target_hostname"
 	ssh_root_cmd 'rm -f /tmp/disko-password'
 	
 	# Create the password file
+	yellow "Creating /tmp/disko-password file on $target_hostname"
 	ssh_root_cmd 'printf "passphrase" > /tmp/disko-password && chmod 600 /tmp/disko-password'
 	
 	# Verify the file was created
