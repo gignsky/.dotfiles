@@ -125,8 +125,12 @@ done
 
 # SSH commands
 ssh_cmd="ssh -oport=${ssh_port} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ${ssh_key} -t ${target_user}@${target_destination}"
-ssh_root_cmd="${ssh_cmd/@${target_user}@/root@}" # uses @ in the sed switch to avoid it triggering on the $ssh_key value
 scp_cmd="scp -oport=${ssh_port} -o StrictHostKeyChecking=no -i ${ssh_key}"
+
+# SSH root command function
+ssh_root_cmd() {
+    ssh -oport="${ssh_port}" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "${ssh_key}" -t root@"${target_destination}" "$@"
+}
 
 git_root=$(git rev-parse --show-toplevel)
 
@@ -162,10 +166,10 @@ function nixos_anywhere() {
 	# when using luks, disko expects a passphrase on /tmp/disko-password, so we set it for now and will update the passphrase later
 	# via the config
 	green "Preparing a temporary password for disko."
-	$ssh_root_cmd "/bin/sh -c 'echo passphrase > /tmp/disko-password'"
+	ssh_root_cmd "/bin/sh -c 'echo passphrase > /tmp/disko-password'"
 
 	green "Generating hardware-config.nix for $target_hostname and adding it to the .dotfiles."
-	$ssh_root_cmd "nixos-generate-config --no-filesystems --root /mnt"
+	ssh_root_cmd "nixos-generate-config --no-filesystems --root /mnt"
 	$scp_cmd root@"$target_destination":/mnt/etc/nixos/hardware-configuration.nix "${git_root}"/hosts/"$target_hostname"/hardware-configuration.nix
 
 	just dont-fuck-my-build
@@ -183,8 +187,8 @@ function nixos_anywhere() {
 	ssh-keyscan -p "$ssh_port" "$target_destination" >>~/.ssh/known_hosts || true
 
 	if [ -n "$persist_dir" ]; then
-		$ssh_root_cmd "cp /etc/machine-id $persist_dir/etc/machine-id || true"
-		$ssh_root_cmd "cp -R /etc/ssh/ $persist_dir/etc/ssh/ || true"
+		ssh_root_cmd "cp /etc/machine-id $persist_dir/etc/machine-id || true"
+		ssh_root_cmd "cp -R /etc/ssh/ $persist_dir/etc/ssh/ || true"
 	fi
 	cd -
 }
