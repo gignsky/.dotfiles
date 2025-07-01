@@ -180,8 +180,30 @@ function nixos_anywhere() {
 	ssh_root_cmd 'ls -la /tmp/disko-password'
 
 	green "Generating hardware-config.nix for $target_hostname and adding it to the .dotfiles."
+	# Ensure hardware-configuration.nix is generated on the target machine
 	ssh_root_cmd "nixos-generate-config --no-filesystems --root /mnt"
+	
+	# Verify the hardware-configuration.nix was created
+	green "Verifying hardware-configuration.nix was generated..."
+	ssh_root_cmd 'ls -la /mnt/etc/nixos/hardware-configuration.nix'
+	
+	# Ensure the target directory exists locally
+	mkdir -p "${git_root}/hosts/${target_hostname}"
+	
+	# Copy the hardware configuration
+	green "Copying hardware-configuration.nix from remote system..."
 	$scp_cmd root@"$target_destination":/mnt/etc/nixos/hardware-configuration.nix "${git_root}"/hosts/"$target_hostname"/hardware-configuration.nix
+	
+	# Double check that the file was copied and contains the broadcom module reference
+	green "Verifying hardware-configuration.nix was copied locally and contains necessary modules..."
+	if grep -q "broadcom_sta" "${git_root}/hosts/${target_hostname}/hardware-configuration.nix"; then
+		green "✅ broadcom_sta module found in hardware-configuration.nix"
+	else
+		yellow "⚠️ broadcom_sta module not found in hardware-configuration.nix"
+		yellow "Manual intervention may be required after installation"
+	fi
+	
+	ls -la "${git_root}/hosts/${target_hostname}/hardware-configuration.nix"
 
 	yellow "Adding files to git"
 	git ls-files --others --exclude-standard -- '*.nix' | xargs -r git add -v
@@ -191,10 +213,29 @@ function nixos_anywhere() {
 	echo "IP: $target_destination"
 	echo "SSH: $ssh_port"
 	echo "Temp Dir: $temp"
-	echo "Running: SHELL=/bin/sh nix run github:nix-community/nixos-anywhere -- --ssh-port $ssh_port --extra-files $temp --flake .#$target_hostname root@$target_destination"
+	# Copy our fallback script to ensure unfree packages are allowed
+	green "Copying unfree package fallback script..."
+	$scp_cmd "${git_root}/nixos-installer/ensure-unfree-packages.sh" root@"$target_destination":/tmp/ensure-unfree-packages.sh
+	ssh_root_cmd "chmod +x /tmp/ensure-unfree-packages.sh"
+
+	# Create a special Nix configuration to ensure unfree packages are allowed
+	mkdir -p "$temp/etc/nix"
+	cat > "$temp/etc/nix/nix.conf" << EOF
+allow-unfree = true
+EOF
+
+	echo "Running: NIXPKGS_ALLOW_UNFREE=1 NIX_CONFIG=\"allow-unfree = true\" SHELL=/bin/sh nix run github:nix-community/nixos-anywhere --impure -- --ssh-port $ssh_port --extra-files $temp --flake .#$target_hostname root@$target_destination"
 
 	# --extra-files here picks up the ssh host key we generated earlier and puts it onto the target machine
-	SHELL=/bin/sh nix run github:nix-community/nixos-anywhere -- --ssh-port "$ssh_port" --extra-files "$temp" --flake .#"$target_hostname" root@"$target_destination"
+	# --impure is needed to allow unfree packages via NIXPKGS_ALLOW_UNFREE environment variable
+	# NIX_CONFIG environment variable directly sets Nix options
+	if ! NIXPKGS_ALLOW_UNFREE=1 NIX_CONFIG="allow-unfree = true" SHELL=/bin/sh nix run github:nix-community/nixos-anywhere --impure -- --ssh-port "$ssh_port" --extra-files "$temp" --flake .#"$target_hostname" root@"$target_destination"; then
+		yellow "Main installation failed, attempting to fix unfree package configuration..."
+		# Run the fallback script to ensure unfree packages are allowed
+		ssh_root_cmd "/tmp/ensure-unfree-packages.sh"
+		yellow "Retrying installation..."
+		NIXPKGS_ALLOW_UNFREE=1 NIX_CONFIG="allow-unfree = true" SHELL=/bin/sh nix run github:nix-community/nixos-anywhere --impure -- --ssh-port "$ssh_port" --extra-files "$temp" --flake .#"$target_hostname" root@"$target_destination"
+	fi
 
 	yellow "Updating ssh host fingerprint at $target_destination to ~/.ssh/known_hosts"
 	ssh-keyscan -p "$ssh_port" "$target_destination" >>~/.ssh/known_hosts || true
