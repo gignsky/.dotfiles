@@ -307,7 +307,8 @@ if [ "$always_yes" == "false" ]; then
 
 	if [[ $updated_age_keys == 1 ]]; then
 		# Since we may update the sops.yaml file twice above, only rekey once at the end
-		just rekey
+		# Use rekey-no-hooks to bypass pre-commit hooks during bootstrap
+		just rekey-no-hooks
 		green "Updating flake input to pick up new .sops.yaml"
 		nix flake lock --update-input nix-secrets
 	fi
@@ -381,7 +382,8 @@ else
 	updated_age_keys=1
 	if [[ $updated_age_keys == 1 ]]; then
 		# Since we may update the sops.yaml file twice above, only rekey once at the end
-		just rekey
+		# Use rekey-no-hooks to bypass pre-commit hooks during bootstrap
+		just rekey-no-hooks
 		green "Updating flake input to pick up new .sops.yaml"
 		nix flake lock --update-input nix-secrets
 	fi
