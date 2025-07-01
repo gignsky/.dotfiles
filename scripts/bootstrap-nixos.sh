@@ -167,32 +167,15 @@ function nixos_anywhere() {
 	# via the config
 	green "Preparing a temporary password for disko."
 	
-	# Debug: Check remote system state
-	yellow "Debug: Checking remote system state..."
-	ssh_root_cmd 'whoami'
-	ssh_root_cmd 'ls -la /tmp'
-	ssh_root_cmd 'mount | grep /tmp'
-	ssh_root_cmd 'touch /tmp/test-write && echo "Can write to /tmp" || echo "Cannot write to /tmp"'
-	ssh_root_cmd 'rm -f /tmp/test-write'
+	# Remove any existing disko-password file that might be owned by another user
+	ssh_root_cmd 'rm -f /tmp/disko-password'
 	
-	# Try multiple approaches to create the password file
-	yellow "Debug: Attempting to create disko password file..."
-	if ssh_root_cmd 'printf "passphrase" > /tmp/disko-password && chmod 600 /tmp/disko-password'; then
-		green "Successfully created /tmp/disko-password using printf"
-	elif ssh_root_cmd 'echo "passphrase" | tee /tmp/disko-password >/dev/null && chmod 600 /tmp/disko-password'; then
-		green "Successfully created /tmp/disko-password using tee"
-	elif ssh_root_cmd 'cat > /tmp/disko-password << EOF
-passphrase
-EOF
-chmod 600 /tmp/disko-password'; then
-		green "Successfully created /tmp/disko-password using cat heredoc"
-	else
-		red "Failed to create /tmp/disko-password - trying alternative location"
-		ssh_root_cmd 'mkdir -p /root/tmp && printf "passphrase" > /root/tmp/disko-password && chmod 600 /root/tmp/disko-password && ln -sf /root/tmp/disko-password /tmp/disko-password'
-	fi
+	# Create the password file
+	ssh_root_cmd 'printf "passphrase" > /tmp/disko-password && chmod 600 /tmp/disko-password'
 	
 	# Verify the file was created
-	ssh_root_cmd 'ls -la /tmp/disko-password && cat /tmp/disko-password'
+	green "Verifying disko password file was created successfully..."
+	ssh_root_cmd 'ls -la /tmp/disko-password'
 
 	green "Generating hardware-config.nix for $target_hostname and adding it to the .dotfiles."
 	ssh_root_cmd "nixos-generate-config --no-filesystems --root /mnt"
