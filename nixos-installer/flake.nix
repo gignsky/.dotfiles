@@ -53,7 +53,7 @@
         # host = newConfig "name" disk" "qemuGuest";
         # Swap size is in GiB
         # merlin = newConfig "merlin" "/dev/nvme1n1" false;
-        spacedock-test = newConfig "spacedock-test" "/dev/vda" true;
+        spacedock = newConfig "spacedock" "/dev/vda" true;
 
         # Custom ISO
         #
