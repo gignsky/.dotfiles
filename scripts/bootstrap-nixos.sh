@@ -51,7 +51,7 @@ function yes_or_no() {
 
 function sync() {
 	# $1 = user, $2 = source, $3 = destination
-	rsync -av --filter=':- .gitignore' -e "ssh -l $1 -oport=${ssh_port}" $2 $1@${target_destination}:
+	rsync -av --filter=':- .gitignore' -e "ssh -l $1 -oport=${ssh_port}" "$2" "$1"@"${target_destination}":
 }
 
 function help_and_exit() {
@@ -82,31 +82,31 @@ while [[ $# -gt 0 ]]; do
 	case "$1" in
 	-n)
 		shift
-		target_hostname=$1
+		target_hostname="$1"
 		;;
 	-d)
 		shift
-		target_destination=$1
+		target_destination="$1"
 		;;
 	-u)
 		shift
-		target_user=$1
+		target_user="$1"
 		;;
 	-k)
 		shift
-		ssh_key=$1
+		ssh_key="$1"
 		;;
 	-always_yes)
 		shift
-		always_yes=$1
+		always_yes="$1"
 		;;
 	--port)
 		shift
-		ssh_port=$1
+		ssh_port="$1"
 		;;
 	--temp-override)
 		shift
-		temp=$1
+		temp="$1"
 		;;
 	--impermanence)
 		persist_dir="/persist"
@@ -124,9 +124,13 @@ while [[ $# -gt 0 ]]; do
 done
 
 # SSH commands
-ssh_cmd="ssh -oport=${ssh_port} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i $ssh_key -t $target_user@$target_destination"
-ssh_root_cmd=$(echo "$ssh_cmd" | sed "s|${target_user}@|root@|") # uses @ in the sed switch to avoid it triggering on the $ssh_key value
-scp_cmd="scp -oport=${ssh_port} -o StrictHostKeyChecking=no -i $ssh_key"
+ssh_cmd="ssh -oport=${ssh_port} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i ${ssh_key} -t ${target_user}@${target_destination}"
+scp_cmd="scp -oport=${ssh_port} -o StrictHostKeyChecking=no -i ${ssh_key}"
+
+# SSH root command function
+ssh_root_cmd() {
+    ssh -oport="${ssh_port}" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i "${ssh_key}" -t root@"${target_destination}" "$@"
+}
 
 git_root=$(git rev-parse --show-toplevel)
 
@@ -162,29 +166,83 @@ function nixos_anywhere() {
 	# when using luks, disko expects a passphrase on /tmp/disko-password, so we set it for now and will update the passphrase later
 	# via the config
 	green "Preparing a temporary password for disko."
-	$ssh_root_cmd "/bin/sh -c 'echo passphrase > /tmp/disko-password'"
+	
+	# Remove any existing disko-password file that might be owned by another user
+	yellow "Removing any existing /tmp/disko-password file on $target_hostname"
+	ssh_root_cmd 'rm -f /tmp/disko-password'
+	
+	# Create the password file
+	yellow "Creating /tmp/disko-password file on $target_hostname"
+	ssh_root_cmd 'printf "passphrase" > /tmp/disko-password && chmod 600 /tmp/disko-password'
+	
+	# Verify the file was created
+	green "Verifying disko password file was created successfully..."
+	ssh_root_cmd 'ls -la /tmp/disko-password'
 
 	green "Generating hardware-config.nix for $target_hostname and adding it to the .dotfiles."
-	$ssh_root_cmd "nixos-generate-config --no-filesystems --root /mnt"
+	# Ensure hardware-configuration.nix is generated on the target machine
+	ssh_root_cmd "nixos-generate-config --no-filesystems --root /mnt"
+	
+	# Verify the hardware-configuration.nix was created
+	green "Verifying hardware-configuration.nix was generated..."
+	ssh_root_cmd 'ls -la /mnt/etc/nixos/hardware-configuration.nix'
+	
+	# Ensure the target directory exists locally
+	mkdir -p "${git_root}/hosts/${target_hostname}"
+	
+	# Copy the hardware configuration
+	green "Copying hardware-configuration.nix from remote system..."
 	$scp_cmd root@"$target_destination":/mnt/etc/nixos/hardware-configuration.nix "${git_root}"/hosts/"$target_hostname"/hardware-configuration.nix
+	
+	# Double check that the file was copied and contains the broadcom module reference
+	green "Verifying hardware-configuration.nix was copied locally and contains necessary modules..."
+	if grep -q "broadcom_sta" "${git_root}/hosts/${target_hostname}/hardware-configuration.nix"; then
+		green "✅ broadcom_sta module found in hardware-configuration.nix"
+	else
+		yellow "⚠️ broadcom_sta module not found in hardware-configuration.nix"
+		yellow "Manual intervention may be required after installation"
+	fi
+	
+	ls -la "${git_root}/hosts/${target_hostname}/hardware-configuration.nix"
 
-	just dont-fuck-my-build
+	yellow "Adding files to git"
+	git ls-files --others --exclude-standard -- '*.nix' | xargs -r git add -v
+	nix-shell -p lolcat --run 'echo "Very little chance your build is fucked! 👍" | lolcat 2> /dev/null'
 
 	echo "Hostname: $target_hostname"
 	echo "IP: $target_destination"
 	echo "SSH: $ssh_port"
 	echo "Temp Dir: $temp"
-	echo "Running: SHELL=/bin/sh nix run github:nix-community/nixos-anywhere -- --ssh-port $ssh_port --extra-files $temp --flake .#$target_hostname root@$target_destination"
+	# Copy our fallback script to ensure unfree packages are allowed
+	green "Copying unfree package fallback script..."
+	$scp_cmd "${git_root}/nixos-installer/ensure-unfree-packages.sh" root@"$target_destination":/tmp/ensure-unfree-packages.sh
+	ssh_root_cmd "chmod +x /tmp/ensure-unfree-packages.sh"
+
+	# Create a special Nix configuration to ensure unfree packages are allowed
+	mkdir -p "$temp/etc/nix"
+	cat > "$temp/etc/nix/nix.conf" << EOF
+allow-unfree = true
+EOF
+
+	echo "Running: NIXPKGS_ALLOW_UNFREE=1 NIX_CONFIG=\"allow-unfree = true\" SHELL=/bin/sh nix run github:nix-community/nixos-anywhere --impure -- --ssh-port $ssh_port --extra-files $temp --flake .#$target_hostname root@$target_destination"
 
 	# --extra-files here picks up the ssh host key we generated earlier and puts it onto the target machine
-	SHELL=/bin/sh nix run github:nix-community/nixos-anywhere -- --ssh-port "$ssh_port" --extra-files "$temp" --flake .#"$target_hostname" root@"$target_destination"
+	# --impure is needed to allow unfree packages via NIXPKGS_ALLOW_UNFREE environment variable
+	# NIX_CONFIG environment variable directly sets Nix options
+	if ! NIXPKGS_ALLOW_UNFREE=1 NIX_CONFIG="allow-unfree = true" SHELL=/bin/sh nix run github:nix-community/nixos-anywhere --impure -- --ssh-port "$ssh_port" --extra-files "$temp" --flake .#"$target_hostname" root@"$target_destination"; then
+		yellow "Main installation failed, attempting to fix unfree package configuration..."
+		# Run the fallback script to ensure unfree packages are allowed
+		ssh_root_cmd "/tmp/ensure-unfree-packages.sh"
+		yellow "Retrying installation..."
+		NIXPKGS_ALLOW_UNFREE=1 NIX_CONFIG="allow-unfree = true" SHELL=/bin/sh nix run github:nix-community/nixos-anywhere --impure -- --ssh-port "$ssh_port" --extra-files "$temp" --flake .#"$target_hostname" root@"$target_destination"
+	fi
 
 	yellow "Updating ssh host fingerprint at $target_destination to ~/.ssh/known_hosts"
 	ssh-keyscan -p "$ssh_port" "$target_destination" >>~/.ssh/known_hosts || true
 
 	if [ -n "$persist_dir" ]; then
-		$ssh_root_cmd "cp /etc/machine-id $persist_dir/etc/machine-id || true"
-		$ssh_root_cmd "cp -R /etc/ssh/ $persist_dir/etc/ssh/ || true"
+		ssh_root_cmd "cp /etc/machine-id $persist_dir/etc/machine-id || true"
+		ssh_root_cmd "cp -R /etc/ssh/ $persist_dir/etc/ssh/ || true"
 	fi
 	cd -
 }
@@ -227,7 +285,12 @@ function generate_host_age_key() {
 				exit 1
 			)
 	)
-	host_age_key=$(nix shell nixpkgs#ssh-to-age.out -c sh -c "echo $target_key | ssh-to-age")
+	
+	yellow "Debug: Retrieved SSH key: $target_key"
+	
+	host_age_key=$(nix shell nixpkgs#ssh-to-age.out -c sh -c "echo '$target_key' | ssh-to-age")
+	
+	yellow "Debug: Generated age key: $host_age_key"
 
 	if grep -qv '^age1' <<<"$host_age_key"; then
 		red "The result from generated age key does not match the expected format."
@@ -287,7 +350,8 @@ if [ "$always_yes" == "false" ]; then
 
 	if [[ $updated_age_keys == 1 ]]; then
 		# Since we may update the sops.yaml file twice above, only rekey once at the end
-		just rekey
+		# Use rekey-no-hooks to bypass pre-commit hooks during bootstrap
+		just rekey-no-hooks
 		green "Updating flake input to pick up new .sops.yaml"
 		nix flake lock --update-input nix-secrets
 	fi
@@ -304,7 +368,7 @@ if [ "$always_yes" == "false" ]; then
 		$ssh_cmd "mkdir -p $home_path/.ssh/"
 		# sync "$target_user" "$ssh_key" "$home_path/.ssh/$ssh_key"
 		yellow "Copying ssh_key to $home_path/.ssh/. on $target_hostname"
-		$scp_cmd "$ssh_key" "root"@"$target_destination":/"$ssh_key"
+		$scp_cmd "$ssh_key" "root@$target_destination:/$ssh_key"
 		yellow "chown gig:users $home_path/.ssh/"
 		$ssh_cmd "sudo chown -R gig:users $home_path/.ssh/"
 		yellow "chmod 600 $ssh_key"
@@ -361,7 +425,8 @@ else
 	updated_age_keys=1
 	if [[ $updated_age_keys == 1 ]]; then
 		# Since we may update the sops.yaml file twice above, only rekey once at the end
-		just rekey
+		# Use rekey-no-hooks to bypass pre-commit hooks during bootstrap
+		just rekey-no-hooks
 		green "Updating flake input to pick up new .sops.yaml"
 		nix flake lock --update-input nix-secrets
 	fi
@@ -376,7 +441,7 @@ else
 	$ssh_cmd "mkdir -p $home_path/.ssh/"
 	# sync "$target_user" "$ssh_key" "$home_path/.ssh/$ssh_key"
 	yellow "Copying ssh_key to $home_path/.ssh/. on $target_hostname"
-	$scp_cmd "$ssh_key" "root"@"$target_destination":/"$ssh_key"
+	$scp_cmd "$ssh_key" "root@$target_destination:/$ssh_key"
 	yellow "chown gig:users $home_path/.ssh/"
 	$ssh_cmd "sudo chown -R gig:users $home_path/.ssh/"
 	yellow "chmod 600 $ssh_key"
@@ -391,7 +456,16 @@ else
 	green "Rebuilding .dotfiles on $target_hostname"
 	#FIXME there are still a gitlab fingerprint request happening during the rebuild
 	#$ssh_cmd -oForwardAgent=yes "cd .dotfiles && sudo nixos-rebuild --show-trace --flake .#$target_hostname" switch"
-	$ssh_cmd -oForwardAgent=yes "cd .dotfiles && direnv allow && just rebuild-full"
+	
+	# Check if direnv is available, if not, skip it (fresh NixOS install may not have it yet)
+	yellow "Checking if direnv is available on remote system..."
+	if $ssh_cmd "command -v direnv >/dev/null 2>&1"; then
+		green "direnv found, running direnv allow..."
+		$ssh_cmd -oForwardAgent=yes "cd .dotfiles && direnv allow && just rebuild-full"
+	else
+		yellow "direnv not found on remote system, skipping direnv allow and running rebuild directly..."
+		$ssh_cmd -oForwardAgent=yes "cd .dotfiles && just rebuild-full"
+	fi
 	(pre-commit run --all-files 2>/dev/null || true) &&
 		git add "$git_root/hosts/$target_hostname/hardware-configuration.nix" "$git_root/flake.lock" && (git commit -m "feat: hardware-configuration.nix for $target_hostname" || true) && git push
 	$ssh_cmd -oForwardAgent=yes "cd .dotfiles && just sops-fix"
