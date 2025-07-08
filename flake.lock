@@ -1806,10 +1806,10 @@
     "nix-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1751935865,
-        "narHash": "sha256-dd3MN8MnffvML1z3RBGXukOMnoaIVeuw5Sa9hRGkvSw=",
+        "lastModified": 1751938816,
+        "narHash": "sha256-V/VgckAb8yEQPYzsMcZtBT7Dlo2ryWTmsZS1xWm+Nxg=",
         "ref": "main",
-        "rev": "d4f97e25f63055f8a75633d665c0b63d70e3fa57",
+        "rev": "887f84e1c6e1fd1733fea6292bd01e3f3ba60854",
         "shallow": true,
         "type": "git",
         "url": "ssh://git@github.com/gignsky/nix-secrets.git"
