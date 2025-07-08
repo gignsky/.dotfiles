@@ -45,7 +45,7 @@ rebuild-pre:
 
 dont-fuck-my-build:
 	git ls-files --others --exclude-standard -- '*.nix' | xargs -r git add -v
-	nix flake lock --update-input nix-secrets
+	nix flake update nix-secrets
 	nix-shell -p lolcat --run 'echo "Very little chance your build is fucked! 👍" | lolcat 2> /dev/null'
 
 switch args="":
@@ -117,7 +117,7 @@ update-rebuild-full:
 
 check:
 	just dont-fuck-my-build
-	nix flake check --impure --no-build
+	nix flake check
 	nix-shell -p lolcat --run 'echo "[CHECK] Finished." | lolcat 2> /dev/null'
 
 check-iso:
@@ -157,6 +157,8 @@ home:
 
 # Runs just home and then zsh
 new home:
+	nix-shell -p lolcat --run 'echo "Cleaning zplug directory..." | lolcat 2> /dev/null'
+	rm -rfv ~/.config/zsh/zplug
 	just home
 	zsh
 
@@ -191,8 +193,7 @@ post-build:
 # helper justfile arg
 setup-vm-pre:
 	nix-shell -p lolcat --run 'echo "[VM] Running VM pre-setup..." | lolcat 2> /dev/null'
-	nix-shell -p lolcat --run 'echo "[VM] Cleaning Results dir..." | lolcat 2> /dev/null'
-	just clean
+	just cleanup-vm
 	nix-shell -p lolcat --run 'echo "[VM] VM pre-setup complete." | lolcat 2> /dev/null'
 
 # helper justfile arg
@@ -226,16 +227,16 @@ setup-vm-full-vm:
 cleanup-vm:
 	nix-shell -p lolcat --run 'echo "[VM] Removing tmp-iso dir..." | lolcat 2> /dev/null'
 	rm -rfv ./tmp-iso
-	nix-shell -p lolcat --run 'echo "[VM] tmp-iso removed." | lolcat 2> /dev/null'
+	nix-shell -p lolcat --run 'echo "[VM] tmp-iso Removed." | lolcat 2> /dev/null'
 	nix-shell -p lolcat --run 'echo "[VM] Cleaning Results dir..." | lolcat 2> /dev/null'
 	just clean
 	nix-shell -p lolcat --run 'echo "[VM] Finished." | lolcat 2> /dev/null'
 
 # helper justfile arg
 call-vm:
-	nix-shell -p lolcat --run 'echo "[VM] Running VM..." | lolcat 2> /dev/null'
-	- nix shell nixpkgs#qemu --command bash -c 'bash scripts/run-iso-vm.sh result/iso/*.iso ./tmp-iso/nixos-vm/vm.img'
-	nix-shell -p lolcat --run 'echo "[VM] VM Closed." | lolcat 2> /dev/null'
+    nix-shell -p lolcat --run 'echo "[VM] Running VM..." | lolcat 2> /dev/null'
+    - nix shell nixpkgs#qemu --command bash -c 'bash scripts/run-iso-vm.sh result/iso/*.iso ./tmp-iso/nixos-vm/vm.img'
+    nix-shell -p lolcat --run 'echo "[VM] VM Closed." | lolcat 2> /dev/null'
 
 # run vm with minimal iso - while not deleting files afterwards
 vm-minimal:
@@ -250,7 +251,8 @@ vm-full:
 # reconnect to vm that has already been created
 vm-reconnect:
 	nix-shell -p lolcat --run 'echo "[VM] Reconnecting to VM..." | lolcat 2> /dev/null'
-	just call-vm
+	- nix shell nixpkgs#qemu --command bash -c 'bash scripts/run-iso-vm.sh result/iso/*.iso ./tmp-iso/nixos-vm/vm.img --choose'
+	nix-shell -p lolcat --run 'echo "[VM] VM Closed." | lolcat 2> /dev/null'
 
 # run vm with minimal iso - while deleting files afterwards
 vm-tmp-minimal:
@@ -313,20 +315,31 @@ sops:
 	nix-shell -p lolcat --run 'echo "Editing ~/nix-secrets/secrets.yaml" | lolcat 2> /dev/null'
 	nano ~/nix-secrets/.sops.yaml
 	sops ~/nix-secrets/secrets.yaml
-	just rekey
+	just rekey-no-hooks
 
 #edit .sops.yaml only (no rekey)
 sops-edit:
 	nix-shell -p lolcat --run 'echo "Editing ~/nix-secrets/.sops.yaml" | lolcat 2> /dev/null'
 	nano ~/nix-secrets/.sops.yaml
 
-# Update the keys in the secrets file
-rekey:
+# # Update the keys in the secrets file
+# rekey:
+# 	just dont-fuck-my-build
+# 	nix-shell -p lolcat --run 'echo "Updating ~/nix-secrets/secrets.yaml" | lolcat 2> /dev/null'
+# 	cd ../nix-secrets && (\
+# 	nix-shell -p sops --run "sops updatekeys -y secrets.yaml" && \
+# 	git add -u && (git commit -m "chore: rekey" || true) && git push \
+# 	)
+# 	nix-shell -p lolcat --run 'echo "Updated Secrets!" | lolcat 2> /dev/null'
+# 	just dont-fuck-my-build
+
+# Update the keys in the secrets file without pre-commit hooks (for bootstrap)
+rekey-no-hooks:
 	just dont-fuck-my-build
 	nix-shell -p lolcat --run 'echo "Updating ~/nix-secrets/secrets.yaml" | lolcat 2> /dev/null'
 	cd ../nix-secrets && (\
 	nix-shell -p sops --run "sops updatekeys -y secrets.yaml" && \
-	git add -u && (git commit -m "chore: rekey" || true) && git push \
+	git add -u && (git commit --no-verify -m "chore: rekey" || true) && git push \
 	)
 	nix-shell -p lolcat --run 'echo "Updated Secrets!" | lolcat 2> /dev/null'
 	just dont-fuck-my-build
@@ -341,7 +354,7 @@ sops-fix:
 update-nix-secrets:
 	just rekey
 	(cd ../nix-secrets && git fetch && git rebase) || true
-	nix flake lock --update-input nix-secrets
+	nix flake update nix-secrets
 
 store-photo:
 	nix-shell -p graphviz nix-du --run "nix-du -s=500MB | \dot -Tpng > store.png"
