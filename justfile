@@ -354,7 +354,7 @@ sops-fix:
 update-nix-secrets:
 	just rekey
 	(cd ../nix-secrets && git fetch && git rebase) || true
-	nix flake update nix-secrets
+	nix flake update nix-secrets --commit-lock-file
 
 store-photo:
 	nix-shell -p graphviz nix-du --run "nix-du -s=500MB | \dot -Tpng > store.png"
