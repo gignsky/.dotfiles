@@ -315,7 +315,7 @@ sops:
 	nix-shell -p lolcat --run 'echo "Editing ~/nix-secrets/secrets.yaml" | lolcat 2> /dev/null'
 	nano ~/nix-secrets/.sops.yaml
 	sops ~/nix-secrets/secrets.yaml
-	just rekey-no-hooks
+	just rekey
 
 #edit .sops.yaml only (no rekey)
 sops-edit:
@@ -334,7 +334,7 @@ sops-edit:
 # 	just dont-fuck-my-build
 
 # Update the keys in the secrets file without pre-commit hooks (for bootstrap)
-rekey-no-hooks:
+rekey:
 	just dont-fuck-my-build
 	nix-shell -p lolcat --run 'echo "Updating ~/nix-secrets/secrets.yaml" | lolcat 2> /dev/null'
 	cd ../nix-secrets && (\
