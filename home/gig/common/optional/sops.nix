@@ -19,6 +19,9 @@ in
       "private_keys/dev" = {
         path = "/home/gig/.ssh/id_rsa";
       };
+      "private_keys/gment" = {
+        path = "/home/gig/.ssh/gment";
+      };
     };
   };
 }
