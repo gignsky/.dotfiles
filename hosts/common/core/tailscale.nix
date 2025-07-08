@@ -9,7 +9,10 @@ _:
     extraUpFlags = [
       "--ssh"
       "--accept-routes"
-      # "--advertise-routes=172.29.118.0/20"
+    ];
+    extraSetFlags = [
+      "--advertise-routes=192.168.51.0/24"
+      "--advertise-exit-node"
     ];
   };
 }
