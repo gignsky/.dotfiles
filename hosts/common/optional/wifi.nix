@@ -1,4 +1,4 @@
-{ lib, ... }:
+_:
 
 {
   # enables network manager to help with wifi

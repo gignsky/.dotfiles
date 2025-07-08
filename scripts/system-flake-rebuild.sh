@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 
-if [ ! -z $1 ]; then
-	export HOST=$1
+if [ -n "$1" ]; then
+	export HOST="$1"
 else
-	if [ $(hostname) == "nixos" ]; then
-		export HOST="wsl"
+	if [ "$(hostname)" = "nixos" ]; then
+		HOST="wsl"
 	else
-		export HOST=$(hostname)
+		HOST="$(hostname)"
 	fi
+	export HOST
 fi
 
-sudo nixos-rebuild --flake .#$HOST switch
+sudo nixos-rebuild --flake .#"$HOST" switch

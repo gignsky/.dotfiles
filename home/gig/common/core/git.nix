@@ -4,9 +4,11 @@
   programs.git = {
     enable = true;
     extraConfig = {
-      user.useConfigOnly = true;
-      user.name = "Maxwell Rupp";
-      user.email = "gig@gignsky.com";
+      user = {
+        useConfigOnly = true;
+        name = "Maxwell Rupp";
+        email = "gig@gignsky.com";
+      };
       pull.rebase = true;
       merge.ff = false;
       # pull.ff = "only";
