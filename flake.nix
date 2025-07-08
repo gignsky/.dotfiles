@@ -170,18 +170,6 @@
           ];
         };
 
-        # spacedock configuration entrypoint - unused as spacedock has a wsl instance
-        spacedock = nixpkgs.lib.nixosSystem {
-          inherit system specialArgs;
-          modules = [
-            # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
-            # home-manager.nixosModules.home-manager {
-            #   home-manager.extraSpecialArgs = specialArgs;
-            # }
-            ./hosts/spacedock
-          ];
-        };
-
         # # # Merlin configuration entrypoint - unused as merlin has a wsl instance
         # merlin = nixpkgs.lib.nixosSystem {
         #   inherit system specialArgs;
