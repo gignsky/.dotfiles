@@ -46,6 +46,12 @@ rec {
     
     # Check nix result-man folder
     check_and_display "./result-man" "nix result-man"
+    
+    # Check node_modules folder
+    check_and_display "./node_modules" "node_modules"
+    
+    # Check .svelte-kit folder
+    check_and_display "./.svelte-kit" ".svelte-kit"
   '' // {
     passthru.tests = {
       basic = pkgs.runCommand "quick-results-test" { buildInputs = [ quick-results ]; } ''
