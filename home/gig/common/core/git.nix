@@ -20,6 +20,8 @@
   home.packages = with pkgs; [
     git-lfs
     gitflow
+    gnupg
+    pinentry
   ];
   # # Debug statement to ensure the file is being processed
   # environment.etc."gitconfig".text = ''
