@@ -23,6 +23,9 @@
   spacedock = "ssh gig@spacedock";
   ganoslal = "ssh gig@ganoslal-wsl";
   merlin = "ssh gig@merlins-windows-wsl";
+  spacedockm = "mosh gig@spacedock";
+  ganoslalm = "mosh gig@ganoslal-wsl";
+  merlinm = "mosh gig@merlins-windows-wsl";
 
   # nmap
   localnmap = "nmap -v -sn 192.168.51.0/24 | grep -v down";
