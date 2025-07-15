@@ -146,6 +146,9 @@ pre-home:
 post-home:
 	nix-shell -p lolcat --run 'echo "[POST-HOME] Finished." | lolcat 2> /dev/null'
 
+simple-home:
+	home-manager switch --flake ~/.dotfiles/.
+
 home:
 	just pre-home
 	nix-shell -p lolcat --run 'echo "[HOME] Attempting Home Rebuild..." | lolcat 2> /dev/null'
