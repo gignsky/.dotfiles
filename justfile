@@ -125,6 +125,9 @@ check-iso:
 	nix flake check --impure --no-build nixos-installer/.
 	nix-shell -p lolcat --run 'echo "[CHECK] Finished." | lolcat 2> /dev/null'
 
+pre-commit:
+	pre-commit run --all-files
+
 show:
 	just dont-fuck-my-build
 	just om show .
