@@ -1,4 +1,4 @@
-{ configLib, pkgs, ... }: {
+{ configLib, ... }: {
   imports = [
     (configLib.relativeToRoot "hosts/common/core")
     (configLib.relativeToRoot "hosts/common/users/gig")
@@ -11,10 +11,10 @@
 
   networking.hostName = "nixos";
 
-  programs.nix-ld = {
-    enable = true;
-    package = pkgs.nix-ld-rs;
-  };
+  # programs.nix-ld = {
+  #   enable = true;
+  #   package = pkgs.nix-ld-rs;
+  # };
 
   # Alternative that doesn't effect other files -- depreciated and doesn't work
   # inputs.vscode-remote-workaround.enable = true;
