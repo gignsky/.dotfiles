@@ -141,7 +141,7 @@
           modules = [
             inputs.vscode-server.nixosModules.default
             (_: {
-              services.vscode-server.enable = true;
+              services.vscode-server.enable = false;
             })
             inputs.nixos-wsl.nixosModules.default
             {
