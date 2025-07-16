@@ -8,11 +8,11 @@ _:
     useRoutingFeatures = "both";
     extraUpFlags = [
       "--ssh"
-      "--accept-routes"
+      # "--accept-routes"
     ];
-    extraSetFlags = [
-      "--advertise-routes=192.168.51.0/24"
-      "--advertise-exit-node"
-    ];
+    # extraSetFlags = [
+    #   "--advertise-routes=192.168.51.0/24"
+    #   "--advertise-exit-node"
+    # ];
   };
 }
