@@ -298,6 +298,7 @@
                 };
                 yamllint = {
                   enable = true;
+                  excludes = [ ".github/workflows/flake-check.yml" ];
                 };
                 end-of-file-fixer = {
                   enable = true;
