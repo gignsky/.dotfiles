@@ -17,6 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up SSH for private repositories
         run: |
           mkdir -p ~/.ssh
@@ -24,10 +25,18 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan github.com >> ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
+
       - name: Install Nix
         uses: cachix/install-nix-action@v27
         with:
           extra_nix_config: |
             experimental-features = nix-command flakes
+
       - name: Debug nix flake check
         run: nix flake check --show-trace --verbose
+
+      - name: Run NixosTest - VM tests
+        run: |
+          echo "Running VM tests..."
+          nix build .#checks.x86_64-linux.nixosTest-wsl --show-trace --verbose
+          nix build .#checks.x86_64-linux.nixosTest-full-vm --show-trace --verbose
