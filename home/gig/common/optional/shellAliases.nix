@@ -20,10 +20,10 @@
   cd = "z";
 
   # ssh
-  spacedock = "ssh gig@spacedock";
+  spacedock = "ssh gig@192.168.51.2";
   ganoslal = "ssh gig@ganoslal-wsl";
   merlin = "ssh gig@merlins-windows-wsl";
-  spacedockm = "mosh gig@spacedock";
+  spacedockm = "mosh gig@192.168.51.2";
   ganoslalm = "mosh gig@ganoslal-wsl";
   merlinm = "mosh gig@merlins-windows-wsl";
 
