@@ -43,7 +43,7 @@
   password = "mkpasswd -s";
 
   # Template commands
-  rustup = "nix --accept-flake-config run github:juspay/omnix -- init github:gignsky/rust-nix-template -o";
+  rusty-repo = "nix --accept-flake-config run github:juspay/omnix -- init github:gignsky/rust-nix-template -o";
   nixup = "nix --accept-flake-config run github:juspay/omnix -- init github:gignsky/nix-template -o";
   om = "nix run github:juspay/omnix --";
   inspect = "nix run github:bluskript/nix-inspect";
