@@ -36,9 +36,9 @@ rec {
       else
         if [ "$dir" == "./result" ]; then
           if [ -d "./result" ]; then
-            ls -lah "$dir" | ${pkgs.lolcat}/bin/lolcat 2> /dev/null
+            ${pkgs.tree}/bin/tree "$dir" | ${pkgs.lolcat}/bin/lolcat 2> /dev/null
           else
-            echo "No nix result directory found" | ${pkgs.cowsay}/bin/cowsay | ${pkgs.lolcat}/bin/lolcat 2> /dev/null
+            ls -lah "$dir" | ${pkgs.lolcat}/bin/lolcat 2> /dev/null
           fi
         else
           echo "No $name directory found" | ${pkgs.cowsay}/bin/cowsay | ${pkgs.lolcat}/bin/lolcat 2> /dev/null
