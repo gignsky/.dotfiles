@@ -11,7 +11,7 @@
         viAlias = true;
         vimAlias = true;
         lsp = {
-          enable = false;
+          enable = true;
         };
         clipboard.enable = true;
         globals = {
