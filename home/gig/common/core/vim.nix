@@ -8,8 +8,8 @@
     enable = true;
     settings = {
       vim = {
-        viAlias = false;
-        vimAlias = false;
+        viAlias = true;
+        vimAlias = true;
         lsp = {
           enable = false;
         };
