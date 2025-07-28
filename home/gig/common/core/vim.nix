@@ -13,6 +13,14 @@
         lsp = {
           enable = true;
         };
+        languages = {
+          nix.enable = true;
+          rust.enable = true;
+          python.enable = false;
+          markdown.enable = true;
+          html.enable = true;
+          sql.enable = true;
+        };
         clipboard.enable = true;
         globals = {
           mapleader = " ";
