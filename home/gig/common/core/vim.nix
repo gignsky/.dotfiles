@@ -13,6 +13,7 @@
         lsp = {
           enable = false;
         };
+        clipboard.enable = true;
         globals = {
           mapleader = " ";
           maplocalleader = " ";
