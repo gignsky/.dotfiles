@@ -17,6 +17,9 @@
           mapleader = " ";
           maplocalleader = " ";
         };
+        utility = {
+          icon-picker.enable = true;
+        };
       };
     };
   };
