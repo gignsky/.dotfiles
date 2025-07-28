@@ -39,6 +39,18 @@
       };
     };
 
+    # Optional, if you intend to follow nvf's obsidian-nvim input
+    # you must also add it as a flake input.
+    # obsidian-nvim.url = "github:epwalsh/obsidian.nvim";
+
+    nvf = {
+      url = "github:NotAShelf/nvf";
+      inputs.nixpkgs.follows = "nixpkgs";
+      # # Optionally, you can also override individual plugins
+      # # for example:
+      # inputs.obsidian-nvim.follows = "obsidian-nvim"; # <- this will use the obsidian-nvim from your inputs
+    };
+
     # Pre-commit hooks for managing Git hooks declaratively
     pre-commit-hooks.url = "github:cachix/git-hooks.nix";
 
