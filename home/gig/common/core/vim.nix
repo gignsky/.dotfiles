@@ -14,6 +14,9 @@
           enable = true;
         };
         languages = {
+          enableFormat = true;
+          enableExtraDiagnostics = true;
+          enableTreesitter = false;
           nix.enable = true;
           rust.enable = true;
           python.enable = false;
