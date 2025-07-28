@@ -13,7 +13,12 @@
         lsp = {
           enable = false;
         };
+        globals = {
+          mapleader = " ";
+          maplocalleader = " ";
+        };
       };
     };
   };
+
 }
