@@ -2528,11 +2528,11 @@
         "nvf": "nvf"
       },
       "locked": {
-        "lastModified": 1753755340,
-        "narHash": "sha256-N8SO/Ac82nh7RGnMIE/mFqIkFa5EKvWtjznukC54NOU=",
+        "lastModified": 1753756092,
+        "narHash": "sha256-0dA/tIZDDbseSsUmwdcgLLGsLQF1UIk4kmnjH7eOoHw=",
         "owner": "gignsky",
         "repo": "gigvim",
-        "rev": "73aa7975059fbb14d84af5d0e00b29b1988d4431",
+        "rev": "5f26272ea97beee6fdb0ebca4168ae1c13291af2",
         "type": "github"
       },
       "original": {
