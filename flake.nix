@@ -39,18 +39,6 @@
       };
     };
 
-    # Optional, if you intend to follow nvf's obsidian-nvim input
-    # you must also add it as a flake input.
-    # obsidian-nvim.url = "github:epwalsh/obsidian.nvim";
-
-    nvf = {
-      url = "github:NotAShelf/nvf";
-      inputs.nixpkgs.follows = "nixpkgs";
-      # # Optionally, you can also override individual plugins
-      # # for example:
-      # inputs.obsidian-nvim.follows = "obsidian-nvim"; # <- this will use the obsidian-nvim from your inputs
-    };
-
     # Pre-commit hooks for managing Git hooks declaratively
     pre-commit-hooks.url = "github:cachix/git-hooks.nix";
 
@@ -77,14 +65,6 @@
       url = "github:redyf/Neve";
     };
 
-    # nixvim = {
-    #   url = "github:nix-community/nixvim/nixos-24.05";
-    #   # If you are not running an unstable channel of nixpkgs, select the corresponding branch of nixvim.
-    #   # url = "github:nix-community/nixvim/nixos-24.11";
-
-    #   # inputs.nixpkgs.follows = "nixpkgs";
-    # };
-
     #################### Personal Repositories ####################
 
     # Private secrets repo.  See ./docs/secretsmgmt.md
@@ -105,6 +85,8 @@
       url = "github:gignsky/tax-matrix/develop";
       flake = true;
     };
+
+    gigvim.url = "github:gignsky/gigvim";
   };
 
   outputs = { self, nixpkgs, home-manager, ... } @ inputs:
