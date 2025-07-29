@@ -86,7 +86,7 @@ rebuild-full args="":
 	just home
 
 single-update:
-	nix run github:vimjoyer/nix-update-input
+	nix run github:gignsky/nix-update-input
 
 # Update the flake
 update:
