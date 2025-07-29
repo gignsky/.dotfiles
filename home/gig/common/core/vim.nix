@@ -3,8 +3,11 @@
   # https://notashelf.github.io/nvf/index.xhtml
   imports = [
     # inputs.nvf.homeManagerModules.default
-    # inputs.gigvim.homeManagerModules.default
+    inputs.gigvim.homeManagerModules.gigvim
   ];
+
+  programs.gigvim.enable = true;
+
   # programs.nvf = {
   #   enable = true;
   #   settings = {
