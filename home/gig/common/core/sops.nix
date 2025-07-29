@@ -1,5 +1,4 @@
 { inputs, ... }:
-
 let
   secretsDirectory = builtins.toString inputs.nix-secrets;
   secretsFile = "${secretsDirectory}/secrets.yaml";
@@ -21,6 +20,9 @@ in
       };
       "private_keys/gment" = {
         path = "/home/gig/.ssh/gment";
+      };
+      "private_keys/gment-pub" = {
+        path = "/home/gig/.ssh/gment.pub";
       };
     };
   };
