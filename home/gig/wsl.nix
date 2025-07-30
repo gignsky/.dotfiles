@@ -3,11 +3,10 @@
 {
   # inputs,
   outputs
-  # , config,
-, pkgs
+, # , config,
+  pkgs
 , ...
-}:
-{
+}: {
   # You can import other home-manager modules here
   imports = [
     # Or modules exported from other flakes (such as nix-colors):
@@ -15,7 +14,7 @@
 
     # ./common/core
     ./home.nix
-    # ./common/optional/vim.nix
+    ./common/optional/nushell.nix
   ];
 
   nixpkgs = {
