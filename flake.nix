@@ -244,6 +244,21 @@
       # Custom modifications/overrides to upstream packages.
       overlays = import ./overlays { inherit inputs; };
 
+      # Home Manager modules that can be imported by other flakes
+      homeModules = {
+        gig-wsl = ./home/gig/wsl.nix;
+        gig-spacedock = ./home/gig/spacedock.nix;
+        gig-merlin = ./home/gig/merlin.nix;
+        gig-base = ./home/gig/home.nix;
+
+        # Common modules that can be imported individually
+        core = ./home/gig/common/core;
+        optional = ./home/gig/common/optional;
+      };
+
+      # Alternative naming that's more standard for Home Manager flakes
+      homeManagerModules = self.homeModules;
+
       checks = {
         ${system} =
           let
