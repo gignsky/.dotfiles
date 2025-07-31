@@ -694,7 +694,7 @@
     "dotfiles_10": {
       "inputs": {
         "flake-utils": "flake-utils_21",
-        "home-manager": "home-manager_13",
+        "home-manager": "home-manager_12",
         "nix-secrets": "nix-secrets_12",
         "nixos-wsl": "nixos-wsl_12",
         "nixpkgs": "nixpkgs_58",
@@ -722,7 +722,7 @@
     "dotfiles_11": {
       "inputs": {
         "flake-utils": "flake-utils_22",
-        "home-manager": "home-manager_14",
+        "home-manager": "home-manager_13",
         "nix-secrets": "nix-secrets_13",
         "nixos-wsl": "nixos-wsl_13",
         "nixpkgs": "nixpkgs_65",
@@ -750,7 +750,7 @@
     "dotfiles_12": {
       "inputs": {
         "flake-utils": "flake-utils_23",
-        "home-manager": "home-manager_15",
+        "home-manager": "home-manager_14",
         "nix-secrets": "nix-secrets_14",
         "nixos-wsl": "nixos-wsl_14",
         "nixpkgs": "nixpkgs_71",
@@ -918,7 +918,7 @@
     "dotfiles_7": {
       "inputs": {
         "flake-utils": "flake-utils_16",
-        "home-manager": "home-manager_10",
+        "home-manager": "home-manager_9",
         "neve": "neve_4",
         "nix-secrets": "nix-secrets_9",
         "nixos-wsl": "nixos-wsl_9",
@@ -949,7 +949,7 @@
     "dotfiles_8": {
       "inputs": {
         "flake-utils": "flake-utils_19",
-        "home-manager": "home-manager_11",
+        "home-manager": "home-manager_10",
         "nix-secrets": "nix-secrets_10",
         "nixos-wsl": "nixos-wsl_10",
         "nixpkgs": "nixpkgs_46",
@@ -977,7 +977,7 @@
     "dotfiles_9": {
       "inputs": {
         "flake-utils": "flake-utils_20",
-        "home-manager": "home-manager_12",
+        "home-manager": "home-manager_11",
         "nix-secrets": "nix-secrets_11",
         "nixos-wsl": "nixos-wsl_11",
         "nixpkgs": "nixpkgs_52",
@@ -2523,16 +2523,20 @@
       "inputs": {
         "flake-parts": "flake-parts",
         "gigdot": "gigdot",
-        "home-manager": "home-manager_8",
+        "home-manager": [
+          "gigvim",
+          "gigdot",
+          "nixpkgs"
+        ],
         "nixpkgs": "nixpkgs_38",
         "nvf": "nvf"
       },
       "locked": {
-        "lastModified": 1753756092,
-        "narHash": "sha256-0dA/tIZDDbseSsUmwdcgLLGsLQF1UIk4kmnjH7eOoHw=",
+        "lastModified": 1753949379,
+        "narHash": "sha256-UAEgrTzJwDm26Jd5haLD3baM5LGYtxktfm69GlzdDro=",
         "owner": "gignsky",
         "repo": "gigvim",
-        "rev": "5f26272ea97beee6fdb0ebca4168ae1c13291af2",
+        "rev": "53f92d767b6064b9e4784017e9e853db18e11189",
         "type": "github"
       },
       "original": {
@@ -3265,20 +3269,22 @@
         "nixpkgs": [
           "nufetch",
           "dotfiles",
+          "nufetch",
+          "dotfiles",
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1748226808,
-        "narHash": "sha256-GaBRgxjWO1bAQa8P2+FDxG4ANBVhjnSjBms096qQdxo=",
+        "lastModified": 1726989464,
+        "narHash": "sha256-Vl+WVTJwutXkimwGprnEtXc/s/s8sMuXzqXaspIGlwM=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "83665c39fa688bd6a1f7c43cf7997a70f6a109f9",
+        "rev": "2f23fa308a7c067e52dfcc30a0758f47043ec176",
         "type": "github"
       },
       "original": {
         "owner": "nix-community",
-        "ref": "release-25.05",
+        "ref": "release-24.05",
         "repo": "home-manager",
         "type": "github"
       }
@@ -3288,7 +3294,7 @@
         "nixpkgs": [
           "nufetch",
           "dotfiles",
-          "nufetch",
+          "tax-matrix",
           "dotfiles",
           "nixpkgs"
         ]
@@ -3313,7 +3319,7 @@
         "nixpkgs": [
           "nufetch",
           "dotfiles",
-          "tax-matrix",
+          "wrap",
           "dotfiles",
           "nixpkgs"
         ]
@@ -3336,31 +3342,6 @@
     "home-manager_13": {
       "inputs": {
         "nixpkgs": [
-          "nufetch",
-          "dotfiles",
-          "wrap",
-          "dotfiles",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1726989464,
-        "narHash": "sha256-Vl+WVTJwutXkimwGprnEtXc/s/s8sMuXzqXaspIGlwM=",
-        "owner": "nix-community",
-        "repo": "home-manager",
-        "rev": "2f23fa308a7c067e52dfcc30a0758f47043ec176",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-community",
-        "ref": "release-24.05",
-        "repo": "home-manager",
-        "type": "github"
-      }
-    },
-    "home-manager_14": {
-      "inputs": {
-        "nixpkgs": [
           "tax-matrix",
           "dotfiles",
           "nixpkgs"
@@ -3381,7 +3362,7 @@
         "type": "github"
       }
     },
-    "home-manager_15": {
+    "home-manager_14": {
       "inputs": {
         "nixpkgs": [
           "wrap",
@@ -3563,17 +3544,15 @@
     "home-manager_8": {
       "inputs": {
         "nixpkgs": [
-          "gigvim",
-          "gigdot",
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1753592768,
-        "narHash": "sha256-oV695RvbAE4+R9pcsT9shmp6zE/+IZe6evHWX63f2Qg=",
+        "lastModified": 1752544374,
+        "narHash": "sha256-ReX0NG6nIAEtQQjLqeu1vUU2jjZuMlpymNtb4VQYeus=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "fc3add429f21450359369af74c2375cb34a2d204",
+        "rev": "2e00ed310c218127e02ffcf28ddd4e0f669fde3e",
         "type": "github"
       },
       "original": {
@@ -3586,15 +3565,17 @@
     "home-manager_9": {
       "inputs": {
         "nixpkgs": [
+          "nufetch",
+          "dotfiles",
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1752544374,
-        "narHash": "sha256-ReX0NG6nIAEtQQjLqeu1vUU2jjZuMlpymNtb4VQYeus=",
+        "lastModified": 1748226808,
+        "narHash": "sha256-GaBRgxjWO1bAQa8P2+FDxG4ANBVhjnSjBms096qQdxo=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "2e00ed310c218127e02ffcf28ddd4e0f669fde3e",
+        "rev": "83665c39fa688bd6a1f7c43cf7997a70f6a109f9",
         "type": "github"
       },
       "original": {
@@ -6870,7 +6851,7 @@
       "inputs": {
         "flake-utils": "flake-utils",
         "gigvim": "gigvim",
-        "home-manager": "home-manager_9",
+        "home-manager": "home-manager_8",
         "neve": "neve_3",
         "nix-secrets": "nix-secrets_8",
         "nixos-wsl": "nixos-wsl_8",
