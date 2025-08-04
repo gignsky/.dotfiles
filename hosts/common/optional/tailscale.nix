@@ -3,7 +3,7 @@ _: {
     enable = true;
     # package = inputs.tailscale.packages.${pkgs.system}.default;
     authKeyFile = "/etc/tailscale/creds";
-    useRoutingFeatures = "client";
+    # useRoutingFeatures = "client";
     extraUpFlags = [
       "--ssh"
     ];
