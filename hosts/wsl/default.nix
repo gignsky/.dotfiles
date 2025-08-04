@@ -3,7 +3,6 @@
     (configLib.relativeToRoot "hosts/common/core")
     (configLib.relativeToRoot "hosts/common/users/gig")
     (configLib.relativeToRoot "hosts/common/optional/samba.nix")
-    (configLib.relativeToRoot "hosts/common/optional/tailscale.nix")
     # (configLib.relativeToRoot "hosts/common/optional/neofetch.nix")
     # inputs.nixos-wsl.modules
     # inputs.home-manager.nixosModules.home-manager
@@ -21,7 +20,6 @@
 
   # NEW METHOD FOR VSCODE FROM: https://github.com/nix-community/nixos-vscode-server
 
-
   wsl.enable = true; # Redunent with nixosModules.default on the flake.nix level
   wsl.defaultUser = "gig";
 
@@ -31,7 +29,6 @@
     # Opinionated: disable global registry
     flake-registry = "";
     trusted-users = [ "gig" ];
-
   };
 
   #   # I think this is unneccecary if I'm going with standalone home-manager rather than flake os module home-manager
