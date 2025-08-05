@@ -14,8 +14,7 @@
     # inputs.nix-colors.homeManagerModules.default
 
     ./common/core
-    ./common/optional/zsh.nix
-    # ./common/optional/neofetch.nix
+    ./common/optional/nushell.nix
   ];
   nix = {
     package = lib.mkDefault pkgs.nix;
@@ -31,7 +30,7 @@
     sessionPath = [ ]; # Add paths to $PATH
     sessionVariables = {
       FLAKE = "$HOME/.dotfiles/.";
-      SHELL = "zsh";
+      SHELL = "nu";
       # TERM = "kitty";
       # TERMINAL = "kitty";
       EDITOR = "nano";
@@ -61,6 +60,7 @@
     mtr
     lazygit
     countryfetch
+    fastfetch
     # restic
     # xsv
     # ncdu # unneccecary due to the ability to use `dua i` for interactive better dua the only downside is that dua doesn't have a way of sorting folders at the top
