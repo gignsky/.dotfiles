@@ -1,9 +1,6 @@
-{ pkgs, ... }:
-
-{
+{ pkgs, ... }: {
   users.defaultUserShell = pkgs.zsh;
-  users.users.gig.shell = pkgs.zsh;
-  environment.shells = [ pkgs.zsh ];
+  environment.shells = [ pkgs.zsh pkgs.nushell ];
 
   programs.zsh = {
     enable = true;
@@ -13,4 +10,5 @@
     #   path = lib.mkDefault "/home/gig/.zsh_history";
     # };
   };
+  programs.nushell.enable = true;
 }

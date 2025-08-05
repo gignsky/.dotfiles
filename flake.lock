@@ -1850,6 +1850,22 @@
         "type": "github"
       }
     },
+    "git-aliases": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1745759023,
+        "narHash": "sha256-4BegizVWe6JxPMZrecIcr+2oQJbfNvm/CpEyuRM9W9w=",
+        "owner": "KamilKleina",
+        "repo": "git-aliases.nu",
+        "rev": "c488a5e928facf781d5c3c35dd10c7a92c8a5f8f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "KamilKleina",
+        "repo": "git-aliases.nu",
+        "type": "github"
+      }
+    },
     "git-hooks": {
       "flake": false,
       "locked": {
@@ -4997,6 +5013,7 @@
       "inputs": {
         "flake-utils": "flake-utils",
         "gigvim": "gigvim",
+        "git-aliases": "git-aliases",
         "home-manager": "home-manager_8",
         "neve": "neve_3",
         "nix-secrets": "nix-secrets_8",
