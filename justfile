@@ -166,7 +166,7 @@ new home:
 	nix-shell -p lolcat --run 'echo "Cleaning zplug directory..." | lolcat 2> /dev/null'
 	rm -rfv ~/.config/zsh/zplug
 	just home
-	zsh
+	nu
 
 home-trace:
 	just dont-fuck-my-build

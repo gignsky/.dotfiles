@@ -29,8 +29,7 @@ in
                 name = lib.removePrefix "home-manager.users.${config.home.username}." o.name;
               };
           };
-          evaluator = "nix eval
-          /home/gig/.dotfiles#homeManagerConfigurations.${config.home.username}@nixos.config.{{ .Option }}";
+          evaluator = "";
         };
       };
     };

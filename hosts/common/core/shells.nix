@@ -1,12 +1,14 @@
-{ inputs, pkgs, outputs, configLib, ... }:
-
-{
+{ inputs
+, pkgs
+, outputs
+, configLib
+, ...
+}: {
   # overlays
   nixpkgs.overlays = [
     outputs.overlays.unstable-packages
     # outputs.overlays.wrap-packages # example for overlays
   ];
-
 
   environment.systemPackages = with pkgs; [
     tree

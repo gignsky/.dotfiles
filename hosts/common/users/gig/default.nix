@@ -1,5 +1,10 @@
-{ pkgs, config, lib, inputs, configVars, ... }:
-
+{ pkgs
+, config
+, lib
+, inputs
+, configVars
+, ...
+}:
 let
   ifTheyExist = groups: builtins.filter (group: builtins.hasAttr group config.users.groups) groups;
   sopsHashedPasswordFile =
@@ -34,7 +39,10 @@ in
           users.${configVars.username} = {
             home = "/home/${configVars.username}";
             isNormalUser = true;
-            password = if configVars.isMinimal then "nixos" else null; # Overridden if sops is working
+            password =
+              if configVars.isMinimal
+              then "nixos"
+              else null; # Overridden if sops is working
             extraGroups =
               [ "wheel" "gig" ]
               ++ ifTheyExist [
@@ -51,12 +59,18 @@ in
             # These get placed into /etc/ssh/authorized_keys.d/<name> on nixos
             openssh.authorizedKeys.keys = lib.lists.forEach pubKeys (key: builtins.readFile key);
 
-            shell = if configVars.isMinimal then pkgs.bash else pkgs.zsh; # default shell
+            shell =
+              if configVars.isMinimal
+              then pkgs.bash
+              else pkgs.nushell; # default shell
           };
 
           # Proper root use required for borg and some other specific operations
           users.root = {
-            password = if configVars.isMinimal then "nixos" else null; # Overridden if sops is working
+            password =
+              if configVars.isMinimal
+              then "nixos"
+              else null; # Overridden if sops is working
             # root's ssh keys are mainly used for remote deployment.
             openssh.authorizedKeys.keys = config.users.users.${configVars.username}.openssh.authorizedKeys.keys;
           };

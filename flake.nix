@@ -63,6 +63,11 @@
       url = "github:water-sucks/optnix";
     };
 
+    git-aliases = {
+      url = "github:KamilKleina/git-aliases.nu";
+      flake = false;
+    };
+
     #################### Personal Repositories ####################
 
     # Private secrets repo.  See ./docs/secretsmgmt.md

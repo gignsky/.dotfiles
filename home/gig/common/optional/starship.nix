@@ -1,8 +1,7 @@
 # deadnix: skip-file
 # NOTE: Home Manager modules must use { config, pkgs, ... } even if unused.
 #       Ignore deadnix warnings about unused arguments here.
-{ config, pkgs, ... }:
-{
+_: {
   programs.starship = {
     enable = true;
     enableZshIntegration = true;
@@ -10,6 +9,7 @@
     #   "nerd-font-symbols"
     #   "bracketed-segments"
     # ];
+    enableNushellIntegration = true;
     settings = {
       # # Get editor completions based on the config schema
       # "$schema" = 'https://starship.rs/config-schema.json';
