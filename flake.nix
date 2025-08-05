@@ -55,14 +55,12 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
-    # Expandable neofetch
-    nufetch = {
-      url = "github:gignsky/nufetch/develop";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
-
     neve = {
       url = "github:redyf/Neve";
+    };
+
+    optnix = {
+      url = "github:water-sucks/optnix";
     };
 
     #################### Personal Repositories ####################
@@ -89,7 +87,12 @@
     gigvim.url = "github:gignsky/gigvim";
   };
 
-  outputs = { self, nixpkgs, home-manager, ... } @ inputs:
+  outputs =
+    { self
+    , nixpkgs
+    , home-manager
+    , ...
+    } @ inputs:
     let
       inherit (self) outputs;
       inherit (nixpkgs) lib;
@@ -118,17 +121,14 @@
         let
           missing = nixpkgs.lib.filterAttrs (_: config: (config.config.system.build.vmTest or null) == null) configs;
         in
-        if missing != { } then
-          throw ''\nSome nixosConfigurations are missing a vmTest!\nOffending hosts: ${builtins.concatStringsSep ", " (builtins.attrNames missing)}\nEach host must define config.system.build.vmTest.''
-        else
-          true;
+        if missing != { }
+        then throw ''\nSome nixosConfigurations are missing a vmTest!\nOffending hosts: ${builtins.concatStringsSep ", " (builtins.attrNames missing)}\nEach host must define config.system.build.vmTest.''
+        else true;
     in
     {
-
       # NixOS configuration entrypoint
       # Available through 'nixos-rebuild --flake .#your-hostname'
       nixosConfigurations = {
-
         # WSL configuration entrypoint - name can not be changed from nixos without some extra work TODO
         wsl = nixpkgs.lib.nixosSystem {
           inherit system specialArgs;
@@ -262,8 +262,7 @@
       checks = {
         ${system} =
           let
-            nixosTests =
-              assert assertAllHostsHaveVmTest self.nixosConfigurations;
+            nixosTests = assert assertAllHostsHaveVmTest self.nixosConfigurations;
               nixpkgs.lib.filterAttrs (_: v: v != null) (
                 nixpkgs.lib.mapAttrs'
                   (name: config: {
@@ -272,20 +271,25 @@
                   })
                   self.nixosConfigurations
               );
-            homeManagerChecks = nixpkgs.lib.mapAttrs'
-              (name: cfg: {
-                name = "homeManager-${name}";
-                value = cfg.activationPackage;
-              })
-              self.homeConfigurations;
-            packageBuilds = nixpkgs.lib.mapAttrs'
-              (name: pkg: {
-                name = "build-${name}";
-                value = pkg;
-              })
-              (import ./pkgs { inherit pkgs; });
+            homeManagerChecks =
+              nixpkgs.lib.mapAttrs'
+                (name: cfg: {
+                  name = "homeManager-${name}";
+                  value = cfg.activationPackage;
+                })
+                self.homeConfigurations;
+            packageBuilds =
+              nixpkgs.lib.mapAttrs'
+                (name: pkg: {
+                  name = "build-${name}";
+                  value = pkg;
+                })
+                (import ./pkgs { inherit pkgs; });
           in
-          nixosTests // homeManagerChecks // packageBuilds // {
+          nixosTests
+          // homeManagerChecks
+          // packageBuilds
+          // {
             pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
               src = ./.;
               hooks = {
@@ -333,7 +337,8 @@
         buildInputs = self.checks.${system}.pre-commit-check.enabledPackages;
 
         nativeBuildInputs = builtins.attrValues {
-          inherit (pkgs)
+          inherit
+            (pkgs)
             git
             pre-commit
             lolcat
@@ -348,23 +353,19 @@
             statix
             deadnix
             nix
-
             #unstable packages
             # unstable.statix
-
             # personal packages
             quick-results
             upjust
             upflake
             upspell
-
             #necessary for bootstrapping
             ripgrep
             ;
         };
       };
       # import ./shell.nix { inherit pkgs; };
-
 
       # TODO change this to something that has better looking output rules
       # Nix formatter available through 'nix fmt' https://nix-community.github.io/nixpkgs-fmt
