@@ -4,11 +4,10 @@
   # inputs,
   outputs
 , lib
-  # , config,
-, pkgs
+, # , config,
+  pkgs
 , ...
-}:
-{
+}: {
   # You can import other home-manager modules here
   imports = [
     # Or modules exported from other flakes (such as nix-colors):
@@ -16,7 +15,7 @@
 
     ./common/core
     ./common/optional/zsh.nix
-    ./common/optional/neofetch.nix
+    # ./common/optional/neofetch.nix
   ];
   nix = {
     package = lib.mkDefault pkgs.nix;
