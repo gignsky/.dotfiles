@@ -11,4 +11,12 @@ else
 	export HOST
 fi
 
-sudo nixos-rebuild --flake .#"$HOST" switch
+set -e
+pushd ~/.dotfiles || exit
+git diff -U0 ./*glob*.nix
+echo "NixOS Rebuilding..."
+sudo nixos-rebuild switch --flake .#"$HOST" | sudo tee nixos-switch.log || (
+ grep --color error && false) < nixos-switch.log
+gen=$(nixos-rebuild list-generations 2>/dev/null | grep current)
+git commit -am "$HOST: $gen"
+popd || exit
