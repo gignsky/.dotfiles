@@ -7,7 +7,8 @@
 , # , config,
   pkgs
 , ...
-}: {
+}:
+{
   # You can import other home-manager modules here
   imports = [
     # Or modules exported from other flakes (such as nix-colors):
@@ -33,7 +34,6 @@
       SHELL = "nu";
       # TERM = "kitty";
       # TERMINAL = "kitty";
-      EDITOR = "nano";
       # MANPAGER = "batman"; # see ./cli/bat.nix
     };
   };
