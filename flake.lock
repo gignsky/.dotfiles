@@ -1032,16 +1032,15 @@
         "nvf": "nvf"
       },
       "locked": {
-        "lastModified": 1754441268,
-        "narHash": "sha256-RC3+/k2ultwmqXz2M66jmyXD6s3pQh1nN7woGDxcScs=",
+        "lastModified": 1754443451,
+        "narHash": "sha256-5pTZHG1BU9O9oNi6ETRu7vtOEkmoNdIhL9dEK4IhCWg=",
         "owner": "gignsky",
         "repo": "gigvim",
-        "rev": "5419e7f9fc730e18c3be9e7f8aa5dd8bd7cd3505",
+        "rev": "e5818ae9b1622578cc25011a0cd65145e3b70c10",
         "type": "github"
       },
       "original": {
         "owner": "gignsky",
-        "ref": "add-better-file-paths",
         "repo": "gigvim",
         "type": "github"
       }
