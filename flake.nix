@@ -93,7 +93,7 @@
     , nixpkgs
     , home-manager
     , ...
-    } @ inputs:
+    }@inputs:
     let
       inherit (self) outputs;
       inherit (nixpkgs) lib;
@@ -118,13 +118,19 @@
       };
       customPkgs = import ./pkgs { inherit pkgs; };
       pkgs = nixpkgs.legacyPackages.${system} // customPkgs;
-      assertAllHostsHaveVmTest = configs:
+      assertAllHostsHaveVmTest =
+        configs:
         let
-          missing = nixpkgs.lib.filterAttrs (_: config: (config.config.system.build.vmTest or null) == null) configs;
+          missing = nixpkgs.lib.filterAttrs
+            (
+              _: config: (config.config.system.build.vmTest or null) == null
+            )
+            configs;
         in
-        if missing != { }
-        then throw ''\nSome nixosConfigurations are missing a vmTest!\nOffending hosts: ${builtins.concatStringsSep ", " (builtins.attrNames missing)}\nEach host must define config.system.build.vmTest.''
-        else true;
+        if missing != { } then
+          throw ''\nSome nixosConfigurations are missing a vmTest!\nOffending hosts: ${builtins.concatStringsSep ", " (builtins.attrNames missing)}\nEach host must define config.system.build.vmTest.''
+        else
+          true;
     in
     {
       # NixOS configuration entrypoint
@@ -263,7 +269,8 @@
       checks = {
         ${system} =
           let
-            nixosTests = assert assertAllHostsHaveVmTest self.nixosConfigurations;
+            nixosTests =
+              assert assertAllHostsHaveVmTest self.nixosConfigurations;
               nixpkgs.lib.filterAttrs (_: v: v != null) (
                 nixpkgs.lib.mapAttrs'
                   (name: config: {
@@ -272,20 +279,18 @@
                   })
                   self.nixosConfigurations
               );
-            homeManagerChecks =
-              nixpkgs.lib.mapAttrs'
-                (name: cfg: {
-                  name = "homeManager-${name}";
-                  value = cfg.activationPackage;
-                })
-                self.homeConfigurations;
-            packageBuilds =
-              nixpkgs.lib.mapAttrs'
-                (name: pkg: {
-                  name = "build-${name}";
-                  value = pkg;
-                })
-                (import ./pkgs { inherit pkgs; });
+            homeManagerChecks = nixpkgs.lib.mapAttrs'
+              (name: cfg: {
+                name = "homeManager-${name}";
+                value = cfg.activationPackage;
+              })
+              self.homeConfigurations;
+            packageBuilds = nixpkgs.lib.mapAttrs'
+              (name: pkg: {
+                name = "build-${name}";
+                value = pkg;
+              })
+              (import ./pkgs { inherit pkgs; });
           in
           nixosTests
           // homeManagerChecks
@@ -334,12 +339,10 @@
       devShells.${system}.default = pkgs.mkShell {
         NIX_CONFIG = "extra-experimental-features = nix-command flakes ";
 
-        inherit (self.checks.${system}.pre-commit-check) shellHook;
         buildInputs = self.checks.${system}.pre-commit-check.enabledPackages;
 
         nativeBuildInputs = builtins.attrValues {
-          inherit
-            (pkgs)
+          inherit (pkgs)
             git
             pre-commit
             lolcat
@@ -365,6 +368,11 @@
             ripgrep
             ;
         };
+
+        shellHook = ''
+          ${self.checks.${system}.pre-commit-check.shellHook}
+          echo "Welcome to the dotfiles devShell" | ${pkgs.lolcat}/bin/lolcat
+        '';
       };
       # import ./shell.nix { inherit pkgs; };
 
