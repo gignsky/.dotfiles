@@ -1,14 +1,21 @@
 { pkgs
 , inputs
+, outputs
 , ...
-}: {
+}:
+{
+  # overlays
+  nixpkgs.overlays = [
+    outputs.overlays.unstable-packages
+    # outputs.overlays.wrap-packages # example for overlays
+  ];
   imports = [
     ./starship.nix
   ];
   programs = {
     nushell = {
       enable = true;
-      # package = "${pkgs.nushell}/bin/nu";
+      package = pkgs.unstable.nushell;
       shellAliases = import ./shellAliases.nix;
       settings = {
         show_banner = false;
@@ -18,10 +25,10 @@
         };
         buffer_editor = "vi";
       };
-      plugins = with pkgs.nushellPlugins; [
-        net
+      plugins = with pkgs.unstable.nushellPlugins; [
+        # net - currently marked as broken
         highlight
-        units
+        # units - currently marked as broken
         formats
         query
         gstat
