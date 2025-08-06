@@ -1,6 +1,7 @@
 { pkgs
 , inputs
 , outputs
+, system
 , ...
 }:
 {
@@ -23,7 +24,7 @@
           enable = true;
           max_results = 200;
         };
-        buffer_editor = "vi";
+        buffer_editor = "${inputs.gigvim.packages.${system}.full}/bin/nvim";
       };
       plugins = with pkgs.unstable.nushellPlugins; [
         # net - currently marked as broken
