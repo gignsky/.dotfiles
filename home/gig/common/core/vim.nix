@@ -2,8 +2,7 @@
 {
   # https://notashelf.github.io/nvf/index.xhtml
   imports = [
-    # inputs.nvf.homeManagerModules.default
-    inputs.gigvim.homeManagerModules.gigvim
+    inputs.gigvim.homeManagerModules.default
   ];
 
   programs.gigvim.enable = true;
