@@ -85,7 +85,7 @@
       flake = true;
     };
 
-    # gigvim.url = "github:gignsky/gigvim";
+    gigvim.url = "github:gignsky/gigvim";
   };
 
   outputs =
