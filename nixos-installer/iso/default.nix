@@ -2,6 +2,7 @@
 , lib
 , configLib
 , configVars
+, inputs
 , ...
 }:
 let
@@ -52,6 +53,7 @@ in
     magic-wormhole
     btop
     bat
+    inputs.gigvim.packages.${system}.minimal
   ];
 
   environment.shellAliases = {

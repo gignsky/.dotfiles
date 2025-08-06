@@ -6,6 +6,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/release-25.05";
     # Declarative partitioning and formatting
     disko.url = "github:nix-community/disko";
+    gigvim.url = "github:gignsky/gigvim";
   };
 
   outputs =
