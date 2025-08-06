@@ -55,10 +55,6 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
-    neve = {
-      url = "github:redyf/Neve";
-    };
-
     optnix = {
       url = "github:water-sucks/optnix";
     };
@@ -89,7 +85,7 @@
       flake = true;
     };
 
-    gigvim.url = "github:gignsky/gigvim";
+    # gigvim.url = "github:gignsky/gigvim";
   };
 
   outputs =
