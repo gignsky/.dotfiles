@@ -353,7 +353,7 @@
             git
             pre-commit
             lolcat
-            nixd
+            nixfmt-classic
             nil
             age
             ssh-to-age
