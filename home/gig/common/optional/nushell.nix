@@ -26,9 +26,9 @@
         buffer_editor = "vi";
       };
       plugins = with pkgs.unstable.nushellPlugins; [
-        # net - currently marked as broken
+        net
         highlight
-        # units - currently marked as broken
+        units
         formats
         query
         gstat
