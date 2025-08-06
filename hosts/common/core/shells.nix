@@ -3,7 +3,8 @@
 , outputs
 , configLib
 , ...
-}: {
+}:
+{
   # overlays
   nixpkgs.overlays = [
     outputs.overlays.unstable-packages
@@ -29,7 +30,7 @@
 
     # Personal packages
     # wrap.wrap # example for overlays
-    inputs.wrap.packages.${system}.default
+    inputs.wrap.packages.${system}.wrapper
     inputs.tax-matrix.packages.${system}.tax-matrix
   ];
 
