@@ -55,9 +55,7 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
-    optnix = {
-      url = "github:water-sucks/optnix";
-    };
+    optnix.url = "github:water-sucks/optnix";
 
     git-aliases = {
       url = "github:KamilKleina/git-aliases.nu";
@@ -86,6 +84,8 @@
     };
 
     gigvim.url = "github:gignsky/gigvim";
+
+    nufetch.url = "github:gignsky/nufetch";
   };
 
   outputs =
@@ -302,7 +302,7 @@
             pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
               src = ./.;
               hooks = {
-                nixfmt-classic = {
+                nixfmt-rfc-style = {
                   enable = true;
                 };
                 statix = {
