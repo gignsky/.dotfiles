@@ -1,9 +1,10 @@
-{ options
-, pkgs
-, inputs
-, lib
-, config
-, ...
+{
+  options,
+  pkgs,
+  inputs,
+  lib,
+  config,
+  ...
 }:
 let
   optnixLib = inputs.optnix.mkLib pkgs;
@@ -23,7 +24,8 @@ in
           description = "home-manager configuration for all systems";
           options-list-file = optnixLib.mkOptionsList {
             inherit options;
-            transform = o:
+            transform =
+              o:
               o
               // {
                 name = lib.removePrefix "home-manager.users.${config.home.username}." o.name;

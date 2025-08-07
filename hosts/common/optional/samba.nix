@@ -1,21 +1,19 @@
 { lib, pkgs, ... }:
 
 let
-  newMount =
-    shareName: mountPoint: fqdm: uid: gid:
-    {
-      "${mountPoint}" = {
-        device = "//${fqdm}/${shareName}";
-        fsType = "cifs";
-        options =
-          let
-            # this line prevents hanging on network split
-            automount_opts = "x-systemd.automount,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s";
-            creds = "/etc/samba/cifs-creds";
-          in
-          [ "${automount_opts},credentials=${creds},uid=${uid},gid=${gid},vers=3.0" ];
-      };
+  newMount = shareName: mountPoint: fqdm: uid: gid: {
+    "${mountPoint}" = {
+      device = "//${fqdm}/${shareName}";
+      fsType = "cifs";
+      options =
+        let
+          # this line prevents hanging on network split
+          automount_opts = "x-systemd.automount,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s";
+          creds = "/etc/samba/cifs-creds";
+        in
+        [ "${automount_opts},credentials=${creds},uid=${uid},gid=${gid},vers=3.0" ];
     };
+  };
 in
 {
   # imports = (configLib.scanPaths ./.);
@@ -25,7 +23,10 @@ in
   fileSystems = lib.mkMerge [
     (newMount "risa" "/home/gig/mnt/risa" "192.168.51.3" "1000" "100")
     (newMount "utility" "/home/gig/mnt/utility" "192.168.51.3" "1000" "100")
-    (newMount "virtualization-boot-files" "/home/gig/mnt/virtualization-boot-files" "192.168.51.3" "1000" "100")
+    (newMount "virtualization-boot-files" "/home/gig/mnt/virtualization-boot-files" "192.168.51.3"
+      "1000"
+      "100"
+    )
     (newMount "vulcan" "/home/gig/mnt/vulcan" "192.168.51.3" "1000" "100")
     (newMount "appraisals" "/home/gig/mnt/appraisals" "192.168.51.21" "1000" "100")
     (newMount "proxmox-backup-share" "/home/gig/mnt/proxmox_backups" "192.168.51.3" "1000" "100")

@@ -1,9 +1,10 @@
-{ pkgs
-, lib
-, configLib
-, configVars
-, inputs
-, ...
+{
+  pkgs,
+  lib,
+  configLib,
+  configVars,
+  inputs,
+  ...
 }:
 let
   inherit (configVars.networking) sshPort;

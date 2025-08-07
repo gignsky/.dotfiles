@@ -1,8 +1,9 @@
-{ pkgs
-, inputs
-, outputs
-, system
-, ...
+{
+  pkgs,
+  inputs,
+  outputs,
+  system,
+  ...
 }:
 {
   # overlays

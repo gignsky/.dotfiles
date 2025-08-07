@@ -38,7 +38,11 @@
               };
             }
             ./minimal-configuration.nix
-            { _module.args = { inherit qemuGuest; }; }
+            {
+              _module.args = {
+                inherit qemuGuest;
+              };
+            }
             {
               networking = {
                 hostName = name;

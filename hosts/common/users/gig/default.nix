@@ -1,10 +1,11 @@
-{ pkgs
-, config
-, lib
-, inputs
-, configVars
-, outputs
-, ...
+{
+  pkgs,
+  config,
+  lib,
+  inputs,
+  configVars,
+  outputs,
+  ...
 }:
 let
   ifTheyExist = groups: builtins.filter (group: builtins.hasAttr group config.users.groups) groups;
@@ -46,17 +47,18 @@ in
             home = "/home/${configVars.username}";
             isNormalUser = true;
             password = if configVars.isMinimal then "nixos" else null; # Overridden if sops is working
-            extraGroups = [
-              "wheel"
-              "gig"
-            ]
-            ++ ifTheyExist [
-              "audio"
-              "video"
-              "docker"
-              "git"
-              "networkmanager"
-            ];
+            extraGroups =
+              [
+                "wheel"
+                "gig"
+              ]
+              ++ ifTheyExist [
+                "audio"
+                "video"
+                "docker"
+                "git"
+                "networkmanager"
+              ];
 
             # sets the user's id to 1701
             uid = lib.mkDefault 1701;

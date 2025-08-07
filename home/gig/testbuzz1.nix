@@ -10,7 +10,7 @@
     # You can also split up your configuration and import pieces of it here:
     # ./nvim.nix
     #################### Required Configs ####################
-    ./home.nix #required
+    ./home.nix # required
 
     #################### Host-specific Optional Configs ####################
 

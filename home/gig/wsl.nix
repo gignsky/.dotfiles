@@ -2,11 +2,12 @@
 # Use this to configure your home environment (it replaces ~/.config/nixpkgs/home.nix)
 {
   # inputs,
-  outputs
-, # , config,
-  pkgs
-, ...
-}: {
+  outputs,
+  # , config,
+  pkgs,
+  ...
+}:
+{
   # You can import other home-manager modules here
   imports = [
     # Or modules exported from other flakes (such as nix-colors):
