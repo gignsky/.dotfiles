@@ -15,7 +15,7 @@ set -e
 pushd ~/.dotfiles || exit
 git diff -U0 ./*glob*.nix
 echo "NixOS Rebuilding..."
-sudo home-manager switch --flake .#gig@"$HOST" | sudo tee home-manager-switch.log || (
+home-manager switch --flake .#gig@"$HOST" | sudo tee home-manager-switch.log || (
  grep --color error && false) < home-manager-switch.log
 gen=$(home-manager generations 2>/dev/null | head -n 1)
 git commit -am "gig@$HOST: $gen"
