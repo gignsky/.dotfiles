@@ -3684,11 +3684,11 @@
         "themery-nvim": "themery-nvim"
       },
       "locked": {
-        "lastModified": 1754563504,
-        "narHash": "sha256-UKZcHPSVGlLYpKHfpZVqzExj7K/pWFiW4fLVdmJuqO0=",
+        "lastModified": 1754570397,
+        "narHash": "sha256-lYyeB1uhQfWwKWd1NjBZEwXJCeRhHLWWwm3DPwF1Y+I=",
         "owner": "gignsky",
         "repo": "gigvim",
-        "rev": "96c258a83c2b02bc7ff55f00bdc11179de3a8db5",
+        "rev": "55d17b1edf6d847e01ab7e08a3746a3ff38904b4",
         "type": "github"
       },
       "original": {
