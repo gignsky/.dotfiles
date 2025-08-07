@@ -152,10 +152,10 @@ post-home:
 simple-home *ARGS:
 	./scripts/home-manager-flake-rebuild.sh {{ ARGS }}
 
-home:
+home *ARGS:
   just pre-home
   nix-shell -p lolcat --run 'echo "[HOME] Attempting Home Rebuild..." | lolcat 2> /dev/null'
-  just simple-home
+  just simple-home {{ ARGS }}
   just post-home
 
 # Runs just home
