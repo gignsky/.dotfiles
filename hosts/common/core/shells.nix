@@ -51,7 +51,7 @@
 
   programs = {
     direnv = {
-      enable = true;
+      enable = false;
       package = pkgs.direnv;
       silent = false;
       loadInNixShell = true;
