@@ -23,5 +23,5 @@ if ! home-manager switch --flake .#gig@"$HOST" > "$output_file" 2>&1; then
 fi
 rm "$output_file"
 gen=$(home-manager generations 2>/dev/null | head -n 1)
-git commit --a --allow-empty -m "gig@$HOST: $gen" || true
+git commit -a --allow-empty -m "gig@$HOST: $gen" || true
 popd || exit
