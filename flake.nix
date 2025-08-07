@@ -202,7 +202,7 @@
       # Available through 'home-manager --flake .#your-username@your-hostname'
       homeConfigurations = {
         # ganoslalWSL
-        "gig@nixos" = home-manager.lib.homeManagerConfiguration {
+        "gig@wsl" = home-manager.lib.homeManagerConfiguration {
           inherit pkgs; # Home-manager requires 'pkgs' instance
           extraSpecialArgs = {
             inherit
