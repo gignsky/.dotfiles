@@ -1,4 +1,11 @@
-{ inputs, pkgs, outputs, configLib, ... }: {
+{
+  inputs,
+  pkgs,
+  outputs,
+  configLib,
+  ...
+}:
+{
   # overlays
   nixpkgs.overlays = [
     outputs.overlays.unstable-packages
@@ -41,8 +48,10 @@
       };
     };
     bash =
-      let sword = configLib.relativeToRoot "hosts/common/resources/sword.art";
-      in {
+      let
+        sword = configLib.relativeToRoot "hosts/common/resources/sword.art";
+      in
+      {
         # enable = true;
         completion.enable = true;
         enableLsColors = true;

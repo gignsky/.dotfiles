@@ -1,4 +1,5 @@
-{ configLib, ... }: {
+{ configLib, ... }:
+{
   imports = [
     (configLib.relativeToRoot "hosts/common/core")
     (configLib.relativeToRoot "hosts/common/users/gig")

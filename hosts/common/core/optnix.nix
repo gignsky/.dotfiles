@@ -1,7 +1,8 @@
-{ options
-, pkgs
-, inputs
-, ...
+{
+  options,
+  pkgs,
+  inputs,
+  ...
 }:
 let
   optnixLib = inputs.optnix.mkLib pkgs;
