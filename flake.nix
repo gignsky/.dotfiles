@@ -114,7 +114,6 @@
           nixpkgs
           configVars
           configLib
-          system
           ;
       };
       customPkgs = import ./pkgs { inherit pkgs; };
@@ -139,7 +138,7 @@
       nixosConfigurations = {
         # WSL configuration entrypoint - name can not be changed from nixos without some extra work TODO
         wsl = nixpkgs.lib.nixosSystem {
-          inherit specialArgs;
+          inherit system specialArgs;
           modules = [
             inputs.vscode-server.nixosModules.default
             (_: {
@@ -202,7 +201,7 @@
       # Available through 'home-manager --flake .#your-username@your-hostname'
       homeConfigurations = {
         # ganoslalWSL
-        "gig@nixos" = home-manager.lib.homeManagerConfiguration {
+        "gig@wsl" = home-manager.lib.homeManagerConfiguration {
           inherit pkgs; # Home-manager requires 'pkgs' instance
           extraSpecialArgs = {
             inherit
