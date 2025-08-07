@@ -14,9 +14,14 @@ fi
 set -e
 pushd ~/.dotfiles || exit
 git diff -U0 ./*glob*.nix
-echo "NixOS Rebuilding..."
-home-manager switch --flake .#gig@"$HOST" | sudo tee home-manager-switch.log || (
- grep --color error && false) < home-manager-switch.log
+echo "Home-Manager Rebuilding..."
+output_file=$(mktemp)
+if ! home-manager switch --flake .#gig@"$HOST" > "$output_file" 2>&1; then
+  echo "home-manager switch failed. Output:"
+  cat "$output_file"
+  exit 1
+fi
+rm "$output_file"
 gen=$(home-manager generations 2>/dev/null | head -n 1)
 git commit -am "gig@$HOST: $gen"
 popd || exit
