@@ -16,8 +16,14 @@
   wsl.enable = true;
   wsl.defaultUser = "gig";
 
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
-  nix.trustedUsers = [ "root" "gig" ];
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
+  nix.trustedUsers = [
+    "root"
+    "gig"
+  ];
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions

@@ -1,7 +1,8 @@
-{ pkgs
-, lib
-, configLib
-, ...
+{
+  pkgs,
+  lib,
+  configLib,
+  ...
 }:
 # let
 #   inherit (configVars.networking) sshPort;
@@ -59,18 +60,17 @@
     # inputs.nixos-wsl.modules
     # inputs.home-manager.nixosModules.home-manager
   ];
-  nix =
-    {
-      settings = {
-        # Enable flakes and new 'nix' command
-        experimental-features = "nix-command flakes";
-        # Opinionated: disable global registry
-        flake-registry = "";
-        trusted-users = [ "gig" ];
-
-      };
-
-      channel.enable = false;
+  nix = {
+    settings = {
+      # Enable flakes and new 'nix' command
+      experimental-features = "nix-command flakes";
+      # Opinionated: disable global registry
+      flake-registry = "";
+      trusted-users = [ "gig" ];
 
     };
+
+    channel.enable = false;
+
+  };
 }

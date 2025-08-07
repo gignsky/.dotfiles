@@ -1,5 +1,6 @@
 # Custom Nix configuration for install
-{ lib, ... }: {
+{ lib, ... }:
+{
   # This ensures that when nixos-anywhere runs, unfree packages are allowed
   nixpkgs.config = {
     allowUnfree = true;

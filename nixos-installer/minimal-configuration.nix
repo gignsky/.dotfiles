@@ -1,9 +1,10 @@
-{ lib
-, pkgs
-, configLib
-, configVars
-, qemuGuest ? false
-, ...
+{
+  lib,
+  pkgs,
+  configLib,
+  configVars,
+  qemuGuest ? false,
+  ...
 }:
 let
   inherit (configVars.networking) sshPort;
@@ -28,7 +29,6 @@ in
   #   efiSupport = true;
   #   efiInstallAsRemovable = true;
   # };
-
 
   networking = {
     # configures the network interface(include wireless) via `nmcli` & `nmtui`
@@ -95,9 +95,11 @@ in
   nixpkgs.config = {
     allowUnfree = true;
     # Specifically allow broadcom-sta to be installed
-    allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
-      "broadcom-sta"
-    ];
+    allowUnfreePredicate =
+      pkg:
+      builtins.elem (lib.getName pkg) [
+        "broadcom-sta"
+      ];
   };
 
   # Enable redistributable firmware for hardware support

@@ -1,6 +1,7 @@
 # NOTE: ... is needed because disko passes diskoFile
-{ disk ? "/dev/sda"
-, ...
+{
+  disk ? "/dev/sda",
+  ...
 }:
 {
   disko.devices = {
@@ -24,7 +25,10 @@
               format = "vfat";
               mountpoint = "/boot";
               # Use extraArgs to set the filesystem label for vfat
-              extraArgs = [ "-n" "BOOT" ]; # -n is for setting the label in mkfs.vfat
+              extraArgs = [
+                "-n"
+                "BOOT"
+              ]; # -n is for setting the label in mkfs.vfat
             };
           };
           root = {

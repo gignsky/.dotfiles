@@ -3,7 +3,11 @@ with lib;
 {
   options.bootloader = {
     kind = mkOption {
-      type = types.enum [ "grub" "systemd-boot" "none" ];
+      type = types.enum [
+        "grub"
+        "systemd-boot"
+        "none"
+      ];
       default = "grub";
       description = "Select which bootloader to use: 'grub', 'systemd-boot', or 'none' (for WSL). Default is 'grub'. Note: rEFInd is not available as a built-in option in NixOS.";
     };
@@ -55,7 +59,12 @@ with lib;
         systemd-boot.enable = mkDefault false;
         grub = {
           enable = mkDefault true;
-          inherit (config.bootloader.grub) useOSProber device efiSupport efiInstallAsRemovable;
+          inherit (config.bootloader.grub)
+            useOSProber
+            device
+            efiSupport
+            efiInstallAsRemovable
+            ;
         };
       };
     })
