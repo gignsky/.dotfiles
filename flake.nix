@@ -114,7 +114,6 @@
           nixpkgs
           configVars
           configLib
-          system
           ;
       };
       customPkgs = import ./pkgs { inherit pkgs; };
@@ -139,7 +138,7 @@
       nixosConfigurations = {
         # WSL configuration entrypoint - name can not be changed from nixos without some extra work TODO
         wsl = nixpkgs.lib.nixosSystem {
-          inherit specialArgs;
+          inherit system specialArgs;
           modules = [
             inputs.vscode-server.nixosModules.default
             (_: {
