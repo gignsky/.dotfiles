@@ -55,9 +55,7 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
-    optnix = {
-      url = "github:water-sucks/optnix";
-    };
+    optnix = { url = "github:water-sucks/optnix"; };
 
     git-aliases = {
       url = "github:KamilKleina/git-aliases.nu";
@@ -69,7 +67,8 @@
     # Private secrets repo.  See ./docs/secretsmgmt.md
     # Authenticate via ssh and use shallow clone
     nix-secrets = {
-      url = "git+ssh://git@github.com/gignsky/nix-secrets.git?ref=main&shallow=1";
+      url =
+        "git+ssh://git@github.com/gignsky/nix-secrets.git?ref=main&shallow=1";
       flake = false;
     };
 
@@ -88,12 +87,7 @@
     gigvim.url = "github:gignsky/gigvim";
   };
 
-  outputs =
-    { self
-    , nixpkgs
-    , home-manager
-    , ...
-    }@inputs:
+  outputs = { self, nixpkgs, home-manager, ... }@inputs:
     let
       inherit (self) outputs;
       inherit (nixpkgs) lib;
@@ -107,32 +101,22 @@
       # ];
       configVars = import ./vars { inherit inputs lib; };
       configLib = import ./lib { inherit lib; };
-      specialArgs = {
-        inherit
-          inputs
-          outputs
-          nixpkgs
-          configVars
-          configLib
-          ;
-      };
+      specialArgs = { inherit inputs outputs nixpkgs configVars configLib; };
       customPkgs = import ./pkgs { inherit pkgs; };
       pkgs = nixpkgs.legacyPackages.${system} // customPkgs;
-      assertAllHostsHaveVmTest =
-        configs:
+      assertAllHostsHaveVmTest = configs:
         let
           missing = nixpkgs.lib.filterAttrs
-            (
-              _: config: (config.config.system.build.vmTest or null) == null
-            )
+            (_: config: (config.config.system.build.vmTest or null) == null)
             configs;
-        in
-        if missing != { } then
-          throw ''\nSome nixosConfigurations are missing a vmTest!\nOffending hosts: ${builtins.concatStringsSep ", " (builtins.attrNames missing)}\nEach host must define config.system.build.vmTest.''
+        in if missing != { } then
+          throw
+          "\\nSome nixosConfigurations are missing a vmTest!\\nOffending hosts: ${
+            builtins.concatStringsSep ", " (builtins.attrNames missing)
+          }\\nEach host must define config.system.build.vmTest."
         else
           true;
-    in
-    {
+    in {
       # NixOS configuration entrypoint
       # Available through 'nixos-rebuild --flake .#your-hostname'
       nixosConfigurations = {
@@ -141,9 +125,7 @@
           inherit system specialArgs;
           modules = [
             inputs.vscode-server.nixosModules.default
-            (_: {
-              services.vscode-server.enable = true;
-            })
+            (_: { services.vscode-server.enable = true; })
             inputs.nixos-wsl.nixosModules.default
             {
               system.stateVersion = "24.05";
@@ -162,9 +144,7 @@
         full-vm = nixpkgs.lib.nixosSystem {
           inherit system specialArgs;
           modules = [
-            {
-              system.stateVersion = "25.05";
-            }
+            { system.stateVersion = "25.05"; }
             "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
             "${nixpkgs}/nixos/modules/installer/cd-dvd/channel.nix"
             ./hosts/full-vm
@@ -203,14 +183,7 @@
         # ganoslalWSL
         "gig@wsl" = home-manager.lib.homeManagerConfiguration {
           inherit pkgs; # Home-manager requires 'pkgs' instance
-          extraSpecialArgs = {
-            inherit
-              inputs
-              outputs
-              configLib
-              system
-              ;
-          };
+          extraSpecialArgs = { inherit inputs outputs configLib system; };
           # > Our main home-manager configuration file <
           modules = [ ./home/gig/wsl.nix ];
           # config = {
@@ -221,14 +194,7 @@
         # spacedock - unused with spacedock having a wsl instance
         "gig@spacedock" = home-manager.lib.homeManagerConfiguration {
           inherit pkgs; # Home-manager requires 'pkgs' instance
-          extraSpecialArgs = {
-            inherit
-              inputs
-              outputs
-              configLib
-              system
-              ;
-          };
+          extraSpecialArgs = { inherit inputs outputs configLib system; };
           # > Our main home-manager configuration file <
           modules = [ ./home/gig/spacedock.nix ];
         };
@@ -281,75 +247,52 @@
       homeManagerModules = self.homeModules;
 
       checks = {
-        ${system} =
-          let
-            nixosTests =
-              assert assertAllHostsHaveVmTest self.nixosConfigurations;
-              nixpkgs.lib.filterAttrs (_: v: v != null) (
-                nixpkgs.lib.mapAttrs'
-                  (name: config: {
-                    name = "nixosTest-${name}";
-                    value = config.config.system.build.vmTest or null;
-                  })
-                  self.nixosConfigurations
-              );
-            homeManagerChecks = nixpkgs.lib.mapAttrs'
-              (name: cfg: {
-                name = "homeManager-${name}";
-                value = cfg.activationPackage;
-              })
-              self.homeConfigurations;
-            packageBuilds = nixpkgs.lib.mapAttrs'
-              (name: pkg: {
-                name = "build-${name}";
-                value = pkg;
-              })
-              (import ./pkgs { inherit pkgs; });
-          in
-          nixosTests
-          // homeManagerChecks
-          // packageBuilds
-          // {
-            pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
-              src = ./.;
-              hooks = {
-                nixpkgs-fmt = {
-                  enable = true;
-                };
-                statix = {
-                  enable = true;
-                };
-                deadnix = {
-                  enable = true;
-                  excludes = [
-                    "home/gig/common/optional/starship.nix"
-                    "hosts/common/users/gig/default.nix"
-                  ];
-                };
-                shellcheck = {
-                  enable = true;
-                };
-                markdownlint = {
-                  enable = true;
-                };
-                yamllint = {
-                  enable = true;
-                  excludes = [ ".github/workflows/flake-check.yml" ];
-                };
-                end-of-file-fixer = {
-                  enable = true;
-                };
-                # nix-flake-check-main-develop = {
-                #   enable = true;
-                #   name = "nix flake check on develop/main";
-                #   entry = "./scripts/pre-commit-flake-check.sh";
-                #   language = "script";
-                #   pass_filenames = false;
-                #   stages = [ "pre-commit" "pre-merge-commit" ];
-                # };
+        ${system} = let
+          nixosTests = assert assertAllHostsHaveVmTest self.nixosConfigurations;
+            nixpkgs.lib.filterAttrs (_: v: v != null) (nixpkgs.lib.mapAttrs'
+              (name: config: {
+                name = "nixosTest-${name}";
+                value = config.config.system.build.vmTest or null;
+              }) self.nixosConfigurations);
+          homeManagerChecks = nixpkgs.lib.mapAttrs' (name: cfg: {
+            name = "homeManager-${name}";
+            value = cfg.activationPackage;
+          }) self.homeConfigurations;
+          packageBuilds = nixpkgs.lib.mapAttrs' (name: pkg: {
+            name = "build-${name}";
+            value = pkg;
+          }) (import ./pkgs { inherit pkgs; });
+        in nixosTests // homeManagerChecks // packageBuilds // {
+          pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
+            src = ./.;
+            hooks = {
+              nixfmt-classic = { enable = true; };
+              statix = { enable = true; };
+              deadnix = {
+                enable = true;
+                excludes = [
+                  "home/gig/common/optional/starship.nix"
+                  "hosts/common/users/gig/default.nix"
+                ];
               };
+              shellcheck = { enable = true; };
+              markdownlint = { enable = true; };
+              yamllint = {
+                enable = true;
+                excludes = [ ".github/workflows/flake-check.yml" ];
+              };
+              end-of-file-fixer = { enable = true; };
+              # nix-flake-check-main-develop = {
+              #   enable = true;
+              #   name = "nix flake check on develop/main";
+              #   entry = "./scripts/pre-commit-flake-check.sh";
+              #   language = "script";
+              #   pass_filenames = false;
+              #   stages = [ "pre-commit" "pre-merge-commit" ];
+              # };
             };
           };
+        };
       };
 
       # Shell configured with packages that are typically only needed when working on or with nix-config.
@@ -360,30 +303,14 @@
 
         nativeBuildInputs = builtins.attrValues {
           inherit (pkgs)
-            git
-            pre-commit
-            lolcat
-            nixfmt-classic
-            nil
-            age
-            ssh-to-age
-            sops
-            home-manager
-            just
-            lazygit
-            statix
-            deadnix
-            nix
+            git pre-commit lolcat nixfmt-classic nil age ssh-to-age sops
+            home-manager just lazygit statix deadnix nix
             #unstable packages
             # unstable.statix
             # personal packages
-            quick-results
-            upjust
-            upflake
-            upspell
+            quick-results upjust upflake upspell
             #necessary for bootstrapping
-            ripgrep
-            ;
+            ripgrep;
         };
 
         shellHook = ''
