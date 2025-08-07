@@ -339,7 +339,7 @@
     "crane_10": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -384,7 +384,7 @@
     "crane_12": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -427,7 +427,7 @@
     "crane_14": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -470,7 +470,7 @@
     "crane_16": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "tax-matrix",
           "dotfiles",
@@ -511,7 +511,7 @@
     "crane_18": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "wrap",
           "dotfiles",
@@ -662,7 +662,7 @@
     "crane_7": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -692,7 +692,7 @@
     "crane_8": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -918,7 +918,7 @@
         "tax-matrix": "tax-matrix_5",
         "treefmt-nix": "treefmt-nix_33",
         "vscode-server": "vscode-server_14",
-        "wrap": "wrap_5"
+        "wrap": "wrap_4"
       },
       "locked": {
         "lastModified": 1754465003,
@@ -949,7 +949,7 @@
         "tax-matrix": "tax-matrix_3",
         "treefmt-nix": "treefmt-nix_18",
         "vscode-server": "vscode-server_8",
-        "wrap": "wrap_3"
+        "wrap": "wrap_2"
       },
       "locked": {
         "lastModified": 1748427142,
@@ -1658,7 +1658,7 @@
     "flake-parts_10": {
       "inputs": {
         "nixpkgs-lib": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -1684,7 +1684,7 @@
     "flake-parts_11": {
       "inputs": {
         "nixpkgs-lib": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -1712,7 +1712,7 @@
     "flake-parts_12": {
       "inputs": {
         "nixpkgs-lib": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -1759,7 +1759,7 @@
     "flake-parts_14": {
       "inputs": {
         "nixpkgs-lib": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -1806,7 +1806,7 @@
     "flake-parts_16": {
       "inputs": {
         "nixpkgs-lib": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -1871,7 +1871,7 @@
     "flake-parts_19": {
       "inputs": {
         "nixpkgs-lib": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -1941,7 +1941,7 @@
     "flake-parts_21": {
       "inputs": {
         "nixpkgs-lib": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -1986,7 +1986,7 @@
     "flake-parts_23": {
       "inputs": {
         "nixpkgs-lib": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "nvf",
@@ -2010,7 +2010,7 @@
     "flake-parts_24": {
       "inputs": {
         "nixpkgs-lib": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "tax-matrix",
           "dotfiles",
@@ -2053,7 +2053,7 @@
     "flake-parts_26": {
       "inputs": {
         "nixpkgs-lib": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "wrap",
           "dotfiles",
@@ -2695,7 +2695,7 @@
         "tax-matrix": "tax-matrix_4",
         "treefmt-nix": "treefmt-nix_26",
         "vscode-server": "vscode-server_11",
-        "wrap": "wrap_4"
+        "wrap": "wrap_3"
       },
       "locked": {
         "lastModified": 1753183330,
@@ -2742,7 +2742,7 @@
         "flake-parts": "flake-parts_9",
         "gigdot": "gigdot_2",
         "home-manager": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -3191,7 +3191,7 @@
     "gitignore_10": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -3216,7 +3216,7 @@
     "gitignore_11": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -3243,7 +3243,7 @@
     "gitignore_12": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -3270,7 +3270,7 @@
     "gitignore_13": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "pre-commit-hooks",
           "nixpkgs"
@@ -3293,7 +3293,7 @@
     "gitignore_14": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "tax-matrix",
           "dotfiles",
@@ -3318,7 +3318,7 @@
     "gitignore_15": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "wrap",
           "dotfiles",
@@ -3437,7 +3437,7 @@
     "gitignore_6": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -3466,7 +3466,7 @@
     "gitignore_7": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -3493,7 +3493,7 @@
     "gitignore_8": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -3522,7 +3522,7 @@
     "gitignore_9": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -3574,7 +3574,7 @@
     "home-manager_10": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -3603,7 +3603,7 @@
     "home-manager_11": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -3630,7 +3630,7 @@
     "home-manager_12": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -3657,7 +3657,7 @@
     "home-manager_13": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "nixpkgs"
         ]
@@ -3680,7 +3680,7 @@
     "home-manager_14": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "tax-matrix",
           "dotfiles",
@@ -3705,7 +3705,7 @@
     "home-manager_15": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "wrap",
           "dotfiles",
@@ -3824,7 +3824,7 @@
     "home-manager_6": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -3849,7 +3849,7 @@
     "home-manager_7": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -3876,7 +3876,7 @@
     "home-manager_8": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -3905,7 +3905,7 @@
     "home-manager_9": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -3934,7 +3934,7 @@
     "ixx": {
       "inputs": {
         "flake-utils": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -3944,7 +3944,7 @@
           "flake-utils"
         ],
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -3972,7 +3972,7 @@
     "ixx_2": {
       "inputs": {
         "flake-utils": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -3984,7 +3984,7 @@
           "flake-utils"
         ],
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -4502,7 +4502,7 @@
       "inputs": {
         "flake-compat": "flake-compat_29",
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "nixpkgs-unstable"
         ]
@@ -4648,7 +4648,7 @@
       "inputs": {
         "flake-compat": "flake-compat_14",
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -4674,7 +4674,7 @@
       "inputs": {
         "flake-compat": "flake-compat_15",
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -6538,7 +6538,7 @@
         "flake-parts": "flake-parts_18",
         "git-hooks": "git-hooks_13",
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -6568,7 +6568,7 @@
         "flake-parts": "flake-parts_13",
         "git-hooks": "git-hooks_8",
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -6599,7 +6599,7 @@
         "flake-utils": "flake-utils_11",
         "ixx": "ixx",
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -6627,7 +6627,7 @@
         "flake-utils": "flake-utils_14",
         "ixx": "ixx_2",
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -6683,7 +6683,7 @@
         "flake-parts": "flake-parts_23",
         "mnw": "mnw_2",
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "nixpkgs"
@@ -7390,7 +7390,7 @@
         "tax-matrix": "tax-matrix_2",
         "treefmt-nix": "treefmt-nix_11",
         "vscode-server": "vscode-server_5",
-        "wrap": "wrap_2"
+        "wrapd": "wrapd"
       }
     },
     "rust-flake": {
@@ -7424,7 +7424,7 @@
       "inputs": {
         "crane": "crane_10",
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -7455,7 +7455,7 @@
       "inputs": {
         "crane": "crane_11",
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -7484,7 +7484,7 @@
       "inputs": {
         "crane": "crane_12",
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -7513,7 +7513,7 @@
       "inputs": {
         "crane": "crane_13",
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -7540,7 +7540,7 @@
       "inputs": {
         "crane": "crane_14",
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -7569,7 +7569,7 @@
       "inputs": {
         "crane": "crane_15",
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -7596,7 +7596,7 @@
       "inputs": {
         "crane": "crane_16",
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "tax-matrix",
           "dotfiles",
@@ -7623,7 +7623,7 @@
       "inputs": {
         "crane": "crane_17",
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "tax-matrix",
           "nixpkgs"
@@ -7648,7 +7648,7 @@
       "inputs": {
         "crane": "crane_18",
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "wrap",
           "dotfiles",
@@ -7675,7 +7675,7 @@
       "inputs": {
         "crane": "crane_19",
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "wrap",
           "nixpkgs"
@@ -7725,7 +7725,7 @@
       "inputs": {
         "crane": "crane_20",
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "nixpkgs"
         ],
         "rust-overlay": "rust-overlay_23"
@@ -7848,7 +7848,7 @@
       "inputs": {
         "crane": "crane_7",
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -7879,7 +7879,7 @@
       "inputs": {
         "crane": "crane_8",
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -7910,7 +7910,7 @@
       "inputs": {
         "crane": "crane_9",
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -7978,7 +7978,7 @@
     "rust-overlay_11": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -8022,7 +8022,7 @@
     "rust-overlay_13": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -8066,7 +8066,7 @@
     "rust-overlay_15": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -8108,7 +8108,7 @@
     "rust-overlay_17": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -8134,7 +8134,7 @@
     "rust-overlay_18": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "optnix",
           "nix-options-doc",
@@ -8190,7 +8190,7 @@
     "rust-overlay_20": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "tax-matrix",
           "rust-flake",
@@ -8230,7 +8230,7 @@
     "rust-overlay_22": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "wrap",
           "rust-flake",
@@ -8254,7 +8254,7 @@
     "rust-overlay_23": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "rust-flake",
           "nixpkgs"
         ]
@@ -8439,7 +8439,7 @@
     "sops-nix_10": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -8502,7 +8502,7 @@
     "sops-nix_13": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "nixpkgs-unstable"
         ]
@@ -8660,7 +8660,7 @@
     "sops-nix_7": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -9866,7 +9866,7 @@
     "treefmt-nix_12": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -9895,7 +9895,7 @@
     "treefmt-nix_13": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -9923,7 +9923,7 @@
     "treefmt-nix_14": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -9950,7 +9950,7 @@
     "treefmt-nix_15": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -9979,7 +9979,7 @@
     "treefmt-nix_16": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -10007,7 +10007,7 @@
     "treefmt-nix_17": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -10034,7 +10034,7 @@
     "treefmt-nix_18": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -10060,7 +10060,7 @@
     "treefmt-nix_19": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -10113,7 +10113,7 @@
     "treefmt-nix_20": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -10141,7 +10141,7 @@
     "treefmt-nix_21": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -10168,7 +10168,7 @@
     "treefmt-nix_22": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -10193,7 +10193,7 @@
     "treefmt-nix_23": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -10220,7 +10220,7 @@
     "treefmt-nix_24": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -10246,7 +10246,7 @@
     "treefmt-nix_25": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -10271,7 +10271,7 @@
     "treefmt-nix_26": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -10295,7 +10295,7 @@
     "treefmt-nix_27": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -10322,7 +10322,7 @@
     "treefmt-nix_28": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -10348,7 +10348,7 @@
     "treefmt-nix_29": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -10396,7 +10396,7 @@
     "treefmt-nix_30": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "tax-matrix",
           "dotfiles",
@@ -10421,7 +10421,7 @@
     "treefmt-nix_31": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "tax-matrix",
           "dotfiles",
@@ -10445,7 +10445,7 @@
     "treefmt-nix_32": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "tax-matrix",
           "nixpkgs"
@@ -10468,7 +10468,7 @@
     "treefmt-nix_33": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "nixpkgs"
         ]
@@ -10490,7 +10490,7 @@
     "treefmt-nix_34": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "wrap",
           "dotfiles",
@@ -10515,7 +10515,7 @@
     "treefmt-nix_35": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "wrap",
           "dotfiles",
@@ -10539,7 +10539,7 @@
     "treefmt-nix_36": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "wrap",
           "nixpkgs"
@@ -10562,7 +10562,7 @@
     "treefmt-nix_37": {
       "inputs": {
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "nixpkgs"
         ]
       },
@@ -10753,7 +10753,7 @@
     "vscode-server_10": {
       "inputs": {
         "flake-utils": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -10762,7 +10762,7 @@
           "flake-utils"
         ],
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -10788,14 +10788,14 @@
     "vscode-server_11": {
       "inputs": {
         "flake-utils": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
           "flake-utils"
         ],
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -10819,7 +10819,7 @@
     "vscode-server_12": {
       "inputs": {
         "flake-utils": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -10828,7 +10828,7 @@
           "flake-utils"
         ],
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -10854,14 +10854,14 @@
     "vscode-server_13": {
       "inputs": {
         "flake-utils": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "tax-matrix",
           "dotfiles",
           "flake-utils"
         ],
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "tax-matrix",
           "dotfiles",
@@ -10885,12 +10885,12 @@
     "vscode-server_14": {
       "inputs": {
         "flake-utils": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "flake-utils"
         ],
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "nixpkgs"
         ]
@@ -10912,14 +10912,14 @@
     "vscode-server_15": {
       "inputs": {
         "flake-utils": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "wrap",
           "dotfiles",
           "flake-utils"
         ],
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "wrap",
           "dotfiles",
@@ -11051,7 +11051,7 @@
     "vscode-server_6": {
       "inputs": {
         "flake-utils": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -11062,7 +11062,7 @@
           "flake-utils"
         ],
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -11090,7 +11090,7 @@
     "vscode-server_7": {
       "inputs": {
         "flake-utils": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -11101,7 +11101,7 @@
           "flake-utils"
         ],
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -11129,7 +11129,7 @@
     "vscode-server_8": {
       "inputs": {
         "flake-utils": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -11138,7 +11138,7 @@
           "flake-utils"
         ],
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -11164,7 +11164,7 @@
     "vscode-server_9": {
       "inputs": {
         "flake-utils": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -11175,7 +11175,7 @@
           "flake-utils"
         ],
         "nixpkgs": [
-          "wrap",
+          "wrapd",
           "dotfiles",
           "gigvim",
           "gigdot",
@@ -11228,32 +11228,6 @@
     },
     "wrap_2": {
       "inputs": {
-        "cargo-doc-live": "cargo-doc-live_7",
-        "dotfiles": "dotfiles_4",
-        "flake-parts": "flake-parts_28",
-        "git-hooks": "git-hooks_22",
-        "nixpkgs": "nixpkgs_82",
-        "process-compose-flake": "process-compose-flake_20",
-        "rust-flake": "rust-flake_20",
-        "systems": "systems_46",
-        "treefmt-nix": "treefmt-nix_37"
-      },
-      "locked": {
-        "lastModified": 1754522171,
-        "narHash": "sha256-G0KjdX7dCpF2gigCFqhsn0Zmu/FHClGHYCGvfnlMkNg=",
-        "owner": "gignsky",
-        "repo": "wrap",
-        "rev": "7a333a012f2f39dc2245501ffef9f316d3142e22",
-        "type": "github"
-      },
-      "original": {
-        "owner": "gignsky",
-        "repo": "wrap",
-        "type": "github"
-      }
-    },
-    "wrap_3": {
-      "inputs": {
         "cargo-doc-live": "cargo-doc-live_11",
         "dotfiles": "dotfiles_8",
         "flake-parts": "flake-parts_17",
@@ -11278,7 +11252,7 @@
         "type": "github"
       }
     },
-    "wrap_4": {
+    "wrap_3": {
       "inputs": {
         "cargo-doc-live": "cargo-doc-live_15",
         "dotfiles": "dotfiles_10",
@@ -11304,7 +11278,7 @@
         "type": "github"
       }
     },
-    "wrap_5": {
+    "wrap_4": {
       "inputs": {
         "cargo-doc-live": "cargo-doc-live_19",
         "dotfiles": "dotfiles_12",
@@ -11327,6 +11301,32 @@
       "original": {
         "owner": "gignsky",
         "repo": "wrap",
+        "type": "github"
+      }
+    },
+    "wrapd": {
+      "inputs": {
+        "cargo-doc-live": "cargo-doc-live_7",
+        "dotfiles": "dotfiles_4",
+        "flake-parts": "flake-parts_28",
+        "git-hooks": "git-hooks_22",
+        "nixpkgs": "nixpkgs_82",
+        "process-compose-flake": "process-compose-flake_20",
+        "rust-flake": "rust-flake_20",
+        "systems": "systems_46",
+        "treefmt-nix": "treefmt-nix_37"
+      },
+      "locked": {
+        "lastModified": 1754537389,
+        "narHash": "sha256-tA8gw48BApfMEWSKnHMfzUvC9mflVUqpwok9Nftp4AM=",
+        "owner": "gignsky",
+        "repo": "wrapd",
+        "rev": "3661cbda6d86df50ea7e38894c13030b03c88169",
+        "type": "github"
+      },
+      "original": {
+        "owner": "gignsky",
+        "repo": "wrapd",
         "type": "github"
       }
     }
