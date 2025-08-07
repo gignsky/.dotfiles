@@ -24,7 +24,7 @@
 
     # Personal packages
     # wrap.wrap # example for overlays
-    inputs.wrap.packages.${system}.wrapper
+    inputs.wrapd.packages.${system}.wrapd
     inputs.tax-matrix.packages.${system}.tax-matrix
   ];
 
