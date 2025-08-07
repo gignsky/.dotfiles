@@ -23,5 +23,5 @@ if ! sudo nixos-rebuild switch --flake .#"$HOST" | tee "$output_file" 2>&1; then
 fi
 rm "$output_file"
 gen=$(nixos-rebuild list-generations 2>/dev/null | grep current)
-git commit -am "$HOST: $gen" || true
+git commit -a --allow-empty -m "$HOST: $gen" || true
 popd || exit
