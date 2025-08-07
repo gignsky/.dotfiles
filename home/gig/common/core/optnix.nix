@@ -15,7 +15,7 @@ in
   ];
 
   programs.optnix = {
-    enable = true;
+    enable = false;
     settings = {
       min_score = 1;
 
