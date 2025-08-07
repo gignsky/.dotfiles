@@ -3680,14 +3680,15 @@
           "nixpkgs"
         ],
         "nixpkgs": "nixpkgs_17",
-        "nvf": "nvf"
+        "nvf": "nvf",
+        "themery-nvim": "themery-nvim"
       },
       "locked": {
-        "lastModified": 1754560641,
-        "narHash": "sha256-Fna7z+0TICXpphy2mdK6+Bm2OJQFZVLJqsMlbmBdjiI=",
+        "lastModified": 1754563504,
+        "narHash": "sha256-UKZcHPSVGlLYpKHfpZVqzExj7K/pWFiW4fLVdmJuqO0=",
         "owner": "gignsky",
         "repo": "gigvim",
-        "rev": "588d32ff04a2f3be0a118afaa86d4a51c04e5766",
+        "rev": "96c258a83c2b02bc7ff55f00bdc11179de3a8db5",
         "type": "github"
       },
       "original": {
@@ -13273,6 +13274,22 @@
         "owner": "gignsky",
         "ref": "develop",
         "repo": "tax-matrix",
+        "type": "github"
+      }
+    },
+    "themery-nvim": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1735741390,
+        "narHash": "sha256-1I1fr4Hq6547pyj1yUq9yoYjnc/FO0z+x0lrXkwaLXM=",
+        "owner": "zaldih",
+        "repo": "themery.nvim",
+        "rev": "bfa58f4b279d21cb515b28023e1b68ec908584b2",
+        "type": "github"
+      },
+      "original": {
+        "owner": "zaldih",
+        "repo": "themery.nvim",
         "type": "github"
       }
     },
