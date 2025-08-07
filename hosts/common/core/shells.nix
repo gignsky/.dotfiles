@@ -1,10 +1,4 @@
-{ inputs
-, pkgs
-, outputs
-, configLib
-, ...
-}:
-{
+{ inputs, pkgs, outputs, configLib, ... }: {
   # overlays
   nixpkgs.overlays = [
     outputs.overlays.unstable-packages
@@ -34,21 +28,6 @@
     inputs.tax-matrix.packages.${system}.tax-matrix
   ];
 
-  # # Direnv
-  # programs.direnv = {
-  #     enable = lib.mkDefault true;
-  #     # Expanded settings:
-  #     nix-direnv = {
-  #         enable = true;
-  #         package = pkgs.nix-direnv;
-  #     };
-  #     silent = true;
-  #     loadInNixShell = true;
-  #     # direnvrcExtra = lib.mkDefault ''
-  #     #     echo "direnv: loading direnvrc"
-  #     # '';
-  # };
-
   programs = {
     direnv = {
       enable = false;
@@ -62,10 +41,8 @@
       };
     };
     bash =
-      let
-        sword = configLib.relativeToRoot "hosts/common/resources/sword.art";
-      in
-      {
+      let sword = configLib.relativeToRoot "hosts/common/resources/sword.art";
+      in {
         # enable = true;
         completion.enable = true;
         enableLsColors = true;
