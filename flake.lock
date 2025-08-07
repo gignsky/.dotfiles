@@ -3683,11 +3683,11 @@
         "nvf": "nvf"
       },
       "locked": {
-        "lastModified": 1754526493,
-        "narHash": "sha256-BWwtrCdQjqs4EiQK+DtCOh2NcC3tX04BYngMIp+lQ44=",
+        "lastModified": 1754560641,
+        "narHash": "sha256-Fna7z+0TICXpphy2mdK6+Bm2OJQFZVLJqsMlbmBdjiI=",
         "owner": "gignsky",
         "repo": "gigvim",
-        "rev": "aa36293ccdf4fb06971b6443613a34b9f7f62123",
+        "rev": "588d32ff04a2f3be0a118afaa86d4a51c04e5766",
         "type": "github"
       },
       "original": {
