@@ -321,7 +321,10 @@
                 };
                 deadnix = {
                   enable = true;
-                  excludes = [ "home/gig/common/optional/starship.nix" ];
+                  excludes = [
+                    "home/gig/common/optional/starship.nix"
+                    "hosts/common/users/gig/default.nix"
+                  ];
                 };
                 shellcheck = {
                   enable = true;

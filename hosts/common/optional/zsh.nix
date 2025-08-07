@@ -1,6 +1,7 @@
-{ pkgs, ... }: {
+{ pkgs, ... }:
+{
   users.defaultUserShell = pkgs.zsh;
-  environment.shells = [ pkgs.zsh pkgs.nushell ];
+  environment.shells = [ pkgs.zsh ];
 
   programs.zsh = {
     enable = true;
