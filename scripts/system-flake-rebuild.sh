@@ -15,8 +15,13 @@ set -e
 pushd ~/.dotfiles || exit
 git diff -U0 ./*glob*.nix
 echo "NixOS Rebuilding..."
-sudo nixos-rebuild switch --flake .#"$HOST" | sudo tee nixos-switch.log || (
- grep --color error && false) < nixos-switch.log
+output_file=$(mktemp)
+if ! sudo nixos-rebuild switch --flake .#"$HOST" | tee "$output_file" 2>&1; then
+    echo "nixos-rebuild switch failed. Output:"
+    cat "$output_file"
+    exit 1
+fi
+rm "$output_file"
 gen=$(nixos-rebuild list-generations 2>/dev/null | grep current)
-git commit -am "$HOST: $gen"
+git commit -am "$HOST: $gen" || true
 popd || exit
