@@ -114,6 +114,7 @@
           nixpkgs
           configVars
           configLib
+          system
           ;
       };
       customPkgs = import ./pkgs { inherit pkgs; };
@@ -138,7 +139,7 @@
       nixosConfigurations = {
         # WSL configuration entrypoint - name can not be changed from nixos without some extra work TODO
         wsl = nixpkgs.lib.nixosSystem {
-          inherit system specialArgs;
+          inherit specialArgs;
           modules = [
             inputs.vscode-server.nixosModules.default
             (_: {
@@ -221,7 +222,14 @@
         # spacedock - unused with spacedock having a wsl instance
         "gig@spacedock" = home-manager.lib.homeManagerConfiguration {
           inherit pkgs; # Home-manager requires 'pkgs' instance
-          extraSpecialArgs = { inherit inputs outputs configLib; };
+          extraSpecialArgs = {
+            inherit
+              inputs
+              outputs
+              configLib
+              system
+              ;
+          };
           # > Our main home-manager configuration file <
           modules = [ ./home/gig/spacedock.nix ];
         };
