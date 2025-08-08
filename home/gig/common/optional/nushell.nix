@@ -25,7 +25,10 @@
           enable = true;
           max_results = 200;
         };
-        buffer_editor = "${inputs.gigvim.packages.${system}.full}/bin/nvim";
+        buffer_editor = "${inputs.gigvim.packages.${system}.gigvim}/bin/nvim";
+      };
+      environmentVariables = {
+        EDITOR = "${inputs.gigvim.packages.${system}.gigvim}/bin/nvim";
       };
       plugins = with pkgs.unstable.nushellPlugins; [
         # net - currently marked as broken
