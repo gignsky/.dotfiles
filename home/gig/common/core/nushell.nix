@@ -12,7 +12,7 @@
     # outputs.overlays.wrap-packages # example for overlays
   ];
   imports = [
-    ./starship.nix
+    ../optional/starship.nix
   ];
   programs = {
     nushell = {
