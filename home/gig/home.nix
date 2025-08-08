@@ -15,7 +15,6 @@
     # inputs.nix-colors.homeManagerModules.default
 
     ./common/core
-    ./common/optional/nushell.nix
   ];
   nix = {
     package = lib.mkDefault pkgs.nix;
