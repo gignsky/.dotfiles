@@ -3,3 +3,7 @@
 /result
 tmp-iso/nixos-vm/minimal-vm.img
 tmp-iso/nixos-vm/vm.img
+
+# Build and rebuild logs (these should be committed but excluded from normal gitignore patterns)
+# Note: The nushell rebuild scripts will commit these logs automatically
+# rebuild-logs/
