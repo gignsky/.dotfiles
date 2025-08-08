@@ -16,7 +16,6 @@
     # ./common/core
     ./home.nix
     ./common/optional/nushell.nix
-    ./common/optional/neofetch.nix
   ];
 
   nixpkgs = {
