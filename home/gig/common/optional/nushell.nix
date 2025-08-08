@@ -41,6 +41,12 @@
       ];
       extraConfig = ''
         overlay use ${inputs.git-aliases}/git-aliases.nu
+        
+        # Custom command for clear + nufetch that works properly in nushell
+        def ccls [] {
+          clear
+          nufetch
+        }
       '';
     };
     zoxide = {

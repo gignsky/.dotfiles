@@ -10,7 +10,7 @@
   rd = "rmdir";
   rdd = "rm -rfv";
   cls = "clear";
-  ccls = "clear; neofetch";
+  # ccls = "clear; neofetch"; # Moved to nushell.nix as proper function to avoid shell init issues (uses nufetch)
   md = "mkdir";
   syst = "systemctl";
   cat = "bat";

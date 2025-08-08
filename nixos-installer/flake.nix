@@ -2,23 +2,42 @@
   description = "Minimal NixOS configuration for bootstrapping systems";
 
   inputs = {
-    #nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # Follow main flake inputs
     nixpkgs.url = "github:NixOS/nixpkgs/release-25.05";
+    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    
+    # Home manager for minimal user configuration
+    home-manager = {
+      url = "github:nix-community/home-manager/release-25.05";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    
     # Declarative partitioning and formatting
     disko.url = "github:nix-community/disko";
+    
+    # Personal projects
     gigvim.url = "github:gignsky/gigvim";
+    nufetch.url = "github:gignsky/nufetch";
+    
+    # Git aliases for nushell
+    git-aliases = {
+      url = "github:KamilKleina/git-aliases.nu";
+      flake = false;
+    };
   };
 
   outputs =
-    { self, nixpkgs, ... }@inputs:
+    { self, nixpkgs, home-manager, ... }@inputs:
     let
       inherit (self) outputs;
       inherit (nixpkgs) lib;
+      system = "x86_64-linux";
+      pkgs = nixpkgs.legacyPackages.${system};
       configVars = import ../vars { inherit inputs lib; };
       configLib = import ../lib { inherit lib; };
       minimalConfigVars = lib.recursiveUpdate configVars { isMinimal = true; };
       minimalSpecialArgs = {
-        inherit inputs outputs configLib;
+        inherit inputs outputs configLib system;
         configVars = minimalConfigVars;
       };
 
@@ -72,8 +91,23 @@
           modules = [
             "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
             "${nixpkgs}/nixos/modules/installer/cd-dvd/channel.nix"
+            # Include home-manager as a module for the installer
+            home-manager.nixosModules.home-manager
+            {
+              home-manager.extraSpecialArgs = minimalSpecialArgs;
+              home-manager.users.gig = import ../home/gig/nixos-installer.nix;
+            }
             ./iso
           ];
+        };
+      };
+      
+      # Home Manager configurations for the installer
+      homeConfigurations = {
+        "gig@nixos" = home-manager.lib.homeManagerConfiguration {
+          inherit pkgs;
+          extraSpecialArgs = minimalSpecialArgs;
+          modules = [ ../home/gig/nixos-installer.nix ];
         };
       };
     };
