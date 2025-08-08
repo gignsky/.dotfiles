@@ -320,6 +320,9 @@
                 };
                 markdownlint = {
                   enable = true;
+                  excludes = [
+                    ".github/"
+                  ];
                 };
                 yamllint = {
                   enable = true;
