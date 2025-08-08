@@ -18,7 +18,7 @@
     nushell = {
       enable = true;
       package = pkgs.unstable.nushell;
-      shellAliases = import ./shellAliases.nix;
+      shellAliases = import ../optional/shellAliases.nix;
       settings = {
         show_banner = false;
         completions.external = {
