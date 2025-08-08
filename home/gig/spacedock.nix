@@ -11,8 +11,6 @@
     # inputs.nix-colors.homeManagerModules.default
 
     ./home.nix
-    # ./common/optional/vscode
-    # ./cams-countertop.nix
   ];
 
   home.packages = with pkgs; [

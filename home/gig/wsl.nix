@@ -15,7 +15,6 @@
 
     # ./common/core
     ./home.nix
-    ./common/optional/nushell.nix
   ];
 
   nixpkgs = {
