@@ -10,7 +10,6 @@
   rd = "rmdir";
   rdd = "rm -rfv";
   cls = "clear";
-  ccls = "clear; neofetch";
   md = "mkdir";
   syst = "systemctl";
   cat = "bat";
