@@ -6,6 +6,7 @@ common input names as they link to repos:
 - wrap, wrapd, wrapper, & tarballer refer to @gignsky/wrap
 - nufetch & neofetch refer to @gignsky/nufetch
 - gigvim refers to @gignsky/gigvim
+- refer also to @GeeM-Enterprises/dot-spacedock
 
 Below are rules that must ALWAYS be followed:
 1. All progression steps should be displayed as NEW comments with checkbox lists of tasks to be completed, to be checked off via a comment edit while adding a timestamp as well as legnth of time taken to progress to this point and notes about the task, including links to relevant commits, PRs, or issues, etc...
@@ -13,6 +14,7 @@ Below are rules that must ALWAYS be followed:
 3. Make every effort to make every ai agent call as effective as possible in order to preserve as many premium requests as possible
 4. ALWAYS attempt to verify that changes compile, often this is as simple as running `nix flake check` or `nix build` in the repository, if the checks fail, continue iterating until they pass
 5. Document as much as possible in markdown files either in the docs/ dir or in logical places alongside files and in files
+6. Rename the issues and PRs often and frequently whenever the status of work changes or a better more descriptive name is available.
 
 In all sessions, the order of operations is as follows:
 0. Read all of these operations and understand them before continuing
