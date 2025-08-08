@@ -161,6 +161,10 @@ home *ARGS:
 # Runs just home
 # home-core:
 
+#nu'er home
+nu home:
+  just new home
+
 # Runs just home and then zsh
 new home:
 	nix-shell -p lolcat --run 'echo "Cleaning zplug directory..." | lolcat 2> /dev/null'
