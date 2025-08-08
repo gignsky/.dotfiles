@@ -85,7 +85,7 @@
 
     gigvim.url = "github:gignsky/gigvim";
 
-    nufetch.url = "github:gignsky/nufetch";
+    # nufetch.url = "github:gignsky/nufetch";
   };
 
   outputs =
