@@ -31,7 +31,7 @@ in
     (newMount "appraisals" "/home/gig/mnt/appraisals" "192.168.51.21" "1000" "100")
     (newMount "proxmox-backup-share" "/home/gig/mnt/proxmox_backups" "192.168.51.3" "1000" "100")
     (newMount "important-app-data" "/home/gig/mnt/important-app-data" "192.168.51.3" "1000" "100")
-    # (newMount "nzbget" "/home/gig/mnt/dad/nzbget" "192.168.4.15" "1000" "100")
+    (newMount "danger-fast" "/home/gig/mnt/danger-fast" "192.168.51.3" "1000" "100")
     # (newMount "media" "/home/gig/mnt/dad/media" "192.168.4.15" "1000" "100")
   ];
 
