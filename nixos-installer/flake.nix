@@ -7,6 +7,10 @@
     # Declarative partitioning and formatting
     disko.url = "github:nix-community/disko";
     gigvim.url = "github:gignsky/gigvim";
+    nixos-wizard = {
+      url = "github:km-clay/nixos-wizard";
+      inputs.disko.follows = "disko";
+    };
   };
 
   outputs =
@@ -57,8 +61,8 @@
       nixosConfigurations = {
         # host = newConfig "name" disk" "qemuGuest";
         # Swap size is in GiB
-        # merlin = newConfig "merlin" "/dev/nvme1n1" false;
-        spacedock = newConfig "spacedock" "/dev/sda" false;
+        merlin = newConfig "merlin" "/dev/nvme1n1" false;
+        # spacedock = newConfig "spacedock" "/dev/sda" false;
 
         # Custom ISO
         #
