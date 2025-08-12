@@ -55,6 +55,7 @@ in
     btop
     bat
     inputs.gigvim.packages.${system}.minimal
+    inputs.nixos-wizard.packages.${system}.default
   ];
 
   environment.shellAliases = {
