@@ -14,6 +14,8 @@ fi
 set -e
 pushd . || exit
 git diff -U0 ./*glob*.nix
+echo "Running pre-commit on all files"
+nix develop -c pre-commit run --all-files
 echo "Home-Manager Rebuilding..."
 output_file=$(mktemp)
 if ! home-manager switch --flake .#gig@"$HOST" >"$output_file" 2>&1; then
