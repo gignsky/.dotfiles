@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
 
 if [ -n "$1" ]; then
-	export HOST="$1"
+  export HOST="$1"
 else
-	if [ "$(hostname)" = "nixos" ]; then
-		HOST="wsl"
-	else
-		HOST="$(hostname)"
-	fi
-	export HOST
+  if [ "$(hostname)" = "nixos" ]; then
+    HOST="wsl"
+  else
+    HOST="$(hostname)"
+  fi
+  export HOST
 fi
 
 set -e
-pushd ~/.dotfiles || exit
+pushd . || exit
 git diff -U0 ./*glob*.nix
 echo "Home-Manager Rebuilding..."
 output_file=$(mktemp)
-if ! home-manager switch --flake .#gig@"$HOST" > "$output_file" 2>&1; then
+if ! home-manager switch --flake .#gig@"$HOST" >"$output_file" 2>&1; then
   echo "home-manager switch failed. Output:"
   cat "$output_file"
   exit 1
