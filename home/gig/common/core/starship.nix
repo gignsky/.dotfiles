@@ -34,6 +34,25 @@ _: {
       package = {
         # disabled = true; # Disable the package module, hiding it from the prompt completely
       };
+
+      # Shell module to display shell name when not using default nushell
+      shell = {
+        disabled = false;
+        format = "[$indicator]($style) ";
+        style = "cyan bold";
+        # Only show indicators for non-default shells
+        bash_indicator = "bash";
+        fish_indicator = "fish";
+        zsh_indicator = "zsh";
+        powershell_indicator = "pwsh";
+        ion_indicator = "ion";
+        elvish_indicator = "elvish";
+        tcsh_indicator = "tcsh";
+        nu_indicator = ""; # Don't show indicator for nushell (default)
+        xonsh_indicator = "xonsh";
+        cmd_indicator = "cmd";
+        unknown_indicator = "unknown";
+      };
     };
   };
 }
