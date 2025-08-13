@@ -23,7 +23,7 @@
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
 
-    shellAliases = import ./shellAliases.nix;
+    shellAliases = import ../optional/shellAliases.nix;
 
     history = {
       append = true;
@@ -225,7 +225,6 @@
   };
 
   home.packages = with pkgs; [
-    direnv
     python3 # needed for aliases plugin from oh-my-zsh and other alias plugin
     eza # needed for eza plugin
     fzf # needed for fzf plugin
@@ -236,6 +235,4 @@
     zoxide # needed for zoxide plugin
     chroma # needed for colorize plugin from oh-my-zsh
   ];
-
-  home.file.".config/direnv/direnv.toml".source = ../resources/direnv.toml;
 }
