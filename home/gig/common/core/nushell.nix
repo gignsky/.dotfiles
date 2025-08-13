@@ -47,7 +47,7 @@
       enable = true;
       enableNushellIntegration = true;
     };
-    direnv.enableNushellIntegration = true;
+
     carapace = {
       enable = true;
       enableNushellIntegration = true;
