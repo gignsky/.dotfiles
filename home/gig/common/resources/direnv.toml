@@ -1,4 +1,5 @@
 [global]
 hide_env_diff = true;
+
 [whitelist]
 prefix = [ "/home/gig/local_repos", "/home/gig/.dotfiles" ]
