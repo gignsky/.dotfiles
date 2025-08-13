@@ -2,7 +2,7 @@
 {
   programs.direnv = {
     enable = true;
-    enableNushellIntegration = false;  # Disable automatic integration due to syntax issues
+    enableNushellIntegration = false; # Disable automatic integration due to syntax issues
     enableZshIntegration = true;
     nix-direnv.enable = true;
   };
