@@ -12,7 +12,7 @@
     # outputs.overlays.wrap-packages # example for overlays
   ];
   imports = [
-    ../optional/starship.nix
+    ./starship.nix
   ];
   programs = {
     nushell = {
@@ -41,7 +41,7 @@
       ];
       extraConfig = ''
         overlay use ${inputs.git-aliases}/git-aliases.nu
-        
+
         # Direnv integration
         $env.config = ($env.config? | default {})
         $env.config.hooks = ($env.config.hooks? | default {})
