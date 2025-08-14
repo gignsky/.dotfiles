@@ -10265,11 +10265,11 @@
         "snacks-nvim": "snacks-nvim_2"
       },
       "locked": {
-        "lastModified": 1755122763,
-        "narHash": "sha256-o8ZCYfBDLLyVZmJhXDaDOH07NKnOSlXH1jIJaVnxzL0=",
+        "lastModified": 1755147448,
+        "narHash": "sha256-YENBTNMA3j+N3IYXt/eb2nMevSTyZ7nMYwhC8pLP9Hs=",
         "owner": "gignsky",
         "repo": "gigvim",
-        "rev": "690fbc4c6d0f376a15290bf57d69f61ab5f22f37",
+        "rev": "ad618d3d6655819193d6046f273e2a7bfdb35063",
         "type": "github"
       },
       "original": {
