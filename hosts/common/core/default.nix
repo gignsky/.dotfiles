@@ -1,4 +1,4 @@
-{ configLib, ... }:
+{ configLib, pkgs, ... }:
 
 {
   imports = configLib.scanPaths ./.;
@@ -12,6 +12,8 @@
       allowUnfree = true;
     };
   };
+
+  environment.systemPackages = [ pkgs.nix ];
 
   hardware.enableRedistributableFirmware = true;
 }
