@@ -7,7 +7,7 @@
       user = {
         useConfigOnly = true;
         name = "Maxwell Rupp";
-        email = "gig@gignsky.com";
+        email = "gig@giglab.dev";
       };
       pull.rebase = true;
       merge.ff = false;
