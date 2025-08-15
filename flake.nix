@@ -117,8 +117,15 @@
           configLib
           ;
       };
+      pkgs =
+        import nixpkgs {
+          inherit system;
+          config = {
+            allowUnfree = true;
+          };
+        }
+        // customPkgs;
       customPkgs = import ./pkgs { inherit pkgs; };
-      pkgs = nixpkgs.legacyPackages.${system} // customPkgs;
       assertAllHostsHaveVmTest =
         configs:
         let
@@ -362,7 +369,7 @@
             lazygit
             statix
             deadnix
-            nix
+            # nix
             #unstable packages
             # unstable.statix
             # personal packages
