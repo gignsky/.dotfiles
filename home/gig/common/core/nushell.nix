@@ -64,7 +64,6 @@
 
     carapace = {
       enable = true;
-      package = pkgs.unstable.carapace;
       enableNushellIntegration = true;
     };
   };
