@@ -66,7 +66,7 @@ in
             # These get placed into /etc/ssh/authorized_keys.d/<name> on nixos
             openssh.authorizedKeys.keys = lib.lists.forEach pubKeys (key: builtins.readFile key);
 
-            shell = if configVars.isMinimal then pkgs.bash else pkgs.nushell; # default shell
+            shell = if configVars.isMinimal then pkgs.bash else pkgs.unstable.nushell; # default shell
           };
 
           # Proper root use required for borg and some other specific operations
