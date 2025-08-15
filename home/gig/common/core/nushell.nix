@@ -17,7 +17,7 @@
   programs = {
     nushell = {
       enable = true;
-      package = pkgs.unstable.nushell;
+      package = pkgs.nushell;
       shellAliases = import ../optional/shellAliases.nix;
       settings = {
         show_banner = false;
@@ -30,7 +30,7 @@
       environmentVariables = {
         EDITOR = "${inputs.gigvim.packages.${system}.gigvim}/bin/nvim";
       };
-      plugins = with pkgs.unstable.nushellPlugins; [
+      plugins = with pkgs.nushellPlugins; [
         # net - currently marked as broken
         highlight
         # units - currently marked as broken
