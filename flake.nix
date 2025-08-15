@@ -5,6 +5,7 @@
     #################### Official NixOS and HM Package Sources ####################
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     # nixos-anywhere.url = "github:nix-community/nixos-anywhere";
 
     nixos-wsl = {
@@ -117,6 +118,7 @@
           configLib
           ;
       };
+      customPkgs = import ./pkgs { inherit pkgs; };
       pkgs =
         import nixpkgs {
           inherit system;
@@ -125,7 +127,6 @@
           };
         }
         // customPkgs;
-      customPkgs = import ./pkgs { inherit pkgs; };
       assertAllHostsHaveVmTest =
         configs:
         let
@@ -262,7 +263,7 @@
       # );
       # nixosModules = { inherit (import ./modules/nixos); };
 
-      packages.${system} = import ./pkgs { inherit pkgs; };
+      # packages.${system} = import ./pkgs { inherit pkgs; };
 
       # Custom modifications/overrides to upstream packages.
       overlays = import ./overlays { inherit inputs; };
@@ -369,7 +370,7 @@
             lazygit
             statix
             deadnix
-            # nix
+            nix
             #unstable packages
             # unstable.statix
             # personal packages
