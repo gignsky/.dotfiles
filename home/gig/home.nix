@@ -22,6 +22,7 @@
       experimental-features = "nix-command flakes";
       # warn-dirty = false;
     };
+    registry.templates.flake.url = "github:NixOs/nixpkgs#templates";
   };
 
   home = {
