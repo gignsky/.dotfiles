@@ -49,7 +49,6 @@
     # quick-results
     # upjust
     # cargo-update
-    weechat
 
     # direnv # direnv is enabled by default
     dua
