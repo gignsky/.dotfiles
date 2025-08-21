@@ -17025,17 +17025,16 @@
           "home-manager"
         ],
         "nixpkgs": "nixpkgs_393",
-        "nixpkgs-local": "nixpkgs-local_2",
         "nixpkgs-master": "nixpkgs-master_2",
         "nvf": "nvf_13",
         "snacks-nvim": "snacks-nvim_4"
       },
       "locked": {
-        "lastModified": 1755642723,
-        "narHash": "sha256-2jbwUQUsHB/BiP9sdNYEnAoW314V7SJyc9rm8M7xYPU=",
+        "lastModified": 1755746939,
+        "narHash": "sha256-22wozjyeicBwhRIQyvugFtwou/IiC4Oqkw/KUWI/gPA=",
         "owner": "gignsky",
         "repo": "gigvim",
-        "rev": "2993b3190ea56fd90c294babbc8cfc876da9742c",
+        "rev": "922c28ab731c0da0223ffd5e7eeef1c9224455fd",
         "type": "github"
       },
       "original": {
@@ -31762,21 +31761,6 @@
         "ref": "refs/heads/gignsky/backport-themery-nvim",
         "rev": "8966cc11dcac16767eca0c1dd5301f02be46e77f",
         "revCount": 808236,
-        "type": "git",
-        "url": "file:///home/gig/local_repos/nixpkgs"
-      },
-      "original": {
-        "type": "git",
-        "url": "file:///home/gig/local_repos/nixpkgs"
-      }
-    },
-    "nixpkgs-local_2": {
-      "locked": {
-        "lastModified": 1755250040,
-        "narHash": "sha256-FeNex1uyf5liAlANrA9bWY55ut+72MNnRp9U6Mo4g9I=",
-        "ref": "refs/heads/gignsky/backport-carapace-and-nushell",
-        "rev": "4bc779e98bc51b4cf016d1e9f41e5bdc4fee2650",
-        "revCount": 808284,
         "type": "git",
         "url": "file:///home/gig/local_repos/nixpkgs"
       },
