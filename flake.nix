@@ -83,7 +83,7 @@
       flake = true;
     };
 
-    # gigvim.url = "github:gignsky/gigvim";
+    gigvim.url = "github:gignsky/gigvim";
 
     # nufetch.url = "github:gignsky/nufetch";
   };
