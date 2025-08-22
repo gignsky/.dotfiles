@@ -13,6 +13,11 @@
         identitiesOnly = true;
         identityFile = "/home/gig/.ssh/gment";
       };
+      "giglab" = {
+        hostname = "giglab.dev";
+        identitiesOnly = true;
+        identityFile = "/home/gig/.ssh/id_rsa";
+      };
     };
   };
 }
