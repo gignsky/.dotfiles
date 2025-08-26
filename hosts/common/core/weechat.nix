@@ -1,11 +1,10 @@
-{ pkgs, ... }:
-{
+_: {
   services.weechat = {
-    enable = true;
+    enable = false;
   };
   environment.systemPackages = [
-    pkgs.weechatScripts.weechat-matrix
-    pkgs.screen
+    # pkgs.weechatScripts.weechat-matrix
+    # pkgs.screen
   ];
   nixpkgs.config.permittedInsecurePackages = [
     "olm-3.2.16"
