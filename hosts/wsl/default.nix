@@ -16,6 +16,11 @@
     package = pkgs.nix-ld-rs;
   };
 
+  environment.systemPackages = with pkgs; [
+    wayland
+    libxkbcommon
+  ];
+
   # Alternative that doesn't effect other files -- depreciated and doesn't work
   # inputs.vscode-remote-workaround.enable = true;
 
