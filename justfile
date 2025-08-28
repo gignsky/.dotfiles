@@ -81,7 +81,7 @@ rebuild-test args="":
 	nix-shell -p lolcat --run 'echo "[TEST] Finished." | lolcat 2> /dev/null'
 
 # Rebuild-full with new shell
-new rebuild-full:
+rebuild-full-new:
         just rebuild-full
         nu
 
