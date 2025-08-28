@@ -23,7 +23,7 @@
     (configLib.relativeToRoot "hosts/common/core")
 
     # optional
-    # (configLib.relativeToRoot "hosts/common/optional/gui.nix")
+    (configLib.relativeToRoot "hosts/common/optional/gui.nix")
     # (configLib.relativeToRoot "hosts/common/optional/firefox.nix")
     # ../common/optional/xrdp.nix
 
@@ -45,7 +45,7 @@
   };
 
   # Bootloader configuration
-  bootloader.kind = "systemd-boot";
+  # bootloader.kind = "systemd-boot";
 
   nix =
     let
@@ -68,20 +68,20 @@
       nixPath = lib.mapAttrsToList (n: _: "${n}=flake:${n}") flakeInputs;
     };
 
-  fileSystems = {
-    "/" = {
-      device = "zroot/root";
-      fsType = "zfs";
-    };
-    "/boot" = {
-      device = "/dev/nvme1n1p2";
-      fsType = "vfat";
-    };
-    "/nix/store" = {
-      device = "zroot/nix";
-      fsType = "zfs";
-    };
-  };
+  # fileSystems = {
+  #   "/" = {
+  #     device = "zroot/root";
+  #     fsType = "zfs";
+  #   };
+  #   "/boot" = {
+  #     device = "/dev/nvme1n1p2";
+  #     fsType = "vfat";
+  #   };
+  #   "/nix/store" = {
+  #     device = "zroot/nix";
+  #     fsType = "zfs";
+  #   };
+  # };
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   system.stateVersion = "25.05";
