@@ -183,7 +183,7 @@ home-trace:
 	nix-shell -p lolcat --run 'echo "[HOME-TRACE] Finished." | lolcat 2> /dev/null'
 
 gc:
-	nix-shell -p lolcat --run 'nix-collect-garbage --delete-old --quiet | lolcat 2> /dev/null'
+	nix-shell -p lolcat --run 'nix-collect-garbage --delete-old | lolcat 2> /dev/null'
 	nix-shell -p lolcat --run '# nix store gc | lolcat 2> /dev/null'
 
 pre-build:
