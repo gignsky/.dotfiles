@@ -80,6 +80,11 @@ rebuild-test args="":
 	scripts/system-flake-rebuild-test.sh {{args}}
 	nix-shell -p lolcat --run 'echo "[TEST] Finished." | lolcat 2> /dev/null'
 
+# Rebuild-full with new shell
+new rebuild-full:
+        just rebuild-full
+        nu
+
 # Rebuild the system and check sops and home manager
 rebuild-full args="":
 	just rebuild {{args}}
