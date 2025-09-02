@@ -16,7 +16,7 @@
   alsmod = "nano $env.HOME/.dotfiles/home/gig/common/optional/shellAliases.nix";
   # als = "alias";
   cd = "z";
-  nd = "nix develop -c nu";
+  nd = "nix develop";
 
   # ssh
   spacedock = "ssh -i ~/.ssh/gment gig@192.168.51.2";
