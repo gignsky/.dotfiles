@@ -18,6 +18,7 @@
   cd = "z";
   nd = "nix develop -c nu";
   ndw = "nix develop .#windows -c nu";
+  diddy = "touch";
 
   # ssh
   spacedock = "ssh -i ~/.ssh/gment gig@192.168.51.2";
