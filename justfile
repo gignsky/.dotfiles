@@ -172,10 +172,11 @@ nu home:
 
 # Runs just home and then zsh
 new home:
-	nix-shell -p lolcat --run 'echo "Cleaning zplug directory..." | lolcat 2> /dev/null'
-	rm -rfv ~/.config/zsh/zplug
-	just home
-	nu
+  nix-shell -p lolcat --run 'echo "Cleaning zplug directory..." | lolcat 2> /dev/null'
+  rm -rfv ~/.cargo/
+  rm -rfv ~/.config/zsh/zplug
+  just home
+  nu
 
 home-trace:
 	just dont-fuck-my-build
@@ -184,7 +185,7 @@ home-trace:
 
 gc:
 	nix-shell -p lolcat --run 'nix-collect-garbage --delete-old | lolcat 2> /dev/null'
-	nix-shell -p lolcat --run '# nix store gc | lolcat 2> /dev/null'
+	nix-shell -p lolcat --run 'nix store gc | lolcat 2> /dev/null'
 
 pre-build:
 	nix-shell -p lolcat --run 'echo "Pre-Build Starting..." | lolcat 2> /dev/null'
