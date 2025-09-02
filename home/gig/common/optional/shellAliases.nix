@@ -46,5 +46,6 @@
   om = "nix run github:juspay/omnix --";
   inspect = "nix run github:bluskript/nix-inspect";
   mvim = "nix run github:gignsky/gigvim";
+  mini = "nix run github:gignsky/gigvim#mini";
   fupdate = "nix run github:gignsky/nix-update-input";
 }
