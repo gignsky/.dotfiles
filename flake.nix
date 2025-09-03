@@ -262,7 +262,7 @@
       # );
       # nixosModules = { inherit (import ./modules/nixos); };
 
-      # packages.${system} = import ./pkgs { inherit pkgs; };
+      packages.${system} = import ./pkgs { inherit pkgs; };
 
       # Custom modifications/overrides to upstream packages.
       overlays = import ./overlays { inherit inputs; };
