@@ -23,11 +23,11 @@
     wget
     screen
     nmap
-    just
+    # just
     # neofetch
 
     # nixos-unstable packages
-    # unstable.just
+    unstable.just
 
     # Personal packages
     # wrap.wrap # example for overlays
