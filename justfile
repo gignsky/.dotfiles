@@ -174,6 +174,9 @@ nu home:
 new home:
   nix-shell -p lolcat --run 'echo "Cleaning zplug directory..." | lolcat 2> /dev/null'
   rm -rfv ~/.cargo/
+  rm -rfv ~/.cache/pre-commit/
+  rm -rfv ~/.cache/nvf/
+  rm -rfv ~/.cache/starship/
   rm -rfv ~/.config/zsh/zplug
   just home
   nu
