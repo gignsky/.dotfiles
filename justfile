@@ -53,8 +53,13 @@ switch args="":
 	just home
 
 clean:
-	rm -rfv result
-	quick-results
+  rm -rfv ~/.cargo/
+  rm -rfv ~/.cache/pre-commit/
+  rm -rfv ~/.cache/nvf/
+  rm -rfv ~/.cache/starship/
+  rm -rfv ~/.config/zsh/zplug
+  rm -rfv result
+  quick-results
 
 # Run after every rebuild, some of the time
 rebuild-post:
@@ -172,12 +177,7 @@ nu home:
 
 # Runs just home and then zsh
 new home:
-  nix-shell -p lolcat --run 'echo "Cleaning zplug directory..." | lolcat 2> /dev/null'
-  rm -rfv ~/.cargo/
-  rm -rfv ~/.cache/pre-commit/
-  rm -rfv ~/.cache/nvf/
-  rm -rfv ~/.cache/starship/
-  rm -rfv ~/.config/zsh/zplug
+  just clean
   just home
   nu
 
