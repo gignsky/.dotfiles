@@ -1,5 +1,6 @@
 {
   # Basics
+  # quit = "exit"; # Should update to use new super-exit program
   _ = "sudo";
   dot = "cd ~/.dotfiles";
   work = "cd ~/workingFile";
