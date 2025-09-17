@@ -53,6 +53,7 @@ in
     # quick-results
     # upjust
     # cargo-update
+    inputs.flake-iter.packages.${system}.default
 
     # direnv # direnv is enabled by default
     dua
