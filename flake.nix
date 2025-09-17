@@ -212,6 +212,7 @@
               configLib
               system
               ;
+            flakeRoot = self;
           };
           # > Our main home-manager configuration file <
           modules = [ ./home/gig/wsl.nix ];
