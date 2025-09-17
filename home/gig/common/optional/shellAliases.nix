@@ -30,7 +30,8 @@
   merlinm = "mosh gig@merlins-windows-wsl";
 
   # nmap
-  localnmap = "nmap -v -sn 192.168.51.0/24 | grep -v down";
+  localnmap = "nix shell nixpkgs#lolcat -c nix shell nixpkgs#nmap -c nmap -v -sn --open 192.168.51.0/24 | lolcat";
+  spacenmap = "nix shell nixpkgs#lolcat -c nix shell nixpkgs#nmap -c nmap -A -T4 192.168.51.2 | lolcat";
 
   # Git
   lg = "lazygit";
