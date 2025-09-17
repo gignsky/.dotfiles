@@ -272,40 +272,32 @@
       # Home Manager modules that can be imported by other flakes
       homeModules = {
         gig-spacedock =
-          {
-            flakeRoot ? self,
-            ...
-          }@args:
+          { ... }:
           {
             imports = [
-              (import ./home/gig/spacedock.nix (
-                args
-                // {
-                  inherit flakeRoot;
-                  inputs = self.inputs;
-                  outputs = self.outputs;
-                  configLib = import ./lib { inherit (nixpkgs) lib; };
-                }
-              ))
+              ./home/gig/spacedock.nix
             ];
+            # Provide the flakeRoot and other args through _module.args
+            _module.args = {
+              flakeRoot = self;
+              inputs = self.inputs;
+              outputs = self.outputs;
+              configLib = import ./lib { inherit (nixpkgs) lib; };
+            };
           };
         gig-base =
-          {
-            flakeRoot ? self,
-            ...
-          }@args:
+          { ... }:
           {
             imports = [
-              (import ./home/gig/home.nix (
-                args
-                // {
-                  inherit flakeRoot;
-                  inputs = self.inputs;
-                  outputs = self.outputs;
-                  configLib = import ./lib { inherit (nixpkgs) lib; };
-                }
-              ))
+              ./home/gig/home.nix
             ];
+            # Provide the flakeRoot and other args through _module.args
+            _module.args = {
+              flakeRoot = self;
+              inputs = self.inputs;
+              outputs = self.outputs;
+              configLib = import ./lib { inherit (nixpkgs) lib; };
+            };
           };
 
         # Common modules that can be imported individually
