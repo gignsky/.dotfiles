@@ -1,16 +1,19 @@
 # This is your home-manager configuration file
 # Use this to configure your home environment (it replaces ~/.config/nixpkgs/home.nix)
+{ flakeRoot }:
 {
   pkgs,
   ...
 }:
+let
+  homeModule = import ./home.nix { inherit flakeRoot; };
+in
 {
   # You can import other home-manager modules here
   imports = [
     # Or modules exported from other flakes (such as nix-colors):
     # inputs.nix-colors.homeManagerModules.default
-
-    ./home.nix
+    homeModule
   ];
 
   home.packages = with pkgs; [
