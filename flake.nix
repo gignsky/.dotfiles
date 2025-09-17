@@ -214,6 +214,7 @@
               ;
             overlays = import ./overlays { inherit inputs; };
             flakeRoot = self;
+            optnixInput = inputs.optnix;
           };
           # > Our main home-manager configuration file <
           modules = [ ./home/gig/wsl.nix ];
@@ -234,6 +235,7 @@
               ;
             overlays = import ./overlays { inherit inputs; };
             flakeRoot = self;
+            optnixInput = inputs.optnix;
           };
           # > Our main home-manager configuration file <
           modules = [ ./home/gig/spacedock.nix ];
@@ -282,9 +284,10 @@
             # Provide the flakeRoot and other args through _module.args
             _module.args = {
               flakeRoot = ./.; # Use the source path directly
-              inherit inputs;
               # Pass overlays directly instead of outputs to avoid circular reference
               overlays = import ./overlays { inherit inputs; };
+              # Pass specific inputs that modules need
+              optnixInput = inputs.optnix;
             };
           };
         gig-base =
@@ -296,9 +299,10 @@
             # Provide the flakeRoot and other args through _module.args
             _module.args = {
               flakeRoot = ./.; # Use the source path directly
-              inherit inputs;
               # Pass overlays directly instead of outputs to avoid circular reference
               overlays = import ./overlays { inherit inputs; };
+              # Pass specific inputs that modules need
+              optnixInput = inputs.optnix;
             };
           };
 
