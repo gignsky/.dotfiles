@@ -269,14 +269,50 @@
 
       # Home Manager modules that can be imported by other flakes
       homeModules = {
-        gig-wsl = ./home/gig/wsl.nix;
-        gig-spacedock = ./home/gig/spacedock.nix;
-        gig-merlin = ./home/gig/merlin.nix;
-        gig-base = ./home/gig/home.nix;
+        gig-wsl =
+          { ... }:
+          {
+            imports = [
+              (import ./home/gig/wsl.nix { flakeRoot = self; })
+            ];
+          };
+        gig-spacedock =
+          { ... }:
+          {
+            imports = [
+              (import ./home/gig/spacedock.nix { flakeRoot = self; })
+            ];
+          };
+        gig-merlin =
+          { ... }:
+          {
+            imports = [
+              (import ./home/gig/merlin.nix { flakeRoot = self; })
+            ];
+          };
+        gig-base =
+          { ... }:
+          {
+            imports = [
+              (import ./home/gig/home.nix { flakeRoot = self; })
+            ];
+          };
 
         # Common modules that can be imported individually
-        core = ./home/gig/common/core;
-        optional = ./home/gig/common/optional;
+        core =
+          { ... }:
+          {
+            imports = [
+              (import ./home/gig/common/core { flakeRoot = self; })
+            ];
+          };
+        optional =
+          { ... }:
+          {
+            imports = [
+              (import ./home/gig/common/optional { flakeRoot = self; })
+            ];
+          };
       };
 
       # Alternative naming that's more standard for Home Manager flakes
