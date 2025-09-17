@@ -281,7 +281,7 @@
             ];
             # Provide the flakeRoot and other args through _module.args
             _module.args = {
-              flakeRoot = self;
+              flakeRoot = ./.; # Use the source path directly
               inherit inputs;
               # Pass overlays directly instead of outputs to avoid circular reference
               overlays = import ./overlays { inherit inputs; };
@@ -295,7 +295,7 @@
             ];
             # Provide the flakeRoot and other args through _module.args
             _module.args = {
-              flakeRoot = self;
+              flakeRoot = ./.; # Use the source path directly
               inherit inputs;
               # Pass overlays directly instead of outputs to avoid circular reference
               overlays = import ./overlays { inherit inputs; };
