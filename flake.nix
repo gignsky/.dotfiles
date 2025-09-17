@@ -55,7 +55,7 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
-    optnix.url = "github:water-sucks/optnix";
+    # optnix.url = "github:water-sucks/optnix";
 
     git-aliases = {
       url = "github:KamilKleina/git-aliases.nu";
@@ -214,7 +214,6 @@
               ;
             overlays = import ./overlays { inherit inputs; };
             flakeRoot = self;
-            optnixInput = inputs.optnix;
           };
           # > Our main home-manager configuration file <
           modules = [ ./home/gig/wsl.nix ];
@@ -235,7 +234,6 @@
               ;
             overlays = import ./overlays { inherit inputs; };
             flakeRoot = self;
-            optnixInput = inputs.optnix;
           };
           # > Our main home-manager configuration file <
           modules = [ ./home/gig/spacedock.nix ];
@@ -286,7 +284,6 @@
               flakeRoot = ./.; # Use the source path directly
               # Pass overlays directly instead of outputs to avoid circular reference
               overlays = import ./overlays { inherit inputs; };
-              # Don't pass inputs or optnixInput to avoid circular reference
             };
           };
         gig-base =
@@ -300,7 +297,6 @@
               flakeRoot = ./.; # Use the source path directly
               # Pass overlays directly instead of outputs to avoid circular reference
               overlays = import ./overlays { inherit inputs; };
-              # Don't pass inputs or optnixInput to avoid circular reference
             };
           };
 
