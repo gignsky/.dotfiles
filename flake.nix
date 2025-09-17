@@ -283,6 +283,7 @@
             flakeRoot ? self,
             inputs ? self.inputs,
             outputs ? self.outputs,
+            lib ? self.lib,
             ...
           }@args:
           {
@@ -294,6 +295,7 @@
                     flakeRoot
                     inputs
                     outputs
+                    lib
                     ;
                 }
               ))
