@@ -50,5 +50,6 @@
   inspect = "nix run github:bluskript/nix-inspect";
   mvim = "nix run github:gignsky/gigvim";
   mini = "nix run github:gignsky/gigvim#mini";
+  full = "nix run github:gignsky/gigvim#full";
   fupdate = "nix run github:gignsky/nix-update-input";
 }
