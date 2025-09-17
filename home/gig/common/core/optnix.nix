@@ -1,17 +1,17 @@
 {
   options,
   pkgs,
-  inputs,
+  optnixInput,
   lib,
   config,
   ...
 }:
 let
-  optnixLib = inputs.optnix.mkLib pkgs;
+  optnixLib = optnixInput.mkLib pkgs;
 in
 {
   imports = [
-    inputs.optnix.homeModules.optnix
+    optnixInput.homeModules.optnix
   ];
 
   programs.optnix = {
