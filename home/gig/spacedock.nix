@@ -14,6 +14,7 @@
   ];
 
   home.packages = with pkgs; [
+    ponysay
     # plex-media-player
     # remmina
     # bitwarden-cli
