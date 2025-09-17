@@ -280,9 +280,9 @@
             # Provide the flakeRoot and other args through _module.args
             _module.args = {
               flakeRoot = self;
-              inputs = self.inputs;
-              outputs = self.outputs;
-              configLib = import ./lib { inherit (nixpkgs) lib; };
+              inputs = inputs;
+              outputs = outputs; # Use the local outputs, not self.outputs
+              configLib = configLib; # Use the local configLib, not a new import
             };
           };
         gig-base =
@@ -294,9 +294,9 @@
             # Provide the flakeRoot and other args through _module.args
             _module.args = {
               flakeRoot = self;
-              inputs = self.inputs;
-              outputs = self.outputs;
-              configLib = import ./lib { inherit (nixpkgs) lib; };
+              inputs = inputs;
+              outputs = outputs; # Use the local outputs, not self.outputs
+              configLib = configLib; # Use the local configLib, not a new import
             };
           };
 
