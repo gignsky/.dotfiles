@@ -281,8 +281,9 @@
             _module.args = {
               flakeRoot = self;
               inputs = inputs;
-              outputs = outputs; # Use the local outputs, not self.outputs
-              configLib = configLib; # Use the local configLib, not a new import
+              configLib = configLib;
+              # Pass overlays directly instead of outputs to avoid circular reference
+              overlays = import ./overlays { inherit inputs; };
             };
           };
         gig-base =
@@ -295,8 +296,9 @@
             _module.args = {
               flakeRoot = self;
               inputs = inputs;
-              outputs = outputs; # Use the local outputs, not self.outputs
-              configLib = configLib; # Use the local configLib, not a new import
+              configLib = configLib;
+              # Pass overlays directly instead of outputs to avoid circular reference
+              overlays = import ./overlays { inherit inputs; };
             };
           };
 
