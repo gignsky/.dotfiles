@@ -22,7 +22,6 @@
     magic-wormhole
     wget
     screen
-    nmap
     # just
     # neofetch
 
