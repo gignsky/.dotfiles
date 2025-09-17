@@ -1,12 +1,11 @@
 # This is your home-manager configuration file
 # Use this to configure your home environment (it replaces ~/.config/nixpkgs/home.nix)
-{ flakeRoot }:
 {
   pkgs,
   ...
-}:
+}@args:
 let
-  homeModule = import ./home.nix { inherit flakeRoot; };
+  homeModule = import ./home.nix args;
 in
 {
   # You can import other home-manager modules here
