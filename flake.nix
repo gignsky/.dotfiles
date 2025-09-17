@@ -279,24 +279,33 @@
             ];
           };
         gig-spacedock =
-          { ... }:
+          {
+            flakeRoot ? self,
+            ...
+          }@args:
           {
             imports = [
-              (import ./home/gig/spacedock.nix { flakeRoot = self; })
+              (import ./home/gig/spacedock.nix (args // { inherit flakeRoot; }))
             ];
           };
         gig-merlin =
-          { ... }:
+          {
+            flakeRoot ? self,
+            ...
+          }@args:
           {
             imports = [
-              (import ./home/gig/merlin.nix { flakeRoot = self; })
+              (import ./home/gig/merlin.nix (args // { inherit flakeRoot; }))
             ];
           };
         gig-base =
-          { ... }:
+          {
+            flakeRoot ? self,
+            ...
+          }@args:
           {
             imports = [
-              (import ./home/gig/home.nix { flakeRoot = self; })
+              (import ./home/gig/home.nix (args // { inherit flakeRoot; }))
             ];
           };
 
