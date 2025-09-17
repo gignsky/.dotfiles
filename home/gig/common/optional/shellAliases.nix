@@ -18,6 +18,8 @@
   # als = "alias";
   cd = "z";
   nd = "nix develop -c nu";
+  nr = "nix run";
+  nb = "nix build";
   ndw = "nix develop .#windows -c nu";
   diddy = "touch";
 
@@ -50,5 +52,6 @@
   inspect = "nix run github:bluskript/nix-inspect";
   mvim = "nix run github:gignsky/gigvim";
   mini = "nix run github:gignsky/gigvim#mini";
+  full = "nix run github:gignsky/gigvim#full";
   fupdate = "nix run github:gignsky/nix-update-input";
 }
