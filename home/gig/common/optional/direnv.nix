@@ -1,5 +1,5 @@
-{ flakeRoot }:
-_: {
+{ flakeRoot, ... }:
+{
   programs.direnv = {
     enable = true;
     enableNushellIntegration = false; # Disable automatic integration due to syntax issues
