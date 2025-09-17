@@ -1,6 +1,6 @@
-{ lib, ... }:
+{ lib, flakeRoot, ... }:
 let
-  configLib = import ../../../lib { inherit lib; };
+  configLib = import (flakeRoot + /lib) { inherit lib; };
 in
 {
   imports = configLib.scanPaths ./.;
