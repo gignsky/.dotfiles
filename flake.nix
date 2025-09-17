@@ -281,7 +281,6 @@
             _module.args = {
               flakeRoot = self;
               inputs = inputs;
-              configLib = configLib;
               # Pass overlays directly instead of outputs to avoid circular reference
               overlays = import ./overlays { inherit inputs; };
             };
@@ -296,7 +295,6 @@
             _module.args = {
               flakeRoot = self;
               inputs = inputs;
-              configLib = configLib;
               # Pass overlays directly instead of outputs to avoid circular reference
               overlays = import ./overlays { inherit inputs; };
             };
