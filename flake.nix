@@ -281,31 +281,70 @@
         gig-spacedock =
           {
             flakeRoot ? self,
+            inputs ? self.inputs,
+            outputs ? self.outputs,
+            lib ? nixpkgs.lib,
             ...
           }@args:
           {
             imports = [
-              (import ./home/gig/spacedock.nix (args // { inherit flakeRoot; }))
+              (import ./home/gig/spacedock.nix (
+                args
+                // {
+                  inherit
+                    flakeRoot
+                    inputs
+                    outputs
+                    lib
+                    ;
+                }
+              ))
             ];
           };
         gig-merlin =
           {
             flakeRoot ? self,
+            inputs ? self.inputs,
+            outputs ? self.outputs,
+            lib ? nixpkgs.lib,
             ...
           }@args:
           {
             imports = [
-              (import ./home/gig/merlin.nix (args // { inherit flakeRoot; }))
+              (import ./home/gig/merlin.nix (
+                args
+                // {
+                  inherit
+                    flakeRoot
+                    inputs
+                    outputs
+                    lib
+                    ;
+                }
+              ))
             ];
           };
         gig-base =
           {
             flakeRoot ? self,
+            inputs ? self.inputs,
+            outputs ? self.outputs,
+            lib ? nixpkgs.lib,
             ...
           }@args:
           {
             imports = [
-              (import ./home/gig/home.nix (args // { inherit flakeRoot; }))
+              (import ./home/gig/home.nix (
+                args
+                // {
+                  inherit
+                    flakeRoot
+                    inputs
+                    outputs
+                    lib
+                    ;
+                }
+              ))
             ];
           };
 
