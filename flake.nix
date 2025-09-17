@@ -271,19 +271,9 @@
 
       # Home Manager modules that can be imported by other flakes
       homeModules = {
-        gig-wsl =
-          { ... }:
-          {
-            imports = [
-              (import ./home/gig/wsl.nix { flakeRoot = self; })
-            ];
-          };
         gig-spacedock =
           {
             flakeRoot ? self,
-            inputs ? self.inputs,
-            outputs ? self.outputs,
-            lib ? self.lib,
             ...
           }@args:
           {
@@ -291,33 +281,10 @@
               (import ./home/gig/spacedock.nix (
                 args
                 // {
-                  inherit
-                    flakeRoot
-                    inputs
-                    outputs
-                    lib
-                    ;
-                }
-              ))
-            ];
-          };
-        gig-merlin =
-          {
-            flakeRoot ? self,
-            inputs ? self.inputs,
-            outputs ? self.outputs,
-            ...
-          }@args:
-          {
-            imports = [
-              (import ./home/gig/merlin.nix (
-                args
-                // {
-                  inherit
-                    flakeRoot
-                    inputs
-                    outputs
-                    ;
+                  inherit flakeRoot;
+                  inputs = self.inputs;
+                  outputs = self.outputs;
+                  configLib = import ./lib { inherit (nixpkgs) lib; };
                 }
               ))
             ];
@@ -325,8 +292,6 @@
         gig-base =
           {
             flakeRoot ? self,
-            inputs ? self.inputs,
-            outputs ? self.outputs,
             ...
           }@args:
           {
@@ -334,11 +299,10 @@
               (import ./home/gig/home.nix (
                 args
                 // {
-                  inherit
-                    flakeRoot
-                    inputs
-                    outputs
-                    ;
+                  inherit flakeRoot;
+                  inputs = self.inputs;
+                  outputs = self.outputs;
+                  configLib = import ./lib { inherit (nixpkgs) lib; };
                 }
               ))
             ];
