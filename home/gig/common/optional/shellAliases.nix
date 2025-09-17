@@ -18,6 +18,8 @@
   # als = "alias";
   cd = "z";
   nd = "nix develop -c nu";
+  nr = "nix run";
+  nb = "nix build";
   ndw = "nix develop .#windows -c nu";
   diddy = "touch";
 
