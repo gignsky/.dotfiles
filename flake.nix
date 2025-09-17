@@ -283,7 +283,6 @@
             flakeRoot ? self,
             inputs ? self.inputs,
             outputs ? self.outputs,
-            lib ? nixpkgs.lib,
             ...
           }@args:
           {
@@ -295,7 +294,6 @@
                     flakeRoot
                     inputs
                     outputs
-                    lib
                     ;
                 }
               ))
@@ -306,7 +304,6 @@
             flakeRoot ? self,
             inputs ? self.inputs,
             outputs ? self.outputs,
-            lib ? nixpkgs.lib,
             ...
           }@args:
           {
@@ -318,7 +315,6 @@
                     flakeRoot
                     inputs
                     outputs
-                    lib
                     ;
                 }
               ))
@@ -329,7 +325,6 @@
             flakeRoot ? self,
             inputs ? self.inputs,
             outputs ? self.outputs,
-            lib ? nixpkgs.lib,
             ...
           }@args:
           {
@@ -341,7 +336,6 @@
                     flakeRoot
                     inputs
                     outputs
-                    lib
                     ;
                 }
               ))
