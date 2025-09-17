@@ -286,8 +286,7 @@
               flakeRoot = ./.; # Use the source path directly
               # Pass overlays directly instead of outputs to avoid circular reference
               overlays = import ./overlays { inherit inputs; };
-              # Pass specific inputs that modules need
-              optnixInput = inputs.optnix;
+              # Don't pass inputs or optnixInput to avoid circular reference
             };
           };
         gig-base =
@@ -301,8 +300,7 @@
               flakeRoot = ./.; # Use the source path directly
               # Pass overlays directly instead of outputs to avoid circular reference
               overlays = import ./overlays { inherit inputs; };
-              # Pass specific inputs that modules need
-              optnixInput = inputs.optnix;
+              # Don't pass inputs or optnixInput to avoid circular reference
             };
           };
 
