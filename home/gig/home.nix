@@ -10,14 +10,15 @@
   ...
 }:
 let
-  coreModule = import ./common/core { inherit flakeRoot; };
+  direnvModule = import ./common/optional/direnv.nix { inherit flakeRoot; };
 in
 {
   # You can import other home-manager modules here
   imports = [
     # Or modules exported from other flakes (such as nix-colors):
     # inputs.nix-colors.homeManagerModules.default
-    coreModule
+    ./common/core
+    direnvModule
   ];
   nix = {
     package = lib.mkDefault pkgs.nix;
