@@ -3,16 +3,13 @@
 {
   pkgs,
   ...
-}@args:
-let
-  homeModule = import ./home.nix args;
-in
+}:
 {
   # You can import other home-manager modules here
   imports = [
     # Or modules exported from other flakes (such as nix-colors):
     # inputs.nix-colors.homeManagerModules.default
-    homeModule
+    ./home.nix
   ];
 
   home.packages = with pkgs; [
