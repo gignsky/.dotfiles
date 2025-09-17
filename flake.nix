@@ -212,6 +212,7 @@
               configLib
               system
               ;
+            overlays = import ./overlays { inherit inputs; };
             flakeRoot = self;
           };
           # > Our main home-manager configuration file <
@@ -231,6 +232,7 @@
               configLib
               system
               ;
+            overlays = import ./overlays { inherit inputs; };
             flakeRoot = self;
           };
           # > Our main home-manager configuration file <
@@ -280,7 +282,7 @@
             # Provide the flakeRoot and other args through _module.args
             _module.args = {
               flakeRoot = self;
-              inputs = inputs;
+              inherit inputs;
               # Pass overlays directly instead of outputs to avoid circular reference
               overlays = import ./overlays { inherit inputs; };
             };
@@ -294,7 +296,7 @@
             # Provide the flakeRoot and other args through _module.args
             _module.args = {
               flakeRoot = self;
-              inputs = inputs;
+              inherit inputs;
               # Pass overlays directly instead of outputs to avoid circular reference
               overlays = import ./overlays { inherit inputs; };
             };
