@@ -32,9 +32,10 @@
   merlinm = "mosh gig@merlins-windows-wsl";
 
   # nmap
-  localnmap = "nix shell nixpkgs#lolcat -c nix shell nixpkgs#nmap -c nmap -v -sn --open 192.168.51.0/24 | lolcat";
-  spacenmap = "nix shell nixpkgs#lolcat -c nix shell nixpkgs#nmap -c nmap -A -T4 192.168.51.2 | lolcat";
-  fullnmap = "nix shell nixpkgs#nmap -c nmap -A -T4 -v --open 192.168.51.0/24 | less";
+  localnmap = "nix shell nixpkgs#lolcat -c nix shell nixpkgs#nmap -c nmap -v -sn --open
+  192.168.51.0/24; | lolcat";
+  spacenmap = "nix shell nixpkgs#lolcat -c nix shell nixpkgs#nmap -c nmap -A -T4 192.168.51.2; | lolcat";
+  fullnmap = "nix shell nixpkgs#nmap -c nmap -A -T4 -v --open 192.168.51.0/24; | less";
 
   # Git
   lg = "lazygit";
