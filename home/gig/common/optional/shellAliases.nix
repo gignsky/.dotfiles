@@ -34,7 +34,7 @@
   # nmap
   localnmap = "nix shell nixpkgs#nmap -c nmap -v -sn --open 192.168.51.0/24";
   spacenmap = "nix shell nixpkgs#nmap -c nmap -A -T4 192.168.51.2";
-  fullnmap = "nix shell nixpkgs#nmap -c nmap -A -T4 -v --open 192.168.51.0/24; | less";
+  fullnmap = "nix shell nixpkgs#nmap -c nmap -A -T4 -v --open 192.168.51.0/24 | less";
 
   # Git
   lg = "lazygit";
