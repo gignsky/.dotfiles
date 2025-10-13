@@ -56,6 +56,7 @@ in
     inputs.flake-iter.packages.${system}.default
 
     pdfarranger
+    pdf4qt
 
     # direnv # direnv is enabled by default
     dua
