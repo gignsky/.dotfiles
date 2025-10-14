@@ -29,9 +29,10 @@
 
     #gig users
     (configLib.relativeToRoot "hosts/common/users/gig")
+    # (configLib.relativeToRoot "hosts/common/users/nixos")
 
     # wifi
-    (configLib.relativeToRoot "hosts/common/optional/wifi.nix")
+    # (configLib.relativeToRoot "hosts/common/optional/wifi.nix")
 
     # # Bootloader.
     # (configLib.relativeToRoot "hosts/common/core/bootloader.nix")
@@ -42,10 +43,21 @@
     # hostId should be a unique 8-character (hexadecimal) string, especially if using ZFS.
     # You can generate one with: head -c4 /dev/urandom | od -An -tx1 | tr -d ' \n'
     hostId = "81a45b83";
+    networkmanager.enable = true;
   };
 
-  # Bootloader configuration
-  bootloader.kind = "systemd-boot";
+  # Bootloader.
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
+
+  # Configure keymap in X11
+  services.xserver.xkb = {
+    layout = "us";
+    variant = "";
+  };
+
+  # Allow unfree packages
+  nixpkgs.config.allowUnfree = true;
 
   nix =
     let
@@ -68,20 +80,20 @@
       nixPath = lib.mapAttrsToList (n: _: "${n}=flake:${n}") flakeInputs;
     };
 
-  fileSystems = {
-    "/" = {
-      device = "zroot/root";
-      fsType = "zfs";
-    };
-    "/boot" = {
-      device = "/dev/nvme1n1p2";
-      fsType = "vfat";
-    };
-    "/nix/store" = {
-      device = "zroot/nix";
-      fsType = "zfs";
-    };
-  };
+  # fileSystems = {
+  #   "/" = {
+  #     device = "zroot/root";
+  #     fsType = "zfs";
+  #   };
+  #   "/boot" = {
+  #     device = "/dev/nvme0n1p2";
+  #     fsType = "vfat";
+  #   };
+  #   "/nix/store" = {
+  #     device = "zroot/nix";
+  #     fsType = "zfs";
+  #   };
+  # };
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
   system.stateVersion = "25.05";

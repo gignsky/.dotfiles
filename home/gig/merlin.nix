@@ -17,11 +17,11 @@
   ];
 
   home.packages = with pkgs; [
-    plex-media-player
-    remmina
+    # plex-media-player
+    # remmina
     # bitwarden-cli
-    bitwarden-desktop
-    discord
+    # bitwarden-desktop
+    # discord
     # anydesk
   ];
 

@@ -175,17 +175,17 @@
           ];
         };
 
-        # # # Merlin configuration entrypoint - unused as merlin has a wsl instance
-        # merlin = nixpkgs.lib.nixosSystem {
-        #   inherit system specialArgs;
-        #   modules = [
-        #     # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
-        #     # home-manager.nixosModules.home-manager {
-        #     #   home-manager.extraSpecialArgs = specialArgs;
-        #     # }
-        #     ./hosts/merlin
-        #   ];
-        # };
+        # # Merlin configuration entrypoint - unused as merlin has a wsl instance
+        merlin = nixpkgs.lib.nixosSystem {
+          inherit system specialArgs;
+          modules = [
+            # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
+            # home-manager.nixosModules.home-manager {
+            #   home-manager.extraSpecialArgs = specialArgs;
+            # }
+            ./hosts/merlin
+          ];
+        };
 
         # # Not yet working, but this is the entrypoint for a tdarr node
         # tdarr-node = nixpkgs.lib.nixosSystem {
@@ -215,7 +215,7 @@
               system
               ;
             overlays = import ./overlays { inherit inputs; };
-            flakeRoot = self;
+            # flakeRoot = self;
           };
           # > Our main home-manager configuration file <
           modules = [ ./home/gig/wsl.nix ];
@@ -235,19 +235,27 @@
               system
               ;
             overlays = import ./overlays { inherit inputs; };
-            flakeRoot = self;
+            # flakeRoot = self;
           };
           # > Our main home-manager configuration file <
           modules = [ ./home/gig/spacedock.nix ];
         };
 
-        # # merlin - unused with merlin having a wsl instance
-        # "gig@merlin" = home-manager.lib.homeManagerConfiguration {
-        #   inherit pkgs; # Home-manager requires 'pkgs' instance
-        #   extraSpecialArgs = { inherit inputs outputs configLib; };
-        #   # > Our main home-manager configuration file <
-        #   modules = [ ./home/gig/merlin.nix ];
-        # };
+        # merlin - unused with merlin having a wsl instance
+        "gig@merlin" = home-manager.lib.homeManagerConfiguration {
+          inherit pkgs; # Home-manager requires 'pkgs' instance
+          extraSpecialArgs = {
+            inherit
+              inputs
+              outputs
+              configLib
+              system
+              ;
+            overlays = import ./overlays { inherit inputs; };
+          };
+          # > Our main home-manager configuration file <
+          modules = [ ./home/gig/merlin.nix ];
+        };
 
         # # tdarr-node
         # "gig@tdarr-node" = home-manager.lib.homeManagerConfiguration {
@@ -274,53 +282,53 @@
       overlays = import ./overlays { inherit inputs; };
 
       # Home Manager modules that can be imported by other flakes
-      homeModules = {
-        gig-spacedock =
-          { ... }:
-          {
-            imports = [
-              ./home/gig/spacedock.nix
-            ];
-            # Provide the flakeRoot and other args through _module.args
-            _module.args = {
-              flakeRoot = ./.; # Use the source path directly
-              # Pass overlays directly instead of outputs to avoid circular reference
-              overlays = import ./overlays { inherit inputs; };
-            };
-          };
-        gig-base =
-          { ... }:
-          {
-            imports = [
-              ./home/gig/home.nix
-            ];
-            # Provide the flakeRoot and other args through _module.args
-            _module.args = {
-              flakeRoot = ./.; # Use the source path directly
-              # Pass overlays directly instead of outputs to avoid circular reference
-              overlays = import ./overlays { inherit inputs; };
-            };
-          };
-
-        # Common modules that can be imported individually
-        core =
-          { ... }:
-          {
-            imports = [
-              (import ./home/gig/common/core { flakeRoot = self; })
-            ];
-          };
-        optional =
-          { ... }:
-          {
-            imports = [
-              (import ./home/gig/common/optional { flakeRoot = self; })
-            ];
-          };
-      };
-
-      # Alternative naming that's more standard for Home Manager flakes
-      homeManagerModules = self.homeModules;
+      # homeModules = {
+      #   gig-spacedock =
+      #     { ... }:
+      #     {
+      #       imports = [
+      #         ./home/gig/spacedock.nix
+      #       ];
+      #       # Provide the flakeRoot and other args through _module.args
+      #       _module.args = {
+      #         flakeRoot = ./.; # Use the source path directly
+      #         # Pass overlays directly instead of outputs to avoid circular reference
+      #         overlays = import ./overlays { inherit inputs; };
+      #       };
+      #     };
+      #   gig-base =
+      #     { ... }:
+      #     {
+      #       imports = [
+      #         ./home/gig/home.nix
+      #       ];
+      #       # Provide the flakeRoot and other args through _module.args
+      #       _module.args = {
+      #         flakeRoot = ./.; # Use the source path directly
+      #         # Pass overlays directly instead of outputs to avoid circular reference
+      #         overlays = import ./overlays { inherit inputs; };
+      #       };
+      #     };
+      #
+      #   # Common modules that can be imported individually
+      #   core =
+      #     { ... }:
+      #     {
+      #       imports = [
+      #         (import ./home/gig/common/core { flakeRoot = self; })
+      #       ];
+      #     };
+      #   optional =
+      #     { ... }:
+      #     {
+      #       imports = [
+      #         (import ./home/gig/common/optional { flakeRoot = self; })
+      #       ];
+      #     };
+      # };
+      #
+      # # Alternative naming that's more standard for Home Manager flakes
+      # homeManagerModules = self.homeModules;
 
       checks = {
         ${system} =
