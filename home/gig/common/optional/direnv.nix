@@ -1,5 +1,4 @@
-{ flakeRoot, ... }:
-{
+_: {
   programs.direnv = {
     enable = true;
     enableNushellIntegration = false; # Disable automatic integration due to syntax issues
@@ -7,5 +6,5 @@
     nix-direnv.enable = true;
   };
 
-  home.file.".config/direnv/direnv.toml".source = flakeRoot + "home/gig/common/resources/direnv.toml";
+  home.file.".config/direnv/direnv.toml".source = "../resources/direnv.toml";
 }
