@@ -10,11 +10,11 @@
 let
   ifTheyExist = groups: builtins.filter (group: builtins.hasAttr group config.users.groups) groups;
   sopsHashedPasswordFile =
-    lib.optionalString (lib.hasAttr "sops-nix" inputs)
-      config.sops.secrets."${configVars.username}-password".path;
-  # sopsRootHashedPasswordFile =
-  #   lib.optionalString (lib.hasAttr "sops-nix" inputs)
-  #     config.sops.secrets."root-password".path;
+    # lib.optionalString (lib.hasAttr "sops-nix" inputs)
+    config.sops.secrets."${configVars.username}-password".path;
+  sopsRootHashedPasswordFile =
+    # lib.optionalString (lib.hasAttr "sops-nix" inputs)
+    config.sops.secrets."root-password".path;
   pubKeys = lib.filesystem.listFilesRecursive (./keys);
 
   # these are values we don't want to set if the environment is minimal. E.g. ISO or nixos-installer
@@ -44,6 +44,7 @@ in
           };
           mutableUsers = false; # required for password to be set via sops during system activation
           users.${configVars.username} = {
+            hashedPasswordFile = sopsHashedPasswordFile;
             home = "/home/${configVars.username}";
             isNormalUser = true;
             password = if configVars.isMinimal then "nixos" else null; # Overridden if sops is working
@@ -75,10 +76,8 @@ in
             password = if configVars.isMinimal then "nixos" else null; # Overridden if sops is working
             # root's ssh keys are mainly used for remote deployment.
             openssh.authorizedKeys.keys = config.users.users.${configVars.username}.openssh.authorizedKeys.keys;
+            hashedPasswordFile = sopsRootHashedPasswordFile;
           };
         };
       };
-  # decrypt gig-password to /run/secrets-for-users/ so it can be used to create the user
-  sops.secrets.gig-password.neededForUsers = true;
-  sops.secrets.root-password.neededForUsers = true;
 }
