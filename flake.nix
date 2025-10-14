@@ -224,38 +224,38 @@
           # };
         };
 
-        # # spacedock - unused with spacedock having a wsl instance
-        # "gig@spacedock" = home-manager.lib.homeManagerConfiguration {
-        #   inherit pkgs; # Home-manager requires 'pkgs' instance
-        #   extraSpecialArgs = {
-        #     inherit
-        #       inputs
-        #       outputs
-        #       configLib
-        #       system
-        #       ;
-        #     overlays = import ./overlays { inherit inputs; };
-        #     # flakeRoot = self;
-        #   };
-        #   # > Our main home-manager configuration file <
-        #   modules = [ ./home/gig/spacedock.nix ];
-        # };
+        # spacedock - unused with spacedock having a wsl instance
+        "gig@spacedock" = home-manager.lib.homeManagerConfiguration {
+          inherit pkgs; # Home-manager requires 'pkgs' instance
+          extraSpecialArgs = {
+            inherit
+              inputs
+              outputs
+              configLib
+              system
+              ;
+            overlays = import ./overlays { inherit inputs; };
+            # flakeRoot = self;
+          };
+          # > Our main home-manager configuration file <
+          modules = [ ./home/gig/spacedock.nix ];
+        };
 
-        # # merlin - unused with merlin having a wsl instance
-        # "gig@merlin" = home-manager.lib.homeManagerConfiguration {
-        #   inherit pkgs; # Home-manager requires 'pkgs' instance
-        #   extraSpecialArgs = {
-        #     inherit
-        #       inputs
-        #       outputs
-        #       configLib
-        #       system
-        #       ;
-        #    overlays = import ./overlays { inherit inputs; };
-        #   };
-        #   # > Our main home-manager configuration file <
-        #   modules = [ ./home/gig/merlin.nix ];
-        # };
+        # merlin - unused with merlin having a wsl instance
+        "gig@merlin" = home-manager.lib.homeManagerConfiguration {
+          inherit pkgs; # Home-manager requires 'pkgs' instance
+          extraSpecialArgs = {
+            inherit
+              inputs
+              outputs
+              configLib
+              system
+              ;
+            overlays = import ./overlays { inherit inputs; };
+          };
+          # > Our main home-manager configuration file <
+          modules = [ ./home/gig/merlin.nix ];
+        };
 
         # # tdarr-node
         # "gig@tdarr-node" = home-manager.lib.homeManagerConfiguration {
