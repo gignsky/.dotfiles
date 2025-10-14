@@ -43,10 +43,21 @@
     # hostId should be a unique 8-character (hexadecimal) string, especially if using ZFS.
     # You can generate one with: head -c4 /dev/urandom | od -An -tx1 | tr -d ' \n'
     hostId = "81a45b83";
+    networkmanager.enable = true;
   };
 
-  # Bootloader configuration
-  # bootloader.kind = "systemd-boot";
+  # Bootloader.
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
+
+  # Configure keymap in X11
+  services.xserver.xkb = {
+    layout = "us";
+    variant = "";
+  };
+
+  # Allow unfree packages
+  nixpkgs.config.allowUnfree = true;
 
   nix =
     let
