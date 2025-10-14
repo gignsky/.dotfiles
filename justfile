@@ -332,7 +332,7 @@ diff:
 #edit all sops files then rekey
 sops:
 	nix-shell -p lolcat --run 'echo "Editing ~/nix-secrets/secrets.yaml" | lolcat 2> /dev/null'
-	nano ~/nix-secrets/.sops.yaml
+	vi ~/nix-secrets/.sops.yaml
 	sops ~/nix-secrets/secrets.yaml
 	just rekey
 
