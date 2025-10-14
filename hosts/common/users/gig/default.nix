@@ -21,7 +21,7 @@ let
   # isMinimal is true in the nixos-installer/flake.nix
   fullUserConfig = lib.optionalAttrs (!configVars.isMinimal) {
     users.users.${configVars.username} = {
-      hashedPasswordFile = sopsHashedPasswordFile;
+      # hashedPasswordFile = sopsHashedPasswordFile;
       packages = [ pkgs.home-manager ];
     };
 
@@ -73,7 +73,7 @@ in
 
           # Proper root use required for borg and some other specific operations
           users.root = {
-            password = if configVars.isMinimal then "nixos" else null; # Overridden if sops is working
+            # password = if configVars.isMinimal then "nixos" else null; # Overridden if sops is working
             # root's ssh keys are mainly used for remote deployment.
             openssh.authorizedKeys.keys = config.users.users.${configVars.username}.openssh.authorizedKeys.keys;
             hashedPasswordFile = sopsRootHashedPasswordFile;
