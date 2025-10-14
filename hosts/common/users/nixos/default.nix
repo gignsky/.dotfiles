@@ -46,16 +46,17 @@ in
             home = "/home/nixos";
             isNormalUser = true;
             password = "nixos"; # Overridden if sops is working
-            extraGroups = [
-              "wheel"
-            ]
-            ++ ifTheyExist [
-              "audio"
-              "video"
-              "docker"
-              "git"
-              "networkmanager"
-            ];
+            extraGroups =
+              [
+                "wheel"
+              ]
+              ++ ifTheyExist [
+                "audio"
+                "video"
+                "docker"
+                "git"
+                "networkmanager"
+              ];
 
             # sets the user's id to 1701
             uid = lib.mkDefault 1000;
