@@ -251,6 +251,7 @@
         #       configLib
         #       system
         #       ;
+        #    overlays = import ./overlays { inherit inputs; };
         #   };
         #   # > Our main home-manager configuration file <
         #   modules = [ ./home/gig/merlin.nix ];
