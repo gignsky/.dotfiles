@@ -354,14 +354,15 @@ sops-edit:
 
 # Update the keys in the secrets file without pre-commit hooks (for bootstrap)
 rekey:
-	just dont-fuck-my-build
-	nix-shell -p lolcat --run 'echo "Updating ~/nix-secrets/secrets.yaml" | lolcat 2> /dev/null'
-	cd ../nix-secrets && (\
-	nix-shell -p sops --run "sops updatekeys -y secrets.yaml" && \
-	git add -u && (git commit --no-verify -m "chore: rekey" || true) && git push \
-	)
-	nix-shell -p lolcat --run 'echo "Updated Secrets!" | lolcat 2> /dev/null'
-	just dont-fuck-my-build
+  just dont-fuck-my-build
+  nix-shell -p lolcat --run 'echo "Updating ~/nix-secrets/secrets.yaml" | lolcat 2> /dev/null'
+  cd ../nix-secrets && (\
+  nix-shell -p sops --run "sops updatekeys -y secrets.yaml" && \
+  git add -u && (git commit --no-verify -m "chore: rekey" || true) && git push \
+  )
+  nix-shell -p lolcat --run 'echo "Updated Secrets!" | lolcat 2> /dev/null'
+  just dont-fuck-my-build
+  nix flake update nix-secrets --commit-lock-file
 
 sops-fix:
 	just pre-home
