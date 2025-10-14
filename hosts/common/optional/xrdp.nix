@@ -1,5 +1,5 @@
 {
-  # rdp stuff    
+  # rdp stuff
   services.xrdp = {
     enable = true;
     # audio.enable = true;
