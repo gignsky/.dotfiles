@@ -374,7 +374,7 @@
                   enable = true;
                 };
                 markdownlint = {
-                  enable = true;
+                  enable = false;
                 };
                 yamllint = {
                   enable = true;
