@@ -18,7 +18,8 @@
     # Or modules exported from other flakes (such as nix-colors):
     # inputs.nix-colors.homeManagerModules.default
     ./common/core
-    direnvModule
+    ./common/optional/direnv.nix
+    # direnvModule
   ];
   nix = {
     package = lib.mkDefault pkgs.nix;
