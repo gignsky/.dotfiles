@@ -215,7 +215,7 @@
               system
               ;
             overlays = import ./overlays { inherit inputs; };
-            flakeRoot = self;
+            # flakeRoot = self;
           };
           # > Our main home-manager configuration file <
           modules = [ ./home/gig/wsl.nix ];
@@ -235,7 +235,7 @@
               system
               ;
             overlays = import ./overlays { inherit inputs; };
-            flakeRoot = self;
+            # flakeRoot = self;
           };
           # > Our main home-manager configuration file <
           modules = [ ./home/gig/spacedock.nix ];
@@ -281,53 +281,53 @@
       overlays = import ./overlays { inherit inputs; };
 
       # Home Manager modules that can be imported by other flakes
-      homeModules = {
-        gig-spacedock =
-          { ... }:
-          {
-            imports = [
-              ./home/gig/spacedock.nix
-            ];
-            # Provide the flakeRoot and other args through _module.args
-            _module.args = {
-              flakeRoot = ./.; # Use the source path directly
-              # Pass overlays directly instead of outputs to avoid circular reference
-              overlays = import ./overlays { inherit inputs; };
-            };
-          };
-        gig-base =
-          { ... }:
-          {
-            imports = [
-              ./home/gig/home.nix
-            ];
-            # Provide the flakeRoot and other args through _module.args
-            _module.args = {
-              flakeRoot = ./.; # Use the source path directly
-              # Pass overlays directly instead of outputs to avoid circular reference
-              overlays = import ./overlays { inherit inputs; };
-            };
-          };
-
-        # Common modules that can be imported individually
-        core =
-          { ... }:
-          {
-            imports = [
-              (import ./home/gig/common/core { flakeRoot = self; })
-            ];
-          };
-        optional =
-          { ... }:
-          {
-            imports = [
-              (import ./home/gig/common/optional { flakeRoot = self; })
-            ];
-          };
-      };
-
-      # Alternative naming that's more standard for Home Manager flakes
-      homeManagerModules = self.homeModules;
+      # homeModules = {
+      #   gig-spacedock =
+      #     { ... }:
+      #     {
+      #       imports = [
+      #         ./home/gig/spacedock.nix
+      #       ];
+      #       # Provide the flakeRoot and other args through _module.args
+      #       _module.args = {
+      #         flakeRoot = ./.; # Use the source path directly
+      #         # Pass overlays directly instead of outputs to avoid circular reference
+      #         overlays = import ./overlays { inherit inputs; };
+      #       };
+      #     };
+      #   gig-base =
+      #     { ... }:
+      #     {
+      #       imports = [
+      #         ./home/gig/home.nix
+      #       ];
+      #       # Provide the flakeRoot and other args through _module.args
+      #       _module.args = {
+      #         flakeRoot = ./.; # Use the source path directly
+      #         # Pass overlays directly instead of outputs to avoid circular reference
+      #         overlays = import ./overlays { inherit inputs; };
+      #       };
+      #     };
+      #
+      #   # Common modules that can be imported individually
+      #   core =
+      #     { ... }:
+      #     {
+      #       imports = [
+      #         (import ./home/gig/common/core { flakeRoot = self; })
+      #       ];
+      #     };
+      #   optional =
+      #     { ... }:
+      #     {
+      #       imports = [
+      #         (import ./home/gig/common/optional { flakeRoot = self; })
+      #       ];
+      #     };
+      # };
+      #
+      # # Alternative naming that's more standard for Home Manager flakes
+      # homeManagerModules = self.homeModules;
 
       checks = {
         ${system} =
