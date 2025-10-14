@@ -79,6 +79,6 @@ in
         };
       };
   # decrypt gig-password to /run/secrets-for-users/ so it can be used to create the user
-  # sops.secrets.gig-password.neededForUsers = true;
-  # sops.secrets.root-password.neededForUsers = true;
+  sops.secrets.gig-password.neededForUsers = true;
+  sops.secrets.root-password.neededForUsers = true;
 }
