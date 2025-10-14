@@ -10027,10 +10027,10 @@
     "nix-secrets_18": {
       "flake": false,
       "locked": {
-        "lastModified": 1753822574,
-        "narHash": "sha256-2yTuBl/wZ7AqeHH1WXwtCONn+83pFuf5HlHtA+4e8gs=",
+        "lastModified": 1760420344,
+        "narHash": "sha256-q6Dbn29mYU2wkjAaahm2uqSxjDEdJI4+GJ39mBrzJEY=",
         "ref": "main",
-        "rev": "99d5ffa7c0771030ea08de5f37ad59c20131b47f",
+        "rev": "23d918cf3cb660598b8498f275ad3e221ba49320",
         "shallow": true,
         "type": "git",
         "url": "ssh://git@github.com/gignsky/nix-secrets.git"
@@ -20041,11 +20041,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1752544651,
-        "narHash": "sha256-GllP7cmQu7zLZTs9z0J2gIL42IZHa9CBEXwBY9szT0U=",
+        "lastModified": 1760393368,
+        "narHash": "sha256-8mN3kqyqa2PKY0wwZ2UmMEYMcxvNTwLaOrrDsw6Qi4E=",
         "owner": "mic92",
         "repo": "sops-nix",
-        "rev": "2c8def626f54708a9c38a5861866660395bb3461",
+        "rev": "ab8d56e85b8be14cff9d93735951e30c3e86a437",
         "type": "github"
       },
       "original": {

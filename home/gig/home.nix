@@ -1,7 +1,7 @@
 # This is your home-manager configuration file
 # Use this to configure your home environment (it replaces ~/.config/nixpkgs/home.nix)
 {
-  flakeRoot,
+  # flakeRoot,
   inputs,
   overlays,
   lib,
@@ -9,16 +9,17 @@
   pkgs,
   ...
 }:
-let
-  direnvModule = import ./common/optional/direnv.nix { inherit flakeRoot; };
-in
+# let
+#   direnvModule = import ./common/optional/direnv.nix { inherit flakeRoot; };
+# in
 {
   # You can import other home-manager modules here
   imports = [
     # Or modules exported from other flakes (such as nix-colors):
     # inputs.nix-colors.homeManagerModules.default
     ./common/core
-    direnvModule
+    ./common/optional/direnv.nix
+    # direnvModule
   ];
   nix = {
     package = lib.mkDefault pkgs.nix;
