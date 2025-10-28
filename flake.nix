@@ -17,10 +17,7 @@
 
     # nixos-hardware, to fix hardware issues and firmware for specific machines
     # found at: https://github.com/NixOS/nixos-hardware
-    nixos-hardware = {
-      url = "github:nixos/nixos-hardware";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    nixos-hardware.url = "github:nixos/nixos-hardware";
 
     #################### Utilities ####################
     # Flake Utils (used internally by some other utilities and locked to this one version for sanities sake)
