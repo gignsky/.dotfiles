@@ -23,9 +23,18 @@
         "usb_storage"
         "sd_mod"
       ];
-      kernelModules = [ ];
+      kernelModules = [ "amdgpu" ];
     };
     kernelModules = [ "kvm-amd" ];
+
+    # AMD GPU page on nixos wiki:
+    # https://nixos.wiki/wiki/AMD_GPU
+
+    kernelParams = [
+      # needed for GCN1 (Southern Island) cards i.e. my shitty second AMD card
+      "radeon.si_support=0"
+      "amdgpu.si_support=1"
+    ];
     extraModulePackages = [ ];
   };
   fileSystems = {
