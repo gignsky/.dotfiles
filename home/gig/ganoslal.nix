@@ -12,7 +12,7 @@
     # inputs.nix-colors.homeManagerModules.default
 
     ./home.nix
-    # ./common/optional/vscode
+    ./common/optional/hyprland
     # ./cams-countertop.nix
   ];
 
