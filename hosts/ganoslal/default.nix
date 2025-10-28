@@ -61,7 +61,7 @@
       variant = "";
     };
 
-    videoDrivers = [ "amdgpu" ];
+    # videoDrivers = [ "amdgpu" ];
   };
 
   # Allow unfree packages
