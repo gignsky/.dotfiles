@@ -50,11 +50,15 @@
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+  services.xserver = {
 
-  # Configure keymap in X11
-  services.xserver.xkb = {
-    layout = "us";
-    variant = "";
+    # Configure keymap in X11
+    xkb = {
+      layout = "us";
+      variant = "";
+    };
+
+    videoDrivers = [ "amdgpu" ];
   };
 
   # Allow unfree packages
