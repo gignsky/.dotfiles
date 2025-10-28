@@ -293,6 +293,22 @@
           # > Our main home-manager configuration file <
           modules = [ ./home/gig/ganoslal.nix ];
         };
+
+        # mganos - unused with mganos having a wsl instance
+        "gig@mganos" = home-manager.lib.homeManagerConfiguration {
+          inherit pkgs; # Home-manager requires 'pkgs' instance
+          extraSpecialArgs = {
+            inherit
+              inputs
+              outputs
+              configLib
+              system
+              ;
+            overlays = import ./overlays { inherit inputs; };
+          };
+          # > Our main home-manager configuration file <
+          modules = [ ./home/gig/mganos.nix ];
+        };
       };
 
       # Custom packages to be shared or upstreamed.
