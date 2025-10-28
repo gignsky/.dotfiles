@@ -15,11 +15,11 @@
       # };
     };
 
-    # Haven't quite figured out how to use this yet
-    # hardware = {
-    #   url = "github:nixos/nixos-hardware";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
+    # nixos-hardware, to fix hardware issues and firmware for specific machines
+    hardware = {
+      url = "github:nixos/nixos-hardware";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     #################### Utilities ####################
     # Flake Utils (used internally by some other utilities and locked to this one version for sanities sake)
@@ -184,6 +184,9 @@
             #   home-manager.extraSpecialArgs = specialArgs;
             # }
             ./hosts/merlin
+
+            # https://github.com/NixOS/nixos-hardware/tree/master/framework/16-inch/7040-amd
+            inputs.hardware.nixosModules.framework-16-7040-amd
           ];
         };
 
