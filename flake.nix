@@ -164,16 +164,16 @@
           ];
         };
 
-        #wsl based vm
-        full-vm = nixpkgs.lib.nixosSystem {
-          inherit system specialArgs;
-          modules = [
-            { system.stateVersion = "25.05"; }
-            "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
-            "${nixpkgs}/nixos/modules/installer/cd-dvd/channel.nix"
-            ./hosts/full-vm
-          ];
-        };
+        # #wsl based vm
+        # full-vm = nixpkgs.lib.nixosSystem {
+        #   inherit system specialArgs;
+        #   modules = [
+        #     { system.stateVersion = "25.05"; }
+        #     "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
+        #     "${nixpkgs}/nixos/modules/installer/cd-dvd/channel.nix"
+        #     ./hosts/full-vm
+        #   ];
+        # };
 
         # # Merlin configuration entrypoint - unused as merlin has a wsl instance
         merlin = nixpkgs.lib.nixosSystem {
@@ -187,18 +187,17 @@
           ];
         };
 
-        # # Not yet working, but this is the entrypoint for a tdarr node
-        # tdarr-node = nixpkgs.lib.nixosSystem {
-        #   inherit system specialArgs;
-        #   # > Our main nixos configuration file <
-        #   modules = [
-        #     # home-manager.nixosModules.home-manager
-        #     # {
-        #     #   home-manager.extraSpecialArgs = specialArgs;
-        #     # }
-        #     ./hosts/tdarr-node
-        #   ];
-        # };
+        ganosLal = nixpkgs.lib.nixosSystem {
+          inherit system specialArgs;
+          # > Our main nixos configuration file <
+          modules = [
+            # home-manager.nixosModules.home-manager
+            # {
+            #   home-manager.extraSpecialArgs = specialArgs;
+            # }
+            ./hosts/ganosLal
+          ];
+        };
       };
 
       # Standalone home-manager configuration entrypoint
@@ -257,13 +256,21 @@
           modules = [ ./home/gig/merlin.nix ];
         };
 
-        # # tdarr-node
-        # "gig@tdarr-node" = home-manager.lib.homeManagerConfiguration {
-        #   inherit pkgs; # Home-manager requires 'pkgs' instance
-        #   extraSpecialArgs = { inherit inputs outputs configLib; };
-        #   # > Our main home-manager configuration file <
-        #   modules = [ ./home/gig/tdarr-node.nix ];
-        # };
+        # ganosLal - unused with ganosLal having a wsl instance
+        "gig@ganosLal" = home-manager.lib.homeManagerConfiguration {
+          inherit pkgs; # Home-manager requires 'pkgs' instance
+          extraSpecialArgs = {
+            inherit
+              inputs
+              outputs
+              configLib
+              system
+              ;
+            overlays = import ./overlays { inherit inputs; };
+          };
+          # > Our main home-manager configuration file <
+          modules = [ ./home/gig/ganosLal.nix ];
+        };
       };
 
       # Custom packages to be shared or upstreamed.
