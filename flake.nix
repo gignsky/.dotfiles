@@ -425,6 +425,7 @@
             statix
             deadnix
             nix
+            fzf
             #unstable packages
             # unstable.statix
             # personal packages
