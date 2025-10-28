@@ -17,6 +17,7 @@
   ];
 
   home.packages = with pkgs; [
+    ytmdesktop
     # plex-media-player
     # remmina
     # bitwarden-cli
