@@ -1,9 +1,7 @@
 # This is your home-manager configuration file
 # Use this to configure your home environment (it replaces ~/.config/nixpkgs/home.nix)
 {
-  inputs,
-  outputs,
-  # , config,
+  # inputs,
   pkgs,
   ...
 }:
@@ -12,26 +10,22 @@
   imports = [
     # Or modules exported from other flakes (such as nix-colors):
     # inputs.nix-colors.homeManagerModules.default
+
     ./home.nix
+    # ./common/optional/vscode
+    # ./cams-countertop.nix
   ];
 
-  nixpkgs = {
-    # You can add overlays here
-    overlays = [
-      # Add overlays your own flake exports (from overlays and pkgs dir):
-      outputs.overlays.additions
-      # outputs.overlays.modifications
-      outputs.overlays.unstable-packages
-    ];
-  };
-
   home.packages = with pkgs; [
-    inputs.flake-iter.packages.${system}.default
-    unstable.yt-dlp
-    mosh
-    qdirstat
+    ytmdesktop
+    # plex-media-player
+    # remmina
+    # bitwarden-cli
+    # bitwarden-desktop
+    # discord
+    # anydesk
   ];
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
-  home.stateVersion = "24.05";
+  home.stateVersion = "25.05";
 }
