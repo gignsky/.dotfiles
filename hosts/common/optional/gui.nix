@@ -7,14 +7,12 @@ _:
   services.displayManager.sddm.enable = true;
   services.xserver = {
     enable = true;
-    desktopManager.plasma5.enable = true;
-    xkb.layout = "us";
-    xkb.variant = "";
-    resolutions = [
-      {
-        x = 1920;
-        y = 1080;
-      }
-    ];
+    # desktopManager.plasma5.enable = true;
+    # resolutions = [
+    #   {
+    #     x = 1920;
+    #     y = 1080;
+    #   }
+    # ];
   };
 }
