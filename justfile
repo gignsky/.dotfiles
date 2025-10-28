@@ -1,7 +1,8 @@
 # SOPS_FILE := "../nix-secrets/secrets.yaml"
 
 default:
-	@just --list | bat --file-name "justfile"
+	# @just --list | bat --file-name "justfile"
+	@just --choose
 
 pre-pull-stash:
 	nix-shell -p lolcat --run "echo 'Running pre-pull stash on all files in dotfiles and nix-secrets' | lolcat 2> /dev/null"
