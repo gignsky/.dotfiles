@@ -27,6 +27,7 @@
     # (configLib.relativeToRoot "hosts/common/optional/window-manager.nix")
     (configLib.relativeToRoot "hosts/common/optional/firefox.nix")
     # ../common/optional/xrdp.nix
+    (configLib.relativeToRoot "hosts/common/optional/samba.nix")
 
     #gig users
     (configLib.relativeToRoot "hosts/common/users/gig")
