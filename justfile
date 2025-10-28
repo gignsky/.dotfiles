@@ -1,7 +1,8 @@
 # SOPS_FILE := "../nix-secrets/secrets.yaml"
 
 default:
-	@just --list | bat --file-name "justfile"
+	# @just --list | bat --file-name "justfile"
+	@just --choose
 
 pre-pull-stash:
 	nix-shell -p lolcat --run "echo 'Running pre-pull stash on all files in dotfiles and nix-secrets' | lolcat 2> /dev/null"
@@ -10,11 +11,20 @@ pre-pull-stash:
 	git stash push -m "pre-pull"
 	cd ~/.dotfiles
 	
+post-pull-stash:
+  nix-shell -p lolcat --run "echo 'Running post-pull stash to unstash files stashed before the pre-pull' | lolcat 2> /dev/null"
+  @- git stash pop "stash@{0}"
+  cd ~/nix-secrets
+  @- git stash pop "stash@{0}"
+  cd ~/.dotfiles
+  nix-shell -p lolcat --run "echo 'Post-Pull Unstash Complete' | lolcat 2> /dev/null"
+
 pull:
 	nix-shell -p lolcat --run "echo 'Running git pull on all files in dotfiles and nix-secrets' | lolcat 2> /dev/null"
 	just pre-pull-stash
 	git pull
 	just pull-nix-secrets
+	just post-pull-stash
 
 pull-rebuild:
 	just pull
@@ -45,7 +55,7 @@ rebuild-pre:
 
 dont-fuck-my-build:
 	git ls-files --others --exclude-standard -- '*.nix' | xargs -r git add -v
-	nix flake update nix-secrets
+	nix flake update nix-secrets --commit-lock-file
 	nix-shell -p lolcat --run 'echo "Very little chance your build is fucked! 👍" | lolcat 2> /dev/null'
 
 switch args="":
@@ -331,31 +341,26 @@ diff:
 
 #edit all sops files then rekey
 sops:
-	nix-shell -p lolcat --run 'echo "Editing ~/nix-secrets/secrets.yaml" | lolcat 2> /dev/null'
+	nix-shell -p lolcat --run 'echo "Editing ~/nix-secrets/.sops.yaml" | lolcat 2> /dev/null'
 	vi ~/nix-secrets/.sops.yaml
+	nix-shell -p lolcat --run 'echo "Editing ~/nix-secrets/secrets.yaml" | lolcat 2> /dev/null'
 	sops ~/nix-secrets/secrets.yaml
 	just rekey
 
 #edit .sops.yaml only (no rekey)
-sops-edit:
+sops-config-edit:
 	nix-shell -p lolcat --run 'echo "Editing ~/nix-secrets/.sops.yaml" | lolcat 2> /dev/null'
-	nano ~/nix-secrets/.sops.yaml
+	vi ~/nix-secrets/.sops.yaml
 
-# # Update the keys in the secrets file
-# rekey:
-# 	just dont-fuck-my-build
-# 	nix-shell -p lolcat --run 'echo "Updating ~/nix-secrets/secrets.yaml" | lolcat 2> /dev/null'
-# 	cd ../nix-secrets && (\
-# 	nix-shell -p sops --run "sops updatekeys -y secrets.yaml" && \
-# 	git add -u && (git commit -m "chore: rekey" || true) && git push \
-# 	)
-# 	nix-shell -p lolcat --run 'echo "Updated Secrets!" | lolcat 2> /dev/null'
-# 	just dont-fuck-my-build
+#edit secrets.yaml only (no rekey)
+sops-edit:
+  nix-shell -p lolcat --run 'echo "Editing ~/nix-secrets/secrets.yaml" | lolcat 2> /dev/null'
+  sops ~/nix-secrets/secrets.yaml
 
 # Update the keys in the secrets file without pre-commit hooks (for bootstrap)
 rekey:
   just dont-fuck-my-build
-  nix-shell -p lolcat --run 'echo "Updating ~/nix-secrets/secrets.yaml" | lolcat 2> /dev/null'
+  nix-shell -p lolcat --run 'echo "Rekeying with sops: ~/nix-secrets/secrets.yaml" | lolcat 2> /dev/null'
   cd ../nix-secrets && (\
   nix-shell -p sops --run "sops updatekeys -y secrets.yaml" && \
   git add -u && (git commit --no-verify -m "chore: rekey" || true) && git push \
