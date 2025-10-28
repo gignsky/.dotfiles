@@ -28,7 +28,7 @@ echo "Home-Manager Rebuilding..."
 #   exit 1
 # fi
 # rm "$output_file"
-home-manager switch --flake .#gig@"$HOST"
+home-manager switch -b backup --flake .#gig@"$HOST"
 gen=$(home-manager generations 2>/dev/null | head -n 1)
 git commit -a --allow-empty -m "gig@$HOST: $gen" || true
 popd || exit
