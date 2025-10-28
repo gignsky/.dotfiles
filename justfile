@@ -12,10 +12,11 @@ pre-pull-stash:
 	
 post-pull-stash:
   nix-shell -p lolcat --run "echo 'Running post-pull stash to unstash files stashed before the pre-pull' | lolcat 2> /dev/null"
-  -git stash pop "stash@{0}"
+  @- git stash pop "stash@{0}"
   cd ~/nix-secrets
-  -git stash pop "stash@{0}"
+  @- git stash pop "stash@{0}"
   cd ~/.dotfiles
+  nix-shell -p lolcat --run "echo 'Post-Pull Unstash Complete' | lolcat 2> /dev/null"
 
 pull:
 	nix-shell -p lolcat --run "echo 'Running git pull on all files in dotfiles and nix-secrets' | lolcat 2> /dev/null"
