@@ -9,11 +9,11 @@
       open = false;
       nvidiaSettings = true;
       prime = {
-        sync.enable = false;
+        sync.enable = true;
         nvidiaBusId = "PCI:45:0:0";
         amdgpuBusId = "PCI:23:0:0";
       };
     };
-    graphics.enable = false;
+    graphics.enable = true;
   };
 }
