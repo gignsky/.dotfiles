@@ -1,0 +1,7 @@
+_:
+
+{
+  #hyperland
+
+  #wayland
+}
