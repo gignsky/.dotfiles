@@ -19,10 +19,10 @@
   home.packages = with pkgs; [
     ytmdesktop
     # plex-media-player
-    # remmina
+    remmina
     # bitwarden-cli
-    # bitwarden-desktop
-    # discord
+    bitwarden-desktop
+    discord
     # anydesk
   ];
 
