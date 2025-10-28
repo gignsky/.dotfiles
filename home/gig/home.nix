@@ -2,7 +2,7 @@
 # Use this to configure your home environment (it replaces ~/.config/nixpkgs/home.nix)
 {
   # flakeRoot,
-  inputs,
+  # inputs,
   overlays,
   lib,
   # , config,
@@ -54,7 +54,6 @@
     # quick-results
     # upjust
     # cargo-update
-    inputs.flake-iter.packages.${system}.default
 
     pdfarranger
     pdf4qt
