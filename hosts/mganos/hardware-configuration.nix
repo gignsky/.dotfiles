@@ -12,6 +12,8 @@
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
   ];
+  networking.hostName = lib.mkForce "mganos";
+
   boot = {
 
     initrd.availableKernelModules = [
