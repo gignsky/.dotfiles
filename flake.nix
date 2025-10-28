@@ -39,7 +39,7 @@
       };
     };
 
-    flake-iter.url = "github:determinatesystems/flake-iter";
+    # flake-iter.url = "github:determinatesystems/flake-iter";
 
     # Pre-commit hooks for managing Git hooks declaratively
     pre-commit-hooks.url = "github:cachix/git-hooks.nix";
