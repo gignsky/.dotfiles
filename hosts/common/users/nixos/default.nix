@@ -33,7 +33,6 @@ in
 #   # outputs.overlays.wrap-packages # example for overlays
 # ];
 {
-  environment.systemPackages = with pkgs; [ kitty ];
   config =
     lib.recursiveUpdate fullUserConfig
       #this is the second argument to recursiveUpdate
