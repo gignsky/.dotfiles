@@ -37,6 +37,12 @@
       };
     };
 
+    hyprland.url = "github:hyprwm/Hyprland";
+    hyprland-plugins = {
+      url = "github:hyprwm/hyprland-plugins";
+      inputs.hyprland.follows = "hyprland";
+    };
+
     # flake-iter.url = "github:determinatesystems/flake-iter";
 
     # Pre-commit hooks for managing Git hooks declaratively
