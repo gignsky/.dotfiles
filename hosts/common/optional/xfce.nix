@@ -5,7 +5,7 @@ _:
     # gui stuff
 
     # configure keymap in x11
-    displayManager.sddm.enable = true;
+    displayManager.ly.enable = true;
     xserver = {
       enable = true;
       # displayManager.lightdm.enable = true;

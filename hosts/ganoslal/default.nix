@@ -23,7 +23,7 @@
     (configLib.relativeToRoot "hosts/common/core")
 
     # optional
-    # (configLib.relativeToRoot "hosts/common/optional/xfce.nix")
+    (configLib.relativeToRoot "hosts/common/optional/xfce.nix")
     (configLib.relativeToRoot "hosts/common/optional/hyprland.nix")
     (configLib.relativeToRoot "hosts/common/optional/firefox.nix")
     # ../common/optional/xrdp.nix
