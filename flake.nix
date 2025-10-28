@@ -17,7 +17,7 @@
 
     # nixos-hardware, to fix hardware issues and firmware for specific machines
     # found at: https://github.com/NixOS/nixos-hardware
-    hardware = {
+    nixos-hardware = {
       url = "github:nixos/nixos-hardware";
       inputs.nixpkgs.follows = "nixpkgs";
     };
@@ -187,7 +187,7 @@
             ./hosts/merlin
 
             # https://github.com/NixOS/nixos-hardware/tree/master/framework/16-inch/7040-amd
-            inputs.hardware.nixosModules.framework-16-7040-amd
+            inputs.nixos-hardware.nixosModules.framework-16-7040-amd
           ];
         };
 
