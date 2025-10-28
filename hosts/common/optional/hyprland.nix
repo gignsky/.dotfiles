@@ -1,6 +1,16 @@
-{ pkgs, inputs, ... }:
+{
+  lib,
+  pkgs,
+  inputs,
+  ...
+}:
 
 {
+  services.displayManager = {
+    ly.enable = true;
+    sddm.enable = lib.mkForce false;
+    defaultSession = "hyprland";
+  };
   #hyperland
   programs.hyprland = {
     enable = true;
@@ -9,6 +19,5 @@
 
   services = {
     xserver.enable = true;
-    displayManager.defaultSession = "hyprland";
   };
 }
