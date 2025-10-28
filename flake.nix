@@ -16,6 +16,7 @@
     };
 
     # nixos-hardware, to fix hardware issues and firmware for specific machines
+    # found at: https://github.com/NixOS/nixos-hardware
     hardware = {
       url = "github:nixos/nixos-hardware";
       inputs.nixpkgs.follows = "nixpkgs";
