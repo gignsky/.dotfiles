@@ -8358,21 +8358,6 @@
         "type": "github"
       }
     },
-    "hardware": {
-      "locked": {
-        "lastModified": 1760958188,
-        "narHash": "sha256-2m1S4jl+GEDtlt2QqeHil8Ny456dcGSKJAM7q3j/BFU=",
-        "owner": "nixos",
-        "repo": "nixos-hardware",
-        "rev": "d6645c340ef7d821602fd2cd199e8d1eed10afbc",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nixos",
-        "repo": "nixos-hardware",
-        "type": "github"
-      }
-    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -10417,6 +10402,21 @@
         "shallow": true,
         "type": "git",
         "url": "ssh://git@github.com/gignsky/nix-secrets.git"
+      }
+    },
+    "nixos-hardware": {
+      "locked": {
+        "lastModified": 1760958188,
+        "narHash": "sha256-2m1S4jl+GEDtlt2QqeHil8Ny456dcGSKJAM7q3j/BFU=",
+        "owner": "nixos",
+        "repo": "nixos-hardware",
+        "rev": "d6645c340ef7d821602fd2cd199e8d1eed10afbc",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "repo": "nixos-hardware",
+        "type": "github"
       }
     },
     "nixos-wsl": {
@@ -17191,9 +17191,9 @@
         "flake-utils": "flake-utils",
         "gigvim": "gigvim",
         "git-aliases": "git-aliases_5",
-        "hardware": "hardware",
         "home-manager": "home-manager_18",
         "nix-secrets": "nix-secrets_18",
+        "nixos-hardware": "nixos-hardware",
         "nixos-wsl": "nixos-wsl_18",
         "nixpkgs": "nixpkgs_95",
         "nixpkgs-unstable": "nixpkgs-unstable_18",
