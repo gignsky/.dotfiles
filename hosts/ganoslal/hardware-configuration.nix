@@ -11,10 +11,10 @@
 {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
+    # ./nvidia.nix
   ];
   boot = {
     initrd = {
-
       availableKernelModules = [
         "nvme"
         "ahci"
