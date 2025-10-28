@@ -25,7 +25,7 @@
     # optional
     (configLib.relativeToRoot "hosts/common/optional/xfce.nix")
     # (configLib.relativeToRoot "hosts/common/optional/window-manager.nix")
-    # (configLib.relativeToRoot "hosts/common/optional/firefox.nix")
+    (configLib.relativeToRoot "hosts/common/optional/firefox.nix")
     # ../common/optional/xrdp.nix
 
     #gig users
