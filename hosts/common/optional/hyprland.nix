@@ -17,6 +17,8 @@
     package = inputs.hyprland.packages.${pkgs.system}.hyprland;
   };
 
+  environment.systemPackages = [ pkgs.kitty ];
+
   services = {
     xserver.enable = true;
   };
