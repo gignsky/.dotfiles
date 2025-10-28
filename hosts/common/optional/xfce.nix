@@ -1,20 +1,22 @@
 _:
 
 {
-  # gui stuff
+  services = {
+    # gui stuff
 
-  # configure keymap in x11
-  services.displayManager.sddm.enable = true;
-  services.xserver = {
-    enable = true;
-    # displayManager.lightdm.enable = true;
-    desktopManager.xfce.enable = true;
-    # desktopManager.plasma5.enable = true;
-    # resolutions = [
-    #   {
-    #     x = 1920;
-    #     y = 1080;
-    #   }
-    # ];
+    # configure keymap in x11
+    displayManager.sddm.enable = true;
+    xserver = {
+      enable = true;
+      # displayManager.lightdm.enable = true;
+      desktopManager.xfce.enable = true;
+      # desktopManager.plasma5.enable = true;
+      # resolutions = [
+      #   {
+      #     x = 1920;
+      #     y = 1080;
+      #   }
+      # ];
+    };
   };
 }
