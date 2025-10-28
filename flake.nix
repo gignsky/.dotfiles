@@ -187,7 +187,7 @@
           ];
         };
 
-        ganosLal = nixpkgs.lib.nixosSystem {
+        ganoslal = nixpkgs.lib.nixosSystem {
           inherit system specialArgs;
           # > Our main nixos configuration file <
           modules = [
@@ -195,7 +195,7 @@
             # {
             #   home-manager.extraSpecialArgs = specialArgs;
             # }
-            ./hosts/ganosLal
+            ./hosts/ganoslal
           ];
         };
       };
@@ -256,8 +256,8 @@
           modules = [ ./home/gig/merlin.nix ];
         };
 
-        # ganosLal - unused with ganosLal having a wsl instance
-        "gig@ganosLal" = home-manager.lib.homeManagerConfiguration {
+        # ganoslal - unused with ganoslal having a wsl instance
+        "gig@ganoslal" = home-manager.lib.homeManagerConfiguration {
           inherit pkgs; # Home-manager requires 'pkgs' instance
           extraSpecialArgs = {
             inherit
@@ -269,7 +269,7 @@
             overlays = import ./overlays { inherit inputs; };
           };
           # > Our main home-manager configuration file <
-          modules = [ ./home/gig/ganosLal.nix ];
+          modules = [ ./home/gig/ganoslal.nix ];
         };
       };
 

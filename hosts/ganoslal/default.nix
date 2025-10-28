@@ -40,7 +40,7 @@
   ];
 
   networking = {
-    hostName = "ganosLal";
+    hostName = "ganoslal";
     # hostId should be a unique 8-character (hexadecimal) string, especially if using ZFS.
     # You can generate one with: head -c4 /dev/urandom | od -An -tx1 | tr -d ' \n'
     hostId = "f12caece";
