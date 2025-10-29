@@ -26,7 +26,7 @@
     discord
     # anydesk
     gpu-viewer
-    kitty
+    kitty # shouldn't be neccecary with the envPkg in the hyprland.nix file
   ];
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
