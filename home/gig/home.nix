@@ -36,8 +36,8 @@
     sessionVariables = {
       FLAKE = "$HOME/.dotfiles/.";
       SHELL = "nu";
-      # TERM = "kitty";
-      # TERMINAL = "kitty";
+      TERM = "kitty";
+      TERMINAL = "kitty";
       # MANPAGER = "batman"; # see ./cli/bat.nix
     };
   };
