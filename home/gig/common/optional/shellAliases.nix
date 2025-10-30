@@ -3,7 +3,7 @@
   # quit = "exit"; # Should update to use new super-exit program
   _ = "sudo";
   dot = "cd ~/.dotfiles";
-  work = "cd ~/workingFile";
+  work = "cd ~/workingFile/";
   # ll = "ls -lh";
   lla = "eza -gla";
   # cp = "cp -rv";
