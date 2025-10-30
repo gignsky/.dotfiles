@@ -24,7 +24,8 @@
   diddy = "touch";
 
   #recursive listing for searching
-  lsr = "ls **/* \| where type == file \| sort-by size";
+  # need to write a nushell script to make this work since it uses pipes
+  # lsr = "ls **/* \| where type == file \| sort-by size";
 
   # ssh
   spacedock = "ssh -i ~/.ssh/gment gig@192.168.51.2";
