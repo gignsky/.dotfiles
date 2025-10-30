@@ -24,7 +24,7 @@
   diddy = "touch";
 
   #recursive listing for searching
-  lsr = "ls **/* | where type == file | sort-by size";
+  lsr = "ls **/* \| where type == file \| sort-by size";
 
   # ssh
   spacedock = "ssh -i ~/.ssh/gment gig@192.168.51.2";
