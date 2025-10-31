@@ -17,7 +17,10 @@
     package = inputs.hyprland.packages.${pkgs.system}.hyprland;
   };
 
-  environment.systemPackages = [ pkgs.kitty ];
+  environment.systemPackages = with pkgs; [
+    kitty
+    rofi-wayland # runner for starting programs ad-hoc
+  ];
 
   services = {
     xserver.enable = true;
