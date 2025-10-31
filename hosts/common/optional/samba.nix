@@ -33,7 +33,7 @@ in
     (newMount "important-app-data" "/home/gig/mnt/important-app-data" "192.168.51.3" "1000" "100")
     (newMount "nzbget" "/home/gig/mnt/nzbget" "192.168.51.3" "1000" "100")
     (newMount "tdarr-cache" "/home/gig/mnt/tdarr-cache" "192.168.51.3" "1000" "100")
-    (newMount "appraisal-backup" "/home/gig/test-mount" "192.168.51.3" "1000" "100")
+    (newMount "appraisal-backup" "/home/gig/appraisal-backup" "192.168.51.3" "1000" "100")
     # (newMount "media" "/home/gig/mnt/dad/media" "192.168.4.15" "1000" "100")
   ];
 
