@@ -24,14 +24,14 @@
 
     # optional
     (configLib.relativeToRoot "hosts/common/optional/xfce.nix")
-    # (configLib.relativeToRoot "hosts/common/optional/window-manager.nix")
+    (configLib.relativeToRoot "hosts/common/optional/hyprland.nix")
     (configLib.relativeToRoot "hosts/common/optional/firefox.nix")
     # ../common/optional/xrdp.nix
     (configLib.relativeToRoot "hosts/common/optional/samba.nix")
 
     #gig users
     (configLib.relativeToRoot "hosts/common/users/gig")
-    # (configLib.relativeToRoot "hosts/common/users/nixos")
+    (configLib.relativeToRoot "hosts/common/users/nixos")
 
     # wifi
     # (configLib.relativeToRoot "hosts/common/optional/wifi.nix")
