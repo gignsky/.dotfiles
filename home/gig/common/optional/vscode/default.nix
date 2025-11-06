@@ -1,4 +1,4 @@
-{ ... }:
+_:
 
 {
   options.isWSL = lib.mkOption {
@@ -7,5 +7,5 @@
     description = "Set to true if running in WSL.";
   };
 
-  imports = config: if config.isWSL then ./wsl else ./regular;
+  # imports = config: if config.isWSL then ./wsl else ./regular;
 }
