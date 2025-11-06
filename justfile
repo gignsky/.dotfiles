@@ -103,7 +103,7 @@ rebuild-full-new:
 # Rebuild the system and check sops and home manager
 rebuild-full args="":
 	just rebuild {{args}}
-	just home
+	just home {{args}}
 
 single-update:
 	nix run github:gignsky/nix-update-input
