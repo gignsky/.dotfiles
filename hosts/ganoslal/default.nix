@@ -24,13 +24,14 @@
 
     # optional
     (configLib.relativeToRoot "hosts/common/optional/xfce.nix")
-    # (configLib.relativeToRoot "hosts/common/optional/window-manager.nix")
+    (configLib.relativeToRoot "hosts/common/optional/hyprland.nix")
     (configLib.relativeToRoot "hosts/common/optional/firefox.nix")
     # ../common/optional/xrdp.nix
+    (configLib.relativeToRoot "hosts/common/optional/samba.nix")
 
     #gig users
     (configLib.relativeToRoot "hosts/common/users/gig")
-    # (configLib.relativeToRoot "hosts/common/users/nixos")
+    (configLib.relativeToRoot "hosts/common/users/nixos")
 
     # wifi
     # (configLib.relativeToRoot "hosts/common/optional/wifi.nix")
@@ -47,14 +48,21 @@
     networkmanager.enable = true;
   };
 
-  # Bootloader.
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
+  boot.loader = {
+    # Bootloader.
+    systemd-boot.enable = true;
+    efi.canTouchEfiVariables = true;
+  };
 
-  # Configure keymap in X11
-  services.xserver.xkb = {
-    layout = "us";
-    variant = "";
+  services.xserver = {
+
+    # Configure keymap in X11
+    xkb = {
+      layout = "us";
+      variant = "";
+    };
+
+    # videoDrivers = [ "amdgpu" ];
   };
 
   # Allow unfree packages

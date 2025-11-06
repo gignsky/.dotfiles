@@ -16,10 +16,8 @@
     };
 
     # nixos-hardware, to fix hardware issues and firmware for specific machines
-    hardware = {
-      url = "github:nixos/nixos-hardware";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # found at: https://github.com/NixOS/nixos-hardware
+    nixos-hardware.url = "github:nixos/nixos-hardware";
 
     #################### Utilities ####################
     # Flake Utils (used internally by some other utilities and locked to this one version for sanities sake)
@@ -37,6 +35,12 @@
         nixpkgs.follows = "nixpkgs";
         flake-utils.follows = "flake-utils";
       };
+    };
+
+    hyprland.url = "github:hyprwm/Hyprland";
+    hyprland-plugins = {
+      url = "github:hyprwm/hyprland-plugins";
+      inputs.hyprland.follows = "hyprland";
     };
 
     # flake-iter.url = "github:determinatesystems/flake-iter";
@@ -186,7 +190,22 @@
             ./hosts/merlin
 
             # https://github.com/NixOS/nixos-hardware/tree/master/framework/16-inch/7040-amd
-            inputs.hardware.nixosModules.framework-16-7040-amd
+            inputs.nixos-hardware.nixosModules.framework-16-7040-amd
+          ];
+        };
+
+        # # Merlin configuration entrypoint - unused as merlin has a wsl instance
+        mganos = nixpkgs.lib.nixosSystem {
+          inherit system specialArgs;
+          modules = [
+            # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
+            # home-manager.nixosModules.home-manager {
+            #   home-manager.extraSpecialArgs = specialArgs;
+            # }
+            ./hosts/mganos
+
+            # https://github.com/NixOS/nixos-hardware/tree/master/framework/16-inch/7040-amd
+            inputs.nixos-hardware.nixosModules.framework-16-7040-amd
           ];
         };
 
@@ -273,6 +292,22 @@
           };
           # > Our main home-manager configuration file <
           modules = [ ./home/gig/ganoslal.nix ];
+        };
+
+        # mganos - unused with mganos having a wsl instance
+        "gig@mganos" = home-manager.lib.homeManagerConfiguration {
+          inherit pkgs; # Home-manager requires 'pkgs' instance
+          extraSpecialArgs = {
+            inherit
+              inputs
+              outputs
+              configLib
+              system
+              ;
+            overlays = import ./overlays { inherit inputs; };
+          };
+          # > Our main home-manager configuration file <
+          modules = [ ./home/gig/mganos.nix ];
         };
       };
 
