@@ -12,18 +12,21 @@
     # inputs.nix-colors.homeManagerModules.default
 
     ./home.nix
-    # ./common/optional/vscode
+    ./common/optional/hyprland
     # ./cams-countertop.nix
   ];
 
   home.packages = with pkgs; [
-    ytmdesktop
-    # plex-media-player
-    # remmina
+    # ytmdesktop
+    youtube-music
+    plex-media-player
+    remmina
     # bitwarden-cli
-    # bitwarden-desktop
-    # discord
+    bitwarden-desktop
+    discord
     # anydesk
+    gpu-viewer
+    kitty # shouldn't be neccecary with the envPkg in the hyprland.nix file
   ];
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion

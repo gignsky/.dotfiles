@@ -11,41 +11,32 @@
 {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
-    ./nvidia.nix
   ];
+  networking.hostName = lib.mkForce "mganos";
+
   boot = {
-    initrd = {
-      availableKernelModules = [
-        "nvme"
-        "ahci"
-        "xhci_pci"
-        "usbhid"
-        "usb_storage"
-        "sd_mod"
-      ];
-      kernelModules = [ "amdgpu" ];
-    };
-    kernelModules = [ "kvm-amd" ];
 
-    # AMD GPU page on nixos wiki:
-    # https://nixos.wiki/wiki/AMD_GPU
-
-    kernelParams = [
-      # needed for GCN1 (Southern Island) cards i.e. my shitty second AMD card
-      "radeon.si_support=0"
-      "amdgpu.si_support=1"
+    initrd.availableKernelModules = [
+      "nvme"
+      "xhci_pci"
+      "thunderbolt"
+      "usbhid"
+      "usb_storage"
+      "sd_mod"
     ];
+    initrd.kernelModules = [ ];
+    kernelModules = [ "kvm-amd" ];
     extraModulePackages = [ ];
   };
   fileSystems = {
 
     "/" = {
-      device = "/dev/disk/by-uuid/14e6d54a-d136-4e87-a04a-6f0585960aad";
+      device = "/dev/disk/by-uuid/e849bdb6-1da1-40f4-a007-3af4f4123800";
       fsType = "ext4";
     };
 
     "/boot" = {
-      device = "/dev/disk/by-uuid/D47B-8DEC";
+      device = "/dev/disk/by-uuid/71ED-323B";
       fsType = "vfat";
       options = [
         "fmask=0077"
@@ -55,7 +46,7 @@
   };
 
   swapDevices = [
-    { device = "/dev/disk/by-uuid/18dd5063-c9bc-4db5-bf9e-1bbec5435e25"; }
+    { device = "/dev/disk/by-uuid/ea66a316-3a4e-4d48-82d0-9b3f07093a1a"; }
   ];
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
@@ -63,7 +54,8 @@
   # still possible to use this option, but it's recommended to use it in conjunction
   # with explicit per-interface declarations with `networking.interfaces.<interface>.useDHCP`.
   networking.useDHCP = lib.mkDefault true;
-  # networking.interfaces.enp39s0.useDHCP = lib.mkDefault true;
+  # networking.interfaces.enp194s0f3u2u1.useDHCP = lib.mkDefault true;
+  # networking.interfaces.wlp2s0.useDHCP = lib.mkDefault true;
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
