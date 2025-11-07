@@ -28,6 +28,7 @@ in
       "100"
     )
     (newMount "vulcan" "/home/gig/mnt/vulcan" "192.168.51.3" "1000" "100")
+    (newMount "media" "/home/gig/mnt/media" "192.168.51.3" "1000" "100")
     (newMount "appraisals" "/home/gig/mnt/appraisals" "192.168.51.21" "1000" "100")
     (newMount "proxmox-backup-share" "/home/gig/mnt/proxmox_backups" "192.168.51.3" "1000" "100")
     (newMount "important-app-data" "/home/gig/mnt/important-app-data" "192.168.51.3" "1000" "100")
