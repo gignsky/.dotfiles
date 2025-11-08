@@ -7,7 +7,7 @@
   # ll = "ls -lh";
   lla = "eza -gla";
   # cp = "cp -rv";
-  mv = "mv -v";
+  # mv = "mv -v";
   rd = "rmdir";
   rdd = "rm -rfv";
   cls = "clear";
