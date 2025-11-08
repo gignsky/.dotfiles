@@ -84,10 +84,10 @@
     };
 
     # tax-matrix - currently on develop branch
-    tax-matrix = {
-      url = "github:gignsky/tax-matrix/develop";
-      flake = true;
-    };
+    # tax-matrix = {
+    #   url = "github:gignsky/tax-matrix/develop";
+    #   flake = true;
+    # };
 
     gigvim.url = "github:gignsky/gigvim";
 

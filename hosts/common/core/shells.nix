@@ -31,7 +31,7 @@
     # Personal packages
     # wrap.wrap # example for overlays
     inputs.wrapd.packages.${system}.wrapd
-    inputs.tax-matrix.packages.${system}.tax-matrix
+    # inputs.tax-matrix.packages.${system}.tax-matrix
   ];
 
   programs = {
