@@ -69,7 +69,7 @@ in
         # │ Custom Functions Loaded from Resource Directory          │
         # │ Sourced via configLib.scanPaths for modular NuShell code.│
         # └──────────────────────────────────────────────────────────┘
-        # CUSToME FUNCTIONS GO HERE: ${customNuFunctions}
+        ${customNuFunctions}
       '';
     };
     zoxide = {
