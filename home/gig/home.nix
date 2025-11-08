@@ -49,6 +49,7 @@
 
   # Programs
   home.packages = with pkgs; [
+    bat-extras.batman
     # shell packages defined in this repo
     supertree
     # quick-results
