@@ -6,7 +6,7 @@
   work = "cd ~/workingFile/";
   # ll = "ls -lh";
   lla = "eza -gla";
-  # cp = "cp -rv";
+  cp = "cp -rv";
   mv = "mv -v";
   rd = "rmdir";
   rdd = "rm -rfv";
