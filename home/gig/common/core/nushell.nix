@@ -4,6 +4,7 @@
   outputs,
   system,
   configLib,
+  lib,
   ...
 }:
 let
@@ -12,7 +13,7 @@ let
 
   # Utilizes the provided configLib.scanPaths function to read all .nu files
   # in the directory and concatenate their contents into a single string.
-  customNuFunctions = configLib.scanPaths nuResourcesPath;
+  customNuFunctions = lib.concatStringsSep "\n\n" (configLib.scanPaths nuResourcesPath);
 in
 {
   # overlays
