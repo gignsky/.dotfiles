@@ -4,8 +4,15 @@ default:
 	# @just --list | bat --file-name "justfile"
 	@just --choose
 
+#perform a lock update
+lock:
+  @nix-shell -p lolcat --run "echo 'Locking Nix Flake & Commiting Lock File' | lolcat 2> /dev/null"
+  nix flake lock --commit-lock-file
+  @nix-shell -p lolcat --run "echo 'For your convience, the two most recent git commit have been posted below:' | lolcat 2> /dev/null"
+  git log -2
+
 pre-pull-stash:
-	nix-shell -p lolcat --run "echo 'Running pre-pull stash on all files in dotfiles and nix-secrets' | lolcat 2> /dev/null"
+	@nix-shell -p lolcat --run "echo 'Running pre-pull stash on all files in dotfiles and nix-secrets' | lolcat 2> /dev/null"
 	git stash push -m "pre-pull"
 	cd ~/nix-secrets
 	git stash push -m "pre-pull"
