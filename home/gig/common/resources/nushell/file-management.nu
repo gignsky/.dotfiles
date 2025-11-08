@@ -15,7 +15,7 @@ def cp [from: path, to: path] {
   mkdir $dest_dir
 
   # Call the original, built-in 'cp' command using 'core cp'.
-  core cp $from $to
+  core cp -rv $from $to
 }
 
 # This function shadows the default 'mv' command.
@@ -27,5 +27,5 @@ def mv [from: path, to: path] {
   mkdir $dest_dir
   
   # Call the original, built-in 'mv' command.
-  core mv $from $to
+  core mv -v $from $to
 }
