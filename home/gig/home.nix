@@ -36,9 +36,9 @@
     sessionVariables = {
       FLAKE = "$HOME/.dotfiles/.";
       SHELL = "nu";
+      MANPAGER = "${pkgs.bat-extras.batman}/bin/batman";
       TERM = "kitty";
       TERMINAL = "kitty";
-      # MANPAGER = "batman"; # see ./cli/bat.nix
     };
   };
 
@@ -50,6 +50,7 @@
   # Programs
   home.packages = with pkgs; [
     bat-extras.batman
+    man-db
     # shell packages defined in this repo
     supertree
     # quick-results
@@ -123,8 +124,11 @@
   };
 
   # Enable home-manager and git
-  programs.home-manager.enable = true;
-  programs.git.enable = true;
+  programs = {
+    home-manager.enable = true;
+    git.enable = true;
+    man.enable = false; # Overridden by batman
+  };
 
   services.ssh-agent.enable = true;
 
