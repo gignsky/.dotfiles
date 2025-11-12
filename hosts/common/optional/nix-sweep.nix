@@ -12,4 +12,8 @@
   environment.systemPackages = [
     # pkgs.local.nix-sweep
   ];
+  services.nix-sweep = {
+    enable = true;
+    enableDefaultPreset = true;
+  };
 }
