@@ -11808,11 +11808,11 @@
     },
     "nixpkgs-local": {
       "locked": {
-        "lastModified": 1755760207,
-        "narHash": "sha256-mfHKgKo6nZXm53s+Ma1RdqjRk5oSXxnU4WpKYqjRkAw=",
+        "lastModified": 1762941839,
+        "narHash": "sha256-5SQ0sJGuGAUKblwCRnS39lkgyf7Zvn6fhJA1p++wNjI=",
         "ref": "refs/heads/nix-sweep-0.8.0",
-        "rev": "c901314de4f45685beb610e3d0ac30d31aa640f2",
-        "revCount": 1,
+        "rev": "e89c31183d09dd03c8f808381b4b3ce87c168a9b",
+        "revCount": 3,
         "type": "git",
         "url": "file:///home/gig/local_repos/nixpkgs"
       },
