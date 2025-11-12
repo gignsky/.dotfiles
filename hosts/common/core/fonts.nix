@@ -12,6 +12,7 @@ in
         fancy-fonts.packages.${system}.artifex
         fancy-fonts.packages.${system}.monolisa
         nerd-fonts.go-mono
+        times-newer-roman
       ];
     fontconfig = {
       enable = true;
