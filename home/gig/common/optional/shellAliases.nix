@@ -11,6 +11,7 @@
   rd = "rmdir";
   rdd = "rm -rfv";
   cls = "clear";
+  ccls = "clear\; nix run nixpkgs#fastfetch";
   md = "mkdir";
   syst = "systemctl";
   cat = "bat";

@@ -69,7 +69,7 @@
     mtr
     lazygit
     countryfetch
-    fastfetch
+    # fastfetch # not needed as 'ccls' alias auto calls this program
     zellij
     # ncdu # unneccecary due to the ability to use `dua i` for interactive better dua the only downside is that dua doesn't have a way of sorting folders at the top
     ################################################################
