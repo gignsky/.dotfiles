@@ -3,10 +3,10 @@
 
   inputs = {
     #################### Official NixOS and HM Package Sources ####################
-    # nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     # nixpkgs-local.url = "git+file:///home/gig/local_repos/nixpkgs";
-    nixpkgs.url = "git+file:///home/gig/local_repos/nixpkgs";
+    # nixpkgs.url = "git+file:///home/gig/local_repos/nixpkgs";
     # nixos-anywhere.url = "github:nix-community/nixos-anywhere";
 
     nixos-wsl = {
@@ -27,7 +27,7 @@
 
     # Home manager
     home-manager = {
-      url = "github:nix-community/home-manager/release-25.05";
+      url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
