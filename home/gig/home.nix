@@ -57,6 +57,12 @@
     # upjust
     # cargo-update
 
+    #nix tools
+    nix-du
+    nix-tree
+    nix-query-tree-viewer
+    nix-visualize
+
     pdfarranger
     pdf4qt
 
