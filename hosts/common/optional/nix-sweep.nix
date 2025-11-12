@@ -1,7 +1,4 @@
 { outputs, pkgs, ... }:
-let
-  inherit (pkgs.stdenv.hostPlatform) system;
-in
 {
   nixpkgs = {
     # You can add overlays here
@@ -13,6 +10,6 @@ in
     ];
   };
   environment.systemPackages = [
-    pkgs.local.nix-sweep.packages.${system}.default
+    pkgs.local.nix-sweep
   ];
 }
