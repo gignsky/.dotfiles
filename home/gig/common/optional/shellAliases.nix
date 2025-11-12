@@ -15,7 +15,7 @@
   syst = "systemctl";
   cat = "bat";
   alsmod = "nano $env.HOME/.dotfiles/home/gig/common/optional/shellAliases.nix";
-  # als = "alias";
+  als = "help aliases";
   cd = "z";
   nd = "nix develop -c nu";
   nr = "nix run";
