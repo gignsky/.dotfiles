@@ -5,6 +5,7 @@
     #################### Official NixOS and HM Package Sources ####################
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # nixpkgs-local.url = "git+file:///home/gig/local_repos/nixpkgs";
     # nixos-anywhere.url = "github:nix-community/nixos-anywhere";
 
     nixos-wsl = {
@@ -21,11 +22,7 @@
 
     #################### Utilities ####################
     # Nix Sweep, a nix store tool
-    nix-sweep = {
-      # url = "github:jzbor/nix-sweep";
-      url = "git+file:///home/gig/local_repos/nix-sweep";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    nix-sweep.url = "github:jzbor/nix-sweep";
 
     # Flake Utils (used internally by some other utilities and locked to this one version for sanities sake)
     flake-utils.url = "github:numtide/flake-utils";
