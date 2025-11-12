@@ -25,6 +25,15 @@
     };
   };
 
+  # When applied, the unstable nixpkgs set (declared in the flake inputs) will
+  # be accessible through 'pkgs.unstable'
+  local-packages = final: _prev: {
+    unstable = import inputs.nixpkgs-local {
+      inherit (final) system;
+      config.allowUnfree = true;
+    };
+  };
+
   # # wrap packages overlay example
   # wrap-packages = final: _prev: {
   #   wrap = {
