@@ -19,14 +19,17 @@ in
       defaultFonts = {
         monospace = [
           "Cartograph CF"
+          "Artifex CF"
           "Monolisa Variable"
           "GoMono Nerd Font Mono"
+          "Times Newer Roman"
         ];
         sansSerif = [
           "Monolisa Variable"
         ];
         serif = [
           "Artifex CF"
+          "Times Newer Roman"
         ];
         # Set emoji font if needed
         # emoji = [
