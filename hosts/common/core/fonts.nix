@@ -8,4 +8,9 @@ in
     fancy-fonts.packages.${system}.artifex
     fancy-fonts.packages.${system}.monolisa
   ];
+
+  # fav nerd font
+  fonts.packages = with pkgs; [
+    nerd-fonts.go-mono
+  ];
 }
