@@ -11806,21 +11806,6 @@
         "type": "github"
       }
     },
-    "nixpkgs-local": {
-      "locked": {
-        "lastModified": 1762945447,
-        "narHash": "sha256-g9/9mcQ6SYrHDPUYqAQqidPyY2c22Lf3XhTDWsN/O3I=",
-        "ref": "refs/heads/nix-sweep-0.8.0",
-        "rev": "1c061dee68e1e50008894056779d615328df516e",
-        "revCount": 5,
-        "type": "git",
-        "url": "file:///home/gig/local_repos/nixpkgs"
-      },
-      "original": {
-        "type": "git",
-        "url": "file:///home/gig/local_repos/nixpkgs"
-      }
-    },
     "nixpkgs-tectonic": {
       "locked": {
         "lastModified": 1755706679,
@@ -15151,18 +15136,17 @@
     },
     "nixpkgs_96": {
       "locked": {
-        "lastModified": 1760139962,
-        "narHash": "sha256-4xggC56Rub3WInz5eD7EZWXuLXpNvJiUPahGtMkwtuc=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "7e297ddff44a3cc93673bb38d0374df8d0ad73e4",
-        "type": "github"
+        "lastModified": 1762945447,
+        "narHash": "sha256-g9/9mcQ6SYrHDPUYqAQqidPyY2c22Lf3XhTDWsN/O3I=",
+        "ref": "refs/heads/nix-sweep-0.8.0",
+        "rev": "1c061dee68e1e50008894056779d615328df516e",
+        "revCount": 5,
+        "type": "git",
+        "url": "file:///home/gig/local_repos/nixpkgs"
       },
       "original": {
-        "owner": "NixOS",
-        "ref": "nixos-25.05",
-        "repo": "nixpkgs",
-        "type": "github"
+        "type": "git",
+        "url": "file:///home/gig/local_repos/nixpkgs"
       }
     },
     "nixpkgs_97": {
@@ -17217,7 +17201,6 @@
         "nixos-hardware": "nixos-hardware",
         "nixos-wsl": "nixos-wsl_18",
         "nixpkgs": "nixpkgs_96",
-        "nixpkgs-local": "nixpkgs-local",
         "nixpkgs-unstable": "nixpkgs-unstable_18",
         "pre-commit-hooks": "pre-commit-hooks_19",
         "sops-nix": "sops-nix_18",
