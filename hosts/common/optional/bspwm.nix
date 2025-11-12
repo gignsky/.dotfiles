@@ -1,10 +1,10 @@
-{ pkgs, lib, ... }:
+{ pkgs, ... }:
 
 {
   # Enable X server for bspwm
   services.xserver = {
     enable = true;
-    
+
     # Configure keymap in X11
     xkb = {
       layout = "us";
@@ -27,29 +27,29 @@
   environment.systemPackages = with pkgs; [
     # Window manager
     bspwm
-    sxhkd          # Hotkey daemon for bspwm
-    
+    sxhkd # Hotkey daemon for bspwm
+
     # Terminal emulator
     kitty
-    
+
     # Application launcher
     rofi
-    
+
     # System utilities
-    polybar        # Status bar
-    picom          # Compositor for transparency and effects
-    feh            # Image viewer and wallpaper setter
-    dunst          # Notification daemon
-    
+    polybar # Status bar
+    picom # Compositor for transparency and effects
+    feh # Image viewer and wallpaper setter
+    dunst # Notification daemon
+
     # File manager
     pcmanfm
-    
+
     # Screenshots
     scrot
-    
+
     # System monitoring
     htop
-    
+
     # Network manager applet
     networkmanagerapplet
   ];
