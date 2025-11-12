@@ -11856,6 +11856,21 @@
         "type": "github"
       }
     },
+    "nixpkgs-local": {
+      "locked": {
+        "lastModified": 1755760207,
+        "narHash": "sha256-mfHKgKo6nZXm53s+Ma1RdqjRk5oSXxnU4WpKYqjRkAw=",
+        "ref": "refs/heads/nix-sweep-0.8.0",
+        "rev": "c901314de4f45685beb610e3d0ac30d31aa640f2",
+        "revCount": 1,
+        "type": "git",
+        "url": "file:///home/gig/local_repos/nixpkgs"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:///home/gig/local_repos/nixpkgs"
+      }
+    },
     "nixpkgs-tectonic": {
       "locked": {
         "lastModified": 1755706679,
@@ -17269,6 +17284,7 @@
         "nixos-hardware": "nixos-hardware",
         "nixos-wsl": "nixos-wsl_18",
         "nixpkgs": "nixpkgs_97",
+        "nixpkgs-local": "nixpkgs-local",
         "nixpkgs-unstable": "nixpkgs-unstable_18",
         "pre-commit-hooks": "pre-commit-hooks_19",
         "sops-nix": "sops-nix_18",
