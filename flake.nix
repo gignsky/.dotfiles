@@ -22,7 +22,8 @@
     #################### Utilities ####################
     # Nix Sweep, a nix store tool
     nix-sweep = {
-      url = "github:jzbor/nix-sweep";
+      # url = "github:jzbor/nix-sweep";
+      url = "git+file:///home/gig/local_repos/nix-sweep";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
