@@ -20,6 +20,12 @@
     nixos-hardware.url = "github:nixos/nixos-hardware";
 
     #################### Utilities ####################
+    # Nix Sweep, a nix store tool
+    nix-sweep = {
+      url = "github:jzbor/nix-sweep";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Flake Utils (used internally by some other utilities and locked to this one version for sanities sake)
     flake-utils.url = "github:numtide/flake-utils";
 
