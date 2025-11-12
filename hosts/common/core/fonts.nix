@@ -4,6 +4,7 @@ let
 in
 {
   fonts = {
+    enableDefaultPackages = true; # defaults to false
     packages =
       with inputs;
       with pkgs;
