@@ -4,6 +4,10 @@
   inputs = {
     #################### Official NixOS and HM Package Sources ####################
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    nixpkgs-may = {
+      url = "github:NixOS/nixpkgs/nixos-25.05";
+      inputs.nixpkgs.rev = "4xggC56Rub3WInz5eD7EZWXuLXpNvJiUPahGtMkwtuc";
+    };
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     # nixpkgs-local.url = "git+file:///home/gig/local_repos/nixpkgs";
     # nixpkgs.url = "git+file:///home/gig/local_repos/nixpkgs";
@@ -27,8 +31,8 @@
 
     # Home manager
     home-manager = {
-      url = "github:nix-community/home-manager/release-25.11";
-      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:nix-community/home-manager/release-25.05";
+      inputs.nixpkgs.follows = "nixpkgs-may";
     };
 
     vscode-server = {
