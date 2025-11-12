@@ -15136,11 +15136,11 @@
     },
     "nixpkgs_96": {
       "locked": {
-        "lastModified": 1762946972,
-        "narHash": "sha256-vbJ9kQxvAy4VyHIf+/snaOaFZWEtzfSVi9ugyrg2t8A=",
+        "lastModified": 1762947290,
+        "narHash": "sha256-oH63k5+Q3T8R4Fx2UIhdFgQhTVd0l56Z+b8KBZZQ3/A=",
         "ref": "refs/heads/nix-sweep-0.8.0",
-        "rev": "fba7f89751b943d1b62318141f2cdf895b49770f",
-        "revCount": 5,
+        "rev": "09d497e18cb6ce4a8b5f9f2e0e3e37ee6517c9af",
+        "revCount": 6,
         "type": "git",
         "url": "file:///home/gig/local_repos/nixpkgs"
       },
