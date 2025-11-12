@@ -77,6 +77,12 @@
       flake = false;
     };
 
+    # private repo with fancy fonts
+    fancy-fonts = {
+      url = "git+ssh://git@github.com/gignsky/personal-fonts-nix";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+
     # Recursive tarballs
     wrapd = {
       url = "github:gignsky/wrapd";
