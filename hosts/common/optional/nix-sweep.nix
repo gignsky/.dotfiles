@@ -12,7 +12,7 @@ in
       outputs.overlays.unstable-packages
     ];
   };
-  # environment.systemPackages = with inputs; [
-  #   nix-sweep.packages.${system}.default
-  # ];
+  environment.systemPackages = [
+    pkgs.local.nix-sweep.packages.${system}.default
+  ];
 }
