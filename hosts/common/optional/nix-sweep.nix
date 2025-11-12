@@ -10,6 +10,6 @@
     ];
   };
   environment.systemPackages = [
-    pkgs.local.nix-sweep
+    # pkgs.local.nix-sweep
   ];
 }
