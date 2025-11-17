@@ -56,6 +56,7 @@
     # quick-results
     # upjust
     # cargo-update
+    opencode
 
     #nix tools
     nix-du
