@@ -30,14 +30,20 @@
       };
 
       mergetool = {
-        # Defines the specific command for the mergetool named 'diffview'.
+        # Defines the specific configuration for the 'diffview' mergetool.
+        # The tool properties (cmd, keepBackup, etc.) must reside directly here.
         diffview = {
-          diffview = {
-            cmd = "nvim --cmd 'set ft=git' -c 'DiffviewOpen --base \"$BASE\" --local \"$LOCAL\" --remote \"$REMOTE\" --mergetool \"$MERGED\"'";
-            keepBackup = false;
-            prompt = false;
-            trustExitCode = true;
-          };
+          # The corrected 'cmd' attribute
+          cmd = "nvim --cmd 'set ft=git' -c 'DiffviewOpen --base \"$BASE\" --local \"$LOCAL\" --remote \"$REMOTE\" --mergetool \"$MERGED\"'";
+
+          # Prevents Git from prompting to delete the temporary .orig file.
+          keepBackup = false;
+
+          # Prevents Git from prompting before launching the tool for each file.
+          prompt = false;
+
+          # ***This is the vital addition to fix the $BASE error.***
+          trustExitCode = true;
         };
       };
     };
