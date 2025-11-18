@@ -19,7 +19,7 @@
         # This command launches Neovim in diff mode on the local and remote files.
         # Diffview.nvim detects this state and takes over the display.
         diffview = {
-          cmd = "nvim -d \"$LOCAL\" \"$REMOTE\"";
+          cmd = "nvim -d \"$REMOTE\" \"$LOCAL\"";
         };
       };
 
