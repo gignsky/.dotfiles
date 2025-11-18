@@ -6288,11 +6288,11 @@
         "snacks-nvim": "snacks-nvim"
       },
       "locked": {
-        "lastModified": 1761622977,
-        "narHash": "sha256-nINgJ3GcUEAoBIX0aKGbvL4scjDFZs+zrPtUa46EG4w=",
+        "lastModified": 1763452290,
+        "narHash": "sha256-HYLSMZ/gym7TM3VphRVxQmA5SVeYjB20DEbqpLfJVC4=",
         "owner": "gignsky",
         "repo": "gigvim",
-        "rev": "6762118586a0c3f00f590dd3790f696bb97d8c9e",
+        "rev": "43061a28d4be40e504c59adaefe1e5b8dc114456",
         "type": "github"
       },
       "original": {
