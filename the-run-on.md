@@ -5,7 +5,7 @@ type this sentence forever, for if it stops. . . I've Died..._
 
 ---
 
-    to the author(s) -- \*of the title -- of the above,
+    to the author(s) -- of the title -- of the above,
 
     We seriously beleieve that you need to put a stop to this, a full stop!
 
