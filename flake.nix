@@ -438,6 +438,8 @@
                 end-of-file-fixer = {
                   enable = true;
                 };
+                #TODO ADD NUSHELL CHECKER
+
                 # nix-flake-check-main-develop = {
                 #   enable = true;
                 #   name = "nix flake check on develop/main";
