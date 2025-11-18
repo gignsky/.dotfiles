@@ -32,18 +32,12 @@
       mergetool = {
         # Defines the specific command for the mergetool named 'diffview'.
         diffview = {
-          # This is a critical command. It opens Neovim and executes the
-          # DiffviewOpen command with all four necessary merge buffers ($BASE,
-          # $LOCAL, $REMOTE, $MERGED) and the required '--mergetool' flag
-          # for conflict resolution.
-          cmd = "nvim --cmd 'set ft=git' -c 'DiffviewOpen --base \"$BASE\" --local \"$LOCAL\" --remote \"$REMOTE\" --mergetool \"$MERGED\"'";
-
-          # Prevents Git from prompting to delete the temporary .orig file.
-          keepBackup = false;
-
-          # Prevents Git from prompting before launching the tool for each file
-          # during a merge conflict resolution session.
-          prompt = false;
+          diffview = {
+            cmd = "nvim --cmd 'set ft=git' -c 'DiffviewOpen --base \"$BASE\" --local \"$LOCAL\" --remote \"$REMOTE\" --mergetool \"$MERGED\"'";
+            keepBackup = false;
+            prompt = false;
+            trustExitCode = true;
+          };
         };
       };
     };
