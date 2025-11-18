@@ -204,20 +204,20 @@
           ];
         };
 
-        # # Merlin configuration entrypoint - unused as merlin has a wsl instance
-        mganos = nixpkgs.lib.nixosSystem {
-          inherit system specialArgs;
-          modules = [
-            # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
-            # home-manager.nixosModules.home-manager {
-            #   home-manager.extraSpecialArgs = specialArgs;
-            # }
-            ./hosts/mganos
-
-            # https://github.com/NixOS/nixos-hardware/tree/master/framework/16-inch/7040-amd
-            inputs.nixos-hardware.nixosModules.framework-16-7040-amd
-          ];
-        };
+        # # GanosLal configuration entrypoint - but to build on merlin's hardware
+        # mganos = nixpkgs.lib.nixosSystem {
+        #   inherit system specialArgs;
+        #   modules = [
+        #     # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
+        #     # home-manager.nixosModules.home-manager {
+        #     #   home-manager.extraSpecialArgs = specialArgs;
+        #     # }
+        #     ./hosts/mganos
+        #
+        #     # https://github.com/NixOS/nixos-hardware/tree/master/framework/16-inch/7040-amd
+        #     inputs.nixos-hardware.nixosModules.framework-16-7040-amd
+        #   ];
+        # };
 
         ganoslal = nixpkgs.lib.nixosSystem {
           inherit system specialArgs;
@@ -304,21 +304,21 @@
           modules = [ ./home/gig/ganoslal.nix ];
         };
 
-        # mganos - unused with mganos having a wsl instance
-        "gig@mganos" = home-manager.lib.homeManagerConfiguration {
-          inherit pkgs; # Home-manager requires 'pkgs' instance
-          extraSpecialArgs = {
-            inherit
-              inputs
-              outputs
-              configLib
-              system
-              ;
-            overlays = import ./overlays { inherit inputs; };
-          };
-          # > Our main home-manager configuration file <
-          modules = [ ./home/gig/mganos.nix ];
-        };
+        # # mganos - unused with mganos having a wsl instance
+        # "gig@mganos" = home-manager.lib.homeManagerConfiguration {
+        #   inherit pkgs; # Home-manager requires 'pkgs' instance
+        #   extraSpecialArgs = {
+        #     inherit
+        #       inputs
+        #       outputs
+        #       configLib
+        #       system
+        #       ;
+        #     overlays = import ./overlays { inherit inputs; };
+        #   };
+        #   # > Our main home-manager configuration file <
+        #   modules = [ ./home/gig/mganos.nix ];
+        # };
       };
 
       # Custom packages to be shared or upstreamed.
