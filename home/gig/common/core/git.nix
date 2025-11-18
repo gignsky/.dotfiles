@@ -34,7 +34,8 @@
         # The tool properties (cmd, keepBackup, etc.) must reside directly here.
         diffview = {
           # The corrected 'cmd' attribute
-          cmd = "nvim --cmd 'set ft=git' -c 'DiffviewOpen --base \"$BASE\" --local \"$LOCAL\" --remote \"$REMOTE\" --mergetool \"$MERGED\"'";
+          # cmd = "nvim --cmd 'set ft=git' -c 'DiffviewOpen --base \"$BASE\" --local \"$LOCAL\" --remote \"$REMOTE\" --mergetool \"$MERGED\"'";
+          cmd = "sh -c 'nvim --cmd \"set ft=git\" -c \"DiffviewOpen --base \\\"$1\\\" --local \\\"$2\\\" --remote \\\"$3\\\" --mergetool \\\"$4\\\"\"'";
 
           # Prevents Git from prompting to delete the temporary .orig file.
           keepBackup = false;
