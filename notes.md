@@ -48,3 +48,7 @@
   - additionally, update the container organization to allow for the funtions
     used in the nginx configuration to be standardized across all the containers
 - configure tdarr and whisparr containers on spacedock
+- write a little git pre checker to check for configurable keywords and prevent
+  merges in the case it find them. i.e. check a branch for commits marked
+  'REVERT ME' and verify they have been Reverted before allowing the merge to
+  succeed.
