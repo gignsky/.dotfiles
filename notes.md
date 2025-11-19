@@ -19,3 +19,10 @@
   domains
 - Add new domains to ddnsupdater, and send them to
   [redirectarr](https://git.gignsky.com/redirectarr)
+- Write a flake repo that contacts cloudflare's api and configures DDNS updater
+  for dns records and also acts as a central point of truth for internal routing
+  in a generated nginx configuration.
+
+  This repo should output container images that can be pulled automatically
+  either by other nixos machines and run or pushed to a registry so that truenas
+  can pull the updates to the configuration.
