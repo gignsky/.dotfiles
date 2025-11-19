@@ -35,6 +35,8 @@
     - also making it so that `cp ./path/to/source/file.ext` simply pastes that
       source file in the current directory i.e. it would be equivilent to:
       `cp ./path/to/source/file.ext .`
+  - a basic fzf enabled queary tui that can be backed into scripts or by being
+    called with before or after a pipe.
   - writing a plugin to go along with the nushell-binary-engine that allows
     nushell to call rust functions explicitly
   - More to come as I think of them...
