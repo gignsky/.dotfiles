@@ -52,3 +52,4 @@
   merges in the case it find them. i.e. check a branch for commits marked
   'REVERT ME' and verify they have been Reverted before allowing the merge to
   succeed.
+- don't forget to keep fixing the git.gignsky.com proxy stuff
