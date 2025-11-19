@@ -67,3 +67,7 @@
 - Look into IPTV section on archer to see if I can get IPTV for plex
 - REMEMBER you exposed spacedock as a DMZ on archer
 - Look into a openWRT router
+- pihole things to block:
+  - reddit ads
+  - mobile ads
+  - _youtube shorts_
