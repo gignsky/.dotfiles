@@ -348,11 +348,9 @@ diff:
 
 #edit all sops files then rekey
 sops:
-	@nix-shell -p lolcat --run 'echo "Editing ~/nix-secrets/.sops.yaml" | lolcat 2> /dev/null'
-	vi ~/nix-secrets/.sops.yaml
-	@nix-shell -p lolcat --run 'echo "Editing ~/nix-secrets/secrets.yaml" | lolcat 2> /dev/null'
-	sops ~/nix-secrets/secrets.yaml
-	just rekey
+        @just sops-config-edit
+        @just sops-edit
+	@just rekey
 
 #edit .sops.yaml only (no rekey)
 sops-config-edit:
@@ -366,14 +364,14 @@ sops-edit:
 
 # Update the keys in the secrets file without pre-commit hooks (for bootstrap)
 rekey:
-  just dont-fuck-my-build
+  @just dont-fuck-my-build
   @nix-shell -p lolcat --run 'echo "Rekeying with sops: ~/nix-secrets/secrets.yaml" | lolcat 2> /dev/null'
   cd ../nix-secrets && (\
   nix-shell -p sops --run "sops updatekeys -y secrets.yaml" && \
   git add -u && (git commit --no-verify -m "chore: rekey" || true) && git push \
   )
   @nix-shell -p lolcat --run 'echo "Updated Secrets!" | lolcat 2> /dev/null'
-  just dont-fuck-my-build
+  @just dont-fuck-my-build
   nix flake update nix-secrets --commit-lock-file
 
 sops-fix:
