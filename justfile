@@ -341,14 +341,14 @@ diff:
 
 #edit all sops files then rekey
 sops:
-        @just sops-config-edit
-        @just sops-edit
-	@just rekey
+  @just sops-config-edit
+  @just sops-edit
+  @just rekey
 
 #edit .sops.yaml only (no rekey)
 sops-config-edit:
-	@nix-shell -p lolcat --run 'echo "Editing ~/nix-secrets/.sops.yaml" | lolcat 2> /dev/null'
-	vi ~/nix-secrets/.sops.yaml
+  @nix-shell -p lolcat --run 'echo "Editing ~/nix-secrets/.sops.yaml" | lolcat 2> /dev/null'
+  vi ~/nix-secrets/.sops.yaml
 
 #edit secrets.yaml only (no rekey)
 sops-edit:
@@ -368,11 +368,11 @@ rekey:
   nix flake update nix-secrets --commit-lock-file
 
 sops-fix:
-	just pre-home
-	just update-nix-secrets
-	systemctl --user reset-failed
-	home-manager switch --refresh --flake ~/.dotfiles/.
-	just home
+  just pre-home
+  just update-nix-secrets
+  systemctl --user reset-failed
+  home-manager switch --refresh --flake ~/.dotfiles/.
+  just home
 
 update-nix-secrets:
 	just rekey
