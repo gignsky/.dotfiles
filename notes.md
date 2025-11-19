@@ -55,3 +55,5 @@
   'REVERT ME' and verify they have been Reverted before allowing the merge to
   succeed.
 - don't forget to keep fixing the git.gignsky.com proxy stuff
+- modify monolisa and personal fancy-fonts to output items for windows as well
+  - see if there is a way to set window's default monospace font
