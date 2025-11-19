@@ -26,6 +26,8 @@
   This repo should output container images that can be pulled automatically
   either by other nixos machines and run or pushed to a registry so that truenas
   can pull the updates to the configuration.
+- Fix up samba mounts to use the user's proper UID and GID based on lib/vars
+  set.
 - Write some nushell functions (maybe using the
   [nushell-binary-engine](https://git.gignsky.com/nushell-binary-engine)) to do
   various things easier than they are normally -- current ideas include:
