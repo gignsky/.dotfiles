@@ -58,3 +58,9 @@
 - don't forget to keep fixing the git.gignsky.com proxy stuff
 - modify monolisa and personal fancy-fonts to output items for windows as well
   - see if there is a way to set window's default monospace font
+- gigvim improvements:
+  - [just-lsp](https://github.com/terror/just-lsp)
+  - add rust-debugging
+  - add nvim-bacon
+  - add gitlab plugin
+  - look to see if any opencode plugins exist for nvim
