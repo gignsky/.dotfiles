@@ -43,3 +43,6 @@
   interactive, maybe using rust and the nushell-binary-engine to select if the
   user would like to repull the images or do other things like clearing
   configured data directories etc.
+  - additionally, update the container organization to allow for the funtions
+    used in the nginx configuration to be standardized across all the containers
+- configure tdarr and whisparr containers on spacedock
