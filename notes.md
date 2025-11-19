@@ -38,3 +38,8 @@
   - writing a plugin to go along with the nushell-binary-engine that allows
     nushell to call rust functions explicitly
   - More to come as I think of them...
+- Update spacedock container configuration to allow for adhoc scripts to be
+  standardized and overridden when needed, also allow for the adhoc script to be
+  interactive, maybe using rust and the nushell-binary-engine to select if the
+  user would like to repull the images or do other things like clearing
+  configured data directories etc.
