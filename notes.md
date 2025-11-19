@@ -26,3 +26,13 @@
   This repo should output container images that can be pulled automatically
   either by other nixos machines and run or pushed to a registry so that truenas
   can pull the updates to the configuration.
+- Write some nushell functions (maybe using the
+  [nushell-binary-engine](https://git.gignsky.com/nushell-binary-engine)) to do
+  various things easier than they are normally -- current ideas include:
+  - Fixing super copy and super move to work properly
+    - also making it so that `cp ./path/to/source/file.ext` simply pastes that
+      source file in the current directory i.e. it would be equivilent to:
+      `cp ./path/to/source/file.ext .`
+  - writing a plugin to go along with the nushell-binary-engine that allows
+    nushell to call rust functions explicitly
+  - More to come as I think of them...
