@@ -64,3 +64,4 @@
   - add nvim-bacon
   - add gitlab plugin
   - look to see if any opencode plugins exist for nvim
+- Look into IPTV section on archer to see if I can get IPTV for plex
