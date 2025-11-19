@@ -348,23 +348,42 @@ diff:
 
 #edit all sops files then rekey
 sops:
-        @just sops-config-edit
-        @just sops-edit
-	@just rekey
+  -just pull-nix-secrets
+  @just sops-config-edit
+  @just sops-edit
+  @just sops-secrets
+  @just rekey
 
 #edit .sops.yaml only (no rekey)
 sops-config-edit:
-	@nix-shell -p lolcat --run 'echo "Editing ~/nix-secrets/.sops.yaml" | lolcat 2> /dev/null'
-	vi ~/nix-secrets/.sops.yaml
+  -just pull-nix-secrets
+  @nix-shell -p lolcat --run 'echo "Editing ~/nix-secrets/.sops.yaml" | lolcat 2> /dev/null'
+  vi ~/nix-secrets/.sops.yaml
 
 #edit secrets.yaml only (no rekey)
 sops-edit:
+  -just pull-nix-secrets
   @nix-shell -p lolcat --run 'echo "Editing ~/nix-secrets/secrets.yaml" | lolcat 2> /dev/null'
   sops ~/nix-secrets/secrets.yaml
+
+#alias for the sops-secrets command
+notes: 
+  vi notes.md
+  # -git add notes.md
+  # -git commit -m "updated notes via just notes"
+  @just sops-secrets
+  # @just rekey
+
+#edit secret notes.mdl only (no rekey)
+sops-secrets:
+  -just pull-nix-secrets
+  @nix-shell -p lolcat --run 'echo "Editing ~/nix-secrets/notes.md" | lolcat 2> /dev/null'
+  sops ~/nix-secrets/notes.md
 
 # Update the keys in the secrets file without pre-commit hooks (for bootstrap)
 rekey:
   @just dont-fuck-my-build
+  -just pull-nix-secrets
   @nix-shell -p lolcat --run 'echo "Rekeying with sops: ~/nix-secrets/secrets.yaml" | lolcat 2> /dev/null'
   cd ../nix-secrets && (\
   nix-shell -p sops --run "sops updatekeys -y secrets.yaml" && \
@@ -375,11 +394,11 @@ rekey:
   nix flake update nix-secrets --commit-lock-file
 
 sops-fix:
-	just pre-home
-	just update-nix-secrets
-	systemctl --user reset-failed
-	home-manager switch --refresh --flake ~/.dotfiles/.
-	just home
+  just pre-home
+  just update-nix-secrets
+  systemctl --user reset-failed
+  home-manager switch --refresh --flake ~/.dotfiles/.
+  just home
 
 update-nix-secrets:
 	just rekey
