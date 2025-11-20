@@ -391,6 +391,14 @@ sops-secrets:
   @nix-shell -p lolcat --run 'echo "Editing ~/nix-secrets/notes.md" | lolcat 2> /dev/null'
   sops ~/nix-secrets/notes.md
 
+notes-commit:
+  @just sops-secrets
+  @nix-shell -p lolcat --run 'echo "Committing notes.md" | lolcat 2> /dev/null'
+  cd ../nix-secrets && (\
+  git add -u && (git commit --no-verify -m "chore: updating notes" || true) && git push \
+  )
+  @nix-shell -p lolcat --run 'echo "Updated Notes!" | lolcat 2> /dev/null'
+
 # Update the keys in the secrets file without pre-commit hooks (for bootstrap)
 rekey:
   @just dont-fuck-my-build
@@ -398,6 +406,7 @@ rekey:
   @nix-shell -p lolcat --run 'echo "Rekeying with sops: ~/nix-secrets/secrets.yaml" | lolcat 2> /dev/null'
   cd ~/nix-secrets && (\
   nix-shell -p sops --run "sops updatekeys -y secrets.yaml" && \
+  nix-shell -p sops --run "sops updatekeys -y notes.md" && \
   git add -u && (git commit --no-verify -m "chore: rekey" || true) && git push \
   )
   @nix-shell -p lolcat --run 'echo "Updated Secrets!" | lolcat 2> /dev/null'
