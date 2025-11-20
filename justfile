@@ -362,10 +362,10 @@ sops-edit:
 #alias for the sops-secrets command
 notes: 
   vi notes.md
-  -git add notes.md
-  -git commit -m "updated notes via just notes"
-  -just sops-secrets
-  -just rekey
+  # -git add notes.md
+  # -git commit -m "updated notes via just notes"
+  @just sops-secrets
+  # @just rekey
 
 #edit secret notes.mdl only (no rekey)
 sops-secrets:
