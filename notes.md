@@ -73,3 +73,23 @@
   - _youtube shorts_
 - research native website surfacing on search engines to require minimal effort
   other than producing content for sites
+- _gscript_ needs some work, basically I think I should start with the following
+  few steps:
+  1. learn how to write a vimPlugin so that a `.gscript` file can be viewed and
+     edited at least in the plainest of text.
+  2. Begin on the greater project `gwriter` a typewriter for the terminal that
+     save files in the propritary `.gscript` that is simply a plain-text file
+     with a bit of metadata stored in there somewhere
+     - functions include things like, when backspacing over a character the
+       imprint of the old character remains; or if you copy the file the copy
+       has a yellow background with different imperfections since it's
+       'carbon-paper' lol
+     - the program should be completely backwards compaitible with simply
+       scanning a typewritten page and adding metadata but it's purpose is to
+       bring the permanance and history of a text's life up to date with the
+       modern era.
+     - would be cool if somehow there was integration with an LLM to sprinkle in
+       some nice glyphs and clipart throughout
+       - if something is pasted into the document it should have some kind of
+         effect around it to indicate the it was literally 'pasted' onto the
+         paper.
