@@ -344,6 +344,7 @@ sops:
   -just pull-nix-secrets
   @just sops-config-edit
   @just sops-edit
+  @just sops-secrets
   @just rekey
 
 #edit .sops.yaml only (no rekey)
@@ -357,6 +358,20 @@ sops-edit:
   -just pull-nix-secrets
   @nix-shell -p lolcat --run 'echo "Editing ~/nix-secrets/secrets.yaml" | lolcat 2> /dev/null'
   sops ~/nix-secrets/secrets.yaml
+
+#alias for the sops-secrets command
+notes: 
+  vi notes.md
+  -git add notes.md
+  -git commit -m "updated notes via just notes"
+  -just sops-secrets
+  -just rekey
+
+#edit secret notes.mdl only (no rekey)
+sops-secrets:
+  -just pull-nix-secrets
+  @nix-shell -p lolcat --run 'echo "Editing ~/nix-secrets/notes.md" | lolcat 2> /dev/null'
+  sops ~/nix-secrets/notes.md
 
 # Update the keys in the secrets file without pre-commit hooks (for bootstrap)
 rekey:
