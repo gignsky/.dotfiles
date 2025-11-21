@@ -368,12 +368,22 @@ sops-edit:
   sops ~/nix-secrets/secrets.yaml
 
 #alias for the sops-secrets command
-notes: 
-  vi notes.md
+notes-edit: 
   # -git add notes.md
   # -git commit -m "updated notes via just notes"
   @just sops-secrets
   # @just rekey
+
+# Edit secret notes and commit
+notes-edit-commit: notes-edit 
+  just rekey
+
+# commit regular note file
+noted:
+  git add notes.md
+  git commit -m "new notes!!"
+  @nix-shell -p lolcat --run 'echo "It is so Noted!!" | lolcat 2> /dev/null'
+
 
 #edit secret notes.mdl only (no rekey)
 sops-secrets:
