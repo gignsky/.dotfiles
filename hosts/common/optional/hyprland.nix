@@ -18,7 +18,8 @@
   };
 
   environment.systemPackages = with pkgs; [
-    kitty
+    wezterm
+    # kitty # TODO get rid of me after deciding
     rofi-wayland # runner for starting programs ad-hoc
   ];
 

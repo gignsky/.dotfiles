@@ -5,6 +5,7 @@
     #################### Official NixOS and HM Package Sources ####################
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # nixpkgs-local.url = "git+file:///home/gig/local_repos/nixpkgs";
     # nixos-anywhere.url = "github:nix-community/nixos-anywhere";
 
     nixos-wsl = {
@@ -20,6 +21,9 @@
     nixos-hardware.url = "github:nixos/nixos-hardware";
 
     #################### Utilities ####################
+    # Nix Sweep, a nix store tool
+    nix-sweep.url = "github:jzbor/nix-sweep";
+
     # Flake Utils (used internally by some other utilities and locked to this one version for sanities sake)
     flake-utils.url = "github:numtide/flake-utils";
 
@@ -37,11 +41,12 @@
       };
     };
 
-    hyprland.url = "github:hyprwm/Hyprland";
-    hyprland-plugins = {
-      url = "github:hyprwm/hyprland-plugins";
-      inputs.hyprland.follows = "hyprland";
-    };
+    # PENDING REMOVAL AS SOON AS HYPERLAND IS FOR SURE DEAD
+    # hyprland.url = "github:hyprwm/Hyprland";
+    # hyprland-plugins = {
+    #   url = "github:hyprwm/hyprland-plugins";
+    #   inputs.hyprland.follows = "hyprland";
+    # };
 
     # flake-iter.url = "github:determinatesystems/flake-iter";
 
@@ -90,10 +95,10 @@
     };
 
     # tax-matrix - currently on develop branch
-    tax-matrix = {
-      url = "github:gignsky/tax-matrix/develop";
-      flake = true;
-    };
+    # tax-matrix = {
+    #   url = "github:gignsky/tax-matrix/develop";
+    #   flake = true;
+    # };
 
     gigvim.url = "github:gignsky/gigvim";
 
@@ -200,20 +205,20 @@
           ];
         };
 
-        # # Merlin configuration entrypoint - unused as merlin has a wsl instance
-        mganos = nixpkgs.lib.nixosSystem {
-          inherit system specialArgs;
-          modules = [
-            # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
-            # home-manager.nixosModules.home-manager {
-            #   home-manager.extraSpecialArgs = specialArgs;
-            # }
-            ./hosts/mganos
-
-            # https://github.com/NixOS/nixos-hardware/tree/master/framework/16-inch/7040-amd
-            inputs.nixos-hardware.nixosModules.framework-16-7040-amd
-          ];
-        };
+        # # GanosLal configuration entrypoint - but to build on merlin's hardware
+        # mganos = nixpkgs.lib.nixosSystem {
+        #   inherit system specialArgs;
+        #   modules = [
+        #     # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
+        #     # home-manager.nixosModules.home-manager {
+        #     #   home-manager.extraSpecialArgs = specialArgs;
+        #     # }
+        #     ./hosts/mganos
+        #
+        #     # https://github.com/NixOS/nixos-hardware/tree/master/framework/16-inch/7040-amd
+        #     inputs.nixos-hardware.nixosModules.framework-16-7040-amd
+        #   ];
+        # };
 
         ganoslal = nixpkgs.lib.nixosSystem {
           inherit system specialArgs;
@@ -300,21 +305,21 @@
           modules = [ ./home/gig/ganoslal.nix ];
         };
 
-        # mganos - unused with mganos having a wsl instance
-        "gig@mganos" = home-manager.lib.homeManagerConfiguration {
-          inherit pkgs; # Home-manager requires 'pkgs' instance
-          extraSpecialArgs = {
-            inherit
-              inputs
-              outputs
-              configLib
-              system
-              ;
-            overlays = import ./overlays { inherit inputs; };
-          };
-          # > Our main home-manager configuration file <
-          modules = [ ./home/gig/mganos.nix ];
-        };
+        # # mganos - unused with mganos having a wsl instance
+        # "gig@mganos" = home-manager.lib.homeManagerConfiguration {
+        #   inherit pkgs; # Home-manager requires 'pkgs' instance
+        #   extraSpecialArgs = {
+        #     inherit
+        #       inputs
+        #       outputs
+        #       configLib
+        #       system
+        #       ;
+        #     overlays = import ./overlays { inherit inputs; };
+        #   };
+        #   # > Our main home-manager configuration file <
+        #   modules = [ ./home/gig/mganos.nix ];
+        # };
       };
 
       # Custom packages to be shared or upstreamed.
@@ -434,6 +439,8 @@
                 end-of-file-fixer = {
                   enable = true;
                 };
+                #TODO ADD NUSHELL CHECKER
+
                 # nix-flake-check-main-develop = {
                 #   enable = true;
                 #   name = "nix flake check on develop/main";

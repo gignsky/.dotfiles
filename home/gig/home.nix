@@ -36,9 +36,9 @@
     sessionVariables = {
       FLAKE = "$HOME/.dotfiles/.";
       SHELL = "nu";
-      TERM = "kitty";
-      TERMINAL = "kitty";
-      # MANPAGER = "batman"; # see ./cli/bat.nix
+      MANPAGER = "${pkgs.bat-extras.batman}/bin/batman";
+      TERM = "wezterm";
+      TERMINAL = "wezterm";
     };
   };
 
@@ -49,11 +49,21 @@
 
   # Programs
   home.packages = with pkgs; [
+    bat-extras.batman
+    man-db
     # shell packages defined in this repo
     supertree
     # quick-results
     # upjust
     # cargo-update
+    opencode
+    bun # required for opencode #FIXME
+
+    #nix tools
+    nix-du
+    nix-tree
+    nix-query-tree-viewer
+    nix-visualize
 
     pdfarranger
     pdf4qt
@@ -67,7 +77,7 @@
     mtr
     lazygit
     countryfetch
-    fastfetch
+    # fastfetch # not needed as 'ccls' alias auto calls this program
     zellij
     # ncdu # unneccecary due to the ability to use `dua i` for interactive better dua the only downside is that dua doesn't have a way of sorting folders at the top
     ################################################################
@@ -122,8 +132,12 @@
   };
 
   # Enable home-manager and git
-  programs.home-manager.enable = true;
-  programs.git.enable = true;
+  programs = {
+    home-manager.enable = true;
+    git.enable = true;
+    man.enable = false; # Overridden by batman
+    wezterm.enable = true;
+  };
 
   services.ssh-agent.enable = true;
 
