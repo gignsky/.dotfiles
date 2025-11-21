@@ -2,11 +2,12 @@
   pkgs,
   inputs,
   outputs,
-  system,
   configLib,
   ...
 }:
 let
+  inherit (pkgs.stdenv.hostPlatform) system;
+
   # The path to the custom NuShell resource files, relative to this module.
   nuResourcesPath = configLib.relativeToRoot "home/gig/common/resources/nushell";
 
