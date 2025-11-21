@@ -5,8 +5,8 @@
     # Main configuration
     settings = {
       # Core setup
-      model = "copilot.claude-sonnet-4.5";
-      small_model = "copilot.claude-haiku-4.5";
+      model = "github-copilot/claude-3-5-sonnet-20241022";
+      small_model = "github-copilot/claude-3-5-haiku-20241022";
       theme = "gruvbox"; # Built-in gruvbox theme
       autoupdate = true;
 
@@ -35,6 +35,11 @@
         # bash = "auto";
         write = "auto";
         # edit = "auto";
+      };
+
+      # Fix Ctrl+Enter for newlines
+      keybinds = {
+        input_newline = "shift+enter,ctrl+enter,ctrl+j";
       };
 
       share = "manual";
