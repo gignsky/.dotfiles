@@ -103,3 +103,6 @@
   - make sure nvidia drivers are up to date
 - research more functionality with opencode relating to expanding
   [sops-nix](https://github.com/Mic92/sops-nix) support
+- when using opencode to plan nixconf converstion to a better template make sure
+  to also have opencode help clean up old branches and create a list of tasks
+  from those branches that might need to be restarted.
