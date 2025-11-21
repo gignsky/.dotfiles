@@ -37,8 +37,8 @@
       FLAKE = "$HOME/.dotfiles/.";
       SHELL = "nu";
       MANPAGER = "${pkgs.bat-extras.batman}/bin/batman";
-      TERM = "kitty";
-      TERMINAL = "kitty";
+      TERM = "wezterm";
+      TERMINAL = "wezterm";
     };
   };
 
