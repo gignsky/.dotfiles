@@ -466,7 +466,7 @@
             git
             pre-commit
             lolcat
-            nixfmt-classic
+            nixfmt-rfc-style
             nil
             age
             ssh-to-age
