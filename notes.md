@@ -96,3 +96,8 @@
 - Patch bug in opencode drv to requires bun
 - package opencode.nvim for nixpkgs
 - create superset of nixpkgs
+- things to do for ganosLal:
+  - configure nvidia GPU to be primary
+  - switch right monitor top with bottom, since the top is currently connected
+    to the RTX card
+  - make sure nvidia drivers are up to date
