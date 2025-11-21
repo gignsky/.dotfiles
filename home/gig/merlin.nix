@@ -22,7 +22,6 @@
     # bitwarden-cli
     # bitwarden-desktop
     # ytmdesktop
-    ytui-music
     discord
     # anydesk
   ];
