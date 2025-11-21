@@ -31,9 +31,6 @@
     }
   '';
 
-  # Enable sound in XFCE
-  sound.enable = true;
-
   # Additional PulseAudio/PipeWire configuration for XFCE
   environment.systemPackages = with pkgs; [
     pavucontrol # PulseAudio Volume Control GUI
