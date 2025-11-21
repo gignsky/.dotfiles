@@ -55,7 +55,9 @@
     git-lfs
     gitflow
     gnupg
-    pinentry
+    # pinentry
+    pinentry-curses
+    # pinentry-gnome3
   ];
   # # Debug statement to ensure the file is being processed
   # environment.etc."gitconfig".text = ''

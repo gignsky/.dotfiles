@@ -1,7 +1,7 @@
 { pkgs, lib, ... }:
 {
   # Enhanced NixOS VM test with additional checks for services, users, networking, and ports.
-  system.build.vmTest = pkgs.nixosTest {
+  system.build.vmTest = pkgs.testers.nixosTest {
     name = "system-test";
 
     nodes.machine =
