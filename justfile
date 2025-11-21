@@ -4,23 +4,30 @@ default:
 	# @just --list | bat --file-name "justfile"
 	@just --choose
 
+#perform a lock update
+lock:
+  @nix-shell -p lolcat --run "echo 'Locking Nix Flake & Commiting Lock File' | lolcat 2> /dev/null"
+  nix flake lock --commit-lock-file
+  @nix-shell -p lolcat --run "echo 'For your convience, the two most recent git commit have been posted below:' | lolcat 2> /dev/null"
+  git log -2
+
 pre-pull-stash:
-	nix-shell -p lolcat --run "echo 'Running pre-pull stash on all files in dotfiles and nix-secrets' | lolcat 2> /dev/null"
+	@nix-shell -p lolcat --run "echo 'Running pre-pull stash on all files in dotfiles and nix-secrets' | lolcat 2> /dev/null"
 	git stash push -m "pre-pull"
 	cd ~/nix-secrets
 	git stash push -m "pre-pull"
 	cd ~/.dotfiles
 	
 post-pull-stash:
-  nix-shell -p lolcat --run "echo 'Running post-pull stash to unstash files stashed before the pre-pull' | lolcat 2> /dev/null"
+  @nix-shell -p lolcat --run "echo 'Running post-pull stash to unstash files stashed before the pre-pull' | lolcat 2> /dev/null"
   @- git stash pop "stash@{0}"
   cd ~/nix-secrets
   @- git stash pop "stash@{0}"
   cd ~/.dotfiles
-  nix-shell -p lolcat --run "echo 'Post-Pull Unstash Complete' | lolcat 2> /dev/null"
+  @nix-shell -p lolcat --run "echo 'Post-Pull Unstash Complete' | lolcat 2> /dev/null"
 
 pull:
-	nix-shell -p lolcat --run "echo 'Running git pull on all files in dotfiles and nix-secrets' | lolcat 2> /dev/null"
+	@nix-shell -p lolcat --run "echo 'Running git pull on all files in dotfiles and nix-secrets' | lolcat 2> /dev/null"
 	just pre-pull-stash
 	git pull
 	just pull-nix-secrets
@@ -28,35 +35,35 @@ pull:
 
 pull-rebuild:
 	just pull
-	nix-shell -p lolcat --run "echo 'Rebuilding...' | lolcat 2> /dev/null"
+	@nix-shell -p lolcat --run "echo 'Rebuilding...' | lolcat 2> /dev/null"
 	just rebuild
-	nix-shell -p lolcat --run "echo 'Rebuilt.' | lolcat 2> /dev/null"
+	@nix-shell -p lolcat --run "echo 'Rebuilt.' | lolcat 2> /dev/null"
 
 pull-home:
-	nix-shell -p lolcat --run "echo 'Rebuilding Home-Manager...' | lolcat 2> /dev/null"
+	@nix-shell -p lolcat --run "echo 'Rebuilding Home-Manager...' | lolcat 2> /dev/null"
 	just pull
 	just home
-	nix-shell -p lolcat --run "echo 'Home-Manager Rebuilt.' | lolcat 2> /dev/null"
+	@nix-shell -p lolcat --run "echo 'Home-Manager Rebuilt.' | lolcat 2> /dev/null"
 
 pull-rebuild-full:
-	nix-shell -p lolcat --run "echo 'Full Rebuild Running...' | lolcat 2> /dev/null"
+	@nix-shell -p lolcat --run "echo 'Full Rebuild Running...' | lolcat 2> /dev/null"
 	just pull-rebuild
 	just pull-home
-	nix-shell -p lolcat --run "echo 'Full Rebuild Complete.' | lolcat 2> /dev/null"
+	@nix-shell -p lolcat --run "echo 'Full Rebuild Complete.' | lolcat 2> /dev/null"
 
 pull-nix-secrets:
 	cd ~/nix-secrets && git fetch && git pull && cd ~/.dotfiles
 
 # Run before every rebuild, every time
 rebuild-pre:
-	nix-shell -p lolcat --run 'echo "[PRE] Rebuilding NixOS..." | lolcat 2> /dev/null'
+	@nix-shell -p lolcat --run 'echo "[PRE] Rebuilding NixOS..." | lolcat 2> /dev/null'
 	just dont-fuck-my-build
-	nix-shell -p lolcat --run 'echo "Updating Nix-Secrets Repo..." | lolcat 2> /dev/null'
+	@nix-shell -p lolcat --run 'echo "Updating Nix-Secrets Repo..." | lolcat 2> /dev/null'
 
 dont-fuck-my-build:
 	git ls-files --others --exclude-standard -- '*.nix' | xargs -r git add -v
 	nix flake update nix-secrets --commit-lock-file
-	nix-shell -p lolcat --run 'echo "Very little chance your build is fucked! 👍" | lolcat 2> /dev/null'
+	@nix-shell -p lolcat --run 'echo "Very little chance your build is fucked! 👍" | lolcat 2> /dev/null'
 
 switch args="":
 	just rebuild {{args}}
@@ -68,18 +75,19 @@ clean:
   rm -rfv ~/.cache/nvf/
   rm -rfv ~/.cache/starship/
   rm -rfv ~/.config/zsh/zplug
+  rm -rfv ~/.local/share/opencode
   rm -rfv result
   quick-results
 
 # Run after every rebuild, some of the time
 rebuild-post:
 	# just check-sops
-	nix-shell -p lolcat --run 'echo "[POST] Rebuilt." | lolcat 2> /dev/null'
+	@nix-shell -p lolcat --run 'echo "[POST] Rebuilt." | lolcat 2> /dev/null'
 
 # Rebuild the system
 rebuild args="":
 	just rebuild-pre
-	nix-shell -p lolcat --run 'echo "[REBUILD] Attempting Rebuild..." | lolcat' 2> /dev/null 
+	@nix-shell -p lolcat --run 'echo "[REBUILD] Attempting Rebuild..." | lolcat' 2> /dev/null 
 	scripts/system-flake-rebuild.sh {{args}}
 	just rebuild-post
 
@@ -93,7 +101,7 @@ rebuild-v args="":
 rebuild-test args="":
 	just rebuild-pre
 	scripts/system-flake-rebuild-test.sh {{args}}
-	nix-shell -p lolcat --run 'echo "[TEST] Finished." | lolcat 2> /dev/null'
+	@nix-shell -p lolcat --run 'echo "[TEST] Finished." | lolcat 2> /dev/null'
 
 # Rebuild-full with new shell
 rebuild-full-new:
@@ -138,12 +146,12 @@ update-rebuild-full:
 check:
 	just dont-fuck-my-build
 	nix flake check --keep-going --allow-import-from-derivation
-	nix-shell -p lolcat --run 'echo "[CHECK] Finished." | lolcat 2> /dev/null'
+	@nix-shell -p lolcat --run 'echo "[CHECK] Finished." | lolcat 2> /dev/null'
 
 check-iso:
 	just dont-fuck-my-build
 	nix flake check --impure --no-build nixos-installer/.
-	nix-shell -p lolcat --run 'echo "[CHECK] Finished." | lolcat 2> /dev/null'
+	@nix-shell -p lolcat --run 'echo "[CHECK] Finished." | lolcat 2> /dev/null'
 
 pre-commit:
 	pre-commit run --all-files
@@ -163,18 +171,18 @@ om *ARGS:
 # Run before every home rebuild, on non-quick build
 pre-home:
 	just dont-fuck-my-build
-	nix-shell -p lolcat --run 'echo "[PRE-HOME] Finished." | lolcat 2> /dev/null'
+	@nix-shell -p lolcat --run 'echo "[PRE-HOME] Finished." | lolcat 2> /dev/null'
 
 # Runs after every home rebuild
 post-home:
-	nix-shell -p lolcat --run 'echo "[POST-HOME] Finished." | lolcat 2> /dev/null'
+	@nix-shell -p lolcat --run 'echo "[POST-HOME] Finished." | lolcat 2> /dev/null'
 
 simple-home *ARGS:
 	./scripts/home-manager-flake-rebuild.sh {{ ARGS }}
 
 home *ARGS:
   just pre-home
-  nix-shell -p lolcat --run 'echo "[HOME] Attempting Home Rebuild..." | lolcat 2> /dev/null'
+  @nix-shell -p lolcat --run 'echo "[HOME] Attempting Home Rebuild..." | lolcat 2> /dev/null'
   just simple-home {{ ARGS }}
   just post-home
 
@@ -194,14 +202,14 @@ new home:
 home-trace:
 	just dont-fuck-my-build
 	home-manager switch --flake ~/.dotfiles/. --show-trace
-	nix-shell -p lolcat --run 'echo "[HOME-TRACE] Finished." | lolcat 2> /dev/null'
+	@nix-shell -p lolcat --run 'echo "[HOME-TRACE] Finished." | lolcat 2> /dev/null'
 
 gc:
-	nix-shell -p lolcat --run 'nix-collect-garbage --delete-old | lolcat 2> /dev/null'
-	nix-shell -p lolcat --run 'nix store gc | lolcat 2> /dev/null'
+	@nix-shell -p lolcat --run 'nix-collect-garbage --delete-old | lolcat 2> /dev/null'
+	@nix-shell -p lolcat --run 'nix store gc | lolcat 2> /dev/null'
 
 pre-build:
-	nix-shell -p lolcat --run 'echo "Pre-Build Starting..." | lolcat 2> /dev/null'
+	@nix-shell -p lolcat --run 'echo "Pre-Build Starting..." | lolcat 2> /dev/null'
 	just dont-fuck-my-build
 	rm -rfv result
 
@@ -211,7 +219,7 @@ build *args:
 	just post-build
 
 post-build:
-	nix-shell -p lolcat --run 'echo "Build Finished." | lolcat 2> /dev/null'
+	@nix-shell -p lolcat --run 'echo "Build Finished." | lolcat 2> /dev/null'
 	quick-results
 
 #
@@ -221,51 +229,51 @@ post-build:
 
 # helper justfile arg
 setup-vm-pre:
-	nix-shell -p lolcat --run 'echo "[VM] Running VM pre-setup..." | lolcat 2> /dev/null'
+	@nix-shell -p lolcat --run 'echo "[VM] Running VM pre-setup..." | lolcat 2> /dev/null'
 	just cleanup-vm
-	nix-shell -p lolcat --run 'echo "[VM] VM pre-setup complete." | lolcat 2> /dev/null'
+	@nix-shell -p lolcat --run 'echo "[VM] VM pre-setup complete." | lolcat 2> /dev/null'
 
 # helper justfile arg
 setup-vm-post:
-	nix-shell -p lolcat --run 'echo "[VM] Running VM post-setup..." | lolcat 2> /dev/null'
-	nix-shell -p lolcat --run 'echo "[VM] Showing Results..." | lolcat 2> /dev/null'
+	@nix-shell -p lolcat --run 'echo "[VM] Running VM post-setup..." | lolcat 2> /dev/null'
+	@nix-shell -p lolcat --run 'echo "[VM] Showing Results..." | lolcat 2> /dev/null'
 	quick-results
-	nix-shell -p lolcat --run 'echo "[VM] Making tmp-iso dir..." | lolcat 2> /dev/null'
+	@nix-shell -p lolcat --run 'echo "[VM] Making tmp-iso dir..." | lolcat 2> /dev/null'
 	mkdir -p ./tmp-iso/nixos-vm
-	nix-shell -p lolcat --run 'echo "[VM] Creating qemu img from ISO..." | lolcat 2> /dev/null'
+	@nix-shell -p lolcat --run 'echo "[VM] Creating qemu img from ISO..." | lolcat 2> /dev/null'
 	nix shell nixpkgs#qemu --command bash -c 'qemu-img create -f qcow2 -q ./tmp-iso/nixos-vm/vm.img 16G'
-	nix-shell -p lolcat --run 'echo "[VM] VM post-setup complete." | lolcat 2> /dev/null'
+	@nix-shell -p lolcat --run 'echo "[VM] VM post-setup complete." | lolcat 2> /dev/null'
 
 
 # helper justfile arg
 setup-vm-minimal:
 	just setup-vm-pre
-	nix-shell -p lolcat --run 'echo "[VM] Building ISO..." | lolcat 2> /dev/null'
+	@nix-shell -p lolcat --run 'echo "[VM] Building ISO..." | lolcat 2> /dev/null'
 	nix build ./nixos-installer#nixosConfigurations.iso.config.system.build.isoImage
 	just setup-vm-post
 
 # helper justfile arg
 setup-vm-full-vm:
 	just setup-vm-pre
-	nix-shell -p lolcat --run 'echo "[VM] Building ISO..." | lolcat 2> /dev/null'
+	@nix-shell -p lolcat --run 'echo "[VM] Building ISO..." | lolcat 2> /dev/null'
 	nix build .#nixosConfigurations.full-vm.config.system.build.isoImage
-	nix-shell -p lolcat --run 'echo "[VM] Cleaning Results dir..." | lolcat 2> /dev/null'
+	@nix-shell -p lolcat --run 'echo "[VM] Cleaning Results dir..." | lolcat 2> /dev/null'
 	just setup-vm-post
 
 # cleanup vm files
 cleanup-vm:
-	nix-shell -p lolcat --run 'echo "[VM] Removing tmp-iso dir..." | lolcat 2> /dev/null'
+	@nix-shell -p lolcat --run 'echo "[VM] Removing tmp-iso dir..." | lolcat 2> /dev/null'
 	rm -rfv ./tmp-iso
-	nix-shell -p lolcat --run 'echo "[VM] tmp-iso Removed." | lolcat 2> /dev/null'
-	nix-shell -p lolcat --run 'echo "[VM] Cleaning Results dir..." | lolcat 2> /dev/null'
+	@nix-shell -p lolcat --run 'echo "[VM] tmp-iso Removed." | lolcat 2> /dev/null'
+	@nix-shell -p lolcat --run 'echo "[VM] Cleaning Results dir..." | lolcat 2> /dev/null'
 	just clean
-	nix-shell -p lolcat --run 'echo "[VM] Finished." | lolcat 2> /dev/null'
+	@nix-shell -p lolcat --run 'echo "[VM] Finished." | lolcat 2> /dev/null'
 
 # helper justfile arg
 call-vm:
-    nix-shell -p lolcat --run 'echo "[VM] Running VM..." | lolcat 2> /dev/null'
+    @nix-shell -p lolcat --run 'echo "[VM] Running VM..." | lolcat 2> /dev/null'
     - nix shell nixpkgs#qemu --command bash -c 'bash scripts/run-iso-vm.sh result/iso/*.iso ./tmp-iso/nixos-vm/vm.img'
-    nix-shell -p lolcat --run 'echo "[VM] VM Closed." | lolcat 2> /dev/null'
+    @nix-shell -p lolcat --run 'echo "[VM] VM Closed." | lolcat 2> /dev/null'
 
 # run vm with minimal iso - while not deleting files afterwards
 vm-minimal:
@@ -279,9 +287,9 @@ vm-full:
 
 # reconnect to vm that has already been created
 vm-reconnect:
-	nix-shell -p lolcat --run 'echo "[VM] Reconnecting to VM..." | lolcat 2> /dev/null'
+	@nix-shell -p lolcat --run 'echo "[VM] Reconnecting to VM..." | lolcat 2> /dev/null'
 	- nix shell nixpkgs#qemu --command bash -c 'bash scripts/run-iso-vm.sh result/iso/*.iso ./tmp-iso/nixos-vm/vm.img --choose'
-	nix-shell -p lolcat --run 'echo "[VM] VM Closed." | lolcat 2> /dev/null'
+	@nix-shell -p lolcat --run 'echo "[VM] VM Closed." | lolcat 2> /dev/null'
 
 # run vm with minimal iso - while deleting files afterwards
 vm-tmp-minimal:
@@ -302,7 +310,7 @@ iso:
 	nix build ./nixos-installer#nixosConfigurations.iso.config.system.build.isoImage
 	just post-build
 	cp result/iso/nixos* ~/virtualization-boot-files/template/iso/.
-	nix-shell -p lolcat --run 'ls ~/virtualization-boot-files/template/iso | grep nixos | lolcat 2> /dev/null'
+	@nix-shell -p lolcat --run 'ls ~/virtualization-boot-files/template/iso | grep nixos | lolcat 2> /dev/null'
 	rm -rfv result
 
 iso-keep:
