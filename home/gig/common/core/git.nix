@@ -3,7 +3,7 @@
 {
   programs.git = {
     enable = true;
-    extraConfig = {
+    settings = {
       user = {
         useConfigOnly = true;
         name = "Maxwell Rupp";

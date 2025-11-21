@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, config, ... }:
 {
   # home.file.".p10k.zsh".source = ../.p10k.zsh.vm;
   imports = [
@@ -18,7 +18,7 @@
       secrets = "$HOME/nix-secrets";
       repos = "$HOME/local_repos";
     };
-    dotDir = ".config/zsh";
+    dotDir = "${config.home.homeDirectory}/.config/zsh";
     enableCompletion = true;
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
