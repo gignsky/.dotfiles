@@ -31,9 +31,10 @@
 
       # Auto-run bash commands (as requested)
       permission = {
-        bash = "auto";
+        # Commented out options do NOT exist
+        # bash = "auto";
         write = "auto";
-        edit = "auto";
+        # edit = "auto";
       };
 
       share = "manual";
