@@ -10,9 +10,10 @@
 {
   # You can import other NixOS modules here
   imports = [
-    # If you want to use modules from other flakes (such as nixos-hardware):
-    # inputs.hardware.nixosModules.common-cpu-amd
-    # inputs.hardware.nixosModules.common-ssd
+    # nixos-hardware modules for optimal driver support
+    inputs.nixos-hardware.nixosModules.common-cpu-amd
+    inputs.nixos-hardware.nixosModules.common-gpu-nvidia-nonprime
+    inputs.nixos-hardware.nixosModules.common-pc-ssd
 
     # You can also split up your configuration and import pieces of it here:
     # ./users.nix
@@ -62,7 +63,11 @@
       variant = "";
     };
 
-    # videoDrivers = [ "amdgpu" ];
+    # Use NVIDIA as primary GPU
+    videoDrivers = [
+      "nvidia"
+      "amdgpu"
+    ];
   };
 
   # Allow unfree packages

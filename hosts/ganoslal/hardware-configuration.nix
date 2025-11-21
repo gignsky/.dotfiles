@@ -12,6 +12,8 @@
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
     ./nvidia.nix
+    # Audio configuration for SPDIF optical output
+    ./audio.nix
   ];
   boot = {
     initrd = {
@@ -23,18 +25,13 @@
         "usb_storage"
         "sd_mod"
       ];
+      # Load AMD GPU module for secondary GPU support
       kernelModules = [ "amdgpu" ];
     };
     kernelModules = [ "kvm-amd" ];
 
-    # AMD GPU page on nixos wiki:
-    # https://nixos.wiki/wiki/AMD_GPU
-
-    kernelParams = [
-      # needed for GCN1 (Southern Island) cards i.e. my shitty second AMD card
-      "radeon.si_support=0"
-      "amdgpu.si_support=1"
-    ];
+    # AMD GPU configuration moved to nvidia.nix for unified management
+    kernelParams = [ ];
     extraModulePackages = [ ];
   };
   fileSystems = {
