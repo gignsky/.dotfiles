@@ -37,28 +37,30 @@
       enable = true;
       enable32Bit = true;
     };
-
-    # Enable SPDIF/optical audio output
-    pulseaudio.enable = false; # We'll use PipeWire instead
   };
 
   # Configure PipeWire for better audio support including SPDIF
   security.rtkit.enable = true;
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
-    # Enable JACK support for professional audio
-    jack.enable = true;
+  services = {
+    # Enable SPDIF/optical audio output
+    pulseaudio.enable = false; # We'll use PipeWire instead
+    pipewire = {
+      enable = true;
+      alsa.enable = true;
+      alsa.support32Bit = true;
+      pulse.enable = true;
 
-    # Configure audio devices including SPDIF
-    extraConfig.pipewire."99-spdif" = {
-      "context.properties" = {
-        "default.clock.rate" = 48000;
-        "default.clock.quantum" = 1024;
-        "default.clock.min-quantum" = 32;
-        "default.clock.max-quantum" = 8192;
+      # Enable JACK support for professional audio
+      jack.enable = true;
+
+      # Configure audio devices including SPDIF
+      extraConfig.pipewire."99-spdif" = {
+        "context.properties" = {
+          "default.clock.rate" = 48000;
+          "default.clock.quantum" = 1024;
+          "default.clock.min-quantum" = 32;
+          "default.clock.max-quantum" = 8192;
+        };
       };
     };
   };
