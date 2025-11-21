@@ -41,6 +41,17 @@
     # (configLib.relativeToRoot "hosts/common/core/bootloader.nix")
   ];
 
+  # Bootloader configuration
+  bootloader = {
+    kind = "refind";
+    refind = {
+      theme = "gruvbox-dark";
+      resolution = "1920 1080";
+      timeout = 5;
+      showTools = true;
+    };
+  };
+
   networking = {
     hostName = "ganoslal";
     # hostId should be a unique 8-character (hexadecimal) string, especially if using ZFS.
@@ -49,11 +60,12 @@
     networkmanager.enable = true;
   };
 
-  boot.loader = {
-    # Bootloader.
-    systemd-boot.enable = true;
-    efi.canTouchEfiVariables = true;
-  };
+  # Remove old systemd-boot configuration - now handled by bootloader.nix
+  # boot.loader = {
+  #   # Bootloader.
+  #   systemd-boot.enable = true;
+  #   efi.canTouchEfiVariables = true;
+  # };
 
   services.xserver = {
 

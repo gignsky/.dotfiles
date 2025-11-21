@@ -4,12 +4,10 @@ let
   sxhkdConfig = configLib.relativeToRoot "hosts/common/resources/bspwm/sxhkd.config";
 in
 {
-  services = {
-    displayManager.ly.enable = true;
-    xserver.windowManager.bspwm = {
-      enable = true;
-      configFile = bspConfig;
-      sxhkd.configFile = sxhkdConfig;
-    };
+  imports = [ (configLib.relativeToRoot "hosts/common/optional/ly.nix") ];
+  services.xserver.windowManager.bspwm = {
+    enable = true;
+    configFile = bspConfig;
+    sxhkd.configFile = sxhkdConfig;
   };
 }

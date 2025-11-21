@@ -1,11 +1,11 @@
-_:
+{ configLib, ... }:
 
 {
+  imports = [ (configLib.relativeToRoot "hosts/common/optional/ly.nix") ];
   services = {
     # gui stuff
 
     # configure keymap in x11
-    displayManager.ly.enable = true;
     xserver = {
       enable = true;
       # displayManager.lightdm.enable = true;
