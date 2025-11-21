@@ -396,7 +396,7 @@ rekey:
   @just dont-fuck-my-build
   -just pull-nix-secrets
   @nix-shell -p lolcat --run 'echo "Rekeying with sops: ~/nix-secrets/secrets.yaml" | lolcat 2> /dev/null'
-  cd ../nix-secrets && (\
+  cd ~/nix-secrets && (\
   nix-shell -p sops --run "sops updatekeys -y secrets.yaml" && \
   git add -u && (git commit --no-verify -m "chore: rekey" || true) && git push \
   )
