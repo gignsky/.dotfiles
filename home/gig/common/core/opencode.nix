@@ -80,6 +80,14 @@
           url = "https://mcp.grep.app";
           enabled = true;
         };
+
+        # DeepWiki for repository documentation and history research
+        deepwiki = {
+          type = "remote";
+          url = "https://mcp.deepwiki.com/sse";
+          enabled = true;
+          timeout = 20000; # 20 second timeout for repo documentation searches
+        };
       };
 
       # Flake-focused formatters
@@ -135,6 +143,7 @@
         Test the configured MCP servers to ensure they're working properly.
         - Wikipedia: Search for a test article
         - ArXiv: Search for recent papers in a specific field
+        - DeepWiki: Query documentation for a popular repository
         - Verify all MCP server connections and functionality
       '';
     };
@@ -158,11 +167,15 @@
       - **ArXiv**: Search and analyze academic papers
         - Command: Uses uvx to run arxiv-mcp-server  
         - Features: Paper search, metadata extraction, research analysis
+      - **DeepWiki**: Research repository documentation and history
+        - URL: https://mcp.deepwiki.com/sse
+        - Features: Access up-to-date docs for any public repo, repository history research
         
       ## MCP Server Usage
       - Servers auto-start when OpenCode launches with MCP support
       - Wikipedia: Ask for article summaries, search topics, get coordinates
       - ArXiv: Search papers by keywords, authors, or topics
+      - DeepWiki: Query documentation for any public repository, research git history
       - Extensible: Additional servers can be added to the mcp.servers config
     '';
   };
