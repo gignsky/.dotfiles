@@ -135,13 +135,6 @@
     git.enable = true;
     man.enable = false; # Overridden by batman
     wezterm.enable = true;
-    opencode = {
-      # https://mynixos.com/home-manager/options/programs.opencode
-      enable = true;
-      # general global AGENTS.md in $XDG_CONFIG_HOME/opencode/AGENTS.md
-      # rules = ''''';
-      #
-    };
   };
 
   services.ssh-agent.enable = true;
