@@ -94,3 +94,5 @@
          effect around it to indicate the it was literally 'pasted' onto the
          paper.
 - Patch bug in opencode drv to requires bun
+- package opencode.nvim for nixpkgs
+- create superset of nixpkgs
