@@ -3,8 +3,17 @@
   inputs,
   outputs,
   system,
+  configLib,
   ...
 }:
+let
+  # The path to the custom NuShell resource files, relative to this module.
+  nuResourcesPath = configLib.relativeToRoot "home/gig/common/resources/nushell";
+
+  # Utilizes the provided configLib.scanPaths function to read all .nu files
+  # in the directory and concatenate their contents into a single string.
+  customNuFunctions = configLib.scanPathsNuShell nuResourcesPath;
+in
 {
   # overlays
   nixpkgs.overlays = [
@@ -55,6 +64,12 @@
                 }
             }
         )
+
+        # ┌──────────────────────────────────────────────────────────┐
+        # │ Custom Functions Loaded from Resource Directory          │
+        # │ Sourced via configLib.scanPaths for modular NuShell code.│
+        # └──────────────────────────────────────────────────────────┘
+        ${customNuFunctions}
       '';
     };
     zoxide = {
