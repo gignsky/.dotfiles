@@ -20,9 +20,9 @@
 
       # Tools configuration
       tools = {
-        edit = true;
+        # edit = true;
         write = true;
-        bash = true;
+        # bash = true;
         grep = true;
         glob = true;
         read = true;
