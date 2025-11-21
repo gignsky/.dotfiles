@@ -101,3 +101,5 @@
   - switch right monitor top with bottom, since the top is currently connected
     to the RTX card
   - make sure nvidia drivers are up to date
+- research more functionality with opencode relating to expanding
+  [sops-nix](https://github.com/Mic92/sops-nix) support
