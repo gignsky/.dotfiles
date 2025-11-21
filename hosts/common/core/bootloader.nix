@@ -5,6 +5,50 @@
   ...
 }:
 with lib;
+let
+  cfg = config.bootloader;
+  inherit (config.boot.loader) efi;
+
+  # rEFInd installation script following NixOS bootloader patterns
+  refindInstallScript = pkgs.writeScript "install-refind.sh" ''
+    #!${pkgs.runtimeShell}
+    set -e
+
+    # Variables passed by NixOS bootloader framework
+    configurationName="$1"
+
+    echo "Installing rEFInd bootloader..."
+
+    # Check that EFI System Partition is mounted
+    if ! ${pkgs.util-linuxMinimal}/bin/findmnt ${efi.efiSysMountPoint} > /dev/null; then
+      echo "Error: EFI System Partition not mounted at ${efi.efiSysMountPoint}" >&2
+      exit 1
+    fi
+
+    # Install rEFInd to the EFI System Partition
+    echo "Running refind-install..."
+    ${pkgs.refind}/bin/refind-install --usedefault ${efi.efiSysMountPoint}
+
+    # Copy our generated configuration
+    echo "Installing rEFInd configuration..."
+    ${pkgs.coreutils}/bin/cp /etc/refind.conf ${efi.efiSysMountPoint}/EFI/refind/refind.conf
+
+    # Note: External themes need to be installed separately
+    # The refind package doesn't include custom themes by default
+    ${lib.optionalString (cfg.refind.theme != null) ''
+      echo "Note: Theme ${cfg.refind.theme} configured - ensure theme files are available in /boot/EFI/refind/themes/"
+    ''}
+
+    # Copy additional rEFInd resources (icons, tools, etc.)
+    echo "Installing rEFInd resources..."
+    ${pkgs.coreutils}/bin/cp -r ${pkgs.refind}/share/refind/icons ${efi.efiSysMountPoint}/EFI/refind/ || true
+    ${pkgs.coreutils}/bin/cp -r ${pkgs.refind}/share/refind/drivers_* ${efi.efiSysMountPoint}/EFI/refind/ || true
+    ${pkgs.coreutils}/bin/cp -r ${pkgs.refind}/share/refind/tools_* ${efi.efiSysMountPoint}/EFI/refind/ || true
+
+    echo "rEFInd installation completed successfully."
+  '';
+
+in
 {
   options.bootloader = {
     kind = mkOption {
@@ -117,7 +161,10 @@ with lib;
       boot.loader = {
         systemd-boot = {
           enable = mkDefault true;
-          inherit (config.bootloader.systemd-boot) configurationLimit consoleMode;
+          inherit (config.bootloader.systemd-boot)
+            configurationLimit
+            consoleMode
+            ;
         };
         grub.enable = mkDefault false;
         efi.canTouchEfiVariables = mkDefault true;
@@ -129,15 +176,20 @@ with lib;
         systemd-boot.enable = mkDefault false;
         grub.enable = mkDefault false;
         efi.canTouchEfiVariables = mkDefault true;
+        efi.efiSysMountPoint = mkDefault "/boot";
       };
 
-      # Install rEFInd using the refind package
+      # Core NixOS bootloader integration
+      system = {
+        build.installBootLoader = refindInstallScript;
+        boot.loader.id = "refind";
+        requiredKernelConfig = with config.lib.kernelConfig; [ (isYes "EFI_STUB") ];
+      };
+
+      # Install rEFInd package
       environment.systemPackages = [ pkgs.refind ];
 
-      # rEFInd configuration
-      boot.loader.efi.efiSysMountPoint = "/boot";
-
-      # Custom refind.conf generation
+      # Generate rEFInd configuration
       environment.etc."refind.conf" = {
         text = ''
           # rEFInd Configuration
@@ -152,23 +204,19 @@ with lib;
           scan_driver_dirs EFI/refind/drivers_x64
           scanfor internal,external,optical,manual
 
-          # OS detection
+          # OS detection  
           dont_scan_volumes "Recovery HD"
           dont_scan_dirs ESP:/EFI/Boot,EFI/Dell,EFI/HP,EFI/Lenovo
 
-          ${lib.optionalString (config.bootloader.refind.theme == "gruvbox-dark") ''
-            # Gruvbox Dark Theme
-            include themes/gruvbox-dark/theme.conf
-          ''}
+          # NixOS kernel detection
+          also_scan_dirs boot,@/boot
 
-          ${lib.optionalString (config.bootloader.refind.theme == "darkmini") ''
-            # Dark Mini Theme  
-            include themes/darkmini/theme.conf
-          ''}
-
-          ${lib.optionalString (config.bootloader.refind.theme == "minimal") ''
-            # Minimal Theme
-            include themes/minimal/theme.conf
+          # Theme configuration (only if theme files are available)
+          ${lib.optionalString (config.bootloader.refind.theme != null) ''
+            # Theme: ${config.bootloader.refind.theme}
+            # Note: Theme files must be manually placed in /boot/EFI/refind/themes/
+            # Uncomment the following line once theme files are installed:
+            # include themes/${config.bootloader.refind.theme}/theme.conf
           ''}
 
           ${config.bootloader.refind.extraConfig}
