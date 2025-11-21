@@ -93,3 +93,4 @@
        - if something is pasted into the document it should have some kind of
          effect around it to indicate the it was literally 'pasted' onto the
          paper.
+- Patch bug in opencode drv to requires bun
