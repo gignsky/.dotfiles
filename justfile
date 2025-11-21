@@ -77,6 +77,7 @@ clean:
   rm -rfv ~/.config/zsh/zplug
   rm -rfv ~/.local/share/opencode
   rm -rfv result
+  rm -rfv *.fd
   quick-results
 
 # Run after every rebuild, some of the time
