@@ -21,7 +21,9 @@
     # remmina
     # bitwarden-cli
     # bitwarden-desktop
-    # discord
+    ytmdesktop
+    # ytmdl # YT Music downloader
+    discord
     # anydesk
   ];
 
