@@ -136,7 +136,6 @@
     home-manager.enable = true;
     git.enable = true;
     man.enable = false; # Overridden by batman
-    wezterm.enable = true;
   };
 
   services.ssh-agent.enable = true;
