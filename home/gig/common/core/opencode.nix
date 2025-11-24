@@ -5,10 +5,10 @@
     # Main configuration
     settings = {
       # Core setup
-      model = "github-copilot/claude-3-5-sonnet-20241022";
-      small_model = "github-copilot/claude-3-5-haiku-20241022";
+      # model = "github-copilot/claude-3-5-sonnet-20241022";
+      # small_model = "github-copilot/claude-3-5-haiku-20241022";
       theme = "gruvbox"; # Built-in gruvbox theme
-      autoupdate = true;
+      # autoupdate = true;
 
       # TUI optimizations
       tui = {
@@ -46,45 +46,45 @@
 
       # MCP servers for extended functionality
       mcp = {
-        # Wikipedia access for research
-        wikipedia = {
-          type = "local";
-          command = [
-            "npx"
-            "wikipedia-mcp"
-          ];
-          enabled = true;
-          timeout = 10000; # 10 second timeout for searches
-        };
-
-        # ArXiv access for academic research
-        arxiv = {
-          type = "local";
-          command = [
-            "uvx"
-            "arxiv-mcp-server"
-          ];
-          enabled = true;
-          timeout = 15000; # 15 second timeout for paper searches
-        };
-
-        # Context7 for documentation search
-        context7 = {
-          type = "remote";
-          url = "https://mcp.context7.com/mcp";
-          enabled = true;
-          # Uncomment and set if you have an API key for higher rate limits
-          # headers = {
-          #   "CONTEXT7_API_KEY" = "{env:CONTEXT7_API_KEY}";
-          # };
-        };
-
-        # GitHub code search via Grep.app
-        gh_grep = {
-          type = "remote";
-          url = "https://mcp.grep.app";
-          enabled = true;
-        };
+        # # Wikipedia access for research
+        # wikipedia = {
+        #   type = "local";
+        #   command = [
+        #     "npx"
+        #     "wikipedia-mcp"
+        #   ];
+        #   enabled = true;
+        #   timeout = 10000; # 10 second timeout for searches
+        # };
+        #
+        # # ArXiv access for academic research
+        # arxiv = {
+        #   type = "local";
+        #   command = [
+        #     "uvx"
+        #     "arxiv-mcp-server"
+        #   ];
+        #   enabled = true;
+        #   timeout = 15000; # 15 second timeout for paper searches
+        # };
+        #
+        # # Context7 for documentation search
+        # context7 = {
+        #   type = "remote";
+        #   url = "https://mcp.context7.com/mcp";
+        #   enabled = true;
+        #   # Uncomment and set if you have an API key for higher rate limits
+        #   # headers = {
+        #   #   "CONTEXT7_API_KEY" = "{env:CONTEXT7_API_KEY}";
+        #   # };
+        # };
+        #
+        # # GitHub code search via Grep.app
+        # gh_grep = {
+        #   type = "remote";
+        #   url = "https://mcp.grep.app";
+        #   enabled = true;
+        # };
 
         # DeepWiki for repository documentation and history research
         deepwiki = {
@@ -153,36 +153,36 @@
       '';
     };
 
-    # Reference your existing AGENTS.md for project-specific rules
-    rules = ''
-      # OpenCode Configuration
-
-      This configuration is managed through home-manager.
-      See AGENTS.md for project-specific guidelines.
-
-      ## Nix Development Focus
-      - Prefer flake-based workflows
-      - Use nix commands over legacy nix-* commands  
-      - Consider reproducibility and purity principles
-
-      ## MCP Servers Available
-      - **Wikipedia**: Access Wikipedia articles, search, summaries
-        - Command: Uses npx to run wikipedia-mcp
-        - Features: Multi-language support, article retrieval, related topics
-      - **ArXiv**: Search and analyze academic papers
-        - Command: Uses uvx to run arxiv-mcp-server  
-        - Features: Paper search, metadata extraction, research analysis
-      - **DeepWiki**: Research repository documentation and history
-        - URL: https://mcp.deepwiki.com/sse
-        - Features: Access up-to-date docs for any public repo, repository history research
-        
-      ## MCP Server Usage
-      - Servers auto-start when OpenCode launches with MCP support
-      - Wikipedia: Ask for article summaries, search topics, get coordinates
-      - ArXiv: Search papers by keywords, authors, or topics
-      - DeepWiki: Query documentation for any public repository, research git history
-      - Extensible: Additional servers can be added to the mcp.servers config
-    '';
+    # # Reference your existing AGENTS.md for project-specific rules
+    # rules = ''
+    #   # OpenCode Configuration
+    #
+    #   This configuration is managed through home-manager.
+    #   See AGENTS.md for project-specific guidelines.
+    #
+    #   ## Nix Development Focus
+    #   - Prefer flake-based workflows
+    #   - Use nix commands over legacy nix-* commands
+    #   - Consider reproducibility and purity principles
+    #
+    #   ## MCP Servers Available
+    #   - **Wikipedia**: Access Wikipedia articles, search, summaries
+    #     - Command: Uses npx to run wikipedia-mcp
+    #     - Features: Multi-language support, article retrieval, related topics
+    #   - **ArXiv**: Search and analyze academic papers
+    #     - Command: Uses uvx to run arxiv-mcp-server
+    #     - Features: Paper search, metadata extraction, research analysis
+    #   - **DeepWiki**: Research repository documentation and history
+    #     - URL: https://mcp.deepwiki.com/sse
+    #     - Features: Access up-to-date docs for any public repo, repository history research
+    #
+    #   ## MCP Server Usage
+    #   - Servers auto-start when OpenCode launches with MCP support
+    #   - Wikipedia: Ask for article summaries, search topics, get coordinates
+    #   - ArXiv: Search papers by keywords, authors, or topics
+    #   - DeepWiki: Query documentation for any public repository, research git history
+    #   - Extensible: Additional servers can be added to the mcp.servers config
+    # '';
   };
 
   # Keep your existing SOPS secret configuration
