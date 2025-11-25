@@ -11,6 +11,36 @@ else
   export HOST
 fi
 
+authenticate_sudo() {
+    echo "🔐 NixOS rebuild requires sudo access..."
+    if ! sudo -n true 2>/dev/null; then
+        if [ -t 0 ] && [ -t 1 ]; then
+            # Interactive terminal available
+            echo "Please enter your password to authenticate sudo:"
+            sudo true || {
+                echo "❌ Sudo authentication failed. Exiting."
+                exit 1
+            }
+            echo "✅ Sudo authentication successful."
+        else
+            # No interactive terminal - provide helpful guidance
+            echo ""
+            echo "❌ No interactive terminal available for sudo authentication."
+            echo ""
+            echo "To fix this, please choose one of the following options:"
+            echo "  1. Run this command from an interactive terminal"
+            echo "  2. First authenticate sudo manually: sudo true"
+            echo "  3. Run the rebuild command directly: sudo nixos-rebuild switch --flake .#\$(hostname)"
+            echo ""
+            exit 1
+        fi
+    else
+        echo "✅ Sudo already authenticated."
+    fi
+}
+
+authenticate_sudo
+
 failable-pre-commit() {
   nix develop -c pre-commit run --all-files
 }
