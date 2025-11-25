@@ -15,6 +15,22 @@
 
   networking.hostName = "nixos";
 
+  # Tailscale configuration (currently disabled)
+  # To enable Tailscale on WSL:
+  # 1. Generate auth key for WSL in Tailscale admin console with these settings:
+  #    - Description: "wsl-nixos-auto-auth"
+  #    - Reusable: Yes, Ephemeral: No, Pre-approved: Yes
+  #    - Expiry: 1 year (or never)
+  # 2. Add "wsl-auth: tskey-auth-..." to tailscale-creds in secrets.yaml
+  # 3. Import the tailscale module in imports above
+  # 4. Uncomment the block below
+  #
+  # tailscale = {
+  #   enable = true;
+  #   enableSSH = false;        # Usually disabled in WSL
+  #   useRoutingFeatures = "none";  # Minimal routing for WSL
+  # };
+
   programs.nix-ld = {
     enable = true;
     package = pkgs.nix-ld;

@@ -31,9 +31,6 @@ in
       cifs-creds = {
         path = "/etc/samba/cifs-creds";
       };
-      tailscale-creds = {
-        path = "/etc/tailscale/creds";
-      };
     };
   };
 }

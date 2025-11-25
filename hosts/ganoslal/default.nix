@@ -48,6 +48,9 @@
     networkmanager.enable = true;
   };
 
+  # Tailscale configuration
+  tailscale.enable = true;
+
   boot.loader = {
     # Bootloader.
     systemd-boot.enable = true;
