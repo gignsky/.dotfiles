@@ -77,7 +77,7 @@ if [[ -z "$IMPORT_LINE" ]]; then
 fi
 
 # Check if the custom config properly imports the original
-IMPORTS_ORIGINAL=$(grep -q "/etc/nixos/hardware-configuration.nix" "$CUSTOM_CONFIG" && echo "yes" || echo "no")
+IMPORTS_ORIGINAL=$(grep -q -E "\./hardware-configuration\.nix|/etc/nixos/hardware-configuration\.nix" "$CUSTOM_CONFIG" && echo "yes" || echo "no")
 
 if [[ "$IMPORTS_ORIGINAL" == "yes" ]]; then
     print_success "Custom hardware config properly imports original configuration"
