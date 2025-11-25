@@ -93,7 +93,7 @@
 
       # Start compositor for better visuals
       if command -v picom >/dev/null 2>&1; then
-        picom -b &
+        picom --backend glx -b &
       fi
     '';
   };
