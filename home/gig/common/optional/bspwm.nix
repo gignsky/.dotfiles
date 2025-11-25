@@ -91,9 +91,9 @@
         bspc monitor -d I II III IV V VI VII VIII IX X
       fi
 
-      # Start compositor for better visuals - use xrender for multi-GPU compatibility
+      # Start compositor for better visuals - auto-detect backend for multi-GPU compatibility
       if command -v picom >/dev/null 2>&1; then
-        picom --backend xrender -b &
+        picom -b &
       fi
     '';
   };

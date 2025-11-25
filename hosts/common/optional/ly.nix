@@ -1,5 +1,4 @@
-{ pkgs, ... }:
-{
+_: {
   services.displayManager.ly = {
     enable = true;
     settings = {
@@ -9,8 +8,8 @@
       hide_borders = false;
       hide_key_hints = false;
 
-      # FIX: Shell session command - use zsh which user has configured
-      shell = "${pkgs.zsh}/bin/zsh";
+      # FIX: Shell session command - use nushell which matches user's default shell
+      shell = "/run/current-system/sw/bin/nu";
     };
   };
 }
