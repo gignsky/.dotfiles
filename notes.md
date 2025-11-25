@@ -8,6 +8,12 @@
 
 ## Things to do...
 
+- Read following pages:
+  - [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
+  - [AGENTS.md](https://agents.md/)
+- add octo to gigvim for prs and merges
+- NixPkgs RFC Suggestion, allowing for systemwide or flake-wide of flake inputs
+  with custom headers? i.e. `giglib:` in place of `github:`
 - Tape Archival Research [Gemini](https://gemini.google.com/share/4a8aba01628f)
 - nixpkgs git cloning helper
   [Gemini](https://gemini.google.com/share/37aa93598977) -- note, this could be

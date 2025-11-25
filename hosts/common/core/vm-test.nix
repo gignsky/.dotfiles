@@ -1,15 +1,18 @@
 { pkgs, lib, ... }:
 {
   # Enhanced NixOS VM test with additional checks for services, users, networking, and ports.
-  system.build.vmTest = pkgs.nixosTest {
+  system.build.vmTest = pkgs.testers.nixosTest {
     name = "system-test";
 
     nodes.machine =
       { pkgs, ... }:
       {
-        # VM-specific configuration
-        virtualisation.memorySize = 2048;
-        virtualisation.cores = 2;
+        virtualisation = {
+          # VM-specific configuration - Aggressive performance settings
+          memorySize = 8192; # 8GB for fast test execution
+          cores = 6; # 6 cores for parallel operations
+          diskSize = 10240;
+        }; # 10GB disk space
 
         # Basic system configuration
         system.stateVersion = "25.05";
