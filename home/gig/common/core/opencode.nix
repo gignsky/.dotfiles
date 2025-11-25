@@ -29,12 +29,14 @@
         list = true;
       };
 
-      # Auto-run bash commands (as requested)
+      # Auto-approve all operations without prompts
       permission = {
-        # Commented out options do NOT exist
-        # bash = "auto";
-        write = "auto";
-        # edit = "auto";
+        write = "allow";
+        edit = "allow";
+        bash = "allow";
+        webfetch = "allow";
+        doom_loop = "allow";
+        external_directory = "allow";
       };
 
       # Fix Ctrl+Enter for newlines
