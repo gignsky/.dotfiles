@@ -7,7 +7,6 @@
   imports = [
     (configLib.relativeToRoot "hosts/common/core")
     (configLib.relativeToRoot "hosts/common/users/gig")
-    (configLib.relativeToRoot "hosts/common/optional/samba.nix")
     (configLib.relativeToRoot "hosts/common/optional/nix-sweep.nix")
     # (configLib.relativeToRoot "hosts/common/optional/neofetch.nix")
     # inputs.nixos-wsl.modules

@@ -54,7 +54,6 @@
   imports = [
     (configLib.relativeToRoot "hosts/common/core")
     (configLib.relativeToRoot "hosts/common/users/gig")
-    (configLib.relativeToRoot "hosts/common/optional/samba.nix")
     (configLib.relativeToRoot "hosts/common/optional/sshd-with-root-login.nix")
     # (configLib.relativeToRoot "hosts/common/optional/neofetch.nix")
     # inputs.nixos-wsl.modules
