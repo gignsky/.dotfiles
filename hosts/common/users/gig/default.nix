@@ -40,7 +40,7 @@ in
       {
         users = {
           groups.${configVars.username} = {
-            gid = 1701;
+            gid = configVars.guid;
           };
           mutableUsers = false; # required for password to be set via sops during system activation
           users.${configVars.username} = {
@@ -60,8 +60,8 @@ in
               "networkmanager"
             ];
 
-            # sets the user's id to 1701
-            uid = lib.mkDefault 1701;
+            # sets the user's id from configVars
+            uid = lib.mkDefault configVars.uid;
 
             # These get placed into /etc/ssh/authorized_keys.d/<name> on nixos
             openssh.authorizedKeys.keys = lib.lists.forEach pubKeys (key: builtins.readFile key);
