@@ -17,10 +17,10 @@ let
     pkgs.writeShellScriptBin name ''
       # Auto-generated wrapper for ${scriptPath}
       # Dependencies: ${builtins.concatStringsSep ", " (map (pkg: pkg.name or "unknown") dependencies)}
-      
+
       # Make dependencies available in PATH
       export PATH="${pkgs.lib.makeBinPath dependencies}:$PATH"
-      
+
       # Execute the original script with all arguments
       exec ${pkgs.bash}/bin/bash "${scriptPath}" "$@"
     ''
@@ -58,83 +58,6 @@ let
       description = "Validates hardware configuration synchronization and GPU setup";
     };
 
-    # System rebuild script  
-    system-flake-rebuild = makeScriptPackage {
-      name = "system-flake-rebuild";
-      scriptPath = ../scripts/system-flake-rebuild.sh;
-      dependencies = with pkgs; [
-        bash
-        nix
-        nixos-rebuild
-        hostname
-      ];
-      description = "Rebuilds NixOS system configuration from flake";
-    };
-
-    # Home Manager rebuild script
-    home-manager-flake-rebuild = makeScriptPackage {
-      name = "home-manager-flake-rebuild";
-      scriptPath = ../scripts/home-manager-flake-rebuild.sh;
-      dependencies = with pkgs; [
-        bash
-        nix
-        home-manager
-        hostname
-      ];
-      description = "Rebuilds Home Manager configuration from flake";
-    };
-
-    # Test rebuild script
-    system-flake-rebuild-test = makeScriptPackage {
-      name = "system-flake-rebuild-test";
-      scriptPath = ../scripts/system-flake-rebuild-test.sh;
-      dependencies = with pkgs; [
-        bash
-        nix
-        nixos-rebuild
-        hostname
-      ];
-      description = "Test builds NixOS system configuration without activation";
-    };
-
-    # Verbose rebuild script
-    system-flake-rebuild-verbose = makeScriptPackage {
-      name = "system-flake-rebuild-verbose";
-      scriptPath = ../scripts/system-flake-rebuild-verbose.sh;
-      dependencies = with pkgs; [
-        bash
-        nix
-        nixos-rebuild
-        hostname
-      ];
-      description = "Rebuilds NixOS system with verbose output for debugging";
-    };
-
-    # Bootstrap script
-    bootstrap-nixos = makeScriptPackage {
-      name = "bootstrap-nixos";
-      scriptPath = ../scripts/bootstrap-nixos.sh;
-      dependencies = with pkgs; [
-        bash
-        git
-        nix
-        gnugrep
-        coreutils
-      ];
-      description = "Bootstraps a new NixOS installation with dotfiles";
-    };
-
-    # Flake build script
-    flake-build = makeScriptPackage {
-      name = "flake-build";
-      scriptPath = ../scripts/flake-build.sh;
-      dependencies = with pkgs; [
-        bash
-        nix
-      ];
-      description = "Builds specific flake targets with proper error handling";
-    };
-
     # Pre-commit script
     pre-commit-flake-check = makeScriptPackage {
       name = "pre-commit-flake-check";
@@ -145,18 +68,6 @@ let
         pre-commit
       ];
       description = "Runs pre-commit checks on the flake";
-    };
-
-    # ISO VM runner
-    run-iso-vm = makeScriptPackage {
-      name = "run-iso-vm";
-      scriptPath = ../scripts/run-iso-vm.sh;
-      dependencies = with pkgs; [
-        bash
-        nix
-        qemu
-      ];
-      description = "Runs the ISO installer in a VM for testing";
     };
 
     # Interactive script packager with fzf selection and OpenCode integration

@@ -148,6 +148,40 @@ check:
 	nix flake check --keep-going --allow-import-from-derivation
 	@nix-shell -p lolcat --run 'echo "[CHECK] Finished." | lolcat 2> /dev/null'
 
+# Run development checks (VM tests, packages, pre-commit)
+dev-check:
+	just dont-fuck-my-build
+	nix build .#devChecks.x86_64-linux --keep-going
+	@nix-shell -p lolcat --run 'echo "[DEV-CHECK] Finished." | lolcat 2> /dev/null'
+
+# Run development checks without builds (evaluation only)
+dev-check-eval:
+	just dont-fuck-my-build  
+	nix eval .#devChecks.x86_64-linux --apply builtins.attrNames
+	@nix-shell -p lolcat --run 'echo "[DEV-CHECK-EVAL] Finished." | lolcat 2> /dev/null'
+
+# Run specific dev check components
+dev-check-pre-commit:
+	just dont-fuck-my-build
+	nix build .#devChecks.x86_64-linux.pre-commit-check-dev
+	@nix-shell -p lolcat --run 'echo "[PRE-COMMIT] Finished." | lolcat 2> /dev/null'
+
+dev-check-vm-tests:
+	just dont-fuck-my-build
+	nix build .#devChecks.x86_64-linux.nixosTest-ganoslal .#devChecks.x86_64-linux.nixosTest-merlin .#devChecks.x86_64-linux.nixosTest-wsl --keep-going
+	@nix-shell -p lolcat --run 'echo "[VM-TESTS] Finished." | lolcat 2> /dev/null'
+
+dev-check-packages:
+	just dont-fuck-my-build
+	nix build .#devChecks.x86_64-linux.build-quick-results .#devChecks.x86_64-linux.build-upjust .#devChecks.x86_64-linux.build-upflake --keep-going
+	@nix-shell -p lolcat --run 'echo "[PACKAGES] Finished." | lolcat 2> /dev/null'
+
+# Comprehensive development validation (core + dev checks)
+check-full:
+	just check
+	just dev-check
+	@nix-shell -p lolcat --run 'echo "[CHECK-FULL] All checks passed!" | lolcat 2> /dev/null'
+
 check-iso:
 	just dont-fuck-my-build
 	nix flake check --impure --no-build nixos-installer/.
