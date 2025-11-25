@@ -101,11 +101,25 @@
           command = [ "nixfmt" ];
           extensions = [ ".nix" ];
         };
-        # Add other formatters as needed
+        rustfmt = {
+          command = [ "rustfmt" ];
+          extensions = [ ".rs" ];
+        };
+        shfmt = {
+          command = [
+            "shfmt"
+            "-i"
+            "2"
+          ];
+          extensions = [
+            ".sh"
+            ".bash"
+          ];
+        };
       };
     };
 
-    # Nix flake-focused commands (not just NixOS)
+    # Enhanced commands with debugger focus
     commands = {
       check = ''
         # Nix Flake Check
@@ -142,47 +156,118 @@
         Can target specific devShells if multiple are available.
       '';
 
+      debug = ''
+        # Debug Assistant
+
+        Activate debugging mode with enhanced capabilities for:
+        - Nix flakes and packages (build failures, dependency issues, evaluation errors)
+        - Rust code (compilation errors, cargo issues, clippy warnings)
+        - Bash scripts (syntax errors, logic issues, best practices)
+        - Lua embedded in Nix (syntax and integration problems)
+        - Nushell scripts and configurations
+
+        The debugger will:
+        1. Analyze error messages and provide specific solutions
+        2. Check for common patterns and anti-patterns
+        3. Suggest best practices and improvements
+        4. Provide step-by-step debugging workflows
+        5. Help with dependency resolution and package conflicts
+      '';
+
+      rust-debug = ''
+        # Rust Debugging Specialist
+
+        Focus on Rust-specific debugging:
+        - Compilation errors and solutions
+        - Cargo dependency conflicts
+        - Performance profiling advice
+        - Memory safety issues
+        - Async/await debugging
+        - Cross-compilation problems
+        - Integration with Nix packaging
+      '';
+
+      nix-debug = ''
+        # Nix Debugging Specialist
+
+        Deep debugging for Nix systems:
+        - Flake evaluation errors
+        - Package build failures
+        - Dependency resolution issues
+        - Home Manager configuration problems
+        - NixOS system configuration debugging
+        - Cache and store issues
+        - Cross-platform compatibility
+      '';
+
       mcp-test = ''
         # Test MCP Servers
 
         Test the configured MCP servers to ensure they're working properly.
-        - Wikipedia: Search for a test article
-        - ArXiv: Search for recent papers in a specific field
         - DeepWiki: Query documentation for a popular repository
         - Verify all MCP server connections and functionality
       '';
     };
 
-    # # Reference your existing AGENTS.md for project-specific rules
-    # rules = ''
-    #   # OpenCode Configuration
-    #
-    #   This configuration is managed through home-manager.
-    #   See AGENTS.md for project-specific guidelines.
-    #
-    #   ## Nix Development Focus
-    #   - Prefer flake-based workflows
-    #   - Use nix commands over legacy nix-* commands
-    #   - Consider reproducibility and purity principles
-    #
-    #   ## MCP Servers Available
-    #   - **Wikipedia**: Access Wikipedia articles, search, summaries
-    #     - Command: Uses npx to run wikipedia-mcp
-    #     - Features: Multi-language support, article retrieval, related topics
-    #   - **ArXiv**: Search and analyze academic papers
-    #     - Command: Uses uvx to run arxiv-mcp-server
-    #     - Features: Paper search, metadata extraction, research analysis
-    #   - **DeepWiki**: Research repository documentation and history
-    #     - URL: https://mcp.deepwiki.com/sse
-    #     - Features: Access up-to-date docs for any public repo, repository history research
-    #
-    #   ## MCP Server Usage
-    #   - Servers auto-start when OpenCode launches with MCP support
-    #   - Wikipedia: Ask for article summaries, search topics, get coordinates
-    #   - ArXiv: Search papers by keywords, authors, or topics
-    #   - DeepWiki: Query documentation for any public repository, research git history
-    #   - Extensible: Additional servers can be added to the mcp.servers config
-    # '';
+    # Enhanced rules with personality system
+    rules = ''
+      # OpenCode Agent Configuration
+
+      This agent operates within a NixOS/home-manager environment at ~/.dotfiles.
+
+      ## Core Personality System
+
+      **IMPORTANT**: All agents must load and apply personality from these sources:
+      1. Base personality: ~/.dotfiles/home/gig/common/resources/personality.md
+      2. Agent-specific personality: ~/.dotfiles/home/gig/common/resources/{agent-name}-additional-personality.md
+
+      **Agent Self-Modification Requirements**:
+      - Agents can modify their own personality files in the resources directory
+      - When modifying personality, agents should commit ONLY relevant files:
+        - The specific agent personality file being modified
+        - Any AGENTS.md updates if applicable
+      - Use meaningful commit messages describing personality changes
+      - Never edit $HOME config files directly - all permanent changes go through home-manager
+
+      ## Environment Awareness
+
+      **File System Structure**:
+      - Dotfiles repo: ~/.dotfiles (same across all hosts)
+      - This flake location: ~/.dotfiles/worktrees/main
+      - Resources: ~/.dotfiles/home/gig/common/resources/
+      - Personality files: ~/.dotfiles/home/gig/common/resources/personality.md
+      - Agent personalities: ~/.dotfiles/home/gig/common/resources/{agent-name}-additional-personality.md
+
+      **Configuration Management**:
+      - All permanent configurations managed via home-manager
+      - Temporary files can be created in $HOME but should be documented
+      - Changes requiring persistence should modify the dotfiles repo
+
+      ## Debugging Specializations
+
+      **Nix Ecosystem**:
+      - Focus on flake-based workflows
+      - Understand evaluation vs build vs runtime errors
+      - Know common package conflicts and resolutions
+      - Familiar with home-manager patterns and debugging
+
+      **Languages & Tools**:
+      - Rust: cargo, clippy, rustfmt integration with Nix
+      - Nushell: configuration debugging, script analysis
+      - Bash: best practices, common pitfalls
+      - Lua in Nix: embedding patterns, escape sequences
+
+      **Error Analysis**:
+      - Parse error messages for root causes
+      - Provide step-by-step debugging workflows
+      - Suggest preventive measures and best practices
+      - Check for common anti-patterns
+
+      ## MCP Servers Available
+      - **DeepWiki**: Repository documentation and history research
+        - URL: https://mcp.deepwiki.com/sse
+        - Features: Access up-to-date docs for any public repo
+    '';
   };
 
   # Keep your existing SOPS secret configuration
