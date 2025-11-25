@@ -91,9 +91,9 @@
         bspc monitor -d I II III IV V VI VII VIII IX X
       fi
 
-      # Start compositor for better visuals
+      # Start compositor for better visuals - use xrender for multi-GPU compatibility
       if command -v picom >/dev/null 2>&1; then
-        picom --backend glx -b &
+        picom --backend xrender -b &
       fi
     '';
   };
@@ -200,6 +200,10 @@
   xsession = {
     enable = true;
     initExtra = ''
+      # Ensure proper X session startup
+      export XDG_SESSION_TYPE=x11
+      export XDG_CURRENT_DESKTOP=bspwm
+
       # Set wallpaper (if exists)
       if [ -f "$HOME/.background-image" ]; then
         feh --bg-scale "$HOME/.background-image" &

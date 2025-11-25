@@ -9,8 +9,8 @@
       hide_borders = false;
       hide_key_hints = false;
 
-      # FIX: Shell session command - use actual nushell binary path
-      shell = "${pkgs.nushell}/bin/nu";
+      # FIX: Shell session command - use zsh which user has configured
+      shell = "${pkgs.zsh}/bin/zsh";
     };
   };
 }

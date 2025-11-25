@@ -19,6 +19,9 @@
       kernelModules = [ "amdgpu" ]; # Enable AMD GPU kernel modules
     };
 
+    # Enable audio drivers for HDMI/DisplayPort output from GPUs
+    kernelModules = [ "snd-hda-intel" ];
+
     # Updated kernel parameters for better AMD/NVIDIA coexistence
     kernelParams = [
       "radeon.si_support=0" # Disable legacy radeon driver for SI cards
@@ -26,6 +29,24 @@
       "nvidia-drm.modeset=1" # Enable NVIDIA DRM modesetting
       "amdgpu.dc=1" # Enable AMD Display Core for better multi-monitor
     ];
+  };
+
+  # Audio configuration for multi-GPU setup
+  hardware.pulseaudio.enable = false; # Disable PulseAudio in favor of PipeWire
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+    # Enable additional audio codecs for better compatibility
+    extraConfig.pipewire."92-low-latency" = {
+      context.properties = {
+        default.clock.rate = 48000;
+        default.clock.quantum = 32;
+        default.clock.min-quantum = 32;
+        default.clock.max-quantum = 32;
+      };
+    };
   };
 
   # Simplified X server configuration for automatic monitor detection
