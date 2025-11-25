@@ -6,20 +6,34 @@
 }:
 
 let
+  # Helper to normalize mount paths
+  # If path starts with '/', use as absolute path, otherwise prefix with /home/username/
+  normalizeMountPoint =
+    mountPoint:
+    if lib.hasPrefix "/" mountPoint then
+      mountPoint # Absolute path, use as-is
+    else
+      "/home/${configVars.username}/${mountPoint}"; # Relative to user home
+
   # Core mount function that accepts all parameters
-  newMount = shareName: mountPoint: fqdm: uid: gid: {
-    "${mountPoint}" = {
-      device = "//${fqdm}/${shareName}";
-      fsType = "cifs";
-      options =
-        let
-          # this line prevents hanging on network split
-          automount_opts = "x-systemd.automount,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s";
-          creds = "/etc/samba/cifs-creds";
-        in
-        [ "${automount_opts},credentials=${creds},uid=${uid},gid=${gid},vers=3.0" ];
+  newMount =
+    shareName: mountPoint: fqdm: uid: gid:
+    let
+      fullMountPoint = normalizeMountPoint mountPoint;
+    in
+    {
+      "${fullMountPoint}" = {
+        device = "//${fqdm}/${shareName}";
+        fsType = "cifs";
+        options =
+          let
+            # this line prevents hanging on network split
+            automount_opts = "x-systemd.automount,noauto,x-systemd.idle-timeout=60,x-systemd.device-timeout=5s,x-systemd.mount-timeout=5s";
+            creds = "/etc/samba/cifs-creds";
+          in
+          [ "${automount_opts},credentials=${creds},uid=${uid},gid=${gid},vers=3.0" ];
+      };
     };
-  };
 
   # Convenience function using default configVars uid/gid
   defaultMount =
@@ -29,23 +43,25 @@ in
 {
   # This is for mounting samba shares
   # Examples:
-  # - defaultMount "shareName" "mountPoint" "fqdm"  # Uses configVars.uid/guid
-  # - newMount "shareName" "mountPoint" "fqdm" "uid" "gid"  # Full control
+  # - defaultMount "shareName" "mnt/mountPoint" "fqdm"           # → /home/gig/mnt/mountPoint (relative)
+  # - defaultMount "shareName" "/absolute/path" "fqdm"          # → /absolute/path (absolute)
+  # - newMount "shareName" "mnt/custom" "fqdm" "uid" "gid"      # → /home/gig/mnt/custom (relative, custom uid/gid)
+  # - newMount "shareName" "/mnt/system/share" "fqdm" "uid" "gid" # → /mnt/system/share (absolute, custom uid/gid)
 
   fileSystems = lib.mkMerge [
-    (defaultMount "risa" "/home/gig/mnt/risa" "192.168.51.3")
-    (defaultMount "utility" "/home/gig/mnt/utility" "192.168.51.3")
-    (defaultMount "virtualization-boot-files" "/home/gig/mnt/virtualization-boot-files" "192.168.51.3")
-    (defaultMount "vulcan" "/home/gig/mnt/vulcan" "192.168.51.3")
-    (defaultMount "media" "/home/gig/mnt/media" "192.168.51.3")
-    (defaultMount "appraisals" "/home/gig/mnt/appraisals" "192.168.51.21")
-    (defaultMount "proxmox-backup-share" "/home/gig/mnt/proxmox_backups" "192.168.51.3")
-    (defaultMount "important-app-data" "/home/gig/mnt/important-app-data" "192.168.51.3")
-    (defaultMount "nzbget" "/home/gig/mnt/nzbget" "192.168.51.3")
-    (defaultMount "tdarr-cache" "/home/gig/mnt/tdarr-cache" "192.168.51.3")
-    (defaultMount "caches" "/home/gig/mnt/caches" "192.168.51.3")
-    (defaultMount "plex-database" "/home/gig/mnt/plex-database" "192.168.51.3")
-    # (defaultMount "media" "/home/gig/mnt/dad/media" "192.168.4.15")
+    (defaultMount "risa" "mnt/risa" "192.168.51.3")
+    (defaultMount "utility" "mnt/utility" "192.168.51.3")
+    (defaultMount "virtualization-boot-files" "mnt/virtualization-boot-files" "192.168.51.3")
+    (defaultMount "vulcan" "mnt/vulcan" "192.168.51.3")
+    (defaultMount "media" "mnt/media" "192.168.51.3")
+    (defaultMount "appraisals" "mnt/appraisals" "192.168.51.21")
+    (defaultMount "proxmox-backup-share" "mnt/proxmox_backups" "192.168.51.3")
+    (defaultMount "important-app-data" "mnt/important-app-data" "192.168.51.3")
+    (defaultMount "nzbget" "mnt/nzbget" "192.168.51.3")
+    (defaultMount "tdarr-cache" "mnt/tdarr-cache" "192.168.51.3")
+    (defaultMount "caches" "mnt/caches" "192.168.51.3")
+    (defaultMount "plex-database" "mnt/plex-database" "192.168.51.3")
+    # Example absolute path: (defaultMount "media" "/mnt/dad/media" "192.168.4.15")
   ];
 
   environment.systemPackages = [ pkgs.cifs-utils ];
