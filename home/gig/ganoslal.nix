@@ -12,13 +12,14 @@
     # inputs.nix-colors.homeManagerModules.default
 
     ./home.nix
+    ./common/optional/bspwm.nix # Enable bspwm window manager configuration
     # ./cams-countertop.nix
   ];
 
   home.packages = with pkgs; [
     # ytmdesktop
     youtube-music
-    plex-media-player
+    plex-desktop
     remmina
     # bitwarden-cli
     bitwarden-desktop
