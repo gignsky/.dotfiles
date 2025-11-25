@@ -1,6 +1,12 @@
-{ lib, pkgs, ... }:
+{
+  lib,
+  pkgs,
+  configVars,
+  ...
+}:
 
 let
+  # Core mount function that accepts all parameters
   newMount = shareName: mountPoint: fqdm: uid: gid: {
     "${mountPoint}" = {
       device = "//${fqdm}/${shareName}";
@@ -14,29 +20,32 @@ let
         [ "${automount_opts},credentials=${creds},uid=${uid},gid=${gid},vers=3.0" ];
     };
   };
+
+  # Convenience function using default configVars uid/gid
+  defaultMount =
+    shareName: mountPoint: fqdm:
+    newMount shareName mountPoint fqdm (toString configVars.uid) (toString configVars.guid);
 in
 {
-  # imports = (configLib.scanPaths ./.);
+  # This is for mounting samba shares
+  # Examples:
+  # - defaultMount "shareName" "mountPoint" "fqdm"  # Uses configVars.uid/guid
+  # - newMount "shareName" "mountPoint" "fqdm" "uid" "gid"  # Full control
 
-  # This is for mounting a samba share
-  # name = newMount "shareName" "mountPoint" "fqdm" "uid" "gid";
   fileSystems = lib.mkMerge [
-    (newMount "risa" "/home/gig/mnt/risa" "192.168.51.3" "1000" "100")
-    (newMount "utility" "/home/gig/mnt/utility" "192.168.51.3" "1000" "100")
-    (newMount "virtualization-boot-files" "/home/gig/mnt/virtualization-boot-files" "192.168.51.3"
-      "1000"
-      "100"
-    )
-    (newMount "vulcan" "/home/gig/mnt/vulcan" "192.168.51.3" "1000" "100")
-    (newMount "media" "/home/gig/mnt/media" "192.168.51.3" "1000" "100")
-    (newMount "appraisals" "/home/gig/mnt/appraisals" "192.168.51.21" "1000" "100")
-    (newMount "proxmox-backup-share" "/home/gig/mnt/proxmox_backups" "192.168.51.3" "1000" "100")
-    (newMount "important-app-data" "/home/gig/mnt/important-app-data" "192.168.51.3" "1000" "100")
-    (newMount "nzbget" "/home/gig/mnt/nzbget" "192.168.51.3" "1000" "100")
-    (newMount "tdarr-cache" "/home/gig/mnt/tdarr-cache" "192.168.51.3" "1000" "100")
-    (newMount "caches" "/home/gig/mnt/caches" "192.168.51.3" "1000" "100")
-    (newMount "plex-database" "/home/gig/mnt/plex-database" "192.168.51.3" "1000" "100")
-    # (newMount "media" "/home/gig/mnt/dad/media" "192.168.4.15" "1000" "100")
+    (defaultMount "risa" "/home/gig/mnt/risa" "192.168.51.3")
+    (defaultMount "utility" "/home/gig/mnt/utility" "192.168.51.3")
+    (defaultMount "virtualization-boot-files" "/home/gig/mnt/virtualization-boot-files" "192.168.51.3")
+    (defaultMount "vulcan" "/home/gig/mnt/vulcan" "192.168.51.3")
+    (defaultMount "media" "/home/gig/mnt/media" "192.168.51.3")
+    (defaultMount "appraisals" "/home/gig/mnt/appraisals" "192.168.51.21")
+    (defaultMount "proxmox-backup-share" "/home/gig/mnt/proxmox_backups" "192.168.51.3")
+    (defaultMount "important-app-data" "/home/gig/mnt/important-app-data" "192.168.51.3")
+    (defaultMount "nzbget" "/home/gig/mnt/nzbget" "192.168.51.3")
+    (defaultMount "tdarr-cache" "/home/gig/mnt/tdarr-cache" "192.168.51.3")
+    (defaultMount "caches" "/home/gig/mnt/caches" "192.168.51.3")
+    (defaultMount "plex-database" "/home/gig/mnt/plex-database" "192.168.51.3")
+    # (defaultMount "media" "/home/gig/mnt/dad/media" "192.168.4.15")
   ];
 
   environment.systemPackages = [ pkgs.cifs-utils ];
