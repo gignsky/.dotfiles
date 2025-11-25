@@ -9,7 +9,7 @@
 
     # nixos-hardware modules for proper hardware detection
     inputs.nixos-hardware.nixosModules.common-cpu-amd
-    inputs.nixos-hardware.nixosModules.common-gpu-nvidia
+    inputs.nixos-hardware.nixosModules.common-gpu-nvidia-nonprime
     inputs.nixos-hardware.nixosModules.common-gpu-amd
   ];
 
