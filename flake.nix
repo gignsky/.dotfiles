@@ -162,7 +162,13 @@
       nixosConfigurations = {
         # WSL configuration entrypoint - name can not be changed from nixos without some extra work TODO
         wsl = nixpkgs.lib.nixosSystem {
-          inherit system specialArgs;
+          inherit system;
+          specialArgs = specialArgs // {
+            configVars = configVars // {
+              uid = 1000; # WSL compatibility
+              guid = 1000; # Keep gig group as 1000, not 100
+            };
+          };
           modules = [
             inputs.vscode-server.nixosModules.default
             (_: { services.vscode-server.enable = true; })
