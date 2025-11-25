@@ -215,5 +215,6 @@ rec {
     flake-build
     pre-commit-flake-check
     run-iso-vm
+    package-script
     ;
 }

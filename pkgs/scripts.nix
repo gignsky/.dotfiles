@@ -158,6 +158,25 @@ let
       ];
       description = "Runs the ISO installer in a VM for testing";
     };
+
+    # Interactive script packager with fzf selection and OpenCode integration
+    package-script = makeScriptPackage {
+      name = "package-script";
+      scriptPath = ../scripts/package-script.sh;
+      dependencies = with pkgs; [
+        bash
+        nix
+        git
+        fzf
+        gnugrep
+        gawk
+        gnused
+        coreutils
+        findutils
+        bat
+      ];
+      description = "Interactive script packager with fzf selection and OpenCode test generation";
+    };
   };
 
 in
