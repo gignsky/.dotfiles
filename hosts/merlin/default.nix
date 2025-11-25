@@ -48,6 +48,9 @@
     networkmanager.enable = true;
   };
 
+  # Tailscale configuration
+  tailscale.enable = true;
+
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
