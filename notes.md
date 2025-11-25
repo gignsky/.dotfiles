@@ -8,6 +8,12 @@
 
 ## Things to do...
 
+- Read following pages:
+  - [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
+  - [AGENTS.md](https://agents.md/)
+- add octo to gigvim for prs and merges
+- NixPkgs RFC Suggestion, allowing for systemwide or flake-wide of flake inputs
+  with custom headers? i.e. `giglib:` in place of `github:`
 - Tape Archival Research [Gemini](https://gemini.google.com/share/4a8aba01628f)
 - nixpkgs git cloning helper
   [Gemini](https://gemini.google.com/share/37aa93598977) -- note, this could be
@@ -96,3 +102,13 @@
 - Patch bug in opencode drv to requires bun
 - package opencode.nvim for nixpkgs
 - create superset of nixpkgs
+- things to do for ganosLal:
+  - configure nvidia GPU to be primary
+  - switch right monitor top with bottom, since the top is currently connected
+    to the RTX card
+  - make sure nvidia drivers are up to date
+- research more functionality with opencode relating to expanding
+  [sops-nix](https://github.com/Mic92/sops-nix) support
+- when using opencode to plan nixconf converstion to a better template make sure
+  to also have opencode help clean up old branches and create a list of tasks
+  from those branches that might need to be restarted.

@@ -8,6 +8,7 @@
 }:
 let
   inherit (configVars.networking) sshPort;
+  inherit (pkgs.stdenv.hostPlatform) system;
 in
 {
   imports = [ (configLib.relativeToRoot "hosts/common/users/${configVars.username}") ];
