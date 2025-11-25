@@ -20,14 +20,16 @@
       # Enable NVIDIA Control Panel
       nvidiaSettings = true;
 
-      # Prime configuration - NVIDIA as primary, AMD as secondary
+      # Prime configuration - DISABLED for independent GPU operation
       prime = {
-        # Sync mode: NVIDIA always on, handles all rendering and outputs
-        sync.enable = true;
+        # Disable Prime to allow both GPUs to operate independently
+        # This prevents the "one giant monitor" issue and allows each GPU
+        # to drive its connected monitors without interference
+        sync.enable = false;
 
-        # Bus IDs - verify these match your hardware with 'lspci'
-        nvidiaBusId = "PCI:45:0:0"; # NVIDIA GPU bus ID
-        amdgpuBusId = "PCI:23:0:0"; # AMD GPU bus ID
+        # Bus IDs commented out since we're not using Prime
+        # nvidiaBusId = "PCI:45:0:0"; # NVIDIA GPU bus ID
+        # amdgpuBusId = "PCI:23:0:0"; # AMD GPU bus ID
       };
 
       # Enable power management for better stability
@@ -44,12 +46,13 @@
     };
   };
 
-  # Optional: Environment variables for debugging/optimization
+  # Environment variables for independent GPU operation
   environment.variables = {
-    # Force applications to use NVIDIA GPU (not needed in sync mode but useful for debugging)
-    # __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+    # Enable both GPUs for OpenGL/Vulkan applications
+    # Applications can choose which GPU to use explicitly
+    # __GLX_VENDOR_LIBRARY_NAME = "nvidia";  # Not needed in independent mode
 
-    # For debugging PRIME issues (uncomment if needed)
+    # For debugging multi-GPU issues (uncomment if needed)
     # __NV_PRIME_RENDER_OFFLOAD_PROVIDER = "NVIDIA-G0";
     # __VK_LAYER_NV_optimus = "NVIDIA_only";
   };
