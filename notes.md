@@ -112,3 +112,6 @@
 - when using opencode to plan nixconf converstion to a better template make sure
   to also have opencode help clean up old branches and create a list of tasks
   from those branches that might need to be restarted.
+- write a package that basically wraps messages in lolcat but also has some
+  special logic that determines if a message is an error, warning, etc. and
+  assigns a color and maybe an emoji based on the contents
