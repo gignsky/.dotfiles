@@ -5,6 +5,9 @@
   configLib,
   ...
 }:
+let
+  inherit (pkgs.stdenv.hostPlatform) system;
+in
 {
   # overlays
   nixpkgs.overlays = [

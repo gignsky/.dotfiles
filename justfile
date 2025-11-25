@@ -368,12 +368,22 @@ sops-edit:
   sops ~/nix-secrets/secrets.yaml
 
 #alias for the sops-secrets command
-notes: 
-  vi notes.md
+notes-edit: 
   # -git add notes.md
   # -git commit -m "updated notes via just notes"
   @just sops-secrets
   # @just rekey
+
+# Edit secret notes and commit
+notes-edit-commit: notes-edit 
+  just rekey
+
+# commit regular note file
+noted:
+  git add notes.md
+  git commit -m "new notes!!"
+  @nix-shell -p lolcat --run 'echo "It is so Noted!!" | lolcat 2> /dev/null'
+
 
 #edit secret notes.mdl only (no rekey)
 sops-secrets:
@@ -386,7 +396,7 @@ rekey:
   @just dont-fuck-my-build
   -just pull-nix-secrets
   @nix-shell -p lolcat --run 'echo "Rekeying with sops: ~/nix-secrets/secrets.yaml" | lolcat 2> /dev/null'
-  cd ../nix-secrets && (\
+  cd ~/nix-secrets && (\
   nix-shell -p sops --run "sops updatekeys -y secrets.yaml" && \
   git add -u && (git commit --no-verify -m "chore: rekey" || true) && git push \
   )
