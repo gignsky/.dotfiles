@@ -56,8 +56,6 @@
     # quick-results
     # upjust
     # cargo-update
-    opencode
-    bun # required for opencode #FIXME
 
     #nix tools
     nix-du
