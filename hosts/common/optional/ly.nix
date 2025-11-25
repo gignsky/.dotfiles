@@ -1,4 +1,5 @@
-_: {
+{ ... }:
+{
   services.displayManager.ly = {
     enable = true;
     settings = {
@@ -8,8 +9,9 @@ _: {
       hide_borders = false;
       hide_key_hints = false;
 
-      # FIX: Shell session command - use nushell which matches user's default shell
-      shell = "/run/current-system/sw/bin/nu";
+      # DISABLED: Shell configuration breaks session startup with both zsh and nushell
+      # ly's shell parameter is for the shell option in ly menu, not desktop sessions
+      # shell = "${pkgs.zsh}/bin/zsh";
     };
   };
 }
