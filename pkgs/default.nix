@@ -3,6 +3,10 @@
 {
   pkgs ? import <nixpkgs> { },
 }:
+let
+  # Import packaged scripts
+  scripts = import ./scripts.nix { inherit pkgs; };
+in
 rec {
   #################### Example Packages #################################
   # example = pkgs.writeShellScriptBin "example" ''
@@ -199,4 +203,17 @@ rec {
   #################### Packages with external source ####################
   # zsh-als-aliases = pkgs.callPackage ./zsh-als-aliases { }; # Removed as unnecessary but left for help in the future
 
+  #################### Packaged Scripts ####################
+  # Import all packaged scripts from scripts.nix
+  inherit (scripts)
+    check-hardware-config
+    system-flake-rebuild
+    home-manager-flake-rebuild
+    system-flake-rebuild-test
+    system-flake-rebuild-verbose
+    bootstrap-nixos
+    flake-build
+    pre-commit-flake-check
+    run-iso-vm
+    ;
 }
