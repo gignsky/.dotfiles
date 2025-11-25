@@ -27,7 +27,6 @@
     (configLib.relativeToRoot "hosts/common/optional/bspwm.nix") # Enable bspwm window manager
     (configLib.relativeToRoot "hosts/common/optional/firefox.nix")
     # ../common/optional/xrdp.nix
-    (configLib.relativeToRoot "hosts/common/optional/samba.nix")
 
     #gig users
     (configLib.relativeToRoot "hosts/common/users/gig")
