@@ -12,6 +12,7 @@
     # inputs.nix-colors.homeManagerModules.default
 
     ./home.nix
+    ./common/optional/bspwm.nix # Enable bspwm window manager configuration
     # ./cams-countertop.nix
   ];
 
