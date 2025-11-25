@@ -2,11 +2,24 @@
 
 {
   services = {
-    displayManager.ly.enable = true;
+    displayManager.ly = {
+      enable = true;
+      settings = {
+        # Enable autologin for user gig to bspwm session
+        auto_login_user = "gig";
+        auto_login_session = "bspwm";
+        save = true; # Remember session choice
+
+        # Optional: Performance optimizations
+        animation = "none"; # Disable animations for faster boot
+        hide_borders = false;
+        hide_key_hints = false;
+      };
+    };
     xserver = {
       enable = true;
       windowManager.bspwm.enable = true;
-      # Note: ly display manager is configured elsewhere (xfce.nix)
+      # Note: ly display manager is configured with autologin above
       # This provides bspwm as an additional session option
     };
   };
