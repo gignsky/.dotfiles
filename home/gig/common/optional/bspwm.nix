@@ -110,12 +110,12 @@
       "super + d" = "rofi -show drun"; # Alternative launcher binding
 
       # Help window - show bspwm keybindings
-      "super + h" = ''
+      "super + question" = ''
         rofi -dmenu -p "bspwm help" -i -markup-rows -no-custom -auto-select <<< "
         <b>Terminal & Applications:</b>
         super + Return                    Terminal (wezterm)
         super + space / super + d         Application launcher (rofi)
-        super + h                         Show this help window
+        super + ?                         Show this help window
 
         <b>Window Management:</b>
         super + w                         Close window
