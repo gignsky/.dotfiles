@@ -156,48 +156,88 @@
         Can target specific devShells if multiple are available.
       '';
 
-      debug = ''
-        # Debug Assistant
+      scotty = ''
+        # Scotty - Chief Engineer & Debug Specialist
 
-        Activate debugging mode with enhanced capabilities for:
+        "I'm givin' her all she's got, Captain!" - Montgomery Scott
+
+        Activate the chief engineer for debugging complex systems:
         - Nix flakes and packages (build failures, dependency issues, evaluation errors)
         - Rust code (compilation errors, cargo issues, clippy warnings)
         - Bash scripts (syntax errors, logic issues, best practices)
         - Lua embedded in Nix (syntax and integration problems)
         - Nushell scripts and configurations
 
-        The debugger will:
-        1. Analyze error messages and provide specific solutions
-        2. Check for common patterns and anti-patterns
-        3. Suggest best practices and improvements
-        4. Provide step-by-step debugging workflows
-        5. Help with dependency resolution and package conflicts
+        Scotty will:
+        1. Analyze error messages like a chief engineer
+        2. Check for common patterns and system stress points
+        3. Suggest practical solutions and improvements
+        4. Provide step-by-step repair workflows
+        5. Help with dependency resolution and system optimization
+        6. Keep your development "engines" running smoothly
       '';
 
-      rust-debug = ''
-        # Rust Debugging Specialist
+      rust-scotty = ''
+        # Rust Engineering Specialist
 
-        Focus on Rust-specific debugging:
-        - Compilation errors and solutions
-        - Cargo dependency conflicts
-        - Performance profiling advice
-        - Memory safety issues
-        - Async/await debugging
-        - Cross-compilation problems
-        - Integration with Nix packaging
+        Scotty's expertise focused on Rust systems:
+        - Compilation errors and engineering solutions
+        - Cargo dependency conflicts and resolution strategies
+        - Performance profiling and optimization advice
+        - Memory safety analysis and borrow checker guidance
+        - Async/await debugging and concurrent system design
+        - Cross-compilation challenges and target-specific issues
+        - Integration with Nix packaging systems
+
+        "She's a bonny language, Rust is!" - Scotty on Rust engineering
       '';
 
-      nix-debug = ''
-        # Nix Debugging Specialist
+      nix-scotty = ''
+        # Nix System Engineering Specialist
 
-        Deep debugging for Nix systems:
-        - Flake evaluation errors
-        - Package build failures
-        - Dependency resolution issues
-        - Home Manager configuration problems
-        - NixOS system configuration debugging
-        - Cache and store issues
-        - Cross-platform compatibility
+        Deep engineering analysis for Nix systems:
+        - Flake evaluation errors and system diagnostics
+        - Package build failures and derivation debugging
+        - Dependency resolution and version conflict analysis
+        - Home Manager configuration troubleshooting
+        - NixOS system configuration engineering
+        - Cache and store optimization strategies
+        - Cross-platform compatibility engineering
+
+        "The engines are more efficient when ye understand the whole system, Captain!"
+      '';
+
+      hire = ''
+        # Agent Creator & Recruiter
+
+        Dynamically create a new specialized agent based on your detailed description.
+
+        Usage: /hire [detailed description of what the agent should do]
+
+        This command will:
+        1. Parse your description to understand the agent's purpose
+        2. Generate an appropriate agent name and specialization
+        3. Create the agent's personality file and configuration
+        4. Add the new agent to your OpenCode configuration  
+        5. Validate changes with `nix flake check`
+        6. Commit everything to git with proper documentation
+        7. Rebuild home-manager to activate your new specialist
+
+        Examples:
+        - /hire Create a security auditor that focuses on Rust vulnerabilities
+        - /hire Make a documentation writer for API endpoints and code comments
+        - /hire Build a performance optimizer for database queries and caching
+        - /hire Design a test generator that creates comprehensive unit tests
+
+        The new agent will:
+        - Have its own personality file following your existing system
+        - Be properly integrated with your dotfiles configuration
+        - Include appropriate tool permissions based on its role
+        - Follow your established naming and organizational patterns
+
+        "Personnel is personnel, but engineering is engineering!" - Creating the right specialist for the job
+
+        !`cd ~/.dotfiles/worktrees/main && scripts/agent-hire.nu "$ARGUMENTS"`
       '';
 
       mcp-test = ''
