@@ -20,14 +20,16 @@
       # Enable NVIDIA Control Panel
       nvidiaSettings = true;
 
-      # Prime configuration - COMPLETELY DISABLED for independent GPU operation
-      # Commenting out the entire prime block to disable PRIME entirely
-      # This allows both GPUs to operate independently without interference
-      # prime = {
-      #   sync.enable = false;
-      #   nvidiaBusId = "PCI:45:0:0";
-      #   amdgpuBusId = "PCI:23:0:0"; 
-      # };
+      # Prime configuration - EXPLICITLY DISABLED for independent GPU operation
+      # The common-gpu-nvidia nixos-hardware module enables Prime by default,
+      # so we need to explicitly disable it for independent dual-GPU operation
+      prime = {
+        offload.enable = lib.mkForce false;
+        sync.enable = lib.mkForce false;
+        # Provide bus IDs to satisfy the assertion, but with Prime disabled they won't be used
+        nvidiaBusId = "PCI:45:0:0";
+        amdgpuBusId = "PCI:23:0:0";
+      };
 
       # Enable power management for better stability
       powerManagement = {
