@@ -109,6 +109,49 @@
       "super + space" = "rofi -show drun";
       "super + d" = "rofi -show drun"; # Alternative launcher binding
 
+      # Help window - show bspwm keybindings
+      "super + h" = ''
+        rofi -dmenu -p "bspwm help" -i -markup-rows -no-custom -auto-select <<< "
+        <b>Terminal & Applications:</b>
+        super + Return                    Terminal (wezterm)
+        super + space / super + d         Application launcher (rofi)
+        super + h                         Show this help window
+
+        <b>Window Management:</b>
+        super + w                         Close window
+        super + shift + q                 Kill window
+        super + f                         Toggle fullscreen
+        super + s                         Toggle floating
+        super + t                         Toggle tiled
+
+        <b>Navigation:</b>
+        super + h/j/k/l                   Focus window (west/south/north/east)
+        super + shift + h/j/k/l           Swap window
+        super + arrows                    Focus window (alternative)
+        super + shift + arrows            Swap window (alternative)
+
+        <b>Desktops:</b>
+        super + 1-9/0/grave              Switch to desktop 1-11
+        super + shift + 1-9/0/grave      Move window to desktop 1-11
+
+        <b>Window Resizing:</b>
+        super + alt + h/j/k/l            Resize window
+        super + alt + shift + h/j/k/l    Resize window (alternative)
+
+        <b>Screenshots:</b>
+        Print                            Screenshot selection to clipboard
+        super + Print                    Screenshot full screen to clipboard
+
+        <b>System:</b>
+        super + alt + Escape             Quit bspwm
+        super + alt + r                  Restart bspwm
+
+        <b>Audio:</b>
+        XF86AudioRaiseVolume            Volume up
+        XF86AudioLowerVolume            Volume down
+        XF86AudioMute                   Mute toggle
+        "'';
+
       # Close window
       "super + w" = "bspc node -c";
       "super + shift + q" = "bspc node -k"; # Kill window
