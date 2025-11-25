@@ -20,17 +20,14 @@
       # Enable NVIDIA Control Panel
       nvidiaSettings = true;
 
-      # Prime configuration - DISABLED for independent GPU operation
-      prime = {
-        # Disable Prime to allow both GPUs to operate independently
-        # This prevents the "one giant monitor" issue and allows each GPU
-        # to drive its connected monitors without interference
-        sync.enable = false;
-
-        # Bus IDs commented out since we're not using Prime
-        # nvidiaBusId = "PCI:45:0:0"; # NVIDIA GPU bus ID
-        # amdgpuBusId = "PCI:23:0:0"; # AMD GPU bus ID
-      };
+      # Prime configuration - COMPLETELY DISABLED for independent GPU operation
+      # Commenting out the entire prime block to disable PRIME entirely
+      # This allows both GPUs to operate independently without interference
+      # prime = {
+      #   sync.enable = false;
+      #   nvidiaBusId = "PCI:45:0:0";
+      #   amdgpuBusId = "PCI:23:0:0"; 
+      # };
 
       # Enable power management for better stability
       powerManagement = {
