@@ -31,31 +31,37 @@
     ];
   };
 
-  # Audio configuration for multi-GPU setup
-  hardware.pulseaudio.enable = false; # Disable PulseAudio in favor of PipeWire
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
-    # Enable additional audio codecs for better compatibility
-    extraConfig.pipewire."92-low-latency" = {
-      context.properties = {
-        default.clock.rate = 48000;
-        default.clock.quantum = 32;
-        default.clock.min-quantum = 32;
-        default.clock.max-quantum = 32;
+  services = {
+    # Audio configuration for multi-GPU setup
+    pulseaudio.enable = false; # Disable PulseAudio in favor of PipeWire
+    pipewire = {
+      enable = true;
+      alsa = {
+        enable = true;
+        support32Bit = true;
+      };
+      pulse.enable = true;
+      # Enable additional audio codecs for better compatibility
+      extraConfig.pipewire."92-low-latency" = {
+        context.properties = {
+          default.clock = {
+            rate = 48000;
+            quantum = 32;
+            min-quantum = 32;
+            max-quantum = 32;
+          };
+        };
       };
     };
-  };
 
-  # Simplified X server configuration for automatic monitor detection
-  services.xserver = {
-    # Enable both GPU drivers - let them handle monitors independently
-    videoDrivers = [
-      "nvidia"
-      "amdgpu"
-    ];
-    # Remove manual X11 config - let modern drivers auto-detect monitors
+    # Simplified X server configuration for automatic monitor detection
+    xserver = {
+      # Enable both GPU drivers - let them handle monitors independently
+      videoDrivers = [
+        "nvidia"
+        "amdgpu"
+      ];
+      # Remove manual X11 config - let modern drivers auto-detect monitors
+    };
   };
 }
