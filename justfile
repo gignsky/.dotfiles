@@ -88,19 +88,19 @@ rebuild-post:
 rebuild args="":
 	just rebuild-pre
 	@nix-shell -p lolcat --run 'echo "[REBUILD] Attempting Rebuild..." | lolcat' 2> /dev/null 
-	scripts/system-flake-rebuild.sh {{args}}
+	nix run .#system-flake-rebuild -- {{args}}
 	just rebuild-post
 
 # Rebuild the system verbosely
 rebuild-v args="":
 	just rebuild-pre
-	scripts/system-flake-rebuild-verbose.sh {{args}}
+	nix run .#system-flake-rebuild-verbose -- {{args}}
 	just rebuild-post
 
 # Test rebuilds the system
 rebuild-test args="":
 	just rebuild-pre
-	scripts/system-flake-rebuild-test.sh {{args}}
+	nix run .#system-flake-rebuild-test -- {{args}}
 	@nix-shell -p lolcat --run 'echo "[TEST] Finished." | lolcat 2> /dev/null'
 
 # Rebuild-full with new shell
@@ -178,7 +178,7 @@ post-home:
 	@nix-shell -p lolcat --run 'echo "[POST-HOME] Finished." | lolcat 2> /dev/null'
 
 simple-home *ARGS:
-	./scripts/home-manager-flake-rebuild.sh {{ ARGS }}
+	nix run .#home-manager-flake-rebuild -- {{ ARGS }}
 
 home *ARGS:
   just pre-home
@@ -215,7 +215,7 @@ pre-build:
 
 build *args:
 	just pre-build
-	scripts/flake-build.sh {{args}}
+	nix run .#flake-build -- {{args}}
 	just post-build
 
 post-build:
@@ -272,7 +272,7 @@ cleanup-vm:
 # helper justfile arg
 call-vm:
     @nix-shell -p lolcat --run 'echo "[VM] Running VM..." | lolcat 2> /dev/null'
-    - nix shell nixpkgs#qemu --command bash -c 'bash scripts/run-iso-vm.sh result/iso/*.iso ./tmp-iso/nixos-vm/vm.img'
+    - nix run .#run-iso-vm -- result/iso/*.iso ./tmp-iso/nixos-vm/vm.img
     @nix-shell -p lolcat --run 'echo "[VM] VM Closed." | lolcat 2> /dev/null'
 
 # run vm with minimal iso - while not deleting files afterwards
@@ -288,7 +288,7 @@ vm-full:
 # reconnect to vm that has already been created
 vm-reconnect:
 	@nix-shell -p lolcat --run 'echo "[VM] Reconnecting to VM..." | lolcat 2> /dev/null'
-	- nix shell nixpkgs#qemu --command bash -c 'bash scripts/run-iso-vm.sh result/iso/*.iso ./tmp-iso/nixos-vm/vm.img --choose'
+	- nix run .#run-iso-vm -- result/iso/*.iso ./tmp-iso/nixos-vm/vm.img --choose
 	@nix-shell -p lolcat --run 'echo "[VM] VM Closed." | lolcat 2> /dev/null'
 
 # run vm with minimal iso - while deleting files afterwards
@@ -430,7 +430,7 @@ store-photo:
 
 bootstrap *args:
 	just dont-fuck-my-build
-	~/.dotfiles/scripts/bootstrap-nixos.sh {{args}}
+	nix run .#bootstrap-nixos -- {{args}}
 
 #   echo $SOPS_FILE
 #   PS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
@@ -473,3 +473,11 @@ bootstrap *args:
 #
 # sync-secrets USER HOST:
 #   rsync -av --filter=':- .gitignore' -e "ssh -l {{USER}}" . {{USER}}@{{HOST}}:nix-secrets/
+
+# Interactive script packager with fzf selection and OpenCode test generation
+package-script:
+	nix run .#package-script
+
+# Check hardware configuration synchronization
+check-hardware:
+	nix run .#check-hardware-config
