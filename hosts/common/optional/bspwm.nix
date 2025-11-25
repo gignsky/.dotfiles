@@ -2,6 +2,7 @@
 
 {
   services = {
+    displayManager.ly.enable = true;
     xserver = {
       enable = true;
       windowManager.bspwm.enable = true;
