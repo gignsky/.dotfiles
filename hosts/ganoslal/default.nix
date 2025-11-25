@@ -17,8 +17,8 @@
     # You can also split up your configuration and import pieces of it here:
     # ./users.nix
 
-    # Import your generated (nixos-generate-config) hardware configuration
-    ./hardware-configuration.nix
+    # Import custom hardware configuration (includes original + overrides)
+    ./custom-hardware-config.nix
     # core utils
     (configLib.relativeToRoot "hosts/common/core")
 
@@ -58,15 +58,13 @@
   };
 
   services.xserver = {
-
     # Configure keymap in X11
     xkb = {
       layout = "us";
       variant = "";
     };
 
-    # Use NVIDIA drivers for dual-GPU setup (NVIDIA primary + AMD secondary)
-    videoDrivers = [ "nvidia" ];
+    # Video drivers are now configured in custom-hardware-config.nix
   };
 
   # Allow unfree packages
