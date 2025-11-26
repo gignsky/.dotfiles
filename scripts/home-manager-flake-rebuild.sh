@@ -31,49 +31,50 @@ done
 if [ "$LOGGING_LIB_FOUND" = false ]; then
     # Fallback: define basic logging functions if library is not found
     scotty_log_event() { echo "[$1] $*" >&2; }
-log_build_performance() {
-    local operation="$1"
-    local duration_seconds="$2"
-    local success="$3"
-    local error_type="$4"
-    local notes="$5"
-    local generation_number="${6:-unknown}"
-    
-    local journal_dir="${HOME}/.dotfiles/worktrees/main/scottys-journal"
-    local metrics_dir="${journal_dir}/metrics"
-    mkdir -p "$metrics_dir"
-    
-    local timestamp
-    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    local host
-    host=$(hostname)
-    
-    # Get git state
-    local git_commit
-    git_commit=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
-    local git_branch
-    git_branch=$(git branch --show-current 2>/dev/null || echo "unknown")
-    local git_status="clean"
-    if ! git diff-index --quiet HEAD -- 2>/dev/null; then
-        local modified_count
-        modified_count=$(git status --porcelain | wc -l)
-        git_status="${modified_count}_modified"
-    fi
-    local flake_lock_hash="none"
-    if [ -f "flake.lock" ]; then
-        flake_lock_hash=$(sha256sum flake.lock | cut -d' ' -f1)
-    fi
-    
-    local csv_file="${metrics_dir}/build-performance.csv"
-    
-    # Create header if file doesn't exist
-    if [ ! -f "$csv_file" ]; then
-        echo "date,host,operation,duration_seconds,success,error_type,git_commit,git_branch,git_status,flake_lock_hash,generation_number,notes" > "$csv_file"
-    fi
-    
-    # Append the data
-    echo "${timestamp},${host},${operation},${duration_seconds},${success},${error_type},${git_commit},${git_branch},${git_status},${flake_lock_hash},${generation_number},${notes}" >> "$csv_file"
-}
+    log_build_performance() {
+        local operation="$1"
+        local duration_seconds="$2"
+        local success="$3"
+        local error_type="$4"
+        local notes="$5"
+        local generation_number="${6:-unknown}"
+        
+        local journal_dir="${HOME}/.dotfiles/worktrees/main/scottys-journal"
+        local metrics_dir="${journal_dir}/metrics"
+        mkdir -p "$metrics_dir"
+        
+        local timestamp
+        timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+        local host
+        host=$(hostname)
+        
+        # Get git state
+        local git_commit
+        git_commit=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
+        local git_branch
+        git_branch=$(git branch --show-current 2>/dev/null || echo "unknown")
+        local git_status="clean"
+        if ! git diff-index --quiet HEAD -- 2>/dev/null; then
+            local modified_count
+            modified_count=$(git status --porcelain | wc -l)
+            git_status="${modified_count}_modified"
+        fi
+        local flake_lock_hash="none"
+        if [ -f "flake.lock" ]; then
+            flake_lock_hash=$(sha256sum flake.lock | cut -d' ' -f1)
+        fi
+        
+        local csv_file="${metrics_dir}/build-performance.csv"
+        
+        # Create header if file doesn't exist
+        if [ ! -f "$csv_file" ]; then
+            echo "date,host,operation,duration_seconds,success,error_type,git_commit,git_branch,git_status,flake_lock_hash,generation_number,notes" > "$csv_file"
+        fi
+        
+        # Append the data
+        echo "${timestamp},${host},${operation},${duration_seconds},${success},${error_type},${git_commit},${git_branch},${git_status},${flake_lock_hash},${generation_number},${notes}" >> "$csv_file"
+    }
+fi
 
 failable-pre-commit() {
   nix develop -c pre-commit run --all-files
