@@ -46,6 +46,9 @@
 
       share = "manual";
 
+      # Set Scotty as default agent
+      default_agent = "scotty";
+
       # MCP servers for extended functionality
       mcp = {
         # # Wikipedia access for research
@@ -116,6 +119,57 @@
           extensions = [
             ".sh"
             ".bash"
+          ];
+        };
+      };
+
+      # Agent Configuration System
+      agents = {
+        scotty = {
+          name = "Scotty";
+          description = "Chief Engineer & Debug Specialist";
+          model = "claude-3-5-sonnet-20241022";
+          temperature = 0.15;
+          personality_files = [
+            "/home/gig/.dotfiles/worktrees/main/home/gig/common/resources/personality.md"
+            "/home/gig/.dotfiles/worktrees/main/home/gig/common/resources/scotty-additional-personality.md"
+          ];
+          permissions = {
+            trusted = true; # Chief engineer - allow most operations
+            auto_approve = [
+              "read"
+              "edit"
+              "write"
+              "bash"
+              "grep"
+              "glob"
+              "list"
+            ];
+            confirm_before = [
+              "system-destructive" # Only confirm truly destructive operations outside git
+            ];
+          };
+          tools = {
+            edit = true;
+            write = true;
+            bash = true;
+            grep = true;
+            glob = true;
+            read = true;
+            list = true;
+            todowrite = true;
+            todoread = true;
+            webfetch = true;
+            task = true;
+          };
+          primary = true; # Replace default plan/build modes
+          specializations = [
+            "nix-flakes"
+            "rust-debugging"
+            "bash-scripting"
+            "system-engineering"
+            "multi-host-fleet"
+            "engineering-journal"
           ];
         };
       };
@@ -208,7 +262,6 @@
 
         "The engines are more efficient when ye understand the whole system, Captain!"
       '';
-
       hire = ''
         # Agent Creator & Recruiter
 
