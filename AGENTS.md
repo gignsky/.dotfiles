@@ -3,6 +3,13 @@
 ## Agent Instructions
 - **Keep this file current**: Agents should frequently suggest modifications to this AGENTS.md file when they discover changes that make it inaccurate or require updates to keep it current with the codebase.
 
+## Universal Agent Commands
+- **Situation Reports**: All agents must implement `/sitrep` command for standardized status reporting
+  - Provides comprehensive operational status in agent-specific voice
+  - Includes current operations, system health, recent activities, and recommendations
+  - Standard format with agent personality adaptations (see Scotty agent for reference implementation)
+  - Essential for fleet-wide situational awareness and coordination
+
 ## Build Commands
 - **System rebuild**: `just rebuild` or `scripts/system-flake-rebuild.sh [HOST]`
 - **Home Manager**: `just home` or `scripts/home-manager-flake-rebuild.sh [HOST]`
