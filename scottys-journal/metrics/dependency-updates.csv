@@ -1,3 +1,2 @@
 date,host,package_name,old_version,new_version,impact_level,notes
-2024-11-25,fleet-wide,nixpkgs,23.11,24.05,major,"Requires testing across all hosts"
-2024-11-25,ganoslal,home-manager,23.11,24.05,medium,"Configuration syntax changes needed"
+2024-11-25,ganoslal,opencode-home-manager-config,none,initial,medium,"Added programs.opencode.agents configuration support"
