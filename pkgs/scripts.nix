@@ -17,10 +17,10 @@ let
     pkgs.writeShellScriptBin name ''
       # Auto-generated wrapper for ${scriptPath}
       # Dependencies: ${builtins.concatStringsSep ", " (map (pkg: pkg.name or "unknown") dependencies)}
-      
+
       # Make dependencies available in PATH
       export PATH="${pkgs.lib.makeBinPath dependencies}:$PATH"
-      
+
       # Execute the original script with all arguments
       exec ${pkgs.bash}/bin/bash "${scriptPath}" "$@"
     ''
@@ -58,7 +58,7 @@ let
       description = "Validates hardware configuration synchronization and GPU setup";
     };
 
-    # System rebuild script  
+    # System rebuild script
     system-flake-rebuild = makeScriptPackage {
       name = "system-flake-rebuild";
       scriptPath = ../scripts/system-flake-rebuild.sh;
