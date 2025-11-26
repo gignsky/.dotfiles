@@ -46,9 +46,6 @@
 
       share = "manual";
 
-      # Set Scotty as default agent
-      default_agent = "scotty";
-
       # MCP servers for extended functionality
       mcp = {
         # # Wikipedia access for research
