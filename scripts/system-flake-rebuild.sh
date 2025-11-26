@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Source Scotty's logging library for automatic build logging
+source "$(dirname "$0")/scotty-logging-lib.sh"
+
 if [ -n "$1" ]; then
   export HOST="$1"
 else
@@ -47,17 +50,51 @@ failable-pre-commit() {
 
 set -e
 pushd . || exit
+
+# Log build start
+start_time=$(date +%s)
+scotty_log_event "build-start" "nixos-rebuild-${HOST}"
+
 git diff -U0 ./*glob*.nix
 echo "Running pre-commit on all files"
 failable-pre-commit || true
 echo "NixOS Rebuilding..."
+
+# Capture build output and success/failure
 output_file=$(mktemp)
-if ! sudo nixos-rebuild switch --flake .#"$HOST" | tee "$output_file" 2>&1; then
+if sudo nixos-rebuild switch --flake .#"$HOST" | tee "$output_file" 2>&1; then
+  build_success="true"
+  
+  # Extract generation number from nixos-rebuild output or list-generations
+  gen=$(nixos-rebuild list-generations 2>/dev/null | grep current || echo "unknown generation")
+  generation_number=$(echo "$gen" | grep -o '[0-9]*' | head -n 1 || echo "unknown")
+  
+  # Calculate build duration
+  end_time=$(date +%s)
+  duration=$((end_time - start_time))
+  
+  # Log successful build
+  scotty_log_event "build-complete" "nixos-rebuild-${HOST}" "$duration" "$build_success" "$generation_number"
+  
+  # Commit with generation info
+  git commit -a --allow-empty -m "$HOST: $gen" || true
+else
+  build_success="false"
+  end_time=$(date +%s)
+  duration=$((end_time - start_time))
+  
+  # Extract error information from output
+  error_info=$(tail -n 5 "$output_file" | tr '\n' ' ' || echo "Unknown nixos-rebuild error")
+  
+  # Log failed build
+  scotty_log_event "build-error" "nixos-rebuild-${HOST}" "$error_info"
+  log_build_performance "nixos-rebuild-${HOST}" "$duration" "false" "nixos-rebuild-switch-failed" "Build failed during switch operation" "unknown"
+  
   echo "nixos-rebuild switch failed. Output:"
   cat "$output_file"
+  rm "$output_file"
   exit 1
 fi
+
 rm "$output_file"
-gen=$(nixos-rebuild list-generations 2>/dev/null | grep current)
-git commit -a --allow-empty -m "$HOST: $gen" || true
 popd || exit
