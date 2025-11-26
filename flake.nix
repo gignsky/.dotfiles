@@ -448,6 +448,45 @@
                 end-of-file-fixer = {
                   enable = true;
                 };
+
+                # Scotty's Engineering Logging Hooks
+                scotty-post-commit-log = {
+                  enable = true;
+                  name = "scotty-post-commit-log";
+                  entry = "${pkgs.bash}/bin/bash";
+                  args = [
+                    "-c"
+                    ''
+                      # Source Scotty's logging library
+                      source "${./scripts/scotty-logging-lib.sh}"
+
+                      # Get the commit message and log the operation
+                      commit_message=$(git log -1 --pretty=%B)
+                      scotty_log_event "git-commit" "$commit_message"
+                    ''
+                  ];
+                  stages = [ "post-commit" ];
+                  verbose = true;
+                };
+
+                scotty-pre-push-log = {
+                  enable = true;
+                  name = "scotty-pre-push-log";
+                  entry = "${pkgs.bash}/bin/bash";
+                  args = [
+                    "-c"
+                    ''
+                      # Source Scotty's logging library
+                      source "${./scripts/scotty-logging-lib.sh}"
+
+                      # Log the push preparation
+                      current_branch=$(git branch --show-current)
+                      scotty_log_event "git-push-prep" "Preparing to push branch: $current_branch"
+                    ''
+                  ];
+                  stages = [ "pre-push" ];
+                  verbose = true;
+                };
               };
             };
           };
