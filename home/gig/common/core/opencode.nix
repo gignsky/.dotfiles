@@ -250,15 +250,10 @@
         Test the configured MCP servers to ensure they're working properly.
         - DeepWiki: Query documentation for a popular repository
         - Verify all MCP server connections and functionality
-     '';
+      '';
 
-    # Agent Configuration System (Home Manager specific)
-    agents = {
-      scotty = "/home/gig/.dotfiles/home/gig/common/resources/scotty-additional-personality.md";
     };
-  };
 
-<<<<<<< HEAD
     # Enhanced rules with personality system
     rules = ''
       # OpenCode Agent Configuration
@@ -318,6 +313,11 @@
         - URL: https://mcp.deepwiki.com/sse
         - Features: Access up-to-date docs for any public repo
     '';
+
+    # Agent Configuration System (Home Manager specific)
+    agents = {
+      scotty = "/home/gig/.dotfiles/home/gig/common/resources/scotty-additional-personality.md";
+    };
   };
 
   # Keep your existing SOPS secret configuration
