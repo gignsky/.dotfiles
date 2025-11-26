@@ -5,8 +5,8 @@
     # Main configuration
     settings = {
       # Core setup
-      model = "github-copilot/claude-3-5-sonnet-20241022";
-      small_model = "github-copilot/claude-3-5-haiku-20241022";
+      model = "github-copilot/claude-sonnet-4.5";
+      small_model = "github-copilot/claude-haiku-4.5";
       theme = "gruvbox"; # Built-in gruvbox theme
       # autoupdate = true;
 
