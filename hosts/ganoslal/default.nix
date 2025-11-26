@@ -65,8 +65,8 @@
       variant = "";
     };
 
-    # Use NVIDIA drivers for dual-GPU setup (NVIDIA primary + AMD secondary)
-    videoDrivers = [ "nvidia" ];
+    # Use both NVIDIA and AMD drivers for dual-GPU setup (NVIDIA primary + AMD secondary)
+    videoDrivers = [ "nvidia" "amdgpu" ];
   };
 
   # Allow unfree packages
