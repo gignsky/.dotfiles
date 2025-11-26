@@ -21,6 +21,15 @@ let
       # Make dependencies available in PATH
       export PATH="${pkgs.lib.makeBinPath dependencies}:$PATH"
 
+      # Create a temporary copy of the scotty logging library for scripts that need it
+      if [[ "${scriptPath}" == *"system-flake-rebuild.sh"* ]] || [[ "${scriptPath}" == *"home-manager-flake-rebuild.sh"* ]]; then
+        SCOTTY_LIB_CONTENT='${builtins.readFile ../scripts/scotty-logging-lib.sh}'
+        TEMP_LIB_FILE="/tmp/scotty-logging-lib-$$.sh"
+        echo "$SCOTTY_LIB_CONTENT" > "$TEMP_LIB_FILE"
+        export SCOTTY_LOGGING_LIB_PATH="$TEMP_LIB_FILE"
+        trap 'rm -f "$TEMP_LIB_FILE"' EXIT
+      fi
+
       # Execute the original script with all arguments
       exec ${pkgs.bash}/bin/bash "${scriptPath}" "$@"
     ''

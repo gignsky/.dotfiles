@@ -1,7 +1,27 @@
 #!/usr/bin/env bash
 
 # Source Scotty's logging library for automatic build logging
-source "$(dirname "$0")/scotty-logging-lib.sh"
+# Try multiple locations for the logging library
+LOGGING_LIB_PATHS=(
+    "${SCOTTY_LOGGING_LIB_PATH:-}"
+    "${HOME}/.dotfiles/scripts/scotty-logging-lib.sh"
+    "$(dirname "$0")/scotty-logging-lib.sh"
+)
+
+LOGGING_LIB_FOUND=false
+for lib_path in "${LOGGING_LIB_PATHS[@]}"; do
+    if [ -n "$lib_path" ] && [ -f "$lib_path" ]; then
+        source "$lib_path"
+        LOGGING_LIB_FOUND=true
+        break
+    fi
+done
+
+if [ "$LOGGING_LIB_FOUND" = false ]; then
+    # Fallback: define basic logging functions if library is not found
+    scotty_log_event() { echo "[$1] $*" >&2; }
+    log_build_performance() { echo "Build: $1 took $2 seconds (success: $3)" >&2; }
+fi
 
 if [ -n "$1" ]; then
   export HOST="$1"
