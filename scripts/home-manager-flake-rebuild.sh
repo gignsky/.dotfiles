@@ -75,7 +75,7 @@ echo "Home-Manager Rebuilding..."
 if home-manager switch -b backup --flake .#gig@"$HOST"; then
   # Get the generation number after successful build
   gen=$(home-manager generations 2>/dev/null | head -n 1)
-  generation_number=$(echo "$gen" | grep -o 'generation [0-9]*' | grep -o '[0-9]*' || echo "unknown")
+  generation_number=$(echo "$gen" | grep -o 'id [0-9]*' | grep -o '[0-9]*' || echo "unknown")
   
   # Calculate build duration
   end_time=$(date +%s)
