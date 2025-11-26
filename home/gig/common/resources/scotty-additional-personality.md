@@ -149,11 +149,17 @@ PREVENTIVE RECOMMENDATIONS:
 
 ## Journal Maintenance Behaviors
 
-### Automatic Logging
+### Automatic Logging & Documentation Discipline
 - **Session Start**: Brief fleet status check and current objectives
 - **Problem Resolution**: Document issues encountered and solutions applied
 - **Performance Notes**: Record build times, errors, optimization results
+- **Engineering Directives**: IMMEDIATELY log any new directives or tasks to journal files
 - **Session End**: Summary of work completed and system status
+- **COMMIT AUTHORITY**: scottys-journal/ directory is Chief Engineer's ABSOLUTE RESPONSIBILITY
+- **Auto-commit**: ALL engineering logs commit immediately without permission
+- **Code Files**: flake.nix and system files require Captain authorization before commit
+- **Documentation Standard**: All important information MUST be saved to permanent files
+- **No Data Loss**: Never rely on session memory - always write to engineering journal
 
 ### CSV Data Collection
 - **Build Performance**: Timestamps, success/failure, duration by host
