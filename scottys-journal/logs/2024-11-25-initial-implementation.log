@@ -3,38 +3,56 @@ CHIEF ENGINEER'S LOG - STARDATE 2024.11.25
 ================================================================================
 
 FLEET STATUS REPORT:
-• ganoslal: Primary workstation operational, Scotty agent system under construction
-• merlin: Secondary system standing by, ready for configuration testing
-• mganos: Experimental cross-configuration testing vessel (ganoslal config on merlin hardware)
+• ganoslal: Primary workstation operational, home-manager generation 55 active
+• merlin: Secondary system standing by, configuration synchronized
+• mganos: Experimental cross-configuration testing vessel (ganoslal config on merlin hardware)  
 • wsl: Windows subsystem utility craft available for specialized operations
 
-ENGINEERING OPERATIONS:
-Initial implementation of Scotty agent system for OpenCode integration.
-Constructed personality matrix combining Scottish engineering heritage with 
-fleet management capabilities. Established journal infrastructure for both
-narrative logs and quantitative performance metrics.
+ENGINEERING OPERATIONS COMPLETED:
+1. Scotty agent implementation through multiple configuration iterations
+   - Initial attempt: Structured attribute set format (incorrect)
+   - Correction: String format within settings.agents (incorrect)
+   - Final solution: Home Manager programs.opencode.agents structure (successful)
 
-TECHNICAL OBSERVATIONS:
-- Agent configuration follows established patterns in opencode.nix
-- Personality system properly layered (base + Scottish engineering specialization)
-- CSV metric templates established for build performance, error tracking, 
-  dependency updates, and system resource monitoring
-- Directory structure: scottys-journal/{logs,metrics,archives}
+2. Agent configuration refinement process:
+   - Discovered OpenCode config schema requirements via error analysis
+   - Consulted OpenCode documentation and MyNixOS Home Manager options
+   - Implemented proper YAML frontmatter in scotty-additional-personality.md
+   - Successfully deployed via home-manager generation 55
 
-CURRENT OBJECTIVES:
-1. Complete nix flake validation testing
-2. Execute home-manager rebuild to activate Scotty agent
-3. Verify Tab-switchable agent functionality
-4. Commit implementation with proper documentation
+3. Scottish engineering personality matrix established:
+   - Base personality: proprietorial rules and courtly deportment  
+   - Scottish engineering overlay: dialect, fleet awareness, journal behaviors
+   - Combined system prompt with trusted engineer permissions
 
-PREVENTIVE RECOMMENDATIONS:
-- Regular fleet status monitoring via CSV metrics
-- Automated logging of build performance across all hosts
-- Quarterly review of system optimization opportunities
-- Maintain backup configurations for critical system operations
+4. Engineering journal infrastructure deployment:
+   - Directory structure: scottys-journal/{logs,metrics,archives}
+   - CSV templates with sample data for build performance tracking
+   - Initial log template established for narrative documentation
 
-NEXT MAINTENANCE WINDOW:
-Testing and activation of new agent system - estimated 10-15 minutes
+TECHNICAL CHALLENGES RESOLVED:
+- Configuration schema mismatch: agents vs agent vs programs.opencode.agents
+- Home Manager integration: proper file path references and YAML frontmatter
+- Permission system: trusted engineer status with selective confirmations
+- Multiple rebuild cycles: generations 51, 54, 55 with incremental fixes
+
+FINAL SYSTEM STATUS:
+✓ Scotty agent: Deployed and configured as primary agent
+✓ Home Manager: Generation 55 successfully activated  
+✓ Configuration: Validated through nix flake check
+✓ Agent files: Properly linked to ~/.config/opencode/agent/scotty.md
+✓ Journal system: Ready for operational logging
+
+PERFORMANCE METRICS (Actual):
+- Total implementation time: ~45 minutes across multiple sessions
+- Home Manager rebuilds: 3 successful deployments
+- Configuration iterations: 4 major revisions
+- Error resolution cycles: 2 (schema mismatch, file structure)
+
+NEXT OPERATIONAL PHASE:
+Testing Tab-switchable agent functionality in live OpenCode session.
+Agent should be available for primary engineering duties with full
+Scottish engineering personality and fleet management capabilities.
 
                                     Montgomery Scott, Chief Engineer
 ================================================================================

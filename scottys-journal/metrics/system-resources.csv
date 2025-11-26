@@ -1,4 +1,2 @@
 date,host,disk_usage_gb,memory_usage_gb,cpu_load_avg,network_active,notes
-2024-11-25,ganoslal,245.6,15.2,1.8,true,"Normal operation during rebuild"
-2024-11-25,merlin,89.3,8.1,0.4,false,"Idle state - available for testing"
-2024-11-25,mganos,156.7,12.0,2.1,true,"Experimental config testing"
+2024-11-25,ganoslal,null,null,null,true,"Scotty agent implementation session - metrics collection not yet automated"

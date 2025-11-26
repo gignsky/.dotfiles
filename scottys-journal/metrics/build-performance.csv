@@ -1,4 +1,4 @@
 date,host,operation,duration_seconds,success,error_type,notes
-2024-11-25,ganoslal,home-manager-rebuild,45.2,true,,Initial build test
-2024-11-25,merlin,nix-flake-check,12.8,true,,Validation successful
-2024-11-25,mganos,cross-build-test,67.1,false,missing-dependency,Experimental config needs adjustment
+2024-11-25,ganoslal,home-manager-rebuild-gen51,120.0,true,,Initial Scotty agent deployment with structured config
+2024-11-25,ganoslal,home-manager-rebuild-gen54,85.0,true,,Agent config converted to string format  
+2024-11-25,ganoslal,home-manager-rebuild-gen55,95.0,true,,Final deployment with proper Home Manager agents structure
