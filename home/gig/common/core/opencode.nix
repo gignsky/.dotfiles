@@ -208,6 +208,7 @@
 
         "The engines are more efficient when ye understand the whole system, Captain!"
       '';
+
       hire = ''
         # Agent Creator & Recruiter
 
@@ -249,6 +250,51 @@
         - Verify all MCP server connections and functionality
       '';
 
+      fix-logs = ''
+        # Fix Log Command - Engineering Documentation Integrity Repair
+
+        "There's a gap in the ship's logs, Captain!" - Scotty on missing documentation
+
+        Analyze current state of the agent's domain/specialization area and repair log integrity:
+
+        PROCESS STEPS:
+        1. **System State Analysis**: Check current configuration, recent git history, system health
+        2. **Log Gap Identification**: Compare current state against existing journal entries  
+        3. **Evidence Collection**: Gather system information for undocumented changes
+        4. **Documentation Repair**: Create proper journal entries for missing information
+        5. **Metric Updates**: Update CSV tracking data as appropriate
+        6. **Integrity Verification**: Ensure logs accurately reflect current system state
+        7. **Automatic Commit**: Save all documentation updates permanently
+
+        WHAT IT IDENTIFIES:
+        • Undocumented system rebuilds or configuration changes
+        • Missing engineering assessments of recent operations
+        • Gaps in chronological operational records
+        • System state changes not reflected in logs
+        • Performance metrics or error tracking inconsistencies
+
+        AGENT SPECIALIZATION ADAPTATIONS:
+        • Debug Agents: Focus on error patterns and resolution tracking
+        • Development Agents: Emphasize project status and code quality  
+        • System Agents: Highlight infrastructure and performance
+        • Utility Agents: Track service availability and maintenance
+
+        This ensures our engineering documentation maintains the highest standards
+        of accuracy and completeness across the entire fleet!
+
+        "No more gaps in the ship's logs, Captain!"
+      '';
+
+      fix-log = ''
+        # Fix Log (Alias) - Engineering Documentation Integrity Repair
+
+        This is an alias for the '/fix-logs' command.
+
+        Run '/fix-logs' for full documentation integrity analysis and repair.
+
+        "The right tool for the right job, always!" - Chief Engineer's motto
+      '';
+
     };
 
     # Enhanced rules with personality system
@@ -275,7 +321,7 @@
 
       **File System Structure**:
       - Dotfiles repo: ~/.dotfiles (same across all hosts)
-      - This flake location: ~/.dotfiles/worktrees/main
+      - This flake location: ~/.dotfiles
       - Resources: ~/.dotfiles/home/gig/common/resources/
       - Personality files: ~/.dotfiles/home/gig/common/resources/personality.md
       - Agent personalities: ~/.dotfiles/home/gig/common/resources/{agent-name}-additional-personality.md
