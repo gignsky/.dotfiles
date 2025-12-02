@@ -228,3 +228,8 @@
 - I should figure out how to make it so `nix flake show` shows details of custom
   outputs in this repo and others for outputs like 'homeConfigurations' or
   'nixosTest's
+- Task for scotty more than anything:
+  - Help me figure out what the current rfc version of nixpkgs is calle din
+    unstable and make sure that this flake and others are up to date using the
+    proper version
+  - revert to 25.11 now that november is over
