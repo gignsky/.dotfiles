@@ -226,7 +226,7 @@ nu home:
 new home:
   just clean
   just home
-  nu
+  exec nu
 
 home-trace:
 	just dont-fuck-my-build
