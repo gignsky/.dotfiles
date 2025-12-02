@@ -241,3 +241,5 @@
 - check to see if a bunch of man pages are being lost because they are generated
   for all the posix shells but not ported to nushell (opencode might be a place
   to start), if this is an issue write a package to help!
+- write a rust interpreter for nix lang, that will allow for rich rust compilor
+  errors as a byproduct
