@@ -13,7 +13,9 @@
 
   nixpkgs = {
     hostPlatform = lib.mkDefault "x86_64-linux";
-    config.allowUnfree = true;
+    #TODO: Remove me assuming overlay continues to work inside flake let/in
+    #
+    # config.allowUnfree = true;
   };
 
   boot = {

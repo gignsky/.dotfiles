@@ -17,10 +17,14 @@ let
 in
 {
   # overlays
-  nixpkgs.overlays = [
-    outputs.overlays.unstable-packages
-    # outputs.overlays.wrap-packages # example for overlays
-  ];
+
+  #TODO: Remove this commented section if the overlay proves to work
+  #
+  # nixpkgs.overlays = [
+  #   outputs.overlays.unstable-packages
+  #   # outputs.overlays.wrap-packages # example for overlays
+  # ];
+
   imports = [
     ./starship.nix
   ];

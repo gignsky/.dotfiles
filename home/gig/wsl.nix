@@ -15,15 +15,17 @@
     ./home.nix
   ];
 
-  nixpkgs = {
-    # You can add overlays here
-    overlays = [
-      # Add overlays your own flake exports (from overlays and pkgs dir):
-      outputs.overlays.additions
-      # outputs.overlays.modifications
-      outputs.overlays.unstable-packages
-    ];
-  };
+  #TODO: Remove me assuming overlay continues to work inside flake let/in
+  #
+  # nixpkgs = {
+  #   # You can add overlays here
+  #   overlays = [
+  #     # Add overlays your own flake exports (from overlays and pkgs dir):
+  #     outputs.overlays.additions
+  #     # outputs.overlays.modifications
+  #     outputs.overlays.unstable-packages
+  #   ];
+  # };
 
   home.packages = with pkgs; [
     # inputs.flake-iter.packages.${system}.default

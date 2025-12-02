@@ -2,6 +2,7 @@
   inputs,
   pkgs,
   outputs,
+  overlays,
   configLib,
   ...
 }:
@@ -9,10 +10,10 @@ let
   inherit (pkgs.stdenv.hostPlatform) system;
 in
 {
-  # overlays
+  # overlays - use the overlays passed through specialArgs instead of outputs.overlays
   nixpkgs.overlays = [
-    outputs.overlays.unstable-packages
-    # outputs.overlays.wrap-packages # example for overlays
+    overlays.unstable-packages
+    # overlays.wrap-packages # example for overlays
   ];
 
   environment.systemPackages = with pkgs; [

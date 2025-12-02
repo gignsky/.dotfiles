@@ -27,11 +27,13 @@ let
 
     # Removed users.users.root here to avoid duplicate password options
   };
+  #TODO: Remove this commented section if the overlay proves to work
+  #
   # overlays
-  nixpkgs.overlays = [
-    outputs.overlays.unstable-packages
-    # outputs.overlays.wrap-packages # example for overlays
-  ];
+  # nixpkgs.overlays = [
+  #   outputs.overlays.unstable-packages
+  #   # outputs.overlays.wrap-packages # example for overlays
+  # ];
 in
 {
   config =

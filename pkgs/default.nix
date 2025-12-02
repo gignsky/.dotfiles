@@ -1,8 +1,35 @@
 # You can build these directly using 'nix build .#example'
 
 {
-  pkgs ? import <nixpkgs> { },
+  pkgs,
+  lib ? pkgs.lib,
+  configLib ? lib,
+  ...
 }:
+let
+  # pkgs is passed in from the calling flake
+  # No need to extract system or create our own pkgs instance
+
+  # declaring supernote
+  supernote =
+    pkgs.writeShellScriptBin "supernote" ''
+      ${pkgs.git}/bin/git pull --fast-forward
+      ${pkgs.gigs.gigvim}/bin/vi notes.md
+      ${pkgs.just}/bin/just noted
+      ${pkgs.git}/bin/git push
+    ''
+    // {
+      # FIXME: SETUP passthru
+      passthru.tests = {
+        basic = pkgs.runCommand "supernote-test" { buildInputs = [ supernote ]; } ''
+          set -e
+          # Should print something, check for a known directory in the output
+          supernote > $out
+          grep -q "home" $out
+        '';
+      };
+    };
+in
 rec {
   #################### Example Packages #################################
   # example = pkgs.writeShellScriptBin "example" ''
@@ -23,6 +50,9 @@ rec {
         '';
       };
     };
+
+  inherit supernote;
+  supernotes = supernote;
 
   quick-results =
     pkgs.writeShellScriptBin "quick-results" ''

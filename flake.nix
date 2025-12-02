@@ -117,37 +117,75 @@
       inherit (self) outputs;
       inherit (nixpkgs) lib;
       system = "x86_64-linux";
-      # forAllSystems = nixpkgs.lib.genAttrs [
-      #   "x86_64-linux"
-      #   "aarch64-linux"
-      #   "i686-linux"
-      #   "aarch64-darwin"
-      #   "x86_64-darwin"
-      # ];
+
+      # Custom modifications/overrides to upstream packages.
+      overlays = import ./overlays { inherit inputs; };
+
+      # custom modified nixpkgs with all the overlays enabled
+      nixpkgsOverlayer = {
+        overlays = with overlays; [
+          additions
+          unstable-packages
+          gigpkgs
+        ];
+      };
+
+      #pkgs for customPkgs
+      customPkgsPkgs = import nixpkgs {
+        inherit system;
+        config = nixpkgsConfig.config;
+        overlays = nixpkgsOverlayer.overlays;
+      };
+
+      nixpkgsConfig = {
+        config = {
+          allowUnfree = true;
+        };
+      };
+
+      # finial iteration of nixpkgs
+      nixpkgsBase = import nixpkgs {
+        inherit system;
+        config = nixpkgsConfig.config;
+        overlays = nixpkgsOverlayer.overlays;
+      };
+
       configVars = import ./vars { inherit inputs lib; };
       configLib = import ./lib { inherit lib; };
-      specialArgs = {
+
+      customPkgs = import ./pkgs {
+        pkgs = customPkgsPkgs; # For the fight against recursion!
+        inherit lib configLib;
+        # overlays = customOverlays;
+      };
+
+      pkgs = nixpkgsBase // customPkgs;
+      # pkgs = customPkgs;
+      # pkgs = import nixpkgs;
+
+      basicArgs = {
         inherit
+          pkgs
           inputs
           outputs
-          nixpkgs
           configVars
           configLib
+          system
+          overlays
+          nixpkgs
+          nixpkgsBase
           ;
+        # overlays = customOverlays;
+        # nixpkgs = customNixpkgs;
       };
-      customPkgs = import ./pkgs { inherit pkgs; };
-      pkgs =
-        import nixpkgs {
-          inherit system;
-          config = {
-            allowUnfree = true;
-          };
-        }
-        // customPkgs;
+
+      specialArgs = basicArgs;
+      extraSpecialArgs = basicArgs;
+
       assertAllHostsHaveVmTest =
         configs:
         let
-          missing = nixpkgs.lib.filterAttrs (
+          missing = lib.filterAttrs (
             _: config: (config.config.system.build.vmTest or null) == null
           ) configs;
         in
@@ -161,7 +199,7 @@
       # Available through 'nixos-rebuild --flake .#your-hostname'
       nixosConfigurations = {
         # WSL configuration entrypoint - name can not be changed from nixos without some extra work TODO
-        wsl = nixpkgs.lib.nixosSystem {
+        wsl = lib.nixosSystem {
           inherit system;
           specialArgs = specialArgs // {
             configVars = configVars // {
@@ -188,7 +226,7 @@
 
         # #wsl based vm
         # full-vm = nixpkgs.lib.nixosSystem {
-        #   inherit system specialArgs;
+        #   inherit specialArgs;
         #   modules = [
         #     { system.stateVersion = "25.05"; }
         #     "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
@@ -198,8 +236,8 @@
         # };
 
         # # Merlin configuration entrypoint - unused as merlin has a wsl instance
-        merlin = nixpkgs.lib.nixosSystem {
-          inherit system specialArgs;
+        merlin = lib.nixosSystem {
+          inherit specialArgs;
           modules = [
             # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
             # home-manager.nixosModules.home-manager {
@@ -214,7 +252,7 @@
 
         # # GanosLal configuration entrypoint - but to build on merlin's hardware
         # mganos = nixpkgs.lib.nixosSystem {
-        #   inherit system specialArgs;
+        #   inherit specialArgs;
         #   modules = [
         #     # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
         #     # home-manager.nixosModules.home-manager {
@@ -227,8 +265,8 @@
         #   ];
         # };
 
-        ganoslal = nixpkgs.lib.nixosSystem {
-          inherit system specialArgs;
+        ganoslal = lib.nixosSystem {
+          inherit specialArgs;
           # > Our main nixos configuration file <
           modules = [
             # home-manager.nixosModules.home-manager
@@ -245,17 +283,18 @@
       homeConfigurations = {
         # ganoslalWSL
         "gig@wsl" = home-manager.lib.homeManagerConfiguration {
-          inherit pkgs; # Home-manager requires 'pkgs' instance
-          extraSpecialArgs = {
-            inherit
-              inputs
-              outputs
-              configLib
-              system
-              ;
-            overlays = import ./overlays { inherit inputs; };
-            # flakeRoot = self;
-          };
+          # inherit pkgs; # Home-manager requires 'pkgs' instance
+          inherit extraSpecialArgs pkgs;
+          # extraSpecialArgs = {
+          #   inherit
+          #     inputs
+          #     outputs
+          #     configLib
+          #     system
+          #     ;
+          #   # overlays = import ./overlays { inherit inputs; };
+          #   # flakeRoot = self;
+          # };
           # > Our main home-manager configuration file <
           modules = [ ./home/gig/wsl.nix ];
           # config = {
@@ -265,49 +304,50 @@
 
         # spacedock - unused with spacedock having a wsl instance
         "gig@spacedock" = home-manager.lib.homeManagerConfiguration {
-          inherit pkgs; # Home-manager requires 'pkgs' instance
-          extraSpecialArgs = {
-            inherit
-              inputs
-              outputs
-              configLib
-              system
-              ;
-            overlays = import ./overlays { inherit inputs; };
-            # flakeRoot = self;
-          };
+          # inherit pkgs; # Home-manager requires 'pkgs' instance
+          inherit extraSpecialArgs pkgs; # Home-manager requires 'pkgs' instance
+          # extraSpecialArgs = {
+          #   inherit
+          #     inputs
+          #     outputs
+          #     configLib
+          #     system
+          #     ;
+          #   # overlays = import ./overlays { inherit inputs; };
+          #   # flakeRoot = self;
+          # };
           # > Our main home-manager configuration file <
           modules = [ ./home/gig/spacedock.nix ];
         };
 
         # merlin - unused with merlin having a wsl instance
         "gig@merlin" = home-manager.lib.homeManagerConfiguration {
-          inherit pkgs; # Home-manager requires 'pkgs' instance
-          extraSpecialArgs = {
-            inherit
-              inputs
-              outputs
-              configLib
-              system
-              ;
-            overlays = import ./overlays { inherit inputs; };
-          };
+          inherit extraSpecialArgs pkgs; # Home-manager requires 'pkgs' instance
+          # extraSpecialArgs = {
+          #   inherit
+          #     inputs
+          #     outputs
+          #     configLib
+          #     system
+          #     ;
+          #   # overlays = import ./overlays { inherit inputs; };
+          # };
           # > Our main home-manager configuration file <
           modules = [ ./home/gig/merlin.nix ];
         };
 
         # ganoslal - unused with ganoslal having a wsl instance
         "gig@ganoslal" = home-manager.lib.homeManagerConfiguration {
-          inherit pkgs; # Home-manager requires 'pkgs' instance
-          extraSpecialArgs = {
-            inherit
-              inputs
-              outputs
-              configLib
-              system
-              ;
-            overlays = import ./overlays { inherit inputs; };
-          };
+          inherit extraSpecialArgs pkgs; # Home-manager requires 'pkgs' instance
+          # extraSpecialArgs = {
+          #   inherit
+          #     inputs
+          #     outputs
+          #     configLib
+          #     system
+          #     ;
+          #   overlays = import ./overlays { inherit inputs; };
+          # };
           # > Our main home-manager configuration file <
           modules = [ ./home/gig/ganoslal.nix ];
         };
@@ -339,10 +379,7 @@
       # );
       # nixosModules = { inherit (import ./modules/nixos); };
 
-      packages.${system} = import ./pkgs { inherit pkgs; };
-
-      # Custom modifications/overrides to upstream packages.
-      overlays = import ./overlays { inherit inputs; };
+      packages.${system} = import ./pkgs { inherit pkgs lib configLib; };
 
       # Home Manager modules that can be imported by other flakes
       # homeModules = {
@@ -398,20 +435,20 @@
           let
             nixosTests =
               assert assertAllHostsHaveVmTest self.nixosConfigurations;
-              nixpkgs.lib.filterAttrs (_: v: v != null) (
-                nixpkgs.lib.mapAttrs' (name: config: {
+              lib.filterAttrs (_: v: v != null) (
+                lib.mapAttrs' (name: config: {
                   name = "nixosTest-${name}";
                   value = config.config.system.build.vmTest or null;
                 }) self.nixosConfigurations
               );
-            homeManagerChecks = nixpkgs.lib.mapAttrs' (name: cfg: {
+            homeManagerChecks = lib.mapAttrs' (name: cfg: {
               name = "homeManager-${name}";
               value = cfg.activationPackage;
             }) self.homeConfigurations;
-            packageBuilds = nixpkgs.lib.mapAttrs' (name: pkg: {
+            packageBuilds = lib.mapAttrs' (name: pkg: {
               name = "build-${name}";
               value = pkg;
-            }) (import ./pkgs { inherit pkgs; });
+            }) (import ./pkgs { inherit pkgs lib configLib; });
           in
           nixosTests
           // homeManagerChecks
@@ -505,6 +542,6 @@
 
       # TODO change this to something that has better looking output rules
       # Nix formatter available through 'nix fmt' https://nix-community.github.io/nixpkgs-fmt
-      formatter.${system} = pkgs.nixpkgs-fmt;
+      formatter.${system} = pkgs.nixfmt-rfc-style;
     };
 }

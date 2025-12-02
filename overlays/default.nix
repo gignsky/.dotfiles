@@ -16,13 +16,28 @@
   #   # });
   # };
 
+  # # When applied, the unstable nixpkgs set (declared in the flake inputs) will
+  # # be accessible through 'pkgs.unstable'
+  # unstable-packages = final: _prev: {
+  #   unstable = import inputs.nixpkgs-unstable {
+  #     inherit (final.stdenv.hostPlatform) system;
+  #     config.allowUnfree = true;
+  #   };
+  # };
+
+  # brought in from dot-spacedock!!
   # When applied, the unstable nixpkgs set (declared in the flake inputs) will
   # be accessible through 'pkgs.unstable'
   unstable-packages = final: _prev: {
     unstable = import inputs.nixpkgs-unstable {
-      inherit (final.stdenv.hostPlatform) system;
+      inherit (final) system;
       config.allowUnfree = true;
     };
+  };
+
+  #gigpkgs overlay
+  gigpkgs = final: _prev: {
+    gigs = inputs.gigvim.packages.${final.system};
   };
 
   # # wrap packages overlay example
