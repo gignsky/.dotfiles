@@ -4,15 +4,72 @@
 
 # Book/Story Ideas
 
-I. 'The Game' -- or better yet, 'Court' -- a story about a lifelong game played
-in real time as a gift from a father to a son, with early tasks like choosing
-toys that have representative qualities which in turn determine what the nation
-that you will fictionally control in "REAL TIME" over the course of your life
-via communicating in some form with the 'Gamemaster' (the protagonists father),
-who even left behind a letter in his will that gives him a final task entitled
-'Becoming the Gamemaster', in which he must pass on the game to his own soon to
-be daughter. The game itself could be a very real time stategy game played that
-teaches the child lessons of life through a fictional setting
+1. 'The Game' -- or better yet, 'Court' -- a story about a lifelong game played
+   in real time as a gift from a father to a son, with early tasks like choosing
+   toys that have representative qualities which in turn determine what the
+   nation that you will fictionally control in "REAL TIME" over the course of
+   your life via communicating in some form with the 'Gamemaster' (the
+   protagonists father), who even left behind a letter in his will that gives
+   him a final task entitled 'Becoming the Gamemaster', in which he must pass on
+   the game to his own soon to be daughter. The game itself could be a very real
+   time stategy game played that teaches the child lessons of life through a
+   fictional setting
+
+2. Chronicalling a journal of trying to walk back from immense anger.
+3. A book titled something like _threads_ about different ideas (like those
+   found on bicycle day) that all inevitebly end up revolving around similar
+   ideas, like walking benieth a tattered unfinished blanket pulling on the
+   threads with short essays
+
+   1. On the subject of the word **MORAL**
+      - Suppose there be a better option than moral, a word that better defines
+        what I mean? But then I ask, what is it that I mean? I cannot think of
+        any way to describe than a succession of synoyms:
+        - Just
+        - Honorable
+        - Rightchious
+        - Judicious (similar to Just)
+        - Reasonable
+        - Merciful
+        - Faithful (simply having belief in _anything_)
+        - hopeful (the single smallest action -- see _item 6._)
+
+4. Books that are parables of common phrases like:
+   - _the Devil is in the Details_
+     - This could be an initial story about something like a contract gone wrong
+       but ideally wrapped in the subtext of a larger story where someone maybe
+       makes a deal with the devil and the details are surprising, or-maybe,
+       - ,... something where the devil himself is outsmarted via details
+       - ,... a moral lesson about how the devil is inside of us all looking for
+         a loophole in your manner that would allow him to show himself.
+
+   - _Don't Look a Gift Horse in the Mouth_
+     - Famously, horses were judged by their age -- oft estimated by grading of
+       the teeth -- to look a horse, given as a gift, in the mouth is a sign of
+       ungreatfulness; or worse, greed.
+
+   - Seven Deadly Sins, hopefully with a twist
+   - Modern take on the ten commandments, exploring possible updates for the
+     modern age -- but I suspect will ultimately conclude that the simplicity of
+     the original should remind us that sometimes simple is better than complex,
+     and that maybe its modern ideas that are more fragile than we think.
+     - This could expand to an analysis of how a society ought to move forward
+       with progressivism and benefitting those who are marginalized by society
+       at the time, while doing so in a way that ensures positive movement in a
+       moral (?, see item 3.1. -- regarding threads on morals) direction...
+
+5. For a bit of fun: _Children's books, like the good Dr. Sueuss (spelled
+   incorrectly, on stupidities sake)_
+   - I must admit I enjoy a good ryhme, and this could be a great opportunity to
+     _dumb_ down a lesson, and allow for more metaphore
+   - This brings up maybe doing a retelling of _the missing piece_, possibly
+     about the _missing **peace**_
+
+6. a new _**HOPE**_
+   - *Hope, the single smallest action that any human can perform, and the only
+     one that is **ABSOULTELY** _REQUIRED_ in order for things to get better --
+     for both the individual and the whole.
+7. Capitalism, the weight of a Letter (see seperate document)
 
 ## Information about flake templates
 
