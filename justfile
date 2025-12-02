@@ -76,7 +76,7 @@ clean:
   rm -rfv ~/.cache/nvf/
   rm -rfv ~/.cache/starship/
   rm -rfv ~/.config/zsh/zplug
-  rm -rfv ~/.local/share/opencode
+  # rm -rfv ~/.local/share/opencode
   rm -rfv result
   quick-results
 
