@@ -194,3 +194,7 @@
 - deterministic uptime detector -- find a good name for this and get the domain,
   would of course be written in Nix! (& maybe a bit of rust -- maybe, with
   nushell-binary-engine integration!?)
+- need to move spacedock over to this repo instead of seperate one -- ideally I
+  need to stabilize both first then merge the best bits, this might mean I
+  should reorganize the dotfiles first but I feel as though that might be a
+  waste of time
