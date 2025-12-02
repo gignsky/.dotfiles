@@ -225,3 +225,6 @@
   Run 'man nix.conf' for more information on the 'substituters' configuration
   option.
   ```
+- I should figure out how to make it so `nix flake show` shows details of custom
+  outputs in this repo and others for outputs like 'homeConfigurations' or
+  'nixosTest's
