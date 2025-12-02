@@ -1,79 +1,69 @@
+# FIXME: _**GITLAB** Extra Seat_ is being charged to my account, I need to fix this issue immediately
+
+## Black Friday / Cyber Monday Shopping...
+
+1. Ultrawide Monitor?
+2. Split-Keyboard
+3. Sound Upgrade
+
 # Interesting Github repo
 
 [Here](https://github.com/nix-gui/nix-gui)
 
-# Book/Story Ideas
-
-1. 'The Game' -- or better yet, 'Court' -- a story about a lifelong game played
-   in real time as a gift from a father to a son, with early tasks like choosing
-   toys that have representative qualities which in turn determine what the
-   nation that you will fictionally control in "REAL TIME" over the course of
-   your life via communicating in some form with the 'Gamemaster' (the
-   protagonists father), who even left behind a letter in his will that gives
-   him a final task entitled 'Becoming the Gamemaster', in which he must pass on
-   the game to his own soon to be daughter. The game itself could be a very real
-   time stategy game played that teaches the child lessons of life through a
-   fictional setting
-
-2. Chronicalling a journal of trying to walk back from immense anger.
-3. A book titled something like _threads_ about different ideas (like those
-   found on bicycle day) that all inevitebly end up revolving around similar
-   ideas, like walking benieth a tattered unfinished blanket pulling on the
-   threads with short essays
-
-   1. On the subject of the word **MORAL**
-      - Suppose there be a better option than moral, a word that better defines
-        what I mean? But then I ask, what is it that I mean? I cannot think of
-        any way to describe than a succession of synoyms:
-        - Just
-        - Honorable
-        - Rightchious
-        - Judicious (similar to Just)
-        - Reasonable
-        - Merciful
-        - Faithful (simply having belief in _anything_)
-        - hopeful (the single smallest action -- see _item 6._)
-
-4. Books that are parables of common phrases like:
-   - _the Devil is in the Details_
-     - This could be an initial story about something like a contract gone wrong
-       but ideally wrapped in the subtext of a larger story where someone maybe
-       makes a deal with the devil and the details are surprising, or-maybe,
-       - ,... something where the devil himself is outsmarted via details
-       - ,... a moral lesson about how the devil is inside of us all looking for
-         a loophole in your manner that would allow him to show himself.
-
-   - _Don't Look a Gift Horse in the Mouth_
-     - Famously, horses were judged by their age -- oft estimated by grading of
-       the teeth -- to look a horse, given as a gift, in the mouth is a sign of
-       ungreatfulness; or worse, greed.
-
-   - Seven Deadly Sins, hopefully with a twist
-   - Modern take on the ten commandments, exploring possible updates for the
-     modern age -- but I suspect will ultimately conclude that the simplicity of
-     the original should remind us that sometimes simple is better than complex,
-     and that maybe its modern ideas that are more fragile than we think.
-     - This could expand to an analysis of how a society ought to move forward
-       with progressivism and benefitting those who are marginalized by society
-       at the time, while doing so in a way that ensures positive movement in a
-       moral (?, see item 3.1. -- regarding threads on morals) direction...
-
-5. For a bit of fun: _Children's books, like the good Dr. Sueuss (spelled
-   incorrectly, on stupidities sake)_
-   - I must admit I enjoy a good ryhme, and this could be a great opportunity to
-     _dumb_ down a lesson, and allow for more metaphore
-   - This brings up maybe doing a retelling of _the missing piece_, possibly
-     about the _missing **peace**_
-
-6. a new _**HOPE**_
-   - *Hope, the single smallest action that any human can perform, and the only
-     one that is **ABSOULTELY** _REQUIRED_ in order for things to get better --
-     for both the individual and the whole.
-7. Capitalism, the weight of a Letter (see seperate document)
-
 ## Information about flake templates
 
 [Here](https://mulias.github.io/blog/nix-flakes-templates-good-actually/)
+
+## Bugs to fix...
+
+1. The following packaging error in dnsenum (Idk if I even want to use this
+   program but its broke), error follows:
+
+   ```zsh
+    ➜ nix run nixpkgs#dnsenum
+   Can't locate Net/IP.pm in @INC (you may need to install the Net::IP module) (@INC entries checked: /nix/store/nxw1xxfxkd6bm570nb6gv0g6pghp7i4c-perl-5.40.0/lib/perl5/site_perl/5.40.0/x86_64-linux-thread-multi /nix/store/nxw1xxfxkd6bm570nb6gv0g6pghp7i4c-perl-5.40.0/lib/perl5/site_perl/5.40.0 /nix/store/nxw1xxfxkd6bm570nb6gv0g6pghp7i4c-perl-5.40.0/lib/perl5/5.40.0/x86_64-linux-thread-multi /nix/store/nxw1xxfxkd6bm570nb6gv0g6pghp7i4c-perl-5.40.0/lib/perl5/5.40.0) at /nix/store/i5qljn09445jw1kdfv08ci5pmy79zlg2-dnsenum-1.2.4.2/bin/dnsenum line 55.
+   BEGIN failed--compilation aborted at /nix/store/i5qljn09445jw1kdfv08ci5pmy79zlg2-dnsenum-1.2.4.2/bin/dnsenum line 55.
+   ```
+
+   then if one builds with a log they get the following output:
+
+   ```zsh
+     gig in 🌐 spacedock in dot-spacedock on  main [$⇡]
+     > nix build nixpkgs#dnsenum --print-build-logs --verbose --impure --dry-run
+
+    gig in 🌐 spacedock in dot-spacedock on  main [$⇡]
+     > nix eval nixpkgs#dnsenum --print-build-logs --verbose --impure --dry-run
+    error: unrecognised flag '--dry-run'
+    Try '/run/current-system/sw/bin/nix --help' for more information.
+
+    gig in 🌐 spacedock in dot-spacedock on  main [$⇡]
+     ➜ nix eval nixpkgs#dnsenum --print-build-logs --verbose --impure
+    «derivation /nix/store/ah3f0lcdprwnjbm1khsj76ya944rwmm8-dnsenum-1.2.4.2.drv»
+
+    gig in 🌐 spacedock in dot-spacedock on  main [$⇡]
+     > nix log /nix/store/ah3f0lcdprwnjbm1khsj76ya944rwmm8-dnsenum-1.2.4.2.drv
+    Running phase: unpackPhase
+    unpacking source archive /nix/store/25mbxzn5mqg78af9krin4m3h5nzqvn8b-source
+    source root is source
+    Running phase: patchPhase
+    Running phase: updateAutotoolsGnuConfigScriptsPhase
+    Running phase: configurePhase
+    no configure script, doing nothing
+    Running phase: buildPhase
+    no Makefile or custom buildPhase, doing nothing
+    Running phase: installPhase
+    install: creating directory '/nix/store/i5qljn09445jw1kdfv08ci5pmy79zlg2-dnsenum-1.2.4.2'
+    install: creating directory '/nix/store/i5qljn09445jw1kdfv08ci5pmy79zlg2-dnsenum-1.2.4.2/bin'
+    'dnsenum.pl' -> '/nix/store/i5qljn09445jw1kdfv08ci5pmy79zlg2-dnsenum-1.2.4.2/bin/dnsenum'
+    install: creating directory '/nix/store/i5qljn09445jw1kdfv08ci5pmy79zlg2-dnsenum-1.2.4.2/share'
+    'dns.txt' -> '/nix/store/i5qljn09445jw1kdfv08ci5pmy79zlg2-dnsenum-1.2.4.2/share/dns.txt'
+    Running phase: fixupPhase
+    shrinking RPATHs of ELF executables and libraries in /nix/store/i5qljn09445jw1kdfv08ci5pmy79zlg2-dnsenum-1.2.4.2
+    checking for references to /build/ in /nix/store/i5qljn09445jw1kdfv08ci5pmy79zlg2-dnsenum-1.2.4.2...
+    patching script interpreter paths in /nix/store/i5qljn09445jw1kdfv08ci5pmy79zlg2-dnsenum-1.2.4.2
+    /nix/store/i5qljn09445jw1kdfv08ci5pmy79zlg2-dnsenum-1.2.4.2/bin/dnsenum: interpreter directive changed from "#!/usr/bin/perl" to "/nix/store/nxw1xxfxkd6bm5>
+    stripping (with command strip and flags -S -p) in  /nix/store/i5qljn09445jw1kdfv08ci5pmy79zlg2-dnsenum-1.2.4.2/bin
+   ```
 
 ## Things to do...
 
@@ -184,3 +174,23 @@
 - write a package that basically wraps messages in lolcat but also has some
   special logic that determines if a message is an error, warning, etc. and
   assigns a color and maybe an emoji based on the contents
+- spin up an ntp server (ideally, highly available -- but not really nececcary)
+- deal with some load balancing and spread some services across the two servers
+  (memory-alpha/spacedock)
+- configure the layer 3 switch to be a router -- if possible; if not, then
+  configure a highly available router container on both spacedock/memory-alpha
+  in an attempt at a stable network
+- configure ddns on spacedock, so that it is written as code rather than a gui
+  config
+  - this should also be done for the nginx server methinks
+- **A Good thing for _Scotty_ to help with!** : _It would be a nice way to learn
+  how to manually use an sqlite3 database by creating a database that stores
+  information regarding my purchased domains and their details (including their
+  intended uses) -- while a new agent might be nice to help me learn about the
+  sqlite interactions -- Scotty or another in charge of larger organization
+  should be aware of the database and the current state of the websites._
+- It would be wise to setup a redirection machine as described somewhere else in
+  this file to deal with all the future projects
+- deterministic uptime detector -- find a good name for this and get the domain,
+  would of course be written in Nix! (& maybe a bit of rust -- maybe, with
+  nushell-binary-engine integration!?)
