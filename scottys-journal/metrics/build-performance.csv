@@ -1,5 +1,4 @@
 date,host,operation,duration_seconds,success,error_type,git_commit,git_branch,git_status,flake_lock_hash,generation_number,notes
-date,host,operation,duration_seconds,success,error_type,git_commit,git_branch,git_status,flake_lock_hash,generation_number,notes
 2024-11-25,ganoslal,home-manager-rebuild-gen51,120.0,true,,unknown,goodpoint/develop,unknown,unknown,51,Initial Scotty agent deployment with structured config
 2024-11-25,ganoslal,home-manager-rebuild-gen54,85.0,true,,unknown,goodpoint/develop,unknown,unknown,54,Agent config converted to string format  
 2024-11-25,ganoslal,home-manager-rebuild-gen55,95.0,true,,8764a4b,goodpoint/develop,clean,21e2636791a3ae56c54dbde950025d0d93d458582324a7951b876f071ec880c5,55,Final deployment with proper Home Manager agents structure
@@ -9,3 +8,4 @@ date,host,operation,duration_seconds,success,error_type,git_commit,git_branch,gi
 2025-11-25 20:47:05,ganoslal,home-manager-rebuild-gen60to60,12,true,,5af95f9e62afcabf29ebe600a8b44312d7f06ee9,goodpoint/develop,clean,21e2636791a3ae56c54dbde950025d0d93d458582324a7951b876f071ec880c5,60,OpenCode model switch: claude-sonnet-4.5→claude-sonnet-4
 2025-12-02 19:41:25,spacedock,home-manager-rebuild-verification,27,true,,dd623a5,goodpoint/develop,clean,unknown,42,Routine maintenance - Generation 42→42 no config changes detected
 2025-12-02 19:57:53,spacedock,home-manager-rebuild-spacedock,29,true,,a87e4f5a329054bb994d8da29698f1a5ef851249,goodpoint/develop,clean,8bd297c28d618ec9d51a0f510cfa5a36ae806c4f55a7cbfae8ee7ac3f8d498e8,42,Automated home-manager rebuild with Scotty engineering logs
+2025-12-02 21:39:57,spacedock,test-build,15,true,,422ef1935bb939811b741fd58c3d62bf4ea6e59c,goodpoint/develop,3_modified,8bd297c28d618ec9d51a0f510cfa5a36ae806c4f55a7cbfae8ee7ac3f8d498e8,42,Automated build logging

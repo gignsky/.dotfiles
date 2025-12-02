@@ -6,8 +6,17 @@
 # Shared functions for automatic git and build state logging
 # Used by git hooks, build scripts, and other automation
 
-# Configuration
-JOURNAL_DIR="${HOME}/.dotfiles/scottys-journal"
+# Configuration - determine the correct dotfiles path
+if [ -d "${PWD}/scottys-journal" ]; then
+    # We're in the dotfiles repo root
+    JOURNAL_DIR="${PWD}/scottys-journal"
+elif [ -d "${HOME}/.dotfiles/scottys-journal" ]; then
+    # Use the standard dotfiles location
+    JOURNAL_DIR="${HOME}/.dotfiles/scottys-journal"
+else
+    # Default fallback
+    JOURNAL_DIR="${HOME}/.dotfiles/scottys-journal"
+fi
 LOGS_DIR="${JOURNAL_DIR}/logs"
 METRICS_DIR="${JOURNAL_DIR}/metrics"
 
@@ -142,10 +151,11 @@ get_home_manager_generation() {
     fi
 }
 
-# Create a narrative log entry
+# Create a narrative log entry with optional classification for Captain's attention
 create_narrative_entry() {
     local title="$1"
     local content="$2"
+    local log_type="${3:-note}"  # Default to 'note', can be 'report' for Captain's attention
     
     ensure_journal_dirs
     
@@ -167,11 +177,70 @@ CHIEF ENGINEER'S LOG - STARDATE ${stardate} (AUTOMATED)
 EOF
     fi
     
+    # Add classification marker for reports
+    local entry_header="[${timestamp}] ${title}"
+    if [ "$log_type" = "report" ]; then
+        entry_header="[${timestamp}] ★ CAPTAIN'S REPORT ★ ${title}"
+    fi
+    
     cat << EOF >> "$log_file"
-[${timestamp}] ${title}
+${entry_header}
 ${content}
 
 EOF
+
+    # Auto-display reports using bat if available and stdout is a terminal
+    if [ "$log_type" = "report" ] && [ -t 1 ]; then
+        display_captain_report "$log_file" "$entry_header"
+    fi
+}
+
+# Display a Captain's report using bat or fallback to cat
+display_captain_report() {
+    local log_file="$1"
+    local entry_header="$2"
+    
+    echo ""
+    echo "════════════════════════════════════════════════════════════════════"
+    echo "🚨 NEW ENGINEERING REPORT FOR CAPTAIN'S REVIEW 🚨"
+    echo "════════════════════════════════════════════════════════════════════"
+    
+    # Try to use bat for syntax highlighting and paging
+    if command -v bat >/dev/null 2>&1; then
+        # Extract just the latest entry for display
+        local temp_file=$(mktemp)
+        local in_current_entry=false
+        local entry_found=false
+        
+        while IFS= read -r line; do
+            if [[ "$line" == *"$entry_header"* ]]; then
+                in_current_entry=true
+                entry_found=true
+                echo "$line" >> "$temp_file"
+            elif [ "$in_current_entry" = true ] && [[ "$line" =~ ^\[.*\][[:space:]]*★?[[:space:]]*(CAPTAIN\'S[[:space:]]+REPORT[[:space:]]+)?★?[[:space:]]*.* ]]; then
+                # Found start of next entry, stop
+                break
+            elif [ "$in_current_entry" = true ]; then
+                echo "$line" >> "$temp_file"
+            fi
+        done < "$log_file"
+        
+        if [ "$entry_found" = true ]; then
+            bat --style=numbers,changes --theme="Monokai Extended" --language=markdown "$temp_file" 2>/dev/null || cat "$temp_file"
+        else
+            echo "Error: Could not extract report content"
+        fi
+        
+        rm -f "$temp_file"
+    else
+        # Fallback to cat with basic formatting
+        echo "Entry: $entry_header"
+        echo "────────────────────────────────────────────────────────────────────"
+        tail -n 20 "$log_file" | head -n 15
+    fi
+    
+    echo "════════════════════════════════════════════════════════════════════"
+    echo ""
 }
 
 # Function to be called from git hooks or build scripts
@@ -183,7 +252,7 @@ scotty_log_event() {
         "git-commit")
             local message="$1"
             log_git_operation "commit" "$message"
-            create_narrative_entry "GIT COMMIT" "Committed changes: $message"
+            create_narrative_entry "GIT COMMIT" "Committed changes: $message" "note"
             ;;
         "git-push-prep")
             local details="$1"
@@ -192,7 +261,7 @@ scotty_log_event() {
             ;;
         "build-start")
             local operation="$1"
-            create_narrative_entry "BUILD START" "Starting $operation"
+            create_narrative_entry "BUILD START" "Starting $operation" "note"
             ;;
         "build-complete")
             local operation="$1"
@@ -200,24 +269,35 @@ scotty_log_event() {
             local success="$3"
             local generation="$4"
             log_build_performance "$operation" "$duration" "$success" "" "Automated build logging" "$generation"
-            create_narrative_entry "BUILD COMPLETE" "$operation completed in ${duration}s (success: $success, generation: $generation)"
+            create_narrative_entry "BUILD COMPLETE" "$operation completed in ${duration}s (success: $success, generation: $generation)" "report"
             ;;
         "build-error")
             local operation="$1"
             local error="$2"
             log_error "build-failure" "$error" "Manual intervention required" "0" "false"
-            create_narrative_entry "BUILD ERROR" "$operation failed: $error"
+            create_narrative_entry "BUILD ERROR" "$operation failed: $error" "report"
             ;;
         *)
-            create_narrative_entry "UNKNOWN EVENT" "$event_type: $*"
+            create_narrative_entry "UNKNOWN EVENT" "$event_type: $*" "note"
             ;;
     esac
 }
 
+# Enhanced function for Scotty agent to create classified logs
+scotty_create_log() {
+    local title="$1"
+    local content="$2"
+    local log_type="${3:-note}"  # 'note' or 'report'
+    
+    create_narrative_entry "$title" "$content" "$log_type"
+}
+
 # Export functions for use by other scripts
 export -f scotty_log_event
+export -f scotty_create_log
 export -f log_build_performance
 export -f log_git_operation
 export -f log_error
 export -f get_git_state
 export -f get_home_manager_generation
+export -f display_captain_report
