@@ -10,6 +10,14 @@
   - Standard format with agent personality adaptations (see Scotty agent for reference implementation)
   - Essential for fleet-wide situational awareness and coordination
 
+- **Log Integrity Repair**: All agents must implement `/fix-log` command for documentation maintenance
+  - Analyzes current state of agent's domain/specialization area
+  - Identifies gaps or missing information in existing logs
+  - Documents findings in agent-specific log format and voice
+  - Updates logs to accurately reflect current operational state
+  - Commits all documentation changes immediately to repository
+  - Essential for maintaining accurate historical records and operational continuity
+
 ## Build Commands
 - **System rebuild**: `just rebuild` or `scripts/system-flake-rebuild.sh [HOST]`
 - **Home Manager**: `just home` or `scripts/home-manager-flake-rebuild.sh [HOST]`
