@@ -193,6 +193,10 @@
     cloudflare configuration settings via a nix flake and program like
     _ddnsupdater_ to keep cloudflare and the local (& future remote) proxies
     synced properly
+  - Also **IMPORTANT TO FIX SOON _(MAKE NOTE OF ME SCOTTY IF YOU SEE THIS)_**: I
+    need to find a proper solution to managing mass emails coming form different
+    domains for the long term, ideally with a minimal nix-built docker container
+    I could host remotely to keep from having issues with reliability
 - It would be wise to setup a redirection machine as described somewhere else in
   this file to deal with all the future projects
 - deterministic uptime detector -- find a good name for this and get the domain,
