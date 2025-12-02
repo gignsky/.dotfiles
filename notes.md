@@ -216,3 +216,12 @@
 - pretty 'echo' package, maybe called 'whisp' (short for whisper, which even
   though spoken quietly often says the loudest things, thus the lolcat color and
   possible ai enhancement with emojis)
+- On `spacedock` when running `just om show` in this repo I get the error:
+  ```zsh
+  > just om show
+  nix run github:juspay/omnix -- show
+  warning: ignoring untrusted substituter 'https://cache.nixos.asia/oss', you are not
+  a trusted user.
+  Run 'man nix.conf' for more information on the 'substituters' configuration
+  option.
+  ```
