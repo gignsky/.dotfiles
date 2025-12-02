@@ -77,7 +77,7 @@ if [ "$LOGGING_LIB_FOUND" = false ]; then
 fi
 
 failable-pre-commit() {
-  @nix develop -c echo '*The Pre-Commit has been given a chance to Update!*'
+  nix develop -c echo '*The Pre-Commit has been given a chance to Update!*'
   nix shell nixpkgs#pre-commit -c pre-commit run --all-files
 }
 
