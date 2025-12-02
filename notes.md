@@ -189,6 +189,10 @@
   intended uses) -- while a new agent might be nice to help me learn about the
   sqlite interactions -- Scotty or another in charge of larger organization
   should be aware of the database and the current state of the websites._
+  - This would also lead towards the eventual goal of managing all possible
+    cloudflare configuration settings via a nix flake and program like
+    _ddnsupdater_ to keep cloudflare and the local (& future remote) proxies
+    synced properly
 - It would be wise to setup a redirection machine as described somewhere else in
   this file to deal with all the future projects
 - deterministic uptime detector -- find a good name for this and get the domain,
