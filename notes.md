@@ -202,3 +202,5 @@
   need to stabilize both first then merge the best bits, this might mean I
   should reorganize the dotfiles first but I feel as though that might be a
   waste of time
+- need to work on gigvim's folding _this is important, for workflow speed_
+  **AUTOFOLDING** must come!!
