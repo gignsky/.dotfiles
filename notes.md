@@ -238,3 +238,6 @@
 - Might be a good idea to learn how to 'properly' wrap a package with a
   different name, see (supernote/supernotes in pkgs/ for example of one that
   needs doing!)
+- check to see if a bunch of man pages are being lost because they are generated
+  for all the posix shells but not ported to nushell (opencode might be a place
+  to start), if this is an issue write a package to help!
