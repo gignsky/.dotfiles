@@ -26,6 +26,9 @@
   podman = "sudo podman";
   docker = "sudo podman";
 
+  # Agent calls directly
+  scotty = "opencode run --agent scotty";
+
   #recursive listing for searching
   # need to write a nushell script to make this work since it uses pipes
   # lsr = "ls **/* \| where type == file \| sort-by size";
