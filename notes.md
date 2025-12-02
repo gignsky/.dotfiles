@@ -208,3 +208,7 @@
   waste of time
 - need to work on gigvim's folding _this is important, for workflow speed_
   **AUTOFOLDING** must come!!
+- opencode expansion:
+  - it seems there might be 'server' sessions of sorts that can be launched, it
+    would be kinda cool to have scotty working on tasks that I add to a queue
+    file, that he works on then opens MRs for
