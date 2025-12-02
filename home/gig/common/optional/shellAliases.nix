@@ -24,6 +24,7 @@
   ndw = "nix develop .#windows -c nu";
   diddy = "touch";
   podman = "sudo podman";
+  docker = "sudo podman";
 
   #recursive listing for searching
   # need to write a nushell script to make this work since it uses pipes
