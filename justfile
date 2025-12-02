@@ -40,30 +40,31 @@ pull-rebuild:
 	@nix-shell -p lolcat --run "echo 'Rebuilt.' | lolcat 2> /dev/null"
 
 pull-home:
-	@nix-shell -p lolcat --run "echo 'Rebuilding Home-Manager...' | lolcat 2> /dev/null"
-	just pull
-	just home
-	@nix-shell -p lolcat --run "echo 'Home-Manager Rebuilt.' | lolcat 2> /dev/null"
+  @nix-shell -p lolcat --run "echo 'Rebuilding Home-Manager...' | lolcat 2> /dev/null"
+  just pull
+  just home
+  @nix-shell -p lolcat --run "echo 'Home-Manager Rebuilt.' | lolcat 2> /dev/null"
 
 pull-rebuild-full:
-	@nix-shell -p lolcat --run "echo 'Full Rebuild Running...' | lolcat 2> /dev/null"
-	just pull-rebuild
-	just pull-home
-	@nix-shell -p lolcat --run "echo 'Full Rebuild Complete.' | lolcat 2> /dev/null"
+  @nix-shell -p lolcat --run "echo 'Full Rebuild Running...' | lolcat 2> /dev/null"
+  just pull-rebuild
+  just pull-home
+  @nix-shell -p lolcat --run "echo 'Full Rebuild Complete.' | lolcat 2> /dev/null"
 
 pull-nix-secrets:
-	cd ~/nix-secrets && git fetch && git pull && cd ~/.dotfiles
+  cd ~/nix-secrets && git fetch && git pull && cd ~/.dotfiles
 
 # Run before every rebuild, every time
 rebuild-pre:
-	@nix-shell -p lolcat --run 'echo "[PRE] Rebuilding NixOS..." | lolcat 2> /dev/null'
-	just dont-fuck-my-build
-	@nix-shell -p lolcat --run 'echo "Updating Nix-Secrets Repo..." | lolcat 2> /dev/null'
+  @nix-shell -p lolcat --run 'echo "[PRE] Rebuilding NixOS..." | lolcat 2> /dev/null'
+  just dont-fuck-my-build
+  @nix-shell -p lolcat --run 'echo "Updating Nix-Secrets Repo..." | lolcat 2> /dev/null'
 
 dont-fuck-my-build:
-	git ls-files --others --exclude-standard -- '*.nix' | xargs -r git add -v
-	nix flake update nix-secrets --commit-lock-file
-	@nix-shell -p lolcat --run 'echo "Very little chance your build is fucked! 👍" | lolcat 2> /dev/null'
+  @nix develop -c echo '*The Pre-Commit has been given a chance to Update!*'
+  git ls-files --others --exclude-standard -- '*.nix' | xargs -r git add -v
+  nix flake update nix-secrets --commit-lock-file
+  @nix-shell -p lolcat --run 'echo "Very little chance your build is fucked! 👍" | lolcat 2> /dev/null'
 
 switch args="":
 	just rebuild {{args}}
