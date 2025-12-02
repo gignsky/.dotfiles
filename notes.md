@@ -233,3 +233,5 @@
     unstable and make sure that this flake and others are up to date using the
     proper version
   - revert to 25.11 now that november is over
+- A simple addition to gigvim that adds a shortcut to toggle bools true/false --
+  I'm sure someone out there has done this, if not then I must!
