@@ -235,3 +235,6 @@
   - revert to 25.11 now that november is over
 - A simple addition to gigvim that adds a shortcut to toggle bools true/false --
   I'm sure someone out there has done this, if not then I must!
+- Might be a good idea to learn how to 'properly' wrap a package with a
+  different name, see (supernote/supernotes in pkgs/ for example of one that
+  needs doing!)
