@@ -114,6 +114,34 @@ rebuild-full args="":
 	just rebuild {{args}}
 	just home {{args}}
 
+# Bare rebuild commands (minimal, no logging, no scripts)
+rebuild-bare host=`hostname`:
+	@echo "Bare system rebuild for {{host}}..."
+	sudo nixos-rebuild switch --flake .#{{host}}
+
+home-bare host=`hostname`:
+	@echo "Bare home-manager rebuild for gig@{{host}}..."
+	home-manager switch --flake .#gig@{{host}}
+
+rebuild-full-bare host=`hostname`:
+	@echo "Bare full rebuild for {{host}}..."
+	sudo nixos-rebuild switch --flake .#{{host}}
+	home-manager switch --flake .#gig@{{host}}
+
+# Test rebuild commands (dry-run evaluation without applying)
+test-rebuild host=`hostname`:
+	@echo "Testing system rebuild for {{host}} (evaluation only)..."
+	nixos-rebuild dry-run --flake .#{{host}} --verbose
+
+test-home host=`hostname`:
+	@echo "Testing home-manager rebuild for gig@{{host}} (evaluation only)..."
+	home-manager build --flake .#gig@{{host}} --verbose
+
+test-rebuild-full host=`hostname`:
+	@echo "Testing full rebuild for {{host}} (evaluation only)..."
+	nixos-rebuild dry-run --flake .#{{host}} --verbose
+	home-manager build --flake .#gig@{{host}} --verbose
+
 single-update:
 	nix run github:gignsky/nix-update-input
 
