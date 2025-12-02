@@ -2,6 +2,18 @@
 
 [Here](https://github.com/nix-gui/nix-gui)
 
+# Book/Story Ideas
+
+I. 'The Game' -- or better yet, 'Court' -- a story about a lifelong game played
+in real time as a gift from a father to a son, with early tasks like choosing
+toys that have representative qualities which in turn determine what the nation
+that you will fictionally control in "REAL TIME" over the course of your life
+via communicating in some form with the 'Gamemaster' (the protagonists father),
+who even left behind a letter in his will that gives him a final task entitled
+'Becoming the Gamemaster', in which he must pass on the game to his own soon to
+be daughter. The game itself could be a very real time stategy game played that
+teaches the child lessons of life through a fictional setting
+
 ## Information about flake templates
 
 [Here](https://mulias.github.io/blog/nix-flakes-templates-good-actually/)
