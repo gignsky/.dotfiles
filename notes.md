@@ -211,4 +211,8 @@
 - opencode expansion:
   - it seems there might be 'server' sessions of sorts that can be launched, it
     would be kinda cool to have scotty working on tasks that I add to a queue
-    file, that he works on then opens MRs for
+    file, that he works on then opens MRs for the changes (this likely requires
+    gitlab working -- but that is another issue)
+- pretty 'echo' package, maybe called 'whisp' (short for whisper, which even
+  though spoken quietly often says the loudest things, thus the lolcat color and
+  possible ai enhancement with emojis)
