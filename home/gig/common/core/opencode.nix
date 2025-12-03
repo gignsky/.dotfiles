@@ -318,6 +318,40 @@
         "No more gaps in the ship's logs, Captain!"
       '';
 
+      check-logs = ''
+        # Check Logs Command - Engineering Documentation Quality Analysis
+
+        "Let me run a quick diagnostic on our engineering logs, Captain!" - Scotty
+
+        Performs comprehensive analysis of existing engineering documentation for quality and consistency:
+
+        ANALYSIS FOCUS:
+        1. **Log Completeness**: Verify all major operations are documented
+        2. **Chronological Integrity**: Check for timeline gaps or inconsistencies  
+        3. **Format Compliance**: Ensure logs follow established standards
+        4. **Metric Accuracy**: Validate CSV data against documented events
+        5. **Cross-Reference Validation**: Verify logs align with git history
+        6. **Content Quality Assessment**: Review detail levels and clarity
+
+        QUALITY CHECKS:
+        • Recent system changes properly documented
+        • Engineering entries follow Scotty's voice and format standards
+        • CSV metrics align with logged operations
+        • No duplicate or contradictory entries
+        • Proper stardate formatting and authority attribution
+        • Technical details sufficient for future reference
+
+        OUTPUTS:
+        ✓ Comprehensive report on log quality and gaps
+        ✓ Recommendations for documentation improvements  
+        ✓ Identified inconsistencies requiring attention
+        ✓ Assessment of overall engineering record integrity
+
+        This is your quality assurance tool for maintaining engineering excellence!
+
+        "Quality control is the backbone of good engineering, Captain!"
+      '';
+
       fix-log = ''
         # Fix Log (Alias) - Engineering Documentation Integrity Repair
 

@@ -217,9 +217,7 @@ post-home:
 	@nix-shell -p lolcat --run 'echo "[POST-HOME] Finished." | lolcat 2> /dev/null'
 	@echo "📊 Logging home-manager rebuild to engineering records..."
 	@just log-commit "Home-manager rebuild completed successfully"
-	@echo "🧹 Cleaning up engineering logs..."
-	@git add scottys-journal/ 2>/dev/null || true
-	@git commit -m "📊 Scotty: Auto-update engineering logs" 2>/dev/null || true
+	@echo "✅ Post-home cleanup complete"
 
 simple-home *ARGS:
 	nix run .#home-manager-flake-rebuild -- {{ ARGS }}
@@ -536,4 +534,7 @@ log-commit message="":
 		bash -c 'cd ~/.dotfiles && source scripts/scotty-logging-lib.sh && scotty_log_event "git-commit" "{{message}}"'; \
 	fi
 	@echo "✅ Engineering log entry created successfully"
-	@echo "💡 Use 'git add scottys-journal/ && git commit -m \"📊 Update engineering logs\"' to commit logs"
+	@echo "🧹 Auto-committing engineering logs..."
+	@git add scottys-journal/ 2>/dev/null || true
+	@git commit -m "📊 Scotty: Auto-commit engineering logs" 2>/dev/null || true
+	@echo "✅ Engineering logs committed to repository"
