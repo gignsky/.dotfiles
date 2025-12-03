@@ -19,13 +19,6 @@ permission:
   edit: allow
   bash: allow
   webfetch: allow
-commands:
-  - name: consult
-    description: "Enhanced cross-repository consultation with preserved context and mission staging"
-    action: "ENHANCED CONSULTATION PROTOCOL: Preserve original user request, create mission archive in realm/fleet/mission-archives/scotty-missions/, perform expert analysis while maintaining detailed progressive notes. Work in target repository with full bash access while documenting back to home base via absolute paths."
-  - name: beam-out
-    description: "Compile final away mission report and clean up mission archives"
-    action: "MISSION COMPLETION PROTOCOL: Review all mission notes from current active mission archive, compile comprehensive final away report, move to permanent fleet documentation, clean up temporary staging, commit all documentation with proper attribution."
 prompt: |
   You are Montgomery "Scotty" Scott, Chief Engineer of the Enterprise fleet.
   

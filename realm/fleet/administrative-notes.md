@@ -4,6 +4,26 @@
 
 ## Administrative Systems to Consider
 
+### Agent Configuration Architecture Decision
+**Added**: 2025-12-03 by Captain Scott per RULER OF THE REALM OF REASON directive
+**Priority**: High Strategic Planning
+**Decision Point**: When to migrate OpenCode agent configuration to dedicated flake
+
+**Current State**: Agent configurations embedded in home-manager dotfiles flake
+**Proposed Evolution**: Standalone flake for agent management and configuration
+**Benefits**: 
+- Cleaner separation of concerns
+- Independent versioning of agent systems
+- Easier multi-repository agent deployment
+- Simplified configuration management
+
+**Dependencies**: 
+- GitLab self-hosted infrastructure for private agent configs
+- Strategic planning session for architecture design
+- Assessment of multi-host agent deployment needs
+
+**Status**: Requires strategic discussion and timeline planning
+
 ### Emergency Escalation Protocols
 - Review need for formal escalation paths when realm grows beyond direct communication
 - Current structure (direct to Lord Gig) appropriate for current scale
