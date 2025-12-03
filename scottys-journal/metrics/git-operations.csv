@@ -44,3 +44,21 @@ USAGE:
 
 ENGINEERING IMPROVEMENT: Reliable logging without git conflicts! ✅
 2025-12-03 05:56:28,spacedock,commit,2947d04e7278d511992e7fa99dc0525c3415ee8c,develop,3_modified,8bd297c28d618ec9d51a0f510cfa5a36ae806c4f55a7cbfae8ee7ac3f8d498e8,430664commit_msg
+2025-12-03 05:59:53,spacedock,commit,d346320586e404d40eaa2e55e2f7d694bb6ecd34,develop,clean,8bd297c28d618ec9d51a0f510cfa5a36ae806c4f55a7cbfae8ee7ac3f8d498e8,🔧 Captain Scott: Add automatic engineering logging to rebuild commands
+
+ENGINEERING AUTOMATION COMPLETE:
+- All 'just rebuild' commands now automatically log to engineering records
+- All 'just home' commands now automatically log completion
+- Test rebuilds include logging for verification
+- Maintains complete operational audit trail
+
+COMMANDS WITH AUTO-LOGGING:
+  • just rebuild (+ verbose version)
+  • just rebuild-test
+  • just home
+  • just switch (inherits from rebuild + home)
+  • just rebuild-full (inherits from rebuild + home)
+
+Engineering excellence: Every major system operation now documented! ✅
+2025-12-03 05:59:58,spacedock,commit,d346320586e404d40eaa2e55e2f7d694bb6ecd34,develop,2_modified,8bd297c28d618ec9d51a0f510cfa5a36ae806c4f55a7cbfae8ee7ac3f8d498e8,Test of automatic rebuild logging system
+2025-12-03 06:00:19,spacedock,commit,d346320586e404d40eaa2e55e2f7d694bb6ecd34,develop,2_modified,8bd297c28d618ec9d51a0f510cfa5a36ae806c4f55a7cbfae8ee7ac3f8d498e8,Debug test message
