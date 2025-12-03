@@ -139,7 +139,16 @@ if home-manager switch -b backup --flake .#gig@"$HOST"; then
   fi
 
   # Commit with generation info
-  git commit -a --allow-empty -m "gig@$HOST: $gen" || true
+  # Create enhanced commit message using Scotty's enhancement system
+  export AUTOMATED_COMMIT=true
+  if [ -f "$(dirname "$0")/commit-enhance-lib.sh" ]; then
+    source "$(dirname "$0")/commit-enhance-lib.sh"
+    enhanced_msg=$(enhance_commit_message "auto(home): rebuild $HOST generation $gen" "home-manager-flake-rebuild.sh")
+    git commit -a --allow-empty -m "$enhanced_msg" || true
+  else
+    # Fallback to basic message if enhancement library not available
+    git commit -a --allow-empty -m "gig@$HOST: $gen" || true
+  fi
 
   echo "✅ Home Manager rebuild successful! Generation: $generation_number (${duration}s)"
   echo "📝 Detailed engineering log created by Scotty"
