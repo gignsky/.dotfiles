@@ -1,5 +1,3 @@
-#FIXME: FIRST NOTE ADDED WITH SUPERNOTE!
-
 # FIXME: _**GITLAB** Extra Seat_ is being charged to my account, I need to fix this issue immediately
 
 ## Black Friday / Cyber Monday Shopping...
@@ -245,3 +243,8 @@
   to start), if this is an issue write a package to help!
 - write a rust interpreter for nix lang, that will allow for rich rust compilor
   errors as a byproduct
+- two new gigvim versions -- each with themes seperate from the regular gigvim:
+  1. _marking_, used to update markdown files only and minimal in every other
+     way (update the supernote program and the `just sops-secrets` etc., items)
+  2. _differ_, used exclusviely as a diff-tool for things like lazygit and
+     general diffing (need to update git rules for this one)
