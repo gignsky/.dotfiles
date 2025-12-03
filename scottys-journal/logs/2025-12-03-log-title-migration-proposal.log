@@ -1,0 +1,77 @@
+================================================================================
+LOG TITLE MIGRATION PROPOSAL - STARDATE 2025-12-03
+================================================================================
+
+CURRENT SYSTEM ANALYSIS:
+• Format: YYYY-MM-DD-descriptive-name.log
+• Example: 2025-12-03-merlin-host-transition-analysis.log
+• Advantages: Human-readable dates, natural chronological sorting
+• Disadvantages: Date-heavy, no sequential progression indicator
+
+PROPOSED NEW SYSTEM:
+• Format: report-{COMMIT_COUNT}-{YYYY-MM-DD}-descriptive-name.log
+• Example: report-2149-2025-12-03-merlin-host-transition-analysis.log
+• Current HEAD commit count: 2149
+
+TECHNICAL IMPLEMENTATION:
+
+**Method 1: Commit Count Based**
+```bash
+COMMIT_COUNT=$(git rev-list --count HEAD)
+FILENAME="report-${COMMIT_COUNT}-$(date +%Y-%m-%d)-${DESCRIPTION}.log"
+```
+
+**Method 2: Log Sequence Based** 
+```bash
+LOG_COUNT=$(ls scottys-journal/logs/ | wc -l)
+NEXT_LOG=$((LOG_COUNT + 1))
+FILENAME="report-${NEXT_LOG}-$(date +%Y-%m-%d)-${DESCRIPTION}.log"
+```
+
+RECOMMENDATION: **Method 1 (Commit Count)**
+
+**Advantages:**
+- Provides true chronological progression tied to repository state
+- Each report number represents exact repository state when created
+- Easy to correlate reports with specific commits
+- Natural sequential ordering while maintaining date visibility
+- Commit count never decreases, ensuring unique identifiers
+
+**Migration Strategy:**
+1. **Preserve Existing**: Keep current logs unchanged for historical continuity
+2. **New Format**: Apply new format only to future logs
+3. **Transition Period**: Both formats coexist during migration
+4. **Script Integration**: Update scotty_create_log() function in logging library
+
+**Updated Logging Function:**
+```bash
+scotty_create_log() {
+    local description="$1"
+    local classification="$2"  # "note" or "report"
+    local commit_count=$(git rev-list --count HEAD)
+    local date_stamp=$(date +%Y-%m-%d)
+    local filename="report-${commit_count}-${date_stamp}-${description}.log"
+    # ... rest of function
+}
+```
+
+**Example Progressive Sequence:**
+- report-2149-2025-12-03-merlin-host-transition-analysis.log
+- report-2150-2025-12-03-captains-operational-reminders.log  
+- report-2151-2025-12-04-system-maintenance-completion.log
+
+**Benefits of This Approach:**
+- Sequential progression clearly visible
+- Date still present for human readability
+- Easy to determine "what changed between report 2140 and 2150"
+- Commit count provides natural indexing tied to repository evolution
+- No conflicts or duplicate numbers possible
+- Maintains chronological sorting in file listings
+
+ENGINEERING ASSESSMENT:
+This system provides the best of both worlds - sequential indexing with 
+preserved date context, while creating a natural correlation between 
+reports and repository state progression.
+
+                                     Montgomery Scott, Chief Engineer
+================================================================================
