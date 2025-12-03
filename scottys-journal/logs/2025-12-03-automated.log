@@ -159,3 +159,9 @@ Committed changes: 448613(git log -1 --pretty=%s)
 
 [2025-12-03 06:23:23] GIT COMMIT
 Committed changes: 448806(git log -1 --pretty=%s)
+[2025-12-03 06:26:21] GIT COMMIT
+Committed changes: 📊 Scotty: Fix stuck engineering logs from home rebuild
+
+Auto-committing logs that were left uncommitted due to broken auto-cleanup.
+This resolves the issue where 'just new home' left log files in git index.
+Includes pre-commit formatting fixes.
