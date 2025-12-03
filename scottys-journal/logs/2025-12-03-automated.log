@@ -106,3 +106,19 @@ TASK ADDED: Review git stash for potentially missed content
 Engineering documentation: Complete ✅
 [2025-12-03 05:55:24] GIT COMMIT
 Committed changes: 🔧 Pre-commit: Format flake.nix hook configuration
+[2025-12-03 05:56:11] GIT COMMIT
+Committed changes: 🔧 Captain Scott: Replace automatic logging with reliable manual system
+
+SOLUTION FOR CONSISTENT LOGGING:
+- Disabled automatic post-commit hook (prevents 'Failed' status)
+- Added 'just log-commit' command for manual logging
+- More reliable and doesn't interfere with git operations
+- User controls when logs are committed
+
+USAGE:
+  just log-commit           # Log most recent commit
+  just log-commit 'message' # Log custom message
+
+ENGINEERING IMPROVEMENT: Reliable logging without git conflicts! ✅
+[2025-12-03 05:56:28] GIT COMMIT
+Committed changes: 430664commit_msg
