@@ -2,8 +2,6 @@
 
 {
   pkgs,
-  lib ? pkgs.lib,
-  configLib ? lib,
   ...
 }:
 let

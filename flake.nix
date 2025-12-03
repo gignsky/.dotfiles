@@ -133,8 +133,8 @@
       #pkgs for customPkgs
       customPkgsPkgs = import nixpkgs {
         inherit system;
-        config = nixpkgsConfig.config;
-        overlays = nixpkgsOverlayer.overlays;
+        inherit (nixpkgsConfig) config;
+        inherit (nixpkgsOverlayer) overlays;
       };
 
       nixpkgsConfig = {
@@ -146,8 +146,8 @@
       # finial iteration of nixpkgs
       nixpkgsBase = import nixpkgs {
         inherit system;
-        config = nixpkgsConfig.config;
-        overlays = nixpkgsOverlayer.overlays;
+        inherit (nixpkgsConfig) config;
+        inherit (nixpkgsOverlayer) overlays;
       };
 
       configVars = import ./vars { inherit inputs lib; };
@@ -155,7 +155,6 @@
 
       customPkgs = import ./pkgs {
         pkgs = customPkgsPkgs; # For the fight against recursion!
-        inherit lib configLib;
         # overlays = customOverlays;
       };
 
@@ -192,9 +191,7 @@
       assertAllHostsHaveVmTest =
         configs:
         let
-          missing = lib.filterAttrs (
-            _: config: (config.config.system.build.vmTest or null) == null
-          ) configs;
+          missing = lib.filterAttrs (_: config: (config.config.system.build.vmTest or null) == null) configs;
         in
         if missing != { } then
           throw "\\nSome nixosConfigurations are missing a vmTest!\\nOffending hosts: ${builtins.concatStringsSep ", " (builtins.attrNames missing)}\\nEach host must define config.system.build.vmTest."
@@ -402,9 +399,9 @@
       # nixosModules = { inherit (import ./modules/nixos); };
 
       # Overlays for external use
-      overlays = overlays;
+      inherit overlays;
 
-      packages.${system} = import ./pkgs { inherit pkgs lib configLib; };
+      packages.${system} = import ./pkgs { inherit pkgs; };
 
       # Home Manager modules that can be imported by other flakes
       # homeModules = {
@@ -473,7 +470,7 @@
             packageBuilds = lib.mapAttrs' (name: pkg: {
               name = "build-${name}";
               value = pkg;
-            }) (import ./pkgs { inherit pkgs lib configLib; });
+            }) (import ./pkgs { inherit pkgs; });
           in
           nixosTests
           // homeManagerChecks

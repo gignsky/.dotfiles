@@ -3,7 +3,6 @@
 {
   # flakeRoot,
   # inputs,
-  overlays,
   lib,
   # , config,
   pkgs,
