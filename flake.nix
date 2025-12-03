@@ -493,7 +493,7 @@
           };
 
           scotty-pre-push-log = {
-            enable = true;
+            enable = false; # Disabled: Captain needs push flexibility across machines
             name = "scotty-pre-push-log";
             entry = "${pkgs.bash}/bin/bash";
             always_run = true; # Critical: Run even when no files to check
