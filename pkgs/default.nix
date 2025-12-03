@@ -11,7 +11,7 @@ let
   # declaring supernote
   supernote =
     pkgs.writeShellScriptBin "supernote" ''
-      ${pkgs.git}/bin/git pull --fast-forward
+      ${pkgs.git}/bin/git pull --ff-only
       ${pkgs.gigs.gigvim}/bin/vi notes.md
       ${pkgs.just}/bin/just noted
       ${pkgs.git}/bin/git push
