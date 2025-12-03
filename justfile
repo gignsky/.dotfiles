@@ -84,6 +84,8 @@ clean:
 rebuild-post:
 	# just check-sops
 	@nix-shell -p lolcat --run 'echo "[POST] Rebuilt." | lolcat 2> /dev/null'
+	@echo "📊 Logging rebuild to engineering records..."
+	@just log-commit "System rebuild completed successfully"
 
 # Rebuild the system
 rebuild args="":
@@ -103,6 +105,8 @@ rebuild-test args="":
 	just rebuild-pre
 	nix run .#system-flake-rebuild-test -- {{args}}
 	@nix-shell -p lolcat --run 'echo "[TEST] Finished." | lolcat 2> /dev/null'
+	@echo "📊 Logging test rebuild to engineering records..."
+	@just log-commit "System test rebuild completed successfully"
 
 # Rebuild-full with new shell
 rebuild-full-new:
@@ -205,6 +209,8 @@ pre-home:
 # Runs after every home rebuild
 post-home:
 	@nix-shell -p lolcat --run 'echo "[POST-HOME] Finished." | lolcat 2> /dev/null'
+	@echo "📊 Logging home-manager rebuild to engineering records..."
+	@just log-commit "Home-manager rebuild completed successfully"
 
 simple-home *ARGS:
 	nix run .#home-manager-flake-rebuild -- {{ ARGS }}
