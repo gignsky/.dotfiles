@@ -45,7 +45,8 @@
       };
 
       # Cursor configuration - set to line cursor
-      cursor_style = "line";
+      # cursor_style = "line";
+      # just a dream :(
 
       share = "manual";
 
