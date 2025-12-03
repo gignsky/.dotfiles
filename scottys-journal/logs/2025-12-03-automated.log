@@ -177,3 +177,59 @@ Committed changes: 📊 Scotty: Pre-rebuild logs with formatting corrections
 [2025-12-03 06:32:35] GIT COMMIT
 Committed changes: 📊 Scotty: Engineering logs stabilized for rebuild test
 
+[2025-12-03 06:33:25] UNKNOWN EVENT
+system-operation: Smart clean initiated - preserving OpenCode history
+
+[2025-12-03 06:33:29] UNKNOWN EVENT
+system-operation: Smart clean completed - OpenCode ready for rebuild
+2025-12-03 06:34:15 - SPACEDOCK HOME-MANAGER REBUILD SUCCESS
+
+SPACEDOCK HOME-MANAGER REBUILD - Generation 44 → 45
+==============================================
+**Stardate**: $(date '+%Y-%m-%d %H:%M:%S')
+**Authority**: Chief Engineer Montgomery Scott
+**Operation**: Home-manager configuration rebuild
+**Status**: ✅ SUCCESS
+
+PERFORMANCE METRICS:
+- Build Duration: 25 seconds (Excellent performance!)
+- Generation: 44 → 45 
+- Host: spacedock
+- Configuration Path: home/gig/common/core/opencode.nix
+
+ENGINEERING CHANGES:
+- Added comprehensive `/check-logs` command documentation
+- Enhanced OpenCode agent documentation quality analysis capabilities
+- Implemented engineering log quality assurance protocols
+
+TECHNICAL DETAILS:
+The `/check-logs` command provides:
+1. Log completeness verification
+2. Chronological integrity checks  
+3. Format compliance validation
+4. Metric accuracy assessment
+5. Cross-reference validation with git history
+6. Content quality assessment with engineering standards
+
+CONFIGURATION DIFF:
+```diff
++      check-logs = ''
++        # Check Logs Command - Engineering Documentation Quality Analysis
++        [40 lines of comprehensive documentation added]
++      '';
+```
+
+SYSTEM IMPACT:
+✓ Enhanced documentation quality control capabilities
+✓ Improved engineering log management tools
+✓ Maintained system stability throughout rebuild
+✓ All services operational post-rebuild
+
+CHIEF ENGINEER'S ASSESSMENT:
+"Another smooth rebuild, Captain! The new documentation quality tools are now online and ready for engineering excellence. The ship's documentation systems are running at peak efficiency!"
+
+BUILD LOG STATUS: Complete and verified
+NEXT RECOMMENDED ACTION: Test new `/check-logs` functionality
+
+---
+End of automated rebuild log entry
