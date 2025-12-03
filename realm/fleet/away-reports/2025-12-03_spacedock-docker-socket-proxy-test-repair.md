@@ -87,7 +87,7 @@ _Flagship of the Realm - U.S.S. Gigdot (NCC-2038)_
 
 - **Authority**: Implementation of Lord Gig's fleet protocols
 - **Changes**:
-  - Moved from `fleet/mission-reports/` to `fleet/away-reports/` per established
+  - Moved from `realm/fleet/mission-reports/` to `realm/fleet/away-reports/` per established
     standards
   - Corrected date from 2024-12-03 to 2025-12-03
   - Updated terminology: "Mission Report" → "Quest Report", "Technical

@@ -222,7 +222,7 @@
         1. **Repository Isolation**: Works in target repository without affecting home dotfiles
         2. **Documentation Continuity**: Logs all findings back to ~/.dotfiles/scottys-journal/
         3. **Worktree Protection**: Creates temporary analysis without interference
-        4. **Quest Reporting**: Documents expedition in fleet/away-reports/
+        4. **Quest Reporting**: Documents expedition in realm/fleet/away-reports/
 
         CONSULTATION PROCESS:
         • Analyze target repository structure, issues, and requirements
