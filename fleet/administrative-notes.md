@@ -82,3 +82,31 @@
 - **Changes**: Updated primary assignment to reflect correct U.S.S. gigdot registry number (NCC-2038)
 - **Context**: Alignment with commit-count based registry system implementation
 - **Implementation**: Chief Engineer Montgomery Scott
+
+## Repository Maintenance Tasks
+
+### Code & Documentation Cleanup Initiative
+**Added**: 2025-12-03 by Captain Scott
+**Priority**: Medium  
+**Scope**: Complete repository review and cleanup
+
+**Tasks**:
+1. **Comment Audit**:
+   - Remove outdated/unnecessary comments throughout codebase
+   - Preserve or enhance genuinely funny/clever comments that add value
+   - Focus on improving signal-to-noise ratio in code documentation
+
+2. **TODO/FIXME Review**:
+   - Comprehensive scan of all files for TODO and FIXME markers
+   - Categorize by priority and assign to appropriate officers  
+   - Remove completed items that weren't cleaned up
+   - Update obsolete TODOs with current context
+
+3. **Documentation Consistency**:
+   - Standardize comment styles across different file types
+   - Ensure all major functions/modules have appropriate documentation
+   - Remove contradictory or outdated documentation
+
+**Estimated Effort**: 2-3 engineering sessions
+**Recommended Assignment**: Administrative Officer (when hired) + Engineering review
+**Tools**: Consider automated scanning tools for TODO/FIXME detection
