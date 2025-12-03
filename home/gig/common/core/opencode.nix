@@ -44,6 +44,9 @@
         input_newline = "shift+enter,ctrl+enter,ctrl+j";
       };
 
+      # Cursor configuration - set to line cursor
+      cursor_style = "line";
+
       share = "manual";
 
       # MCP servers for extended functionality
