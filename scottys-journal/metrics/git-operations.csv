@@ -75,3 +75,4 @@ This resolves the issue where 'just new home' left log files in git index.
 Includes pre-commit formatting fixes.
 2025-12-03 06:26:46,spacedock,commit,015b3bbca2ece9447a40bfb49f708f924b63ad6a,develop,clean,8bd297c28d618ec9d51a0f510cfa5a36ae806c4f55a7cbfae8ee7ac3f8d498e8,📊 Scotty: Post-commit engineering log updates (pre-clean fix)
 2025-12-03 06:28:29,spacedock,commit,3324d5fb4316d6b6522a6212b744c4aa9737c0e0,develop,clean,8bd297c28d618ec9d51a0f510cfa5a36ae806c4f55a7cbfae8ee7ac3f8d498e8,📊 Scotty: Final engineering logs with formatting fixes
+2025-12-03 06:32:26,spacedock,commit,353f89264bbbf5b574d5c0ab671f27439ee95ce6,develop,clean,8bd297c28d618ec9d51a0f510cfa5a36ae806c4f55a7cbfae8ee7ac3f8d498e8,📊 Scotty: Pre-rebuild logs with formatting corrections
