@@ -14,6 +14,12 @@
   - Analyzes current state of agent's domain/specialization area
   - Identifies gaps or missing information in existing logs
   - Documents findings in agent-specific log format and voice
+  - **Enhanced Quality Assurance Protocol**:
+    - Checks git working tree and index for any uncommitted changes
+    - If non-log changes detected, runs `/check` (flake validation) before committing
+    - Commits non-log changes first (if validation passes), then log updates separately
+    - Uses descriptive commit messages for technical changes, standardized format for logs
+    - Documents any validation failures in logs for future reference
   - Updates logs to accurately reflect current operational state
   - Commits all documentation changes immediately to repository
   - Essential for maintaining accurate historical records and operational continuity
