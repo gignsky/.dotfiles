@@ -253,3 +253,4 @@
 - Write a agent that will go through and reword old commit messages at
   reasonable times (possibly before merges -- with squashes or else) adding more
   detail to them.
+- temp credit cards on _privacy.com_, @dotunwrap says those guys are gigachads.
