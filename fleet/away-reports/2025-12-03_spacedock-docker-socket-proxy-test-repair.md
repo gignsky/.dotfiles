@@ -103,4 +103,3 @@ _Flagship of the Realm - U.S.S. Gigdot (NCC-2038)_
 - **Context**: Alignment with fleet operations protocols established during
   comprehensive AGENTS.md review
 - **Implementation**: Chief Engineer Montgomery Scott
-
