@@ -68,3 +68,8 @@ Engineering excellence: Every major system operation now documented! ✅
 2025-12-03 06:23:04,spacedock,commit,562bf3215ca24da43b55278a8a0638a9de0128be,develop,2_modified,8bd297c28d618ec9d51a0f510cfa5a36ae806c4f55a7cbfae8ee7ac3f8d498e8,Home-manager rebuild completed successfully
 2025-12-03 06:23:17,spacedock,commit,562bf3215ca24da43b55278a8a0638a9de0128be,develop,2_modified,8bd297c28d618ec9d51a0f510cfa5a36ae806c4f55a7cbfae8ee7ac3f8d498e8,448613(git log -1 --pretty=%s)
 2025-12-03 06:23:23,spacedock,commit,562bf3215ca24da43b55278a8a0638a9de0128be,develop,2_modified,8bd297c28d618ec9d51a0f510cfa5a36ae806c4f55a7cbfae8ee7ac3f8d498e8,448806(git log -1 --pretty=%s)
+2025-12-03 06:26:21,spacedock,commit,379d597d2391ae79eda4231b9a2a34ecf288fe7f,develop,clean,8bd297c28d618ec9d51a0f510cfa5a36ae806c4f55a7cbfae8ee7ac3f8d498e8,📊 Scotty: Fix stuck engineering logs from home rebuild
+
+Auto-committing logs that were left uncommitted due to broken auto-cleanup.
+This resolves the issue where 'just new home' left log files in git index.
+Includes pre-commit formatting fixes.
