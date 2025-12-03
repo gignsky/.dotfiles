@@ -260,9 +260,9 @@ pre-home:
 # Runs after every home rebuild
 post-home:
 	@nix-shell -p lolcat --run 'echo "[POST-HOME] Finished." | lolcat 2> /dev/null'
-	@echo "📊 Logging home-manager rebuild to engineering records..."
-	@just log-commit "Home-manager rebuild completed successfully"
-	@echo "✅ Post-home cleanup complete"
+	@echo "📊 Batching home-manager rebuild log..."
+	@bash -c 'cd ~/.dotfiles && source scripts/scotty-logging-lib.sh && scotty_batch_log "build-complete" "Home-manager rebuild completed" "Home-manager rebuild completed successfully at $(date)"'
+	@echo "✅ Post-home complete - log batched"
 
 simple-home *ARGS:
 	nix run .#home-manager-flake-rebuild -- {{ ARGS }}
@@ -568,6 +568,15 @@ package-script:
 # Check hardware configuration synchronization
 check-hardware:
 	nix run .#check-hardware-config
+
+# Batched logging commands for reduced commit noise
+batch-commit-logs:
+	@echo "📊 Committing batched engineering logs..."
+	@bash -c 'cd ~/.dotfiles && source scripts/scotty-logging-lib.sh && _commit_batch_logs'
+
+batch-status:
+	@echo "📊 Batch logging status:"
+	@bash -c 'cd ~/.dotfiles && if [ -d ".batch-logs" ]; then find .batch-logs -name "*.batch" -exec echo "  📄 {}" \; -exec grep -c "^---BATCH-ENTRY-START---" {} \; 2>/dev/null | paste - - | sed "s/\t/ entries: /"; else echo "  No pending batch logs"; fi'
 
 # Manual engineering log entry for commits
 log-commit message="":

@@ -23,6 +23,146 @@ failsafe_log() {
     echo "⚠️ Logged to failsafe: $message" >&2
 }
 
+# BATCHED LOGGING SYSTEM
+# Accumulates log entries and commits them periodically to reduce commit noise
+BATCH_LOG_DIR="${HOME}/.dotfiles/.batch-logs"
+BATCH_THRESHOLD=5  # Commit after this many entries
+BATCH_MAX_AGE=3600 # Commit after this many seconds (1 hour)
+
+# Add entry to batch queue instead of immediate commit
+scotty_batch_log() {
+    local log_type="$1"
+    local title="$2"
+    local content="$3"
+    
+    mkdir -p "$BATCH_LOG_DIR"
+    local batch_file="${BATCH_LOG_DIR}/pending-$(date '+%Y%m%d').batch"
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    
+    # Add to batch file
+    cat >> "$batch_file" << EOF
+---BATCH-ENTRY-START---
+TYPE: $log_type
+TIMESTAMP: $timestamp
+TITLE: $title
+CONTENT: $content
+---BATCH-ENTRY-END---
+EOF
+    
+    # Check if we should commit batch
+    _check_batch_commit_needed
+}
+
+# Check if batch should be committed based on size or age
+_check_batch_commit_needed() {
+    local batch_files=($(find "$BATCH_LOG_DIR" -name "*.batch" 2>/dev/null))
+    [ ${#batch_files[@]} -eq 0 ] && return 0
+    
+    local total_entries=0
+    local oldest_file=""
+    local oldest_time=999999999
+    
+    for batch_file in "${batch_files[@]}"; do
+        local entries=$(grep -c "^---BATCH-ENTRY-START---" "$batch_file" 2>/dev/null || echo 0)
+        total_entries=$((total_entries + entries))
+        
+        local file_time=$(stat -c %Y "$batch_file" 2>/dev/null || stat -f %m "$batch_file" 2>/dev/null || echo 0)
+        if [ "$file_time" -lt "$oldest_time" ]; then
+            oldest_time=$file_time
+            oldest_file="$batch_file"
+        fi
+    done
+    
+    local current_time=$(date +%s)
+    local age=$((current_time - oldest_time))
+    
+    # Commit if threshold reached or max age exceeded
+    if [ "$total_entries" -ge "$BATCH_THRESHOLD" ] || [ "$age" -ge "$BATCH_MAX_AGE" ]; then
+        _commit_batch_logs
+    fi
+}
+
+# Commit all pending batch logs
+_commit_batch_logs() {
+    local batch_files=($(find "$BATCH_LOG_DIR" -name "*.batch" 2>/dev/null))
+    [ ${#batch_files[@]} -eq 0 ] && return 0
+    
+    echo "📊 Processing batched engineering logs..."
+    
+    for batch_file in "${batch_files[@]}"; do
+        _process_batch_file "$batch_file"
+    done
+    
+    # Clean up batch files
+    rm -f "${batch_files[@]}"
+    
+    # Commit the logs
+    cd "${HOME}/.dotfiles"
+    git add scottys-journal/ 2>/dev/null
+    git commit -m "📊 Scotty: Batch commit engineering logs ($(date '+%H:%M'))" 2>/dev/null
+    
+    echo "✅ Batched logs committed successfully"
+}
+
+# Process individual batch file into proper logs
+_process_batch_file() {
+    local batch_file="$1"
+    local current_entry=""
+    local entry_type=""
+    local entry_timestamp=""
+    local entry_title=""
+    local entry_content=""
+    local in_entry=false
+    
+    while IFS= read -r line; do
+        case "$line" in
+            "---BATCH-ENTRY-START---")
+                in_entry=true
+                entry_type=""
+                entry_timestamp=""
+                entry_title=""
+                entry_content=""
+                ;;
+            "---BATCH-ENTRY-END---")
+                if [ "$in_entry" = true ]; then
+                    # Process this entry using existing logging functions
+                    if [ -n "$entry_type" ] && [ -n "$entry_title" ]; then
+                        # Use the original logging function but bypass batching
+                        _direct_log_entry "$entry_type" "$entry_title" "$entry_content" "$entry_timestamp"
+                    fi
+                fi
+                in_entry=false
+                ;;
+            TYPE:*)
+                entry_type="${line#TYPE: }"
+                ;;
+            TIMESTAMP:*)
+                entry_timestamp="${line#TIMESTAMP: }"
+                ;;
+            TITLE:*)
+                entry_title="${line#TITLE: }"
+                ;;
+            CONTENT:*)
+                entry_content="${line#CONTENT: }"
+                ;;
+        esac
+    done < "$batch_file"
+}
+
+# Direct logging bypass for batch processing
+_direct_log_entry() {
+    local log_type="$1"
+    local title="$2"
+    local content="$3" 
+    local custom_timestamp="$4"
+    
+    # Use custom timestamp if provided, otherwise current time
+    local timestamp="${custom_timestamp:-$(date '+%Y-%m-%d %H:%M:%S')}"
+    
+    # Call the original logging function with bypass flag
+    BYPASS_BATCH=1 scotty_log_event "$log_type" "$title" "$content"
+}
+
 # Configuration - determine the correct dotfiles path
 if [ -d "${PWD}/scottys-journal" ]; then
     # We're in the dotfiles repo root
@@ -293,6 +433,35 @@ display_captain_report() {
 
 # Function to be called from git hooks or build scripts
 scotty_log_event() {
+    local event_type="$1"
+    shift
+    
+    # Check if batching is bypassed (for internal processing)
+    if [ "$BYPASS_BATCH" = "1" ]; then
+        unset BYPASS_BATCH
+        _original_scotty_log_event "$event_type" "$@"
+        return
+    fi
+    
+    # Use batching for regular operations
+    case "$event_type" in
+        "git-commit")
+            local message="$1"
+            scotty_batch_log "git-operation" "Git Commit" "Committed changes: $message"
+            ;;
+        "build-complete"|"system-operation")
+            # High-value events - log immediately
+            _original_scotty_log_event "$event_type" "$@"
+            ;;
+        *)
+            # Default: batch low-value events
+            scotty_batch_log "$event_type" "Event: $event_type" "$*"
+            ;;
+    esac
+}
+
+# Original logging function for immediate processing
+_original_scotty_log_event() {
     local event_type="$1"
     shift
     
