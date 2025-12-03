@@ -163,7 +163,19 @@
       # pkgs = customPkgs;
       # pkgs = import nixpkgs;
 
-      basicArgs = {
+      # Args for NixOS configurations (no pkgs - let NixOS manage its own packages)
+      nixosArgs = {
+        inherit
+          inputs
+          outputs
+          configVars
+          configLib
+          system
+          ;
+      };
+
+      # Args for Home Manager configurations (includes pkgs)
+      homeManagerArgs = {
         inherit
           pkgs
           inputs
@@ -171,16 +183,11 @@
           configVars
           configLib
           system
-          overlays
-          nixpkgs
-          nixpkgsBase
           ;
-        # overlays = customOverlays;
-        # nixpkgs = customNixpkgs;
       };
 
-      specialArgs = basicArgs;
-      extraSpecialArgs = basicArgs;
+      specialArgs = nixosArgs;
+      extraSpecialArgs = homeManagerArgs;
 
       assertAllHostsHaveVmTest =
         configs:
@@ -208,6 +215,11 @@
             };
           };
           modules = [
+            # Configure nixpkgs with overlays at the system level
+            {
+              nixpkgs.config = nixpkgsConfig.config;
+              nixpkgs.overlays = nixpkgsOverlayer.overlays;
+            }
             inputs.vscode-server.nixosModules.default
             (_: { services.vscode-server.enable = true; })
             inputs.nixos-wsl.nixosModules.default
@@ -239,6 +251,11 @@
         merlin = lib.nixosSystem {
           inherit specialArgs;
           modules = [
+            # Configure nixpkgs with overlays at the system level
+            {
+              nixpkgs.config = nixpkgsConfig.config;
+              nixpkgs.overlays = nixpkgsOverlayer.overlays;
+            }
             # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
             # home-manager.nixosModules.home-manager {
             #   home-manager.extraSpecialArgs = specialArgs;
@@ -269,6 +286,11 @@
           inherit specialArgs;
           # > Our main nixos configuration file <
           modules = [
+            # Configure nixpkgs with overlays at the system level
+            {
+              nixpkgs.config = nixpkgsConfig.config;
+              nixpkgs.overlays = nixpkgsOverlayer.overlays;
+            }
             # home-manager.nixosModules.home-manager
             # {
             #   home-manager.extraSpecialArgs = specialArgs;
@@ -378,6 +400,9 @@
       #   import ./pkgs { inherit pkgs; }
       # );
       # nixosModules = { inherit (import ./modules/nixos); };
+
+      # Overlays for external use
+      overlays = overlays;
 
       packages.${system} = import ./pkgs { inherit pkgs lib configLib; };
 

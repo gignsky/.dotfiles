@@ -2,7 +2,6 @@
   inputs,
   pkgs,
   outputs,
-  overlays,
   configLib,
   ...
 }:
@@ -10,11 +9,8 @@ let
   inherit (pkgs.stdenv.hostPlatform) system;
 in
 {
-  # overlays - use the overlays passed through specialArgs instead of outputs.overlays
-  nixpkgs.overlays = [
-    overlays.unstable-packages
-    # overlays.wrap-packages # example for overlays
-  ];
+  # overlays are now configured at the system level in flake.nix
+  # No need to set nixpkgs.overlays here anymore!
 
   environment.systemPackages = with pkgs; [
     tree
