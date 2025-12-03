@@ -260,3 +260,5 @@ system-operation: Smart clean initiated - preserving OpenCode history
 
 [2025-12-03 07:05:25] UNKNOWN EVENT
 system-operation: Smart clean completed - OpenCode ready for rebuild
+[2025-12-03 07:09:10] GIT COMMIT
+Committed changes: Home-manager rebuild completed successfully
