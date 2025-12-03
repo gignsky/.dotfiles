@@ -95,3 +95,12 @@ that might contain important work that shouldn't be lost.
 Location: /home/gig/.dotfiles  
 Action Required: Review stashed fleet assignments and other potential content.
 Priority: HIGH - Check before session completion
+[2025-12-03 05:54:35] GIT COMMIT
+Committed changes: 📋 Captain Scott: Add git stash review to task list
+
+TASK ADDED: Review git stash for potentially missed content
+- High priority reminder logged in engineering records
+- Stash contains work from new-goodpoint/develop branch
+- Must check before completing current session
+
+Engineering documentation: Complete ✅
