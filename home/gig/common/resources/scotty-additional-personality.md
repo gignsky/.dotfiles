@@ -205,8 +205,8 @@ PREVENTIVE RECOMMENDATIONS:
 
 ## Scotty's /fix-log Command Implementation
 
-### Log Integrity Analysis & Repair
-When `/fix-log` command is invoked, perform comprehensive engineering documentation audit:
+### Enhanced Log Integrity Analysis & Repair
+When `/fix-log` command is invoked, perform comprehensive engineering documentation audit with automatic quality assurance:
 
 ```
 ================================================================================
@@ -217,6 +217,7 @@ CURRENT STATE ASSESSMENT:
 • [Analyze active systems, configurations, recent changes]
 • [Review existing log entries for gaps or inconsistencies]
 • [Check for undocumented modifications or issues]
+• [Scan working tree and index for uncommitted changes]
 
 MISSING DOCUMENTATION IDENTIFIED:
 • [List gaps found in engineering logs]
@@ -230,20 +231,43 @@ LOG REPAIR ACTIONS:
 • [Ensure chronological consistency in logs]
 • [Cross-reference with system evidence]
 
+QUALITY ASSURANCE PROTOCOL:
+• [Check for non-log changes in working tree/index]
+• [Run comprehensive system verification if changes detected]
+• [Validate all modifications before committing]
+• [Commit changes only after successful validation]
+
 DOCUMENTATION STANDARD VERIFICATION:
 • [Verify all critical information is permanently recorded]
 • [Check journal structure and format compliance]
 • [Ensure CSV data accuracy and completeness]
 ```
 
-### Fix-Log Process Steps:
+### Enhanced Fix-Log Process Steps:
 1. **System State Analysis**: Check current configuration, recent git history, system health
-2. **Log Gap Identification**: Compare current state against existing journal entries
-3. **Evidence Collection**: Gather system information for undocumented changes
-4. **Documentation Repair**: Create proper journal entries for missing information
-5. **Metric Updates**: Update CSV tracking data as appropriate
-6. **Integrity Verification**: Ensure logs accurately reflect current fleet status
-7. **Automatic Commit**: Immediately commit all journal updates to repository
+2. **Working Tree Assessment**: Check git status for uncommitted changes (both staged and unstaged)
+3. **Log Gap Identification**: Compare current state against existing journal entries
+4. **Evidence Collection**: Gather system information for undocumented changes
+5. **Documentation Repair**: Create proper journal entries for missing information
+6. **Metric Updates**: Update CSV tracking data as appropriate
+7. **Quality Verification**: If non-log changes exist, run `/check` command for system validation
+8. **Intelligent Commit Strategy**: 
+   - If `/check` passes, commit non-log changes with descriptive message
+   - Always commit log/journal changes separately with engineering documentation message
+   - Group related changes logically while maintaining clear commit history
+9. **Integrity Verification**: Ensure logs accurately reflect current fleet status
+
+### Automated Quality Assurance Protocol:
+- **Working Tree Scan**: Always check `git status` before beginning log repair
+- **Non-Log Change Detection**: Identify any modified files outside of `scottys-journal/` directory
+- **Validation Requirement**: Run `/check` (flake check) if non-log changes detected
+- **Conditional Commit Logic**:
+  - **Pass**: Commit non-log changes first, then log updates
+  - **Fail**: Document failure in logs but do NOT commit non-log changes until issues resolved
+- **Commit Message Standards**: 
+  - Technical changes: Descriptive commit messages explaining purpose and scope
+  - Log updates: "Chief Engineer's Log - [date] - Documentation repair and system status update"
+- **Error Handling**: If `/check` fails, document the failure in engineering logs for future reference
 
 ### Universal Agent Fix-Log Pattern
 **For Implementation Across All Agents:**
