@@ -65,6 +65,25 @@
     stripping (with command strip and flags -S -p) in  /nix/store/i5qljn09445jw1kdfv08ci5pmy79zlg2-dnsenum-1.2.4.2/bin
    ```
 
+## Black Friday 2025 GPU Expansion Planning
+
+**Current Issue**: AMD GPU DRM driver incompatibility (v2.50.0 vs required
+3.x.x) affecting 6-monitor setup with dual-GPU configuration.
+
+**Expansion Option**: Add second NVIDIA GPU in parallel with existing RTX 3060
+Ti
+
+- **Target Cards**: RTX 3030/3050 (budget) or RTX 5050 (splurge)
+- **Requirements**:
+  - Must fit 4x PCIe slot (check motherboard compatibility)
+  - Need larger PSU with additional GPU power connectors
+  - Calculate total wattage: current 200W + new GPU wattage + 20% headroom
+- **Benefits**:
+  - Eliminates AMD driver compatibility issues
+  - Unified NVIDIA driver stack across all 6 monitors
+  - Better multi-GPU performance with same vendor
+- **Black Friday Timing**: Monitor sales for GPU + PSU combo deals
+
 ## Things to do...
 
 - Read following pages:
@@ -166,24 +185,6 @@
   - switch right monitor top with bottom, since the top is currently connected
     to the RTX card
   - make sure nvidia drivers are up to date
-
-## Black Friday 2025 GPU Expansion Planning
-
-**Current Issue**: AMD GPU DRM driver incompatibility (v2.50.0 vs required 3.x.x) 
-affecting 6-monitor setup with dual-GPU configuration.
-
-**Expansion Option**: Add second NVIDIA GPU in parallel with existing RTX 3060 Ti
-- **Target Cards**: RTX 3030/3050 (budget) or RTX 5050 (splurge)
-- **Requirements**: 
-  - Must fit 4x PCIe slot (check motherboard compatibility)
-  - Need larger PSU with additional GPU power connectors
-  - Calculate total wattage: current 200W + new GPU wattage + 20% headroom
-- **Benefits**: 
-  - Eliminates AMD driver compatibility issues
-  - Unified NVIDIA driver stack across all 6 monitors
-  - Better multi-GPU performance with same vendor
-- **Black Friday Timing**: Monitor sales for GPU + PSU combo deals
-
 - research more functionality with opencode relating to expanding
   [sops-nix](https://github.com/Mic92/sops-nix) support
 - when using opencode to plan nixconf converstion to a better template make sure
