@@ -1,8 +1,6 @@
-# Ignore large or temporary log files
+# Ignore temporary files (large files are handled by Git LFS)
 *.tmp
 *.bak
 
-# Keep directory structure but ignore specific patterns that might get too large
-# Uncomment if logs become too verbose:
-# logs/*.log
-# metrics/*.csv
+# Note: Log and metrics files are tracked with Git LFS
+# See .gitattributes for LFS configuration
