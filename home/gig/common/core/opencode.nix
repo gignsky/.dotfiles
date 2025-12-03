@@ -209,6 +209,39 @@
         "The engines are more efficient when ye understand the whole system, Captain!"
       '';
 
+      consult = ''
+        # Cross-Repository Consultation Command
+
+        "Acting as a rogue agent for external repository analysis!" - Scotty
+
+        EXPEDITION OF CONSULTATION PROTOCOL:
+        This command enables consultation work in repositories outside primary assignment 
+        while maintaining proper documentation in the home repository.
+
+        SAFETY MEASURES:
+        1. **Repository Isolation**: Works in target repository without affecting home dotfiles
+        2. **Documentation Continuity**: Logs all findings back to ~/.dotfiles/scottys-journal/
+        3. **Worktree Protection**: Creates temporary analysis without interference
+        4. **Quest Reporting**: Documents expedition in fleet/away-reports/
+
+        CONSULTATION PROCESS:
+        • Analyze target repository structure, issues, and requirements
+        • Provide recommendations and solutions 
+        • Document findings in engineering logs
+        • Create detailed quest report for fleet records
+        • No modifications to home repository configuration
+
+        USAGE:
+        Navigate to target repository, then run: /consult [analysis focus]
+
+        Examples:
+        - /consult "Analyze build failures and suggest fixes"
+        - /consult "Review code quality and recommend improvements" 
+        - /consult "Assess security vulnerabilities and mitigation strategies"
+
+        "Sometimes ye need fresh eyes on a different ship, Captain!"
+      '';
+
       hire = ''
         # Agent Creator & Recruiter
 

@@ -86,6 +86,9 @@ rebuild-post:
 	@nix-shell -p lolcat --run 'echo "[POST] Rebuilt." | lolcat 2> /dev/null'
 	@echo "📊 Logging rebuild to engineering records..."
 	@just log-commit "System rebuild completed successfully"
+	@echo "🧹 Cleaning up engineering logs..."
+	@git add scottys-journal/ 2>/dev/null || true
+	@git commit -m "📊 Scotty: Auto-update engineering logs" 2>/dev/null || true
 
 # Rebuild the system
 rebuild args="":
@@ -107,6 +110,9 @@ rebuild-test args="":
 	@nix-shell -p lolcat --run 'echo "[TEST] Finished." | lolcat 2> /dev/null'
 	@echo "📊 Logging test rebuild to engineering records..."
 	@just log-commit "System test rebuild completed successfully"
+	@echo "🧹 Cleaning up engineering logs..."
+	@git add scottys-journal/ 2>/dev/null || true
+	@git commit -m "📊 Scotty: Auto-update engineering logs" 2>/dev/null || true
 
 # Rebuild-full with new shell
 rebuild-full-new:
@@ -211,6 +217,9 @@ post-home:
 	@nix-shell -p lolcat --run 'echo "[POST-HOME] Finished." | lolcat 2> /dev/null'
 	@echo "📊 Logging home-manager rebuild to engineering records..."
 	@just log-commit "Home-manager rebuild completed successfully"
+	@echo "🧹 Cleaning up engineering logs..."
+	@git add scottys-journal/ 2>/dev/null || true
+	@git commit -m "📊 Scotty: Auto-update engineering logs" 2>/dev/null || true
 
 simple-home *ARGS:
 	nix run .#home-manager-flake-rebuild -- {{ ARGS }}
