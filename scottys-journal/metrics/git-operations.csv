@@ -30,3 +30,17 @@ TASK ADDED: Review git stash for potentially missed content
 
 Engineering documentation: Complete ✅
 2025-12-03 05:55:24,spacedock,commit,25b83d94a50d5b7b5f9f7db93186a69aaf7abf1b,develop,clean,8bd297c28d618ec9d51a0f510cfa5a36ae806c4f55a7cbfae8ee7ac3f8d498e8,🔧 Pre-commit: Format flake.nix hook configuration
+2025-12-03 05:56:11,spacedock,commit,2947d04e7278d511992e7fa99dc0525c3415ee8c,develop,clean,8bd297c28d618ec9d51a0f510cfa5a36ae806c4f55a7cbfae8ee7ac3f8d498e8,🔧 Captain Scott: Replace automatic logging with reliable manual system
+
+SOLUTION FOR CONSISTENT LOGGING:
+- Disabled automatic post-commit hook (prevents 'Failed' status)
+- Added 'just log-commit' command for manual logging
+- More reliable and doesn't interfere with git operations
+- User controls when logs are committed
+
+USAGE:
+  just log-commit           # Log most recent commit
+  just log-commit 'message' # Log custom message
+
+ENGINEERING IMPROVEMENT: Reliable logging without git conflicts! ✅
+2025-12-03 05:56:28,spacedock,commit,2947d04e7278d511992e7fa99dc0525c3415ee8c,develop,3_modified,8bd297c28d618ec9d51a0f510cfa5a36ae806c4f55a7cbfae8ee7ac3f8d498e8,430664commit_msg

@@ -515,7 +515,7 @@ check-hardware:
 log-commit message="":
 	@if [ -z "{{message}}" ]; then \
 		echo "📝 Logging most recent commit to engineering records..."; \
-		bash -c 'cd ~/.dotfiles && source scripts/scotty-logging-lib.sh && commit_msg=$$(git log -1 --pretty=%B) && scotty_log_event "git-commit" "$$commit_msg"'; \
+		bash -c 'cd ~/.dotfiles && source scripts/scotty-logging-lib.sh && scotty_log_event "git-commit" "$$(git log -1 --pretty=%s)"'; \
 	else \
 		echo "📝 Logging custom message to engineering records..."; \
 		bash -c 'cd ~/.dotfiles && source scripts/scotty-logging-lib.sh && scotty_log_event "git-commit" "{{message}}"'; \
