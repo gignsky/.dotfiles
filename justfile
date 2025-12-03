@@ -71,14 +71,59 @@ switch args="":
 	just home
 
 clean:
+  @echo "🧹 Starting smart clean process..."
+  # First: Failsafe logging checkpoint (in case OpenCode gets broken)
+  @echo "📝 Pre-clean failsafe logging checkpoint..."
+  @bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Smart clean initiated - preserving OpenCode history"' 
+  
+  # Clean standard caches (safe)
   rm -rfv ~/.cargo/
   rm -rfv ~/.cache/pre-commit/
   rm -rfv ~/.cache/nvf/
   rm -rfv ~/.cache/starship/
   rm -rfv ~/.config/zsh/zplug
-  # rm -rfv ~/.local/share/opencode
   rm -rfv result
+  
+  # Smart OpenCode cleanup - preserve history, clean configuration
+  @echo "🔧 Smart OpenCode cleanup (preserving history)..."
+  @if [ -d ~/.local/share/opencode ]; then \
+    echo "📁 Backing up OpenCode history..."; \
+    mkdir -p /tmp/opencode-backup; \
+    cp -r ~/.local/share/opencode/log /tmp/opencode-backup/ 2>/dev/null || true; \
+    cp -r ~/.local/share/opencode/storage /tmp/opencode-backup/ 2>/dev/null || true; \
+    cp ~/.local/share/opencode/auth.json /tmp/opencode-backup/ 2>/dev/null || true; \
+    echo "🗑️ Cleaning OpenCode config (will rebuild)..."; \
+    rm -rf ~/.local/share/opencode/snapshot 2>/dev/null || true; \
+    rm -rf ~/.local/share/opencode/exports 2>/dev/null || true; \
+    rm -rf ~/.local/share/opencode/bin 2>/dev/null || true; \
+    echo "📂 Restoring OpenCode history..."; \
+    cp -r /tmp/opencode-backup/log ~/.local/share/opencode/ 2>/dev/null || true; \
+    cp -r /tmp/opencode-backup/storage ~/.local/share/opencode/ 2>/dev/null || true; \
+    cp /tmp/opencode-backup/auth.json ~/.local/share/opencode/ 2>/dev/null || true; \
+    rm -rf /tmp/opencode-backup; \
+    echo "✅ OpenCode history preserved, config cleaned"; \
+  else \
+    echo "ℹ️ OpenCode not yet initialized - nothing to clean"; \
+  fi
+  
+  @if [ -d ~/.config/opencode ]; then \
+    echo "🧹 Cleaning OpenCode config directory (preserving node_modules temporarily)..."; \
+    mkdir -p /tmp/opencode-node-backup; \
+    cp -r ~/.config/opencode/node_modules /tmp/opencode-node-backup/ 2>/dev/null || true; \
+    rm -rf ~/.config/opencode; \
+    mkdir -p ~/.config/opencode; \
+    cp -r /tmp/opencode-node-backup/node_modules ~/.config/opencode/ 2>/dev/null || true; \
+    rm -rf /tmp/opencode-node-backup; \
+    echo "✅ OpenCode config cleaned (node_modules preserved for faster rebuild)"; \
+  fi
+  
+  # Quick results cleanup
   quick-results
+  
+  # Post-clean failsafe logging
+  @echo "📝 Post-clean failsafe logging checkpoint..."
+  @bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Smart clean completed - OpenCode ready for rebuild"'
+  @echo "✅ Smart clean complete - OpenCode history preserved, configuration reset for rebuild"
 
 # Run after every rebuild, some of the time
 rebuild-post:

@@ -6,6 +6,23 @@
 # Shared functions for automatic git and build state logging
 # Used by git hooks, build scripts, and other automation
 
+# FAILSAFE LOGGING FUNCTION
+# For critical operations when normal logging might fail (e.g., during clean)
+failsafe_log() {
+    local message="$1"
+    local fallback_log="${HOME}/.dotfiles/failsafe-operations.log"
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    
+    # Try normal logging first
+    if command -v scotty_log_event >/dev/null 2>&1; then
+        scotty_log_event "system-operation" "$message" && return 0
+    fi
+    
+    # Failsafe: Write to emergency log
+    echo "[${timestamp}] FAILSAFE LOG: $message" >> "$fallback_log"
+    echo "⚠️ Logged to failsafe: $message" >&2
+}
+
 # Configuration - determine the correct dotfiles path
 if [ -d "${PWD}/scottys-journal" ]; then
     # We're in the dotfiles repo root
