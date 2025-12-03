@@ -171,11 +171,11 @@ else
   exit 1
 fi
 
-echo "=== CALLING SCOTTY FIX LOGS (IF NEEDED) ==="
+echo "=== CALLING SCOTTY CHECK LOGS (IF NEEDED) ==="
 if command -v opencode >/dev/null 2>&1; then
-  opencode run --agent scotty "Scotty, could you please /fix-logs on this ${HOST}? Generation ${previous_gen} → ${generation_number}, build duration ${duration} seconds. Configuration changes since last rebuild: ${config_files_changed}. Files changed: ${detailed_diff}" || echo "Scotty logging failed, continuing..."
+  opencode run --agent scotty "Scotty, could you please /check-logs on this ${HOST}? Generation ${previous_gen} → ${generation_number}, build duration ${duration} seconds. Configuration changes since last rebuild: ${config_files_changed}. Files changed: ${detailed_diff}" || echo "Scotty logging failed, continuing..."
 else
-  echo "OpenCode not available - skipping detailed Scotty log-fix :("
+  echo "OpenCode not available - skipping detailed Scotty log-check :("
 fi
 
 popd || exit
