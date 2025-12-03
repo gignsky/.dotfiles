@@ -7,7 +7,7 @@
 # Used by git hooks, build scripts, and other automation
 
 # Configuration
-JOURNAL_DIR="${HOME}/.dotfiles/worktrees/main/scottys-journal"
+JOURNAL_DIR="${HOME}/.dotfiles/scottys-journal"
 LOGS_DIR="${JOURNAL_DIR}/logs"
 METRICS_DIR="${JOURNAL_DIR}/metrics"
 
@@ -20,16 +20,20 @@ ensure_journal_dirs() {
 # Get current git state information
 get_git_state() {
     local repo_dir="${1:-$(pwd)}"
-    cd "$repo_dir"
+    cd "$repo_dir" || return 1
     
-    local git_commit=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
-    local git_branch=$(git branch --show-current 2>/dev/null || echo "unknown")
-    local git_short_commit=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+    local git_commit
+    git_commit=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
+    local git_branch
+    git_branch=$(git branch --show-current 2>/dev/null || echo "unknown")
+    local git_short_commit
+    git_short_commit=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
     
     # Check git status
     local git_status="clean"
     if ! git diff-index --quiet HEAD -- 2>/dev/null; then
-        local modified_count=$(git status --porcelain | wc -l)
+        local modified_count
+        modified_count=$(git status --porcelain | wc -l)
         git_status="${modified_count}_modified"
     fi
     
@@ -53,9 +57,12 @@ log_build_performance() {
     
     ensure_journal_dirs
     
-    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    local host=$(hostname)
-    local git_info=$(get_git_state)
+    local timestamp
+    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    local host
+    host=$(hostname)
+    local git_info
+    git_info=$(get_git_state "$(pwd)")
     
     IFS='|' read -r git_commit git_branch git_status flake_lock_hash git_short_commit <<< "$git_info"
     
@@ -77,9 +84,12 @@ log_git_operation() {
     
     ensure_journal_dirs
     
-    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    local host=$(hostname) 
-    local git_info=$(get_git_state)
+    local timestamp
+    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    local host
+    host=$(hostname)
+    local git_info
+    git_info=$(get_git_state "$(pwd)")
     
     IFS='|' read -r git_commit git_branch git_status flake_lock_hash git_short_commit <<< "$git_info"
     
@@ -104,8 +114,10 @@ log_error() {
     
     ensure_journal_dirs
     
-    local timestamp=$(date '+%Y-%m-%d')
-    local host=$(hostname)
+    local timestamp
+    timestamp=$(date '+%Y-%m-%d')
+    local host
+    host=$(hostname)
     
     local csv_file="${METRICS_DIR}/error-tracking.csv"
     
@@ -115,8 +127,8 @@ log_error() {
     fi
     
     # Append the data (escape commas in messages)
-    local escaped_message=$(echo "$error_message" | sed 's/,/;/g')
-    local escaped_solution=$(echo "$solution_applied" | sed 's/,/;/g')
+    local escaped_message="${error_message//,/;}"
+    local escaped_solution="${solution_applied//,/;}"
     echo "${timestamp},${host},${error_type},${escaped_message},${escaped_solution},${resolution_time_minutes},${prevented_future}" >> "$csv_file"
 }
 
@@ -137,10 +149,13 @@ create_narrative_entry() {
     
     ensure_journal_dirs
     
-    local date=$(date '+%Y-%m-%d')
-    local stardate=$(date '+%Y.%m.%d')
+    local date
+    date=$(date '+%Y-%m-%d')
+    local stardate
+    stardate=$(date '+%Y.%m.%d')
     local log_file="${LOGS_DIR}/${date}-automated.log"
-    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    local timestamp
+    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     
     # Create or append to log file
     if [ ! -f "$log_file" ]; then
@@ -169,6 +184,11 @@ scotty_log_event() {
             local message="$1"
             log_git_operation "commit" "$message"
             create_narrative_entry "GIT COMMIT" "Committed changes: $message"
+            ;;
+        "git-push-prep")
+            local details="$1"
+            log_git_operation "push-prep" "$details"
+            create_narrative_entry "GIT PUSH PREPARATION" "$details"
             ;;
         "build-start")
             local operation="$1"
