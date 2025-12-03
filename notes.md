@@ -250,3 +250,6 @@
      general diffing (need to update git rules for this one)
 - hire _Uhura_ for git expertise, since shes a commons officer after all, but
   then again I could hire _Hoshi_ I think I like that more :)
+- Write a agent that will go through and reword old commit messages at
+  reasonable times (possibly before merges -- with squashes or else) adding more
+  detail to them.
