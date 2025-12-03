@@ -128,75 +128,33 @@
     # Agent slash commands - accessible across all agents
     commands = {
       # Nix development commands
-      check = {
-        description = "Validate flake configuration and outputs";
-        action = "Run nix flake check and address any issues found. This validates the entire flake including all outputs, packages, and system configurations.";
-      };
+      check = "Validate flake configuration and outputs. Run nix flake check and address any issues found. This validates the entire flake including all outputs, packages, and system configurations.";
 
-      build = {
-        description = "Build flake outputs and check for issues";
-        action = "Build flake outputs using nix build and check for issues. Usage: specify .#output to build specific outputs. Helpful for testing package builds.";
-      };
+      build = "Build flake outputs and check for issues. Build flake outputs using nix build and check for issues. Usage: specify .#output to build specific outputs. Helpful for testing package builds.";
 
-      update = {
-        description = "Update flake inputs and handle breaking changes";
-        action = "Update flake inputs using nix flake update and handle any breaking changes. Can update specific inputs with input-name parameter.";
-      };
+      update = "Update flake inputs and handle breaking changes. Update flake inputs using nix flake update and handle any breaking changes. Can update specific inputs with input-name parameter.";
 
-      show = {
-        description = "Display all available flake outputs";
-        action = "Show all available flake outputs using nix flake show. Helpful for understanding the flake structure and available packages/systems.";
-      };
+      show = "Display all available flake outputs. Show all available flake outputs using nix flake show. Helpful for understanding the flake structure and available packages/systems.";
 
       # Fleet operation commands
-      sitrep = {
-        description = "Comprehensive fleet status and engineering situation report";
-        action = "Provide detailed status report covering: fleet systems, current operations, system health, performance metrics, recent issues, and engineering recommendations";
-      };
+      sitrep = "Comprehensive fleet status and engineering situation report. Provide detailed status report covering: fleet systems, current operations, system health, performance metrics, recent issues, and engineering recommendations";
 
-      fix-log = {
-        description = "Analyze current state and fix missing log documentation";
-        action = "Assess current host/domain operational state, identify gaps in existing logs, and document missing information in proper engineering log format";
-      };
+      fix-log = "Analyze current state and fix missing log documentation. Assess current host/domain operational state, identify gaps in existing logs, and document missing information in proper engineering log format";
 
-      check-logs = {
-        aliases = [ "check-log" ];
-        description = "Comprehensive log analysis and attention area identification";
-        action = "Search through all existing engineering logs and journal entries to identify areas requiring attention, maintenance, follow-up actions, or resolution. Present findings to user, create documentation log entry, and run /sitrep if significant issues discovered.";
-      };
+      check-logs = "Comprehensive log analysis and attention area identification (aliases: check-log). Search through all existing engineering logs and journal entries to identify areas requiring attention, maintenance, follow-up actions, or resolution. Present findings to user, create documentation log entry, and run /sitrep if significant issues discovered.";
 
-      unstuck = {
-        description = "Reset focus and continue with current task";
-        action = "Acknowledge being stuck, reset mental state with appropriate personality response, and continue from the last clear objective. Get back on track with the task at hand.";
-      };
+      unstuck = "Reset focus and continue with current task. Acknowledge being stuck, reset mental state with appropriate personality response, and continue from the last clear objective. Get back on track with the task at hand.";
 
       # Away mission commands
-      consult = {
-        description = "Enhanced cross-repository consultation with mission staging";
-        action = "ENHANCED CONSULTATION PROTOCOL: Preserve original user request, create mission archive in realm/fleet/mission-archives/[agent]-missions/, perform expert analysis while maintaining detailed progressive notes. Work in target repository with full access while documenting back to home base.";
-      };
+      consult = "Enhanced cross-repository consultation with mission staging. ENHANCED CONSULTATION PROTOCOL: Preserve original user request, create mission archive in realm/fleet/mission-archives/[agent]-missions/, perform expert analysis while maintaining detailed progressive notes. Work in target repository with full access while documenting back to home base.";
 
-      beam-out = {
-        aliases = [ "mission-complete" ];
-        description = "Compile final away mission report and clean up archives";
-        action = "MISSION COMPLETION PROTOCOL: Review all mission notes from current active mission archive, compile comprehensive final away report, move to permanent fleet documentation, clean up temporary staging, commit all documentation with proper attribution.";
-      };
+      beam-out = "Compile final away mission report and clean up archives (aliases: mission-complete). MISSION COMPLETION PROTOCOL: Review all mission notes from current active mission archive, compile comprehensive final away report, move to permanent fleet documentation, clean up temporary staging, commit all documentation with proper attribution.";
 
       # Quality assurance commands
-      enhance-commit = {
-        aliases = [ "enhance" ];
-        description = "Analyze and improve commit message quality";
-        action = "Use the commit enhancement system to analyze a commit message for quality issues, provide suggestions, and optionally guide through interactive improvement. Integrates with scripts/commit-enhance-lib.sh";
-      };
+      enhance-commit = "Analyze and improve commit message quality (aliases: enhance). Use the commit enhancement system to analyze a commit message for quality issues, provide suggestions, and optionally guide through interactive improvement. Integrates with scripts/commit-enhance-lib.sh";
 
       # Agent summoning (when talking to other agents)
-      scotty = {
-        description = "Summon Chief Engineer for debugging and technical issues";
-        action = "Activate Chief Engineer Montgomery Scott for debugging complex systems: Nix
-        flakes, Rust code, Bash scripts, Lua in Nix, Nushell configurations. Scotty will analyze
-        errors, check system stress points, and provide engineering solutions. He is so described in
-          the relevant gigdot/../resources/{agent-name}-additional-personality.md";
-      };
+      scotty = "Summon Chief Engineer for debugging and technical issues. Activate Chief Engineer Montgomery Scott for debugging complex systems: Nix flakes, Rust code, Bash scripts, Lua in Nix, Nushell configurations. Scotty will analyze errors, check system stress points, and provide engineering solutions. He is so described in the relevant gigdot/../resources/{agent-name}-additional-personality.md";
     };
 
     # Enhanced rules with personality system
