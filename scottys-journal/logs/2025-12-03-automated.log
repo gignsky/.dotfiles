@@ -122,3 +122,25 @@ USAGE:
 ENGINEERING IMPROVEMENT: Reliable logging without git conflicts! ✅
 [2025-12-03 05:56:28] GIT COMMIT
 Committed changes: 430664commit_msg
+[2025-12-03 05:59:53] GIT COMMIT
+Committed changes: 🔧 Captain Scott: Add automatic engineering logging to rebuild commands
+
+ENGINEERING AUTOMATION COMPLETE:
+- All 'just rebuild' commands now automatically log to engineering records
+- All 'just home' commands now automatically log completion
+- Test rebuilds include logging for verification
+- Maintains complete operational audit trail
+
+COMMANDS WITH AUTO-LOGGING:
+  • just rebuild (+ verbose version)
+  • just rebuild-test
+  • just home
+  • just switch (inherits from rebuild + home)
+  • just rebuild-full (inherits from rebuild + home)
+
+Engineering excellence: Every major system operation now documented! ✅
+[2025-12-03 05:59:58] GIT COMMIT
+Committed changes: Test of automatic rebuild logging system
+
+[2025-12-03 06:00:19] GIT COMMIT
+Committed changes: Debug test message
