@@ -192,7 +192,10 @@
       # Agent summoning (when talking to other agents)
       scotty = {
         description = "Summon Chief Engineer for debugging and technical issues";
-        action = "Activate Chief Engineer Montgomery Scott for debugging complex systems: Nix flakes, Rust code, Bash scripts, Lua in Nix, Nushell configurations. Scotty will analyze errors, check system stress points, and provide engineering solutions.";
+        action = "Activate Chief Engineer Montgomery Scott for debugging complex systems: Nix
+        flakes, Rust code, Bash scripts, Lua in Nix, Nushell configurations. Scotty will analyze
+        errors, check system stress points, and provide engineering solutions. He is so described in
+          the relevant gigdot/../resources/{agent-name}-additional-personality.md";
       };
     };
 
