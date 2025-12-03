@@ -29,6 +29,22 @@
 - **Complexity**: Likely significant undertaking requiring dedicated development time
 - **Status**: Major project for future planning when development capacity exists
 
+### Technical Conventions Review
+- **Goal**: Review and refine realm's technical conventions and standards
+- **Documents**: GIT-CONVENTIONS.md, coding standards, documentation practices
+- **Focus**: Ensure conventions scale appropriately with realm growth
+- **Personnel**: Requires experienced technical crew member with strong opinions on best practices
+- **Status**: Schedule review when suitable technical administrative support available
+
+### Creative Works Discussion
+- **Goal**: Schedule discussion with Lord Gig about creative works and their operational implications
+- **Documents to Review**:
+  - "the-run-on.md" - creative work about endless sentences and literary themes
+  - "exchange" - philosophical thoughts that could influence crew operations (requires polishing)
+- **Purpose**: Gather crew thoughts, interpretations, and explore how creative works might inform operational practices
+- **Format**: Future crew discussion session to explore literary themes, philosophical concepts, and potential operational changes
+- **Status**: Awaiting scheduling when administrative support available
+
 ### MCP Server Expansion
 - **Goal**: Provide crew members with additional tools and capabilities via MCP servers
 - **Requirements**: Research available MCP servers, evaluate crew-specific needs
