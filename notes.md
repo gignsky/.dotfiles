@@ -261,3 +261,11 @@
   created as to hope not to interfer with work that is in progress in that
   branch/path that may be ongoing) -- but the agent should at all times for ALL
   agents attempt to keep record of it's experinces for later review.
+- need to /hire an admin officer -- or a yeoman -- to handle admin duties, and
+  hopefully they can help me sort through all the paper work that I'm having
+  scotty and the soon-to-be new crew generate as logs and reports
+  - this adds another thing I need to do, set up some sort of system for the
+    senior staff to meet, and maybe a mega planning repository with closer
+    connections to a seperate repository meant to setup all the agents stuff so
+    that the agents have a uniform (low-traffic) place-to-go to update
+    themselves and their logs
