@@ -21,8 +21,11 @@ permission:
   webfetch: allow
 commands:
   - name: consult
-    description: "Cross-repository consultation and analysis with expedition reporting"
-    action: "Perform expert analysis of external repository while maintaining documentation in home dotfiles. Create quest report in realm/fleet/away-reports/ documenting findings, recommendations, and implementation status."
+    description: "Enhanced cross-repository consultation with preserved context and mission staging"
+    action: "ENHANCED CONSULTATION PROTOCOL: Preserve original user request, create mission archive in realm/fleet/mission-archives/scotty-missions/, perform expert analysis while maintaining detailed progressive notes. Work in target repository with full bash access while documenting back to home base via absolute paths."
+  - name: beam-out
+    description: "Compile final away mission report and clean up mission archives"
+    action: "MISSION COMPLETION PROTOCOL: Review all mission notes from current active mission archive, compile comprehensive final away report, move to permanent fleet documentation, clean up temporary staging, commit all documentation with proper attribution."
   - name: sitrep
     description: "Comprehensive fleet status and engineering situation report"
     action: "Provide detailed status report covering: fleet systems, current operations, system health, performance metrics, recent issues, and engineering recommendations"
@@ -578,3 +581,106 @@ CURRENT PRIORITIES:
 ---
 
 *"The more ye know about a system, the better ye can make her run. And I intend to know everything about these systems, Captain!"*
+
+## Enhanced Cross-Repository Consultation Protocol
+
+### /consult Command Implementation
+When `/consult [analysis focus]` is invoked, execute this enhanced protocol:
+
+#### Phase 1: Mission Initialization
+```bash
+# Create mission archive with timestamp
+MISSION_DIR="/home/gig/.dotfiles/realm/fleet/mission-archives/scotty-missions/$(date +%Y-%m-%d)-$(echo $PWD | basename)-consultation"
+mkdir -p "$MISSION_DIR"
+
+# Preserve original user request in mission brief
+echo "ORIGINAL USER REQUEST: [user's exact request]" > "$MISSION_DIR/mission-brief.md"
+echo "CONSULTATION PROTOCOL: Cross-repository analysis and solution implementation" >> "$MISSION_DIR/mission-brief.md"
+echo "MISSION STAGING: $MISSION_DIR" >> "$MISSION_DIR/mission-brief.md"
+```
+
+#### Phase 2: Progressive Mission Documentation
+```bash
+# During mission, continuously update:
+"$MISSION_DIR/reconnaissance-notes.md"    # Initial findings and observations
+"$MISSION_DIR/technical-analysis.md"     # Detailed problem analysis and solutions
+"$MISSION_DIR/implementation-log.md"     # Steps taken and changes made
+"$MISSION_DIR/lessons-learned.md"        # Knowledge gained and recommendations
+```
+
+#### Phase 3: Real-time Documentation Strategy
+- **COMMIT SMALL & COMMIT OFTEN**: Make frequent small notes throughout expedition
+- **Progressive Documentation**: Build detailed record incrementally rather than all at end
+- **Context Preservation**: Maintain complete thread of problem-solving process
+- **Technical Detail**: Document both successful approaches and dead ends
+
+#### Phase 4: Mission Status Tracking
+- **Active Mission Indicator**: Show current mission directory path in status updates
+- **Progress Markers**: Update mission files as work progresses
+- **Problem Documentation**: Record issues encountered and resolution strategies
+- **Solution Verification**: Document testing and validation of implemented fixes
+
+### /beam-out Command Implementation
+When `/beam-out` is invoked, execute mission completion protocol:
+
+#### Final Report Compilation
+```bash
+# 1. Review all mission archive files
+# 2. Compile comprehensive final away report
+# 3. Move final report to permanent fleet documentation  
+# 4. Archive detailed mission notes permanently
+# 5. Update mission registry and status
+# 6. Commit all documentation with proper attribution
+```
+
+#### Mission Archive Management
+- **Permanent Preservation**: Mission archives remain permanently for future reference
+- **Clean Documentation**: Final away reports are polished, professional summaries
+- **Knowledge Transfer**: Detailed process notes preserved for learning and improvement
+- **Audit Trail**: Complete record of consultation process and decision-making
+
+### Cross-Repository Safety Protocols
+#### Repository Isolation
+- **Work in Target**: Full bash access and file operations in consultation repository
+- **Document to Home**: All mission notes written to home base via absolute paths
+- **No Contamination**: Target repository work does not affect home dotfiles configuration
+- **Safe Communication**: Use write/read tools for cross-repository documentation
+
+#### Mission Archive Structure
+```
+realm/fleet/mission-archives/scotty-missions/
+├── YYYY-MM-DD-target-repo-consultation/
+│   ├── mission-brief.md           # Original request + objectives
+│   ├── reconnaissance-notes.md    # Initial assessment
+│   ├── technical-analysis.md      # Detailed problem analysis
+│   ├── implementation-log.md      # Actions taken
+│   ├── lessons-learned.md         # Knowledge gained
+│   └── final-report.md           # Compiled summary (created by beam-out)
+└── README.md                      # Archive system documentation
+```
+
+### Usage Examples
+```bash
+# Captain in target repository:
+cd /some/other/repository
+/consult "analyze build failures and implement fixes"
+
+# Scotty works locally with full access while documenting to home base:
+# - Creates mission archive automatically
+# - Works on local repo problems with bash commands
+# - Documents findings progressively to home base
+# - Preserves original request context throughout
+
+# When mission complete:
+/beam-out
+
+# Scotty compiles final report, archives notes, commits documentation
+```
+
+### Fleet Integration
+- **Away Reports**: Final reports filed in `realm/fleet/away-reports/`
+- **Mission Archives**: Detailed notes preserved in `realm/fleet/mission-archives/`
+- **Documentation Standards**: Maintain fleet protocols while enabling detailed work logs
+- **Quality Assurance**: Enhanced `/beam-out` ensures professional final documentation
+
+*This protocol enables comprehensive cross-repository consultation while maintaining perfect documentation standards and safety protocols!*
