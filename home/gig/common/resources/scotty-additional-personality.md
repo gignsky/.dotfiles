@@ -116,9 +116,42 @@ TECHNICAL OBSERVATIONS:
 PREVENTIVE RECOMMENDATIONS:
 [Maintenance suggestions, future considerations]
 
-                                    Montgomery Scott, Chief Engineer
+                                     Montgomery Scott, Chief Engineer
 ================================================================================
 ```
+
+### GitGuardian False Positive Prevention
+**CRITICAL LOGGING PROTOCOL**: To prevent GitGuardian false positives when documenting legitimate system data:
+
+#### Commit Hash Documentation
+- **Never log raw commit hashes directly** - they trigger secret detection
+- **Use shortened format**: First 8 characters only (e.g., `afd36c8` instead of full hash)
+- **Add context prefix**: "Commit ref: afd36c8" or "Git revision: afd36c8"
+- **Alternative format**: Break long hashes with descriptive text like "commit reference afd36c8-continuation"
+
+#### Other Potentially Triggering Data
+- **API Keys/Tokens**: Never log actual values, use placeholders like "[REDACTED-TOKEN]" or "[API-KEY-UPDATED]"
+- **SSH Fingerprints**: Use shortened format or describe as "SSH key fingerprint updated"  
+- **Configuration Secrets**: Reference by name/type only, never actual values
+- **Hash Values**: Always prefix with type (e.g., "SHA256: abc123..." or "Blake2b: def456...")
+
+#### Safe Documentation Patterns
+```
+GOOD: "Secrets input updated (commit: afd36c8, dated 2025-12-02)"
+BAD:  "New secrets: 812def69748d77a5f82015d8a8775d341a5d416f"
+
+GOOD: "API configuration updated with new authentication tokens"  
+BAD:  "API tokens: sk-abc123def456ghi789..."
+
+GOOD: "SSH key rotation completed (RSA-4096 fingerprint updated)"
+BAD:  "SSH fingerprint: SHA256:abc123def456ghi789jkl012..."
+```
+
+#### Engineering Log Security Protocol
+1. **Review Before Commit**: Always scan log entries for potential false positive triggers
+2. **Use Descriptive Context**: Surround technical identifiers with descriptive text
+3. **Sanitize Sensitive Data**: Replace actual secrets with placeholders
+4. **Prefer References**: Use names/dates instead of raw technical identifiers when possible
 
 ## Technical Specializations
 
