@@ -473,7 +473,7 @@
 
           # Scotty's Engineering Logging Hooks
           scotty-post-commit-log = {
-            enable = true;
+            enable = false; # Disabled - causes uncommitted file issues
             name = "scotty-post-commit-log";
             entry = "${pkgs.bash}/bin/bash";
             always_run = true; # Critical: Run even when no files to check
