@@ -473,32 +473,15 @@
 
           # Scotty's Engineering Logging Hooks
           scotty-post-commit-log = {
-            enable = true; # Re-enabled with proper non-modifying behavior
+            enable = false; # Disabled - Manual logging preferred for reliability
             name = "scotty-post-commit-log";
             entry = "${pkgs.bash}/bin/bash";
-            always_run = true; # Critical: Run even when no files to check
+            always_run = true;
             args = [
               "-c"
               ''
-                # Source Scotty's logging library
-                source "${./scripts/scotty-logging-lib.sh}"
-
-                # Get the commit message and check if this is our own automated commit
-                commit_message=$(git log -1 --pretty=%B)
-
-                # Skip logging if this commit was made by the logger itself
-                if echo "$commit_message" | grep -q "📊 Scotty: Auto-log"; then
-                  echo "✅ Skipping auto-commit to prevent recursion"
-                  exit 0
-                fi
-
-                # Log the original user commit (this writes files but doesn't commit)
-                echo "📝 Logging commit activity for engineering records..."
-                scotty_log_event "git-commit" "$commit_message"
-
-                # Instead of auto-committing, just report success
-                echo "✅ Engineering log entry created successfully"
-                echo "💡 Note: Log files updated but not committed (prevents git conflicts)"
+                echo "ℹ️  Scotty's automatic logging is disabled"
+                echo "💡 Use 'just log-commit' for manual engineering logs"
                 exit 0
               ''
             ];

@@ -510,3 +510,15 @@ package-script:
 # Check hardware configuration synchronization
 check-hardware:
 	nix run .#check-hardware-config
+
+# Manual engineering log entry for commits
+log-commit message="":
+	@if [ -z "{{message}}" ]; then \
+		echo "📝 Logging most recent commit to engineering records..."; \
+		bash -c 'cd ~/.dotfiles && source scripts/scotty-logging-lib.sh && commit_msg=$$(git log -1 --pretty=%B) && scotty_log_event "git-commit" "$$commit_msg"'; \
+	else \
+		echo "📝 Logging custom message to engineering records..."; \
+		bash -c 'cd ~/.dotfiles && source scripts/scotty-logging-lib.sh && scotty_log_event "git-commit" "{{message}}"'; \
+	fi
+	@echo "✅ Engineering log entry created successfully"
+	@echo "💡 Use 'git add scottys-journal/ && git commit -m \"📊 Update engineering logs\"' to commit logs"
