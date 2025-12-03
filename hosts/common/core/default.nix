@@ -13,7 +13,10 @@
     };
   };
 
-  environment.systemPackages = [ pkgs.nix ];
+  environment.systemPackages = with pkgs; [
+    nix
+    dig
+  ];
 
   hardware.enableRedistributableFirmware = true;
 }
