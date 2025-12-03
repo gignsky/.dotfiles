@@ -289,3 +289,7 @@ Ti
     that the agents have a uniform (low-traffic) place-to-go to update
     themselves and their logs
 - update gigvim to turn tree sitter back on, or at least check.
+- SCOTTY!! -- we should add to admin notes that we need a 'fast' version of
+  rebuild and home-manager switch that somehow call the logger and engineer's
+  report in the background and return control of the shell to the user in the
+  meantime.
