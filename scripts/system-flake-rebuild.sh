@@ -96,8 +96,16 @@ if sudo nixos-rebuild switch --flake .#"$HOST" | tee "$output_file" 2>&1; then
   # Log successful build
   scotty_log_event "build-complete" "nixos-rebuild-${HOST}" "$duration" "$build_success" "$generation_number"
   
-  # Commit with generation info
-  git commit -a --allow-empty -m "$HOST: $gen" || true
+  # Commit with enhanced generation info
+  export AUTOMATED_COMMIT=true
+  if [ -f "$(dirname "$0")/commit-enhance-lib.sh" ]; then
+    source "$(dirname "$0")/commit-enhance-lib.sh"
+    enhanced_msg=$(enhance_commit_message "auto(system): rebuild $HOST generation $gen" "system-flake-rebuild.sh")
+    git commit -a --allow-empty -m "$enhanced_msg" || true
+  else
+    # Fallback to basic message if enhancement library not available
+    git commit -a --allow-empty -m "$HOST: $gen" || true
+  fi
 else
   build_success="false"
   end_time=$(date +%s)

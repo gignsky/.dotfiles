@@ -405,7 +405,15 @@ if [ "$always_yes" == "false" ]; then
 	fi
 	if yes_or_no "You can now commit and push the .dotfiles, which includes the hardware-configuration.nix for $target_hostname?"; then
 		(pre-commit run --all-files 2>/dev/null || true) &&
-			git add "$git_root/hosts/$target_hostname/hardware-configuration.nix" "$git_root/flake.lock" && (git commit -m "feat: hardware-configuration.nix for $target_hostname" || true) && git push
+			# Create enhanced commit message for hardware configuration
+			export AUTOMATED_COMMIT=true
+			if [ -f "$git_root/scripts/commit-enhance-lib.sh" ]; then
+				source "$git_root/scripts/commit-enhance-lib.sh"
+				enhanced_msg=$(enhance_commit_message "feat(bootstrap): add hardware-configuration.nix for $target_hostname" "bootstrap-nixos.sh")
+				git add "$git_root/hosts/$target_hostname/hardware-configuration.nix" "$git_root/flake.lock" && (git commit -m "$enhanced_msg" || true) && git push
+			else
+				git add "$git_root/hosts/$target_hostname/hardware-configuration.nix" "$git_root/flake.lock" && (git commit -m "feat: hardware-configuration.nix for $target_hostname" || true) && git push
+			fi
 	fi
 	if yes_or_no "Do you want to reboot $target_hostname?"; then
 		green "Rebooting $target_hostname"
@@ -467,7 +475,15 @@ else
 		$ssh_cmd -oForwardAgent=yes "cd .dotfiles && just rebuild-full"
 	fi
 	(pre-commit run --all-files 2>/dev/null || true) &&
-		git add "$git_root/hosts/$target_hostname/hardware-configuration.nix" "$git_root/flake.lock" && (git commit -m "feat: hardware-configuration.nix for $target_hostname" || true) && git push
+		# Create enhanced commit message for hardware configuration  
+		export AUTOMATED_COMMIT=true
+		if [ -f "$git_root/scripts/commit-enhance-lib.sh" ]; then
+			source "$git_root/scripts/commit-enhance-lib.sh"
+			enhanced_msg=$(enhance_commit_message "feat(bootstrap): add hardware-configuration.nix for $target_hostname" "bootstrap-nixos.sh")
+			git add "$git_root/hosts/$target_hostname/hardware-configuration.nix" "$git_root/flake.lock" && (git commit -m "$enhanced_msg" || true) && git push
+		else
+			git add "$git_root/hosts/$target_hostname/hardware-configuration.nix" "$git_root/flake.lock" && (git commit -m "feat: hardware-configuration.nix for $target_hostname" || true) && git push
+		fi
 	$ssh_cmd -oForwardAgent=yes "cd .dotfiles && just sops-fix"
 	$ssh_cmd "sudo reboot now"
 fi

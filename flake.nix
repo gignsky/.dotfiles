@@ -476,6 +476,7 @@
             enable = true;
             name = "scotty-post-commit-log";
             entry = "${pkgs.bash}/bin/bash";
+            always_run = true; # Critical: Run even when no files to check
             args = [
               "-c"
               ''
@@ -495,6 +496,7 @@
             enable = true;
             name = "scotty-pre-push-log";
             entry = "${pkgs.bash}/bin/bash";
+            always_run = true; # Critical: Run even when no files to check
             args = [
               "-c"
               ''

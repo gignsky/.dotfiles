@@ -151,6 +151,37 @@ get_home_manager_generation() {
     fi
 }
 
+# Log commit enhancement data for analytics
+log_commit_enhancement() {
+    local original_length="$1"
+    local enhanced_length="$2"
+    local commit_type="$3"
+    local agent="$4"
+    local validation_passed="$5"
+    local git_commit="$6"
+    local enhancement_method="${7:-automatic}"
+    
+    ensure_journal_dirs
+    
+    local timestamp
+    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    local host
+    host=$(hostname)
+    
+    local csv_file="${METRICS_DIR}/commit-enhancements.csv"
+    
+    # Create header if file doesn't exist
+    if [ ! -f "$csv_file" ]; then
+        echo "date,host,git_commit,commit_type,original_length,enhanced_length,agent,validation_passed,enhancement_method,technical_context_added" > "$csv_file"
+    fi
+    
+    # Calculate if technical context was added
+    local tech_context_added=$((enhanced_length > original_length ? 1 : 0))
+    
+    # Append the data
+    echo "${timestamp},${host},${git_commit},${commit_type},${original_length},${enhanced_length},${agent},${validation_passed},${enhancement_method},${tech_context_added}" >> "$csv_file"
+}
+
 # Create a narrative log entry with optional classification for Captain's attention
 create_narrative_entry() {
     local title="$1"
@@ -298,6 +329,7 @@ export -f scotty_create_log
 export -f log_build_performance
 export -f log_git_operation
 export -f log_error
+export -f log_commit_enhancement
 export -f get_git_state
 export -f get_home_manager_generation
 export -f display_captain_report
