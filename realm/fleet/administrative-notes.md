@@ -110,3 +110,43 @@
 **Estimated Effort**: 2-3 engineering sessions
 **Recommended Assignment**: Administrative Officer (when hired) + Engineering review
 **Tools**: Consider automated scanning tools for TODO/FIXME detection
+
+### Chat Log Archival & Preservation System
+**Added**: 2025-12-03 by Captain Scott per Lord Gig directive
+**Priority**: Medium-High
+**Scope**: Comprehensive OpenCode chat session preservation
+
+**Objective**: Evaluate and potentially implement system for archiving complete OpenCode chat logs for operational, debugging, and historical purposes.
+
+**Benefits**:
+- Complete operational context preservation
+- Decision rationale and troubleshooting history
+- Pattern analysis for system improvements
+- Audit trail for critical operations
+- Knowledge transfer for new crew members
+
+**Implementation Considerations**:
+- **Volume Management**: Chat logs can be substantial - need intelligent filtering/compression
+- **Security**: Contains operational details, system information, personal context
+- **Storage**: Integration with existing logging infrastructure vs. separate system
+- **Retention**: Automated cleanup policies and archival strategies
+- **Searchability**: Index and search capabilities for historical reference
+
+**Security & Privacy Notes**:
+- **Encryption**: SOPS integration for sensitive operational data
+- **Redaction**: Automated filtering of personal/sensitive information  
+- **Access Control**: Restricted to authorized personnel only
+- **Backup**: Integrated with existing backup and disaster recovery
+
+**Future Infrastructure Dependency**:
+- **GitLab Server Priority**: Lord Gig has indicated GitLab server deployment is high priority
+- **Alternative**: If GitLab deployment delayed, implement SOPS-encrypted storage in current repository structure
+- **Timeline**: Evaluate implementation once GitLab infrastructure decision finalized
+
+**Recommended Approach**:
+1. Research existing chat log archival solutions and best practices
+2. Design schema for chat log metadata and indexing
+3. Implement prototype with SOPS encryption as interim solution  
+4. Migrate to GitLab-based solution when infrastructure available
+
+**Status**: Pending technical research and infrastructure planning
