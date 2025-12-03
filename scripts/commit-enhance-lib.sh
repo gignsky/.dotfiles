@@ -1,299 +1,288 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Commit Message Enhancement Library
+# Part of Chief Engineer Montgomery Scott's Engineering Excellence Initiative
 
-# =============================================================================
-# SCOTTY'S COMMIT ENHANCEMENT LIBRARY
-# =============================================================================
-# Automatic commit message enhancement following Gigi's Commitus standards
-# Integrates with conventional commits while adding technical context and signatures
+# Color definitions
+readonly RED='\033[0;31m'
+readonly GREEN='\033[0;32m' 
+readonly YELLOW='\033[1;33m'
+readonly BLUE='\033[0;34m'
+readonly CYAN='\033[0;36m'
+readonly BOLD='\033[1m'
+readonly NC='\033[0m' # No Color
 
-# Source the existing logging library for git state functions
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "${SCRIPT_DIR}/scotty-logging-lib.sh"
+# Configuration
+readonly ENHANCEMENT_CONFIG_FILE="$HOME/.dotfiles/.commit-enhancement-config"
 
-# Agent identification and signatures
-SCOTTY_SIGNATURE="Chief-Engineer: Scotty"
-AUTO_SYSTEM_PREFIX="Auto-System:"
-CAPTAIN_SIGNATURE="Captain: Lord-Gig"
-
-# Get current timestamp in Scotty's preferred stardate format
-get_stardate_timestamp() {
-    date '+%Y.%m.%d-%H:%M'
-}
-
-# Determine who/what is making this commit
-get_commit_agent() {
-    local script_name="${1:-unknown}"
-    
-    # Check if we're in an automated context
-    if [ -n "$AUTOMATED_COMMIT" ] || [ -n "$CI" ]; then
-        echo "${AUTO_SYSTEM_PREFIX} ${script_name}"
-    elif [ -n "$SCOTTY_AGENT" ]; then
-        echo "$SCOTTY_SIGNATURE"
+# Load enhancement preferences
+load_enhancement_config() {
+    if [[ -f "$ENHANCEMENT_CONFIG_FILE" ]]; then
+        source "$ENHANCEMENT_CONFIG_FILE"
     else
-        echo "$CAPTAIN_SIGNATURE"
+        export COMMIT_ENHANCEMENT_ENABLED="true"
+        export SUGGEST_IMPROVEMENTS="true"
+        export SHOW_EXAMPLES="true"
     fi
 }
 
-# Extract conventional commit components from a message
-parse_commit_message() {
+# Detect problematic patterns in commit messages
+detect_problematic_patterns() {
     local message="$1"
-    local type=""
-    local scope=""
-    local description=""
-    local body=""
-    local footers=""
+    local issues=()
     
-    # Extract type and scope from first line: type(scope): description
-    if [[ "$message" =~ ^([a-z]+)(\([^)]+\))?: (.+)$ ]]; then
-        type="${BASH_REMATCH[1]}"
-        scope="${BASH_REMATCH[2]}"
-        description="${BASH_REMATCH[3]}"
-        # Remove parentheses from scope
-        scope="${scope//[()]/}"
-    else
-        # Fallback: treat entire first line as description
-        description=$(echo "$message" | head -n1)
+    # Convert to lowercase for case-insensitive matching
+    local lower_message=$(echo "$message" | tr '[:upper:]' '[:lower:]')
+    
+    # Check for overused terms
+    if [[ "$lower_message" =~ (^|[[:space:]])final([[:space:]]|$) ]]; then
+        issues+=("OVERUSED: 'final' - consider: complete, conclude, establish, integrate")
     fi
     
-    # Extract body and footers
-    if [ "$(echo "$message" | wc -l)" -gt 1 ]; then
-        body=$(echo "$message" | sed -n '3,$p' | sed '/^[A-Za-z-]*:/,$d')
-        footers=$(echo "$message" | sed -n '/^[A-Za-z-]*:/,$p')
+    if [[ "$lower_message" =~ (^|[[:space:]])update([[:space:]]|$) ]] && ! [[ "$lower_message" =~ (dependency|package|version) ]]; then
+        issues+=("GENERIC: 'update' - consider: enhance, modernize, expand, refactor")
     fi
     
-    echo "${type}|${scope}|${description}|${body}|${footers}"
+    if [[ "$lower_message" =~ (^|[[:space:]])fix([[:space:]]|$) ]] && ! [[ "$lower_message" =~ fix: ]]; then
+        issues+=("VAGUE: 'fix' - consider: resolve, repair, correct, address")
+    fi
+    
+    if [[ "$lower_message" =~ (^|[[:space:]])change([[:space:]]|$) ]]; then
+        issues+=("MEANINGLESS: 'change' - be specific about what changed")
+    fi
+    
+    # Check for conventional commit format
+    if ! [[ "$message" =~ ^(feat|fix|docs|style|refactor|test|chore|build|ci|perf|revert): ]]; then
+        issues+=("FORMAT: Consider conventional commit format (feat:, fix:, docs:, etc.)")
+    fi
+    
+    # Check for too-short descriptions
+    local subject=$(echo "$message" | head -n1)
+    if [[ ${#subject} -lt 20 ]]; then
+        issues+=("LENGTH: Subject line seems brief - consider adding more context")
+    fi
+    
+    printf '%s\n' "${issues[@]}"
 }
 
-# Enhance a commit message with technical context
-enhance_commit_message() {
-    local original_message="$1"
-    local script_name="${2:-manual}"
-    local repo_dir="${3:-$(pwd)}"
+# Generate enhancement suggestions
+suggest_enhancements() {
+    local message="$1"
+    local suggestions=()
     
-    cd "$repo_dir" || return 1
+    local lower_message=$(echo "$message" | tr '[:upper:]' '[:lower:]')
     
-    # Parse the original message
-    local parsed
-    parsed=$(parse_commit_message "$original_message")
-    IFS='|' read -r type scope description body footers <<< "$parsed"
-    
-    # Get current git and system state
-    local git_info
-    git_info=$(get_git_state "$repo_dir")
-    IFS='|' read -r git_commit git_branch git_status flake_lock_hash git_short_commit <<< "$git_info"
-    
-    # Get generation information if available
-    local generation_info=""
-    local current_gen
-    current_gen=$(get_home_manager_generation)
-    if [ "$current_gen" != "unknown" ]; then
-        generation_info="gen $current_gen"
+    if [[ "$lower_message" =~ (add|new) ]]; then
+        suggestions+=("SUGGESTION: If adding functionality, consider 'feat:' prefix")
     fi
     
-    # Build enhanced description with technical context
-    local enhanced_description="$description"
-    local technical_context=""
-    
-    # Add git state context if tree is not clean
-    if [ "$git_status" != "clean" ]; then
-        technical_context="${technical_context} (${git_status})"
+    if [[ "$lower_message" =~ (bug|error|issue) ]]; then
+        suggestions+=("SUGGESTION: If fixing bugs, consider 'fix:' prefix")
     fi
     
-    # Add generation info if available
-    if [ -n "$generation_info" ]; then
-        technical_context="${technical_context} ($generation_info)"
+    if [[ "$lower_message" =~ (documentation|readme|comment) ]]; then
+        suggestions+=("SUGGESTION: If updating docs, consider 'docs:' prefix")
     fi
     
-    # Add branch context if not on main/master
-    if [ "$git_branch" != "main" ] && [ "$git_branch" != "master" ]; then
-        technical_context="${technical_context} [$git_branch]"
+    if [[ "$lower_message" =~ (performance|speed|optimize) ]]; then
+        suggestions+=("SUGGESTION: If improving performance, consider 'perf:' prefix")
     fi
     
-    # Append technical context to description if we have any
-    if [ -n "$technical_context" ]; then
-        enhanced_description="${description}${technical_context}"
-    fi
+    printf '%s\n' "${suggestions[@]}"
+}
+
+# Display enhancement report
+show_enhancement_report() {
+    local message="$1"
+    local issues=($(detect_problematic_patterns "$message"))
+    local suggestions=($(suggest_enhancements "$message"))
     
-    # Build enhanced body with system information
-    local enhanced_body="$body"
-    if [ -z "$enhanced_body" ] && [ "$git_status" != "clean" ]; then
-        enhanced_body="System state: ${git_status}, commit: ${git_short_commit}"
-        if [ -n "$generation_info" ]; then
-            enhanced_body="${enhanced_body}, ${generation_info}"
+    if [[ ${#issues[@]} -gt 0 ]] || [[ ${#suggestions[@]} -gt 0 ]]; then
+        echo -e "${BOLD}${CYAN}════════════════════════════════════════════════════════════════════════════════${NC}"
+        echo -e "${BOLD}${CYAN}CHIEF ENGINEER'S COMMIT MESSAGE ANALYSIS${NC}"
+        echo -e "${BOLD}${CYAN}════════════════════════════════════════════════════════════════════════════════${NC}"
+        echo
+        echo -e "${BOLD}Original message:${NC}"
+        echo -e "${YELLOW}$message${NC}"
+        echo
+        
+        if [[ ${#issues[@]} -gt 0 ]]; then
+            echo -e "${BOLD}${RED}Issues Detected:${NC}"
+            for issue in "${issues[@]}"; do
+                echo -e "  ${RED}●${NC} $issue"
+            done
+            echo
         fi
-    fi
-    
-    # Add agent signature
-    local agent_sig
-    agent_sig=$(get_commit_agent "$script_name")
-    local timestamp
-    timestamp=$(get_stardate_timestamp)
-    local signature="${agent_sig} <${timestamp}>"
-    
-    # Build the complete enhanced message
-    local enhanced_message=""
-    
-    # First line: type(scope): enhanced_description
-    if [ -n "$scope" ]; then
-        enhanced_message="${type}(${scope}): ${enhanced_description}"
-    else
-        enhanced_message="${type}: ${enhanced_description}"
-    fi
-    
-    # Add body if present
-    if [ -n "$enhanced_body" ]; then
-        enhanced_message="${enhanced_message}
-
-${enhanced_body}"
-    fi
-    
-    # Add footers and signature
-    enhanced_message="${enhanced_message}
-
-${signature}"
-    
-    # Add any existing footers
-    if [ -n "$footers" ]; then
-        enhanced_message="${enhanced_message}
-${footers}"
-    fi
-    
-    # Log the enhancement for analytics
-    local original_length=${#original_message}
-    local enhanced_length=${#enhanced_message}
-    local commit_agent=$(get_commit_agent "$script_name")
-    
-    # Source logging library if not already available
-    if command -v log_commit_enhancement >/dev/null 2>&1; then
-        log_commit_enhancement "$original_length" "$enhanced_length" "$type" "$commit_agent" "true" "$git_short_commit" "enhancement_library"
-    fi
-    
-    echo "$enhanced_message"
-}
-
-# Validate commit message against Gigi's Commitus standards
-validate_commit_message() {
-    local message="$1"
-    local errors=()
-    
-    # Check if message follows conventional commit format
-    if ! echo "$message" | grep -qE '^[a-z]+(\([^)]+\))?: .+'; then
-        errors+=("Message must follow conventional commit format: type(scope): description")
-    fi
-    
-    # Check for valid type (read from Lord Gig's Standards of Commitence if available)
-    local first_line
-    first_line=$(echo "$message" | head -n1)
-    local type
-    type=$(echo "$first_line" | sed -E 's/^([a-z]+).*/\1/')
-    
-    # Basic type validation (extend this by parsing gigis-commitus.md)
-    local valid_types="feat fix docs style refactor perf test build ci chore revert eng ops security config agent auto hook log fleet nix home host comm sitrep metrics journal"
-    if ! echo "$valid_types" | grep -qw "$type"; then
-        errors+=("Unknown commit type: $type. Check gigis-commitus.md for valid types.")
-    fi
-    
-    # Check description length
-    local description
-    description=$(echo "$first_line" | sed -E 's/^[a-z]+(\([^)]+\))?: (.+)/\2/')
-    if [ ${#description} -gt 72 ]; then
-        errors+=("Description too long (${#description} chars). Keep under 72 characters.")
-    fi
-    
-    # Return validation results
-    if [ ${#errors[@]} -eq 0 ]; then
+        
+        if [[ ${#suggestions[@]} -gt 0 ]]; then
+            echo -e "${BOLD}${GREEN}Engineering Recommendations:${NC}"
+            for suggestion in "${suggestions[@]}"; do
+                echo -e "  ${GREEN}●${NC} $suggestion"
+            done
+            echo
+        fi
+        
+        if [[ "$SHOW_EXAMPLES" == "true" ]]; then
+            show_examples_for_message "$message"
+        fi
+        
+        echo -e "${BOLD}${CYAN}════════════════════════════════════════════════════════════════════════════════${NC}"
         return 0
     else
-        printf '%s\n' "${errors[@]}"
+        echo -e "${GREEN}✓ Commit message quality: EXCELLENT${NC}"
         return 1
     fi
 }
 
-# Process a commit message: validate, enhance, and format
-process_commit_message() {
+# Show relevant examples
+show_examples_for_message() {
+    local message="$1"
+    local lower_message=$(echo "$message" | tr '[:upper:]' '[:lower:]')
+    
+    echo -e "${BOLD}${BLUE}Example Enhancements:${NC}"
+    
+    if [[ "$lower_message" =~ final ]]; then
+        echo -e "  ${BLUE}Instead of:${NC} 'final update to login system'"
+        echo -e "  ${BLUE}Consider:${NC}   'feat: complete user authentication system implementation'"
+        echo
+    fi
+    
+    if [[ "$lower_message" =~ update ]] && ! [[ "$lower_message" =~ (dependency|package|version) ]]; then
+        echo -e "  ${BLUE}Instead of:${NC} 'update configuration'"
+        echo -e "  ${BLUE}Consider:${NC}   'config: modernize database connection settings'"
+        echo
+    fi
+    
+    if [[ "$lower_message" =~ fix ]] && ! [[ "$lower_message" =~ fix: ]]; then
+        echo -e "  ${BLUE}Instead of:${NC} 'fix bug in parser'"
+        echo -e "  ${BLUE}Consider:${NC}   'fix: resolve null pointer exception in JSON parser'"
+        echo
+    fi
+}
+
+# Interactive enhancement mode
+interactive_enhancement() {
     local original_message="$1"
-    local script_name="${2:-manual}"
-    local repo_dir="${3:-$(pwd)}"
-    local auto_enhance="${4:-true}"
     
-    # Validate the message first
-    local validation_errors
-    validation_errors=$(validate_commit_message "$original_message" 2>&1)
-    if [ $? -ne 0 ]; then
-        echo "VALIDATION ERRORS:" >&2
-        echo "$validation_errors" >&2
-        return 1
-    fi
+    show_enhancement_report "$original_message"
+    local has_issues=$?
     
-    # Enhance if requested
-    if [ "$auto_enhance" = "true" ]; then
-        enhance_commit_message "$original_message" "$script_name" "$repo_dir"
-    else
-        echo "$original_message"
-    fi
-}
-
-# Batch process multiple commits (for /liven-commits command)
-liven_commits() {
-    local repo_dir="${1:-$(pwd)}"
-    local commit_range="${2:-HEAD~5..HEAD}"
-    
-    cd "$repo_dir" || return 1
-    
-    echo "🔧 SCOTTY'S COMMIT LIVENING PROTOCOL ENGAGED"
-    echo "======================================================"
-    echo "Analyzing commits in range: $commit_range"
-    echo ""
-    
-    local commits
-    commits=$(git rev-list --reverse "$commit_range")
-    local enhanced_count=0
-    local error_count=0
-    
-    for commit in $commits; do
-        echo "Processing commit: $(git log --oneline -n1 "$commit")"
+    if [[ $has_issues -eq 0 ]]; then
+        echo
+        echo -e "${BOLD}Would you like to revise your commit message? ${NC}${CYAN}[y/N]${NC}"
+        read -r response
         
-        local original_message
-        original_message=$(git log --format=%B -n1 "$commit")
-        
-        # Check if already has agent signature
-        if echo "$original_message" | grep -qE "(Chief-Engineer|Captain|Auto-System):"; then
-            echo "  ✓ Already enhanced, skipping"
-            continue
-        fi
-        
-        # Enhance the commit message
-        local enhanced_message
-        enhanced_message=$(process_commit_message "$original_message" "liven-commits" "$repo_dir")
-        
-        if [ $? -eq 0 ]; then
-            # Update the commit message
-            if git rebase --exec "git commit --amend -m \"$enhanced_message\"" "$commit^"; then
-                echo "  ✓ Enhanced successfully"
-                ((enhanced_count++))
-            else
-                echo "  ✗ Failed to update commit"
-                ((error_count++))
+        if [[ "$response" =~ ^[Yy]$ ]]; then
+            echo -e "${BOLD}Enter improved commit message:${NC}"
+            read -r improved_message
+            
+            if [[ -n "$improved_message" ]]; then
+                echo
+                echo -e "${GREEN}✓ Enhanced message:${NC}"
+                echo -e "${BOLD}$improved_message${NC}"
+                echo "$improved_message"
+                return 0
             fi
-        else
-            echo "  ✗ Validation failed"
-            ((error_count++))
         fi
-        
-        echo ""
-    done
+    fi
     
-    echo "======================================================"
-    echo "LIVENING COMPLETE: $enhanced_count enhanced, $error_count errors"
-    
-    return $error_count
+    echo "$original_message"
+    return 1
 }
 
-# Export functions for use by hooks and scripts
-export -f enhance_commit_message
-export -f validate_commit_message
-export -f process_commit_message
-export -f liven_commits
-export -f get_stardate_timestamp
-export -f get_commit_agent
-export -f parse_commit_message
+# Analyze recent commits
+analyze_recent_commits() {
+    local count=${1:-10}
+    
+    echo -e "${BOLD}${CYAN}════════════════════════════════════════════════════════════════════════════════${NC}"
+    echo -e "${BOLD}${CYAN}COMMIT MESSAGE QUALITY ANALYSIS - LAST $count COMMITS${NC}"
+    echo -e "${BOLD}${CYAN}════════════════════════════════════════════════════════════════════════════════${NC}"
+    echo
+    
+    local total_issues=0
+    local total_commits=0
+    
+    while IFS= read -r commit_line; do
+        local hash=$(echo "$commit_line" | cut -d' ' -f1)
+        local message=$(echo "$commit_line" | cut -d' ' -f2-)
+        
+        echo -e "${BOLD}Commit ${hash}:${NC} $message"
+        
+        local issues=($(detect_problematic_patterns "$message"))
+        if [[ ${#issues[@]} -gt 0 ]]; then
+            for issue in "${issues[@]}"; do
+                echo -e "  ${RED}●${NC} $issue"
+            done
+            ((total_issues += ${#issues[@]}))
+        else
+            echo -e "  ${GREEN}✓ No issues detected${NC}"
+        fi
+        
+        ((total_commits++))
+        echo
+    done < <(git log --oneline -n "$count")
+    
+    local quality_score=$((100 - (total_issues * 100 / total_commits)))
+    echo -e "${BOLD}${CYAN}════════════════════════════════════════════════════════════════════════════════${NC}"
+    echo -e "${BOLD}Quality Score: ${quality_score}% ${NC}(${total_issues} issues across ${total_commits} commits)"
+    
+    if [[ $quality_score -ge 80 ]]; then
+        echo -e "${GREEN}✓ Engineering assessment: EXCELLENT commit message quality!${NC}"
+    elif [[ $quality_score -ge 60 ]]; then
+        echo -e "${YELLOW}⚠ Engineering assessment: GOOD quality, room for improvement${NC}"
+    else
+        echo -e "${RED}⚠ Engineering assessment: Significant improvement needed${NC}"
+    fi
+    
+    echo -e "${BOLD}${CYAN}════════════════════════════════════════════════════════════════════════════════${NC}"
+}
+
+# Main command interface
+main() {
+    load_enhancement_config
+    
+    case "${1:-help}" in
+        "analyze"|"check")
+            if [[ -n "$2" ]]; then
+                show_enhancement_report "$2"
+            else
+                echo "Usage: $0 analyze 'commit message'"
+            fi
+            ;;
+        "interactive"|"improve")
+            if [[ -n "$2" ]]; then
+                interactive_enhancement "$2"
+            else
+                echo "Usage: $0 interactive 'commit message'"
+            fi
+            ;;
+        "history"|"batch")
+            analyze_recent_commits "${2:-10}"
+            ;;
+        "help"|*)
+            cat << EOF
+${BOLD}Chief Engineer's Commit Message Enhancement System${NC}
+
+${BOLD}USAGE:${NC}
+  $0 analyze 'commit message'     - Analyze a commit message for issues
+  $0 interactive 'message'        - Interactive enhancement mode
+  $0 history [count]              - Analyze recent commits (default: 10)  
+  $0 help                         - Show this help message
+
+${BOLD}EXAMPLES:${NC}
+  $0 analyze 'final fix for login'
+  $0 interactive 'update user system'
+  $0 history 20
+  
+${BOLD}Integration with git:${NC}
+  git commit -m "\$(./scripts/commit-enhance-lib.sh interactive 'my message')"
+  
+${GREEN}Engineering excellence through precise communication!${NC}
+EOF
+            ;;
+    esac
+}
+
+# Run main function if script is executed directly
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
+fi
