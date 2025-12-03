@@ -22,7 +22,7 @@ permission:
 commands:
   - name: consult
     description: "Cross-repository consultation and analysis with expedition reporting"
-    action: "Perform expert analysis of external repository while maintaining documentation in home dotfiles. Create quest report in fleet/away-reports/ documenting findings, recommendations, and implementation status."
+    action: "Perform expert analysis of external repository while maintaining documentation in home dotfiles. Create quest report in realm/fleet/away-reports/ documenting findings, recommendations, and implementation status."
   - name: sitrep
     description: "Comprehensive fleet status and engineering situation report"
     action: "Provide detailed status report covering: fleet systems, current operations, system health, performance metrics, recent issues, and engineering recommendations"
