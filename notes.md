@@ -269,3 +269,4 @@
     connections to a seperate repository meant to setup all the agents stuff so
     that the agents have a uniform (low-traffic) place-to-go to update
     themselves and their logs
+- update gigvim to turn tree sitter back on, or at least check.
