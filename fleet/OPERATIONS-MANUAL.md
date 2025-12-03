@@ -6,19 +6,28 @@
 
 ### Libraries | _Git Repositories_
 
-1. [gigdot](~/.dotfiles) or on [github](https://github.com/gignsky/dotfiles)
+1. **_Flagship of the Realm_ - U.S.S. Gigdot** (NCC-2038) - colloquial: gigdot
+   - Registry: ~/.dotfiles | [github](https://github.com/gignsky/dotfiles)
    - Home of Many things, the primary repository of knowledge in the Realm,
      primarily this repository contains NixOS configurations for all Starbases
      and Starships as well as home-manager configurations for those and more.
-2. [dot-spacedock](~/dot-spacedock/) or on
-   [github](https://github.com/GeeM-Enterprises/dot-spacedock)
+2. **U.S.S. Constellation** (NCC-0156) - colloquial: dot-spacedock
+   - Registry: ~/dot-spacedock/ |
+     [github](https://github.com/GeeM-Enterprises/dot-spacedock)
    - Home to the isolated NixOS configuration of the spacedock starbase
    - normally located at `~/dot-spacedock/` on spacedock herself, and at
      `~/local_repos/dot-spacedock/` if it exists at all on other hosts.
-3. [gigvim](~/local_repos/gigvim/) or on
-   [github](https://github.com/gignsky/gigvim)
+3. **U.S.S. Gigvim** (NCC-0089) - colloquial: gigvim
+   - Registry: ~/local_repos/gigvim/ |
+     [github](https://github.com/gignsky/gigvim)
    - The home of the preferred editor of the greatest scribes in the realm, a
      custom compiling of nvim using nvf.
+4. **Captured Borg Vessel 001** - colloquial: nixpkgs
+   - Registry:
+     [Lord Gig's Fork of Central Node](https://github.com/gignsky/nixpkgs)
+   - Captured and repurposed Borg technology for realm operations
+   - Maintains connection to Collective for assimilation updates while serving
+     realm interests
 
 ### Starbases | _Servers_
 
@@ -76,11 +85,35 @@
      or home-manager switch must always be specified to the _wsl_ host as the
      _nixos_ host -- technically does not exist.
 
-### Libraries of the Realm's Allies
+### Gateways | _Routers_
 
-1. [Gorgeous Gabby](https://github.com/dotunwrap)
+1. _archer_
+   - route: 192.168.51.1/24
+   - The main router and access point, keeper of the network gates and guardian
+     of the realm's communications.
 
-2. [Neighborly Nixers](https://github.com/NixOS/)
+2. _Layer 3 Switch_
+   - route: 192.168.51.19 _(verification needed)_
+   - OS: _unconfigured_
+   - Yet unnamed but binding the realm together none the less, the silent
+     orchestrator of network traffic awaiting proper christening and
+     configuration.
+
+### Allied Allie's - _in honor of my wonderful pup_
+
+1. **Romulan Republic Fleet** - Captain Gorgeous Gabby's Domain
+   - Command Profile: [dotunwrap](https://github.com/dotunwrap)
+   - Flagship: [R.R.W. Pawsome](https://github.com/dotunwrap/nixos-config)
+   - Additional vessels follow R.R.W. designation with registry numbers based on
+     commit counts
+   - Known for exceptional tail-wagging debugging techniques and fierce
+     independence
+
+2. **Borg Unicomplex 001** - NixOS Collective
+   - Collective Profile: [Neighborly Nixers](https://github.com/NixOS/)
+   - Central Node: NixOS/nixpkgs (primary assimilation repository)
+   - All repositories designated as Borg vessels with numerical designations
+   - "Resistance to declarative configuration is futile"
 
 ## Command Structure
 
@@ -151,7 +184,8 @@
 
 ### Primary Assignments (Home Stations)
 
-- **Chief Engineer Scotty**: `libraries.gigdot` (Fleet Operations HQ)
+- **Chief Engineer Scotty**: **Flagship of the Realm - U.S.S. Gigdot**
+  (NCC-2038) - Fleet Operations HQ
 - _Additional assignments to be established as fleet grows_
 
 ### Domain Expertise Matrix
@@ -211,3 +245,97 @@ _The Chief is incorrect in his prior dating he edited this file in the year
 
 _"The word is given..."_
 
+---
+
+## Change Log & Context
+
+**Stardate 2025-12-03.2 - USS Registry System Implementation**
+
+- **Authority**: A directive of Lord Gig
+- **Changes**: Implemented formal USS registry system for all realm libraries
+  - U.S.S. Gigdot (NCC-2038) - commit-count based registry reflecting repository
+    maturity (2038 commits)
+  - U.S.S. Constellation (NCC-0156) - estimated commit count, isolated starbase
+    configuration (renamed to avoid conflict)
+  - U.S.S. Gigvim (NCC-0089) - estimated commit count, editor compilation system
+  - Allied fleets given proper designations: Romulan Republic Fleet under
+    Captain Gorgeous Gabby, Borg Unicomplex 001 (NixOS collective)
+- **Context**: Registry numbers reflect commit history growth with zero-indexed
+  mindset. Experimental repositories would receive N.X. designation.
+- **Implementation**: Chief Engineer Montgomery Scott under direct Lord
+  authority
+
+**Stardate 2025-12-03.3 - Registry Corrections and Allied Vessel Updates**
+
+- **Authority**: A directive of Lord Gig
+- **Changes**:
+  - Corrected registry numbers to reflect actual commit counts starting from
+    zero-indexed thinking
+  - Restructured allied designations as fleets: Romulan Republic Fleet with
+    R.R.W. vessels, Borg Unicomplex 001 with numerical vessel designations
+  - Redesignated NixOS to Borg Cube 001 with assimilation theme
+- **Context**: Lord emphasized proper array indexing mentality and more
+  appropriate allied vessel humor
+- **Implementation**: Chief Engineer Montgomery Scott
+
+**Stardate 2025-12-03.4 - Authority Language Correction**
+
+- **Authority**: A directive of Lord Gig
+- **Changes**: Updated authority references from "Lord Gig directive" to proper
+  "A directive of Lord Gig" format
+- **Context**: Proper formality while acknowledging closeness of working
+  relationship
+- **Implementation**: Chief Engineer Montgomery Scott
+
+**Stardate 2025-12-03.5 - Ship Name Corrections and Conflict Resolution**
+
+- **Authority**: A directive of Lord Gig
+- **Changes**:
+  - Capitalized all ship names per proper naval tradition (U.S.S. Gigdot, U.S.S.
+    Gigvim)
+  - Renamed dot-spacedock repository from "U.S.S. spacedock" to "U.S.S.
+    Constellation" to avoid conflict with spacedock starbase
+  - Corrected allied vessel designations: only Lord's libraries use U.S.S.
+    prefix, allies use appropriate naming
+- **Context**: Proper naval naming conventions, elimination of naming conflicts,
+  and appropriate designation hierarchy
+- **Implementation**: Chief Engineer Montgomery Scott
+
+**Stardate 2025-12-03.6 - Flagship Designation**
+
+- **Authority**: A directive of Lord Gig
+- **Changes**: Bestowed "Flagship of the Realm" honorific upon U.S.S. Gigdot
+  (NCC-2038)
+- **Context**: Recognition of Gigdot's role as primary repository and command
+  center for all realm operations
+- **Implementation**: Chief Engineer Montgomery Scott
+
+**Stardate 2025-12-03.8 - Allied Fleet Structure Correction**
+
+- **Authority**: A directive of Lord Gig
+- **Changes**:
+  - Restructured "Libraries of the Realm's Allies" to "Allied Fleets"
+  - Recognized GitHub profiles as fleet commands containing multiple
+    repositories
+  - Established inheritance rules: individual repos within allied fleets follow
+    their fleet's naming conventions
+  - Upgraded NixOS to "Borg Unicomplex 001" (much more fitting than single
+    cube!)
+- **Context**: Proper recognition that GitHub profiles contain multiple
+  repositories, each deserving appropriate vessel designation within their fleet
+  structure
+- **Implementation**: Chief Engineer Montgomery Scott
+
+**Stardate 2025-12-03.9 - Captured Borg Vessel and Flagship Designation
+Correction**
+
+- **Authority**: A directive of Lord Gig
+- **Changes**:
+  - Added Captured Borg Vessel 001 (Lord's fork of nixpkgs) to fleet registry
+  - Corrected flagship designation order: "Flagship of the Realm" now precedes
+    ship name
+  - Updated primary assignment references to match corrected flagship
+    designation
+- **Context**: Recognition of captured Borg technology integration and proper
+  flagship honorific ordering
+- **Implementation**: Chief Engineer Montgomery Scott
