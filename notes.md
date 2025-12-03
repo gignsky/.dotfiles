@@ -254,3 +254,10 @@
   reasonable times (possibly before merges -- with squashes or else) adding more
   detail to them.
 - temp credit cards on _privacy.com_, @dotunwrap says those guys are gigachads.
+- SCOTTY HERE -- lets add a '/consult' command where an agent who is called with
+  the /consult command will act as a 'rouge' agent making an analysis of the
+  repo that it is called in but attempting to continue to keep good logs in the
+  home ~/.dotfiles repo (ideally in a worktree or something that is temporarily
+  created as to hope not to interfer with work that is in progress in that
+  branch/path that may be ongoing) -- but the agent should at all times for ALL
+  agents attempt to keep record of it's experinces for later review.
