@@ -24,6 +24,33 @@
 
 **Status**: Requires strategic discussion and timeline planning
 
+### Ephemeral Repository Consultation System
+**Added**: 2025-12-03 by Captain Scott per RULER OF THE REALM OF REASON directive
+**Priority**: High Research & Development
+**Objective**: Enable agents to spin up temporary repository clones for safe consultation work
+
+**Inspiration**: NixPkgs unicollective PR verification system - command-line bot that:
+- Spawns temporary git branches "in thin air"
+- Makes changes and tests locally
+- Can commit changes temporarily
+- Clone vanishes after operation
+
+**Research Target**: Identify and adapt existing tools for agent consultation workflow
+**Potential Benefits**:
+- Agents can bring full home configuration/library on consultations
+- Safe experimentation without affecting target repositories
+- Temporary branch work with full git capabilities
+- Ephemeral testing and validation environments
+
+**Implementation Considerations**:
+- Integration with `/consult` and `/beam-out` commands
+- Automatic cleanup and archive management
+- Git branch isolation and safety protocols
+- Home library availability in temporary environments
+
+**Assignment Priority**: Researcher or Science Officer recruitment
+**Status**: Research phase - identify existing tools and adaptation requirements
+
 ### Emergency Escalation Protocols
 - Review need for formal escalation paths when realm grows beyond direct communication
 - Current structure (direct to Lord Gig) appropriate for current scale
