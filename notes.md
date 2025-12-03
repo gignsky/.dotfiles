@@ -1,3 +1,5 @@
+#FIXME: FIRST NOTE ADDED WITH SUPERNOTE!
+
 # FIXME: _**GITLAB** Extra Seat_ is being charged to my account, I need to fix this issue immediately
 
 ## Black Friday / Cyber Monday Shopping...
