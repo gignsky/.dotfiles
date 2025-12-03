@@ -22,3 +22,4 @@ Generated automatically by:
 - System rebuild operations
 
 Managed by `scotty-logging-lib.sh` in the Nix store.
+Test logging system functionality
