@@ -248,3 +248,5 @@
      way (update the supernote program and the `just sops-secrets` etc., items)
   2. _differ_, used exclusviely as a diff-tool for things like lazygit and
      general diffing (need to update git rules for this one)
+- hire _Uhura_ for git expertise, since shes a commons officer after all, but
+  then again I could hire _Hoshi_ I think I like that more :)
