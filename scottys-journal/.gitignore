@@ -1,0 +1,8 @@
+# Ignore large or temporary log files
+*.tmp
+*.bak
+
+# Keep directory structure but ignore specific patterns that might get too large
+# Uncomment if logs become too verbose:
+# logs/*.log
+# metrics/*.csv
