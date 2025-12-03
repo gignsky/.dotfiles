@@ -165,3 +165,8 @@ Committed changes: 📊 Scotty: Fix stuck engineering logs from home rebuild
 Auto-committing logs that were left uncommitted due to broken auto-cleanup.
 This resolves the issue where 'just new home' left log files in git index.
 Includes pre-commit formatting fixes.
+[2025-12-03 06:26:46] GIT COMMIT
+Committed changes: 📊 Scotty: Post-commit engineering log updates (pre-clean fix)
+
+[2025-12-03 06:28:07] UNKNOWN EVENT
+system-operation: Testing failsafe logging system for clean command safety
