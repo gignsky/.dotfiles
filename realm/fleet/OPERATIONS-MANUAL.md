@@ -41,7 +41,7 @@
    - home-manager: configuration localted inside _library.gigdot_
    - primary-services:
      - gitlab host @ `giglab.dev`
-     - pihole-slave
+      - pihole-secondary
 3. _memory-beta_
    - route: 192.168.51.20 _for the main host_ | 192.168.51.21 _for the omv/samba
      host_

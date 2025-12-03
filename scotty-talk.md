@@ -1480,7 +1480,7 @@ agent = {
   general.disable = false;  # Keep for research tasks
   
   scotty = {
-    description = "Chief Engineer Montgomery Scott - Your vessel's guardian and master of all systems";
+    description = "Chief Engineer Montgomery Scott - Your vessel's guardian and systems specialist";
     mode = "primary";
     model = "anthropic/claude-sonnet-4-5-20250929";
     temperature = 0.15;
