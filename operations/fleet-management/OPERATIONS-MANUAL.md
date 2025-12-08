@@ -165,7 +165,7 @@
    - Technical findings and solutions implemented
    - Repository status and safety measures taken
    - Recommendations for future operations
-   - Filed in `realm/fleet/mission-reports/` with date and mission type
+   - Filed in `operations/reports/mission-archives/` with date and mission type
 
 2. **Safe Commit Practices**:
    - Never commit in-progress work from current worktree to away repository
