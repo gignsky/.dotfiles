@@ -482,3 +482,29 @@ Current agent logging infrastructure operates on local repository basis:
 **Status**: Planning Phase - Investigation Required  
 **Timeline**: Strategic Initiative - No immediate deadline  
 **Dependencies**: MCP protocol research, DeepWiki capabilities assessment
+
+### Script Architecture Refactoring Requirements
+**Added**: 2025-12-08 by Chief Engineer Montgomery Scott  
+**Priority**: High  
+**Authority**: Captain's directive during rebuild troubleshooting  
+
+**Issue**: Scripts are designed to run as Nix binaries but currently call other scripts directly via filesystem paths (e.g., `scripts/other-script.sh`).
+
+**Required Refactoring**:
+- When one script needs to execute another, use `nix run .#script-name` instead of direct `.sh` file execution
+- This ensures proper dependency management and consistent execution environment
+- Maintains script isolation and prevents path-based coupling issues
+
+**Examples**:
+- Instead of: `scripts/home-manager-rebuild.sh`  
+- Use: `nix run .#home-manager-rebuild`
+- Instead of: `./other-script.sh`
+- Use: `nix run .#other-script`
+
+**Benefits**:
+- Consistent execution environment across all script calls
+- Proper Nix package dependency resolution
+- Better isolation and error handling
+- Eliminates direct filesystem dependency issues
+
+**Implementation Timeline**: To be scheduled after current rebuild issue resolution
