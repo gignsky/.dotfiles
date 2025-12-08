@@ -52,8 +52,15 @@ if [ "$LOGGING_LIB_FOUND" = false ]; then
 fi
 
 # Enhanced host detection with intelligent WSL mapping
-export HOST=$(detect_flake_target "$1")
+# Use auto-detected hostname, don't treat arguments as hostname
+export HOST=$(detect_flake_target)
 export HOST_IDENTIFIER=$(get_host_identifier "$HOST")
+
+# Store all arguments for passing to nixos-rebuild
+NIXOS_REBUILD_ARGS="$*"
+if [ -z "$NIXOS_REBUILD_ARGS" ]; then
+    NIXOS_REBUILD_ARGS="switch"
+fi
 
 authenticate_sudo() {
     echo "🔐 NixOS rebuild requires sudo access for ${HOST_IDENTIFIER}..."
@@ -73,8 +80,8 @@ authenticate_sudo() {
             echo ""
             echo "To fix this, please choose one of the following options:"
             echo "  1. Run this command from an interactive terminal"
-            echo "  2. First authenticate sudo manually: sudo true"
-            echo "  3. Run the rebuild command directly: sudo nixos-rebuild switch --flake .#${HOST}"
+            echo "  2. First authenticate sudo manually: sudo -v"
+            echo "  3. Run the rebuild command directly: sudo nixos-rebuild ${NIXOS_REBUILD_ARGS} --flake .#${HOST}"
             echo ""
             exit 1
         fi
@@ -132,7 +139,7 @@ echo "NixOS Rebuilding ${HOST_IDENTIFIER}..."
 
 # Capture build output and success/failure
 output_file=$(mktemp)
-if sudo nixos-rebuild switch --flake .#"$HOST" | tee "$output_file" 2>&1; then
+if sudo nixos-rebuild $NIXOS_REBUILD_ARGS --flake .#"$HOST" | tee "$output_file" 2>&1; then
   build_success="true"
   
   # Extract generation number from nixos-rebuild output or list-generations
