@@ -34,12 +34,6 @@ fi
 export HOST=$(detect_flake_target)
 export HOST_IDENTIFIER=$(get_host_identifier "$HOST")
 
-# Store all arguments for passing to home-manager
-HOME_MANAGER_ARGS="$*"
-if [ -z "$HOME_MANAGER_ARGS" ]; then
-    HOME_MANAGER_ARGS="switch"
-fi
-
 # Source Scotty's logging library for automatic build logging
 # Try multiple locations for the logging library
 LOGGING_LIB_PATHS=(
@@ -145,7 +139,7 @@ git diff -U0 ./*glob*.nix
 echo "Home-Manager Rebuilding ${HOST_IDENTIFIER}..."
 
 # Capture build success/failure
-if home-manager $HOME_MANAGER_ARGS -b backup --flake .#gig@"$HOST"; then
+if home-manager switch -b backup --flake .#gig@"$HOST"; then
   # Get the generation number after successful build
   gen=$(home-manager generations 2>/dev/null | head -n 1)
   generation_number=$(echo "$gen" | grep -o 'id [0-9]*' | grep -o '[0-9]*' || echo "unknown")

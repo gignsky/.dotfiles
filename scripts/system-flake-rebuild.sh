@@ -84,7 +84,7 @@ authenticate_sudo() {
             echo "To fix this, please choose one of the following options:"
             echo "  1. Run this command from an interactive terminal"
             echo "  2. First authenticate sudo manually: sudo -v"
-            echo "  3. Run the rebuild command directly: sudo nixos-rebuild ${NIXOS_REBUILD_ARGS} --flake .#${HOST}"
+                echo "  3. Run the rebuild command directly: sudo nixos-rebuild switch --flake .#${HOST}"
             echo ""
             exit 1
         fi
@@ -168,7 +168,7 @@ echo "NixOS Rebuilding ${HOST_IDENTIFIER}..."
 
 # Capture build output and success/failure
 output_file=$(mktemp)
-if sudo nixos-rebuild $NIXOS_REBUILD_ARGS --flake .#"$HOST" | tee "$output_file" 2>&1; then
+if sudo nixos-rebuild switch --flake .#"$HOST" | tee "$output_file" 2>&1; then
   build_success="true"
   
   # Extract generation number from nixos-rebuild output or list-generations
