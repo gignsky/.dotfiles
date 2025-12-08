@@ -142,10 +142,11 @@ rebuild args="":
 	nix run .#system-flake-rebuild -- {{args}}
 	just rebuild-post
 
-# Rebuild the system verbosely
+# Rebuild the system verbosely (with SCOTTY_DEBUG)
 rebuild-v args="":
 	just rebuild-pre
-	nix run .#system-flake-rebuild-verbose -- {{args}}
+	@nix-shell -p lolcat --run 'echo "[REBUILD-V] Attempting Verbose Rebuild..." | lolcat' 2> /dev/null 
+	env SCOTTY_DEBUG=true nix run .#system-flake-rebuild -- {{args}}
 	just rebuild-post
 
 # Test rebuilds the system
@@ -271,6 +272,13 @@ home *ARGS:
   just pre-home
   @nix-shell -p lolcat --run 'echo "[HOME] Attempting Home Rebuild..." | lolcat 2> /dev/null'
   just simple-home {{ ARGS }}
+  just post-home
+
+# Rebuild home-manager verbosely (with SCOTTY_DEBUG)
+home-v *ARGS:
+  just pre-home
+  @nix-shell -p lolcat --run 'echo "[HOME-V] Attempting Verbose Home Rebuild..." | lolcat 2> /dev/null'
+  env SCOTTY_DEBUG=true just simple-home {{ ARGS }}
   just post-home
 
 # Runs just home
