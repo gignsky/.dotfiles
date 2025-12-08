@@ -92,9 +92,15 @@ failable-pre-commit() {
 set -e
 pushd . || exit
 
-# Log build start with enhanced host information
+# Log build start with enhanced host information (WSL uses direct logging)
 start_time=$(date +%s)
-scotty_log_event "build-start" "nixos-rebuild-${HOST_IDENTIFIER}"
+if [ "$(hostname)" = "nixos" ]; then
+    # WSL: Use direct logging to avoid batch processing hangs
+    BYPASS_BATCH=1 scotty_log_event "build-start" "nixos-rebuild-${HOST_IDENTIFIER}"
+else
+    # Native Linux: Use normal batched logging
+    scotty_log_event "build-start" "nixos-rebuild-${HOST_IDENTIFIER}"
+fi
 
 git diff -U0 ./*glob*.nix
 echo "Running pre-commit on all files"
@@ -114,8 +120,14 @@ if sudo nixos-rebuild switch --flake .#"$HOST" | tee "$output_file" 2>&1; then
   end_time=$(date +%s)
   duration=$((end_time - start_time))
   
-  # Log successful build with enhanced host information
-  scotty_log_event "build-complete" "nixos-rebuild-${HOST_IDENTIFIER}" "$duration" "$build_success" "$generation_number"
+  # Log successful build with enhanced host information (WSL uses direct logging)
+  if [ "$(hostname)" = "nixos" ]; then
+      # WSL: Use direct logging to avoid batch processing hangs
+      BYPASS_BATCH=1 scotty_log_event "build-complete" "nixos-rebuild-${HOST_IDENTIFIER}" "$duration" "$build_success" "$generation_number"
+  else
+      # Native Linux: Use normal batched logging
+      scotty_log_event "build-complete" "nixos-rebuild-${HOST_IDENTIFIER}" "$duration" "$build_success" "$generation_number"
+  fi
   
   # Commit with enhanced generation info
   export AUTOMATED_COMMIT=true
@@ -135,9 +147,16 @@ else
   # Extract error information from output
   error_info=$(tail -n 5 "$output_file" | tr '\n' ' ' || echo "Unknown nixos-rebuild error")
   
-  # Log failed build with enhanced host information
-  scotty_log_event "build-error" "nixos-rebuild-${HOST_IDENTIFIER}" "$error_info"
-  log_build_performance "nixos-rebuild-${HOST_IDENTIFIER}" "$duration" "false" "nixos-rebuild-switch-failed" "Build failed during switch operation" "unknown"
+  # Log failed build with enhanced host information (WSL uses direct logging)
+  if [ "$(hostname)" = "nixos" ]; then
+      # WSL: Use direct logging to avoid batch processing hangs
+      BYPASS_BATCH=1 scotty_log_event "build-error" "nixos-rebuild-${HOST_IDENTIFIER}" "$error_info"
+      BYPASS_BATCH=1 log_build_performance "nixos-rebuild-${HOST_IDENTIFIER}" "$duration" "false" "nixos-rebuild-switch-failed" "Build failed during switch operation" "unknown"
+  else
+      # Native Linux: Use normal batched logging
+      scotty_log_event "build-error" "nixos-rebuild-${HOST_IDENTIFIER}" "$error_info"
+      log_build_performance "nixos-rebuild-${HOST_IDENTIFIER}" "$duration" "false" "nixos-rebuild-switch-failed" "Build failed during switch operation" "unknown"
+  fi
   
   echo "nixos-rebuild switch failed. Output:"
   cat "$output_file"
