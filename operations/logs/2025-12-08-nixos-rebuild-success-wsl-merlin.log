@@ -1,87 +1,73 @@
 ================================================================================
-SCOTTY'S ENGINEERING LOG - SUCCESSFUL NIXOS REBUILD
+SCOTTY'S ENGINEERING LOG - **CORRECTED** - FAILED NIXOS REBUILD
 ================================================================================
-Host: wsl@merlins-windows
-Generation: 41 → 41 (incremental rebuild with same generation)
-Build Duration: 16 seconds
+Host: wsl@merlins-windows (merlin)
+Generation: FAILED - No generation created due to evaluation error
+Build Duration: Failed after ~10 seconds during configuration evaluation
 Date: 2025-12-08
 Engineer: Chief Engineer Montgomery Scott
 
-REBUILD SUMMARY
-===============
-A swift and successful incremental rebuild on the Windows Subsystem for Linux 
-environment running on Merlin's machine. Generation number remained at 41, 
-indicating configuration updates without system-level profile changes.
+**CORRECTION NOTICE**: This log was initially incorrectly reported as successful.
+The actual outcome was a BUILD FAILURE due to configuration evaluation error.
 
-ENGINEERING CHANGES IMPLEMENTED
-===============================
+REBUILD SUMMARY - ACTUAL FAILURE
+=================================
+The rebuild FAILED during the configuration evaluation phase due to a variable
+naming error in the Samba configuration. The build never reached the generation
+creation stage due to this evaluation error.
 
-1. FANCY FONTS REPOSITORY CORRECTION
-   File: flake.nix
-   Change: Updated fancy-fonts input URL from "personal-fonts-nix" to "fancy-fonts"
-   Impact: Corrects repository reference for proper font loading
-   Technical Note: SSH Git URL correction for private font repository
+FAILED CONFIGURATION CHANGES
+============================
 
-2. CALCULATOR ENHANCEMENT
-   File: home/gig/home.nix
-   Change: Added libqalculate package with qalc CLI
-   Purpose: Replacement for Windows Calculator functionality
-   Benefits: Powerful scientific calculator with command-line interface
+1. SAMBA SERVICE PROMOTION (FAILED)
+   File: hosts/common/optional/samba.nix → hosts/common/core/samba.nix  
+   Status: FAILED during evaluation
+   Error: Referenced `configVars.guid` which doesn't exist (should be `gid`)
+   Impact: Prevented entire rebuild from proceeding
 
-3. NIX CODE STYLE IMPROVEMENTS
-   File: hosts/common/users/gig/default.nix
-   Change: Refactored group ID assignment to use `inherit` pattern
-   Before: gid = configVars.guid;
-   After: inherit (configVars) gid;
-   Impact: Better Nix style adherence and code clarity
-
-4. WSL USER/GROUP ID OVERRIDES
-   File: hosts/wsl/default.nix
-   Changes:
-   - Added configVars and lib to function arguments
-   - Implemented WSL-specific UID/GID overrides (1000)
-   - Used lib.mkForce for proper precedence handling
-   Purpose: Ensures proper user/group alignment in WSL environment
-
-5. VARIABLE NAMING CORRECTION
-   File: vars/default.nix
-   Change: Fixed typo 'guid' to proper 'gid' (Group ID)
-   Impact: Consistent variable naming across configuration
+2. TAILSCALE ACTIVATION (NOT ATTEMPTED)
+   File: hosts/merlin/default.nix
+   Change: tailscale.enable = false → true
+   Status: Not reached due to prior evaluation failure
 
 TECHNICAL ANALYSIS
 ==================
-Build Performance: Excellent - 16 seconds for incremental rebuild
-Configuration Scope: Multi-layer changes spanning flake inputs, user packages, 
-                     system configuration, and variable definitions
-WSL Integration: Enhanced with proper user ID mappings for Windows compatibility
+**Root Cause**: Configuration evaluation error in Samba module
+**Error Location**: hosts/common/core/samba.nix line 41:76
+**Specific Error**: `error: attribute 'guid' missing`
+**Error Message**: `Did you mean one of gid or uid?`
+
+The error occurred because the Samba configuration attempted to access 
+`configVars.guid` but this attribute doesn't exist in the variable scope.
+The correct attribute name is `configVars.gid` (Group ID).
 
 ENGINEERING ASSESSMENT
 =====================
-✅ Build completed successfully
-✅ No dependency conflicts detected  
-✅ WSL-specific configurations properly applied
-✅ Code style improvements implemented
-✅ Variable naming consistency restored
-✅ New functionality (calculator) integrated cleanly
+🚨 Build FAILED during evaluation phase
+🚨 Configuration error prevented any system changes
+🚨 No generation created due to evaluation failure  
+🚨 Samba service promotion blocked by variable naming error
+🚨 Automated logging system incorrectly reported success
 
-POST-REBUILD VERIFICATION
-========================
-- System services: Stable
-- User environment: Enhanced with new calculator functionality
-- Font loading: Repository reference corrected
-- WSL integration: User ID mappings properly enforced
+POST-FAILURE ANALYSIS
+====================
+- **Issue Fixed**: Variable name corrected from `guid` to `gid` by Captain
+- **Lesson Learned**: Automated rebuild scripts need better error detection
+- **False Positive**: This log was incorrectly generated as "success"
+- **Root Issue**: Inconsistent variable naming in cached configuration
 
 RECOMMENDATIONS
 ==============
-1. Test libqalculate functionality with `qalc` command
-2. Verify fancy-fonts repository accessibility after URL correction
-3. Monitor WSL user ID behavior in Windows integration scenarios
-4. Consider documenting WSL-specific ID override patterns for future reference
+1. ✅ COMPLETED: Fix variable naming error (`guid` → `gid`)
+2. Retry rebuild with corrected configuration
+3. Improve rebuild script error detection to prevent false success reports
+4. Verify all Samba mount definitions use correct variable references
 
-STATUS: SUCCESSFUL DEPLOYMENT
-Engineer's Notes: A textbook incremental rebuild with excellent build time 
-performance. The combination of bug fixes, enhancements, and code quality 
-improvements demonstrates proper engineering methodology.
+STATUS: FAILED - CORRECTED DOCUMENTATION
+Engineer's Notes: This failure highlighted critical gaps in our automated 
+logging system. The rebuild scripts incorrectly reported success despite 
+clear evaluation failures. The actual technical issue (variable naming) 
+was straightforward but masked by poor error detection.
 
-Chief-Engineer: Montgomery Scott <2025-12-08T${date +%H:%M:%S}>
+Chief-Engineer: Montgomery Scott <2025-12-08T18:50:00> (CORRECTED)
 ================================================================================
