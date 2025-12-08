@@ -307,3 +307,8 @@ Ti
     - **Integration**: Use agenix or sops-nix for password/secret management
     - **Features**: The nixos-mailserver provides 10/10 mail server with flake support
   - **Benefits**: Unified email management, declarative configuration, reduced reliance on external providers
+- **BLUETOOTH DEVICE MANAGEMENT**:
+  - **Need**: Program to manage bluetooth devices in Linux native OS (specifically merlin)
+  - **Recommendation**: Gabby suggests 'btman' as potential solution
+  - **Priority**: Medium - required for proper bluetooth device management on merlin host
+  - **Research**: Investigate btman and alternative bluetooth management tools for NixOS/Linux
