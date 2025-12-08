@@ -204,3 +204,6 @@ Starting Event: build-start
 [2025-12-08 18:40:24] UNKNOWN EVENT
 test-event: Test Title Test content
 
+[2025-12-08 18:40:29] BUILD START
+Starting Event: build-start
+
