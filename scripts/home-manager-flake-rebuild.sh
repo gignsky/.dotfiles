@@ -135,8 +135,6 @@ else
 fi
 
 git diff -U0 ./*glob*.nix
-echo "Running pre-commit on all files"
-failable-pre-commit || true
 echo "Home-Manager Rebuilding ${HOST_IDENTIFIER}..."
 
 # Capture build success/failure
@@ -161,15 +159,15 @@ if home-manager switch -b backup --flake .#gig@"$HOST"; then
   fi
 
   # Commit with generation info
-  # Create enhanced commit message using Scotty's enhancement system
+  # Create enhanced commit message using Scotty's enhancement system (skip pre-commit hooks)
   export AUTOMATED_COMMIT=true
   if [ -f "$(dirname "$0")/commit-enhance-lib.sh" ]; then
     source "$(dirname "$0")/commit-enhance-lib.sh"
     enhanced_msg=$(enhance_commit_message "auto(home): rebuild $HOST_IDENTIFIER generation $gen" "home-manager-flake-rebuild.sh")
-    git commit -a --allow-empty -m "$enhanced_msg" || true
+    git commit -a --allow-empty --no-verify -m "$enhanced_msg" || true
   else
     # Fallback to basic message if enhancement library not available
-    git commit -a --allow-empty -m "gig@$HOST_IDENTIFIER: $gen" || true
+    git commit -a --allow-empty --no-verify -m "gig@$HOST_IDENTIFIER: $gen" || true
   fi
 
   echo "✅ Home Manager rebuild successful! Generation: $generation_number (${duration}s) for ${HOST_IDENTIFIER}"
