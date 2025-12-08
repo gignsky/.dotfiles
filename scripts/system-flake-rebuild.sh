@@ -102,6 +102,31 @@ else
     scotty_log_event "build-start" "nixos-rebuild-${HOST_IDENTIFIER}"
 fi
 
+# Capture previous generation for comparison
+previous_gen=$(nixos-rebuild list-generations 2>/dev/null | grep current | grep -o '[0-9]*' | head -n 1 || echo "0")
+
+# Find the last nixos-rebuild commit for this host
+echo "=== ANALYZING CONFIGURATION CHANGES SINCE LAST REBUILD ==="
+last_rebuild_commit=$(git log --oneline --grep="${HOST}:" -1 --format="%H" 2>/dev/null || echo "")
+
+if [ -n "$last_rebuild_commit" ]; then
+  echo "Last rebuild commit for ${HOST_IDENTIFIER}: ${last_rebuild_commit}"
+  config_files_changed=$(git diff --name-only "${last_rebuild_commit}..HEAD" | grep -E '\.(nix|conf|toml|yaml|yml)$' || echo "")
+  if [ -n "$config_files_changed" ]; then
+    echo "Configuration files changed since last rebuild:"
+    echo "$config_files_changed"
+    # Capture detailed diff for Scotty (limited to avoid huge output)
+    detailed_diff=$(git diff "${last_rebuild_commit}..HEAD" -- "*.nix" "*.conf" "*.toml" "*.yaml" "*.yml" | head -200)
+  else
+    config_files_changed="No configuration files changed"
+    detailed_diff="No configuration changes detected"
+  fi
+else
+  echo "No previous rebuild found for ${HOST_IDENTIFIER} - this appears to be the first rebuild"
+  config_files_changed="First rebuild for this host"
+  detailed_diff="Initial configuration deployment for ${HOST_IDENTIFIER}"
+fi
+
 git diff -U0 ./*glob*.nix
 echo "NixOS Rebuilding ${HOST_IDENTIFIER}..."
 
@@ -125,6 +150,14 @@ if sudo nixos-rebuild switch --flake .#"$HOST" | tee "$output_file" 2>&1; then
   else
       # Native Linux: Use normal batched logging
       scotty_log_event "build-complete" "nixos-rebuild-${HOST_IDENTIFIER}" "$duration" "$build_success" "$generation_number"
+  fi
+  
+  # Call Scotty to create detailed engineering log
+  echo "=== CALLING SCOTTY FOR DETAILED ENGINEERING LOG ==="
+  if command -v opencode >/dev/null 2>&1; then
+    opencode run --agent scotty "Scotty, document this successful nixos-rebuild for ${HOST_IDENTIFIER}: Generation ${previous_gen} → ${generation_number}, build duration ${duration} seconds. Configuration changes since last rebuild: ${config_files_changed}. Files changed: ${detailed_diff}" || echo "Scotty logging failed, continuing..."
+  else
+    echo "OpenCode not available - skipping detailed Scotty log"
   fi
   
   # Commit with enhanced generation info (skip pre-commit hooks to avoid conflicts)
@@ -154,6 +187,14 @@ else
       # Native Linux: Use normal batched logging
       scotty_log_event "build-error" "nixos-rebuild-${HOST_IDENTIFIER}" "$error_info"
       log_build_performance "nixos-rebuild-${HOST_IDENTIFIER}" "$duration" "false" "nixos-rebuild-switch-failed" "Build failed during switch operation" "unknown"
+  fi
+  
+  # Call Scotty to document the failure
+  echo "=== CALLING SCOTTY FOR FAILURE ANALYSIS ==="
+  if command -v opencode >/dev/null 2>&1; then
+    opencode run --agent scotty "Scotty, document this FAILED nixos-rebuild for ${HOST_IDENTIFIER}: Build duration ${duration} seconds, previous generation ${previous_gen}. Configuration changes attempted: ${config_files_changed}. Error: ${error_info}. Analyze what went wrong and provide troubleshooting recommendations." || echo "Scotty logging failed"
+  else
+    echo "OpenCode not available - skipping detailed Scotty failure log"
   fi
   
   echo "nixos-rebuild switch failed. Output:"
