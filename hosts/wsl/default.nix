@@ -15,8 +15,7 @@
     # inputs.home-manager.nixosModules.home-manager
   ];
 
-  # WSL-specific user/group ID overrides
-  users.groups.${configVars.username}.gid = lib.mkForce 1000;
+  # WSL-specific user ID override (group stays at 1701)
   users.users.${configVars.username}.uid = lib.mkForce 1000;
 
   networking.hostName = "nixos";
