@@ -30,6 +30,9 @@
   # Agent calls directly
   scotty = "opencode run --agent scotty";
 
+  # Test alias for rebuild verification
+  rebuild-test-verified = "echo 'Rebuild test successful on develop branch - Scotty'";
+
   #recursive listing for searching
   # need to write a nushell script to make this work since it uses pipes
   # lsr = "ls **/* \| where type == file \| sort-by size";
