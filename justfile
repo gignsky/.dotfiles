@@ -594,3 +594,8 @@ log-commit message="":
 	@git add scottys-journal/ 2>/dev/null || true
 	@git commit -m "📊 Scotty: Auto-commit engineering logs" 2>/dev/null || true
 	@echo "✅ Engineering logs committed to repository"
+
+# Scotty's system state analysis and gap detection
+log-status:
+	@echo "🔍 Running Chief Engineer's system state analysis..."
+	@bash -c 'cd ~/.dotfiles && source scripts/scotty-logging-lib.sh && log_status'

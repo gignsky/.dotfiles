@@ -614,6 +614,129 @@ scotty_create_log() {
     create_narrative_entry "$title" "$content" "$log_type"
 }
 
+# Log Status Command - Detect undocumented system changes
+log_status() {
+    echo "🔍 Chief Engineer's System State Analysis"
+    echo "========================================"
+    
+    local current_date=$(date '+%Y-%m-%d %H:%M:%S')
+    local hostname=$(get_host_identifier)
+    local report_content=""
+    
+    # Get current generation information
+    local current_system_gen=$(nixos-rebuild list-generations 2>/dev/null | tail -1 | awk '{print $1}' || echo "unknown")
+    local current_home_gen=$(get_home_manager_generation)
+    
+    # Check for recent rebuild activity in logs
+    local log_dir="${HOME}/.dotfiles/scottys-journal/logs"
+    local recent_system_log=$(find "$log_dir" -name "*automated.log" -mtime -1 | head -1)
+    local recent_rebuild_activity=""
+    
+    if [ -f "$recent_system_log" ]; then
+        recent_rebuild_activity=$(grep -E "(nixos-rebuild|home-manager)" "$recent_system_log" | tail -3)
+    fi
+    
+    # Analyze metrics for gaps
+    local metrics_dir="${HOME}/.dotfiles/scottys-journal/metrics"
+    local last_build_metric=""
+    local last_git_metric=""
+    
+    if [ -f "$metrics_dir/build-performance.csv" ]; then
+        last_build_metric=$(tail -1 "$metrics_dir/build-performance.csv" 2>/dev/null | cut -d',' -f1)
+    fi
+    
+    if [ -f "$metrics_dir/git-operations.csv" ]; then
+        last_git_metric=$(tail -1 "$metrics_dir/git-operations.csv" 2>/dev/null | cut -d',' -f1)
+    fi
+    
+    # Check git status for uncommitted changes
+    local git_status=""
+    if cd "${HOME}/.dotfiles" 2>/dev/null; then
+        git_status=$(git status --porcelain)
+        if [ -n "$git_status" ]; then
+            echo "⚠️  UNCOMMITTED CHANGES DETECTED:"
+            echo "$git_status" | head -5
+            echo ""
+        fi
+    fi
+    
+    # Display current state
+    echo "📊 CURRENT SYSTEM STATE:"
+    echo "  Host: $hostname"
+    echo "  Time: $current_date"
+    echo "  System Generation: $current_system_gen"
+    echo "  Home Generation: $current_home_gen"
+    echo ""
+    
+    # Analyze potential gaps
+    echo "🔎 GAP ANALYSIS:"
+    local gaps_found=false
+    
+    if [ -n "$git_status" ]; then
+        echo "  • Uncommitted configuration changes detected"
+        gaps_found=true
+    fi
+    
+    if [ -z "$recent_rebuild_activity" ]; then
+        echo "  • No recent rebuild activity in logs (last 24h)"
+        gaps_found=true
+    fi
+    
+    if [ -z "$last_build_metric" ]; then
+        echo "  • No build metrics found - potential bare rebuilds"
+        gaps_found=true
+    fi
+    
+    if [ "$gaps_found" = false ]; then
+        echo "  • No significant gaps detected - system appears documented"
+    fi
+    
+    echo ""
+    
+    # Create log entry for this analysis
+    report_content="LOG STATUS ANALYSIS - $hostname @ $current_date
+
+SYSTEM STATE:
+- System Generation: $current_system_gen  
+- Home Generation: $current_home_gen
+
+DOCUMENTATION GAPS:
+$(if [ -n "$git_status" ]; then echo "- Uncommitted changes detected"; fi)
+$(if [ -z "$recent_rebuild_activity" ]; then echo "- No recent rebuild logs found"; fi)
+$(if [ -z "$last_build_metric" ]; then echo "- Missing build metrics"; fi)
+$(if [ "$gaps_found" = false ]; then echo "- No significant gaps identified"; fi)
+
+RECENT ACTIVITY:
+$recent_rebuild_activity
+
+Last Build Metric: ${last_build_metric:-"None found"}
+Last Git Metric: ${last_git_metric:-"None found"}
+
+ANALYSIS: System state analysis completed. 
+$(if [ "$gaps_found" = true ]; then echo "Attention areas identified for documentation."; else echo "Documentation appears current."; fi)"
+    
+    # Create narrative log entry
+    create_narrative_entry "LOG STATUS ANALYSIS" "$report_content" "note"
+    
+    echo "📝 Analysis logged to engineering records."
+    
+    # Suggest actions if gaps found
+    if [ "$gaps_found" = true ]; then
+        echo ""
+        echo "🔧 RECOMMENDED ACTIONS:"
+        if [ -n "$git_status" ]; then
+            echo "  • Run 'just commit' to document configuration changes"
+        fi
+        echo "  • Consider running '/fix-log' to update documentation"
+        echo "  • Run 'just rebuild' with full logging for system changes"
+    fi
+}
+
+# Alias for slash command compatibility
+log-status() {
+    log_status "$@"
+}
+
 # Export functions for use by other scripts
 export -f scotty_log_event
 export -f scotty_create_log
@@ -624,4 +747,6 @@ export -f log_commit_enhancement
 export -f get_git_state
 export -f get_home_manager_generation
 export -f display_captain_report
+export -f log_status
+export -f log-status
 export -f _debug_log  # Export debug function for child processes
