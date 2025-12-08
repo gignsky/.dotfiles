@@ -19,6 +19,7 @@
   als = "help aliases";
   cd = "z";
   nd = "nix develop -c nu";
+  ndc = "nix develop -c";
   nr = "nix run";
   nb = "nix build";
   ndw = "nix develop .#windows -c nu";
