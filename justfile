@@ -129,11 +129,7 @@ clean:
 rebuild-post:
 	# just check-sops
 	@nix-shell -p lolcat --run 'echo "[POST] Rebuilt." | lolcat 2> /dev/null'
-	@echo "📊 Logging rebuild to engineering records..."
-	@just log-commit "System rebuild completed successfully"
-	@echo "🧹 Cleaning up engineering logs..."
-	@git add scottys-journal/ 2>/dev/null || true
-	@git commit -m "📊 Scotty: Auto-update engineering logs" 2>/dev/null || true
+	@echo "✅ Rebuild completed successfully - engineering logs handled by rebuild script"
 
 # Rebuild the system
 rebuild args="":
