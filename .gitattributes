@@ -1,2 +1,6 @@
+# *.log filter=lfs diff=lfs merge=lfs -text
+# *.csv filter=lfs diff=lfs merge=lfs -text
+# scottys-journal/logs/* filter=lfs diff=lfs merge=lfs -text
+# scottys-journal/metrics/* filter=lfs diff=lfs merge=lfs -text
 *.csv !text !filter !merge !diff
 *.log !text !filter !merge !diff

@@ -2479,17 +2479,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1762915690,
-        "narHash": "sha256-p4AUjAQN+0V1fZ6gu3RXJ+O3IgER5saRE9b1+oZmdZ0=",
+        "lastModified": 1765217228,
+        "narHash": "sha256-UNQkIX/nSbhlNOu75AZEXBrU0utWpNPuBOpXfq6zqYQ=",
         "ref": "refs/heads/main",
-        "rev": "1d6c743a7f3ba5f8fcc61b9dede7947b2b4c507e",
-        "revCount": 14,
+        "rev": "b4f2123109d6a42f930a2f7b13ed9a989dc807f5",
+        "revCount": 18,
         "type": "git",
-        "url": "ssh://git@github.com/gignsky/personal-fonts-nix"
+        "url": "ssh://git@github.com/gignsky/fancy-fonts"
       },
       "original": {
         "type": "git",
-        "url": "ssh://git@github.com/gignsky/personal-fonts-nix"
+        "url": "ssh://git@github.com/gignsky/fancy-fonts"
       }
     },
     "flake-compat": {
