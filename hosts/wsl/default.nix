@@ -1,6 +1,8 @@
 {
   pkgs,
   configLib,
+  configVars,
+  lib,
   ...
 }:
 {
@@ -12,6 +14,10 @@
     # inputs.nixos-wsl.modules
     # inputs.home-manager.nixosModules.home-manager
   ];
+
+  # WSL-specific user/group ID overrides
+  users.groups.${configVars.username}.gid = lib.mkForce 1000;
+  users.users.${configVars.username}.uid = lib.mkForce 1000;
 
   networking.hostName = "nixos";
 
