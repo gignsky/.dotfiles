@@ -312,6 +312,21 @@ Ti
   - **Recommendation**: Gabby suggests 'btman' as potential solution
   - **Priority**: Medium - required for proper bluetooth device management on merlin host
   - **Research**: Investigate btman and alternative bluetooth management tools for NixOS/Linux
+- **NUSHELL MAN PAGE CONVERSION PROJECT**:
+  - **Concept**: Create program to convert traditional bash/zsh man pages to nushell-compatible documentation
+  - **Problem**: Many man pages are generated for POSIX shells but not ported to nushell, causing documentation gaps
+  - **Potential Solution**: Parser/converter that:
+    - Extracts command syntax and options from traditional man pages
+    - Converts bash-style examples to nushell equivalent syntax  
+    - Generates nushell help documentation format
+    - Handles shell-specific differences (pipes, variables, etc.)
+  - **Implementation Ideas**: 
+    - Use nushell-binary-engine for Rust integration
+    - Parse man page source files (roff/troff format) or rendered output
+    - Build conversion rules for common shell patterns
+    - Generate `help commands` compatible output for nushell
+  - **Benefits**: Bridge documentation gap, improve nushell ecosystem adoption
+  - **Priority**: Medium - would significantly improve nushell usability
 - **MONOLISA FONT DEVELOPMENT SETUP**:
   - **Access Issue**: Need to input MonoLisa credentials into Gabby's MonoLisa font repository
   - **Purpose**: Enable creation of new versions and customizations of MonoLisa font
