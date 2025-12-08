@@ -6,6 +6,27 @@
 # Shared functions for automatic git and build state logging
 # Used by git hooks, build scripts, and other automation
 
+# Source host detection library for enhanced logging context
+HOST_DETECTION_LIB_PATHS=(
+    "${HOME}/.dotfiles/scripts/host-detection-lib.sh"
+    "$(dirname "$0")/host-detection-lib.sh"
+)
+
+HOST_DETECTION_FOUND=false
+for lib_path in "${HOST_DETECTION_LIB_PATHS[@]}"; do
+    if [ -n "$lib_path" ] && [ -f "$lib_path" ]; then
+        source "$lib_path"
+        HOST_DETECTION_FOUND=true
+        break
+    fi
+done
+
+if [ "$HOST_DETECTION_FOUND" = false ]; then
+    # Fallback: basic host identification if library not found
+    get_host_identifier() { echo "${1:-$(hostname)}"; }
+    detect_flake_target() { echo "${1:-$(hostname)}"; }
+fi
+
 # FAILSAFE LOGGING FUNCTION
 # For critical operations when normal logging might fail (e.g., during clean)
 failsafe_log() {
@@ -478,21 +499,33 @@ _original_scotty_log_event() {
             ;;
         "build-start")
             local operation="$1"
-            create_narrative_entry "BUILD START" "Starting $operation" "note"
+            # Extract host from operation string and enhance it
+            local host_part=$(echo "$operation" | sed 's/.*-\([^-]*\)$/\1/')
+            local enhanced_host=$(get_host_identifier "$host_part")
+            local enhanced_operation=$(echo "$operation" | sed "s/-${host_part}$/-${enhanced_host}/")
+            create_narrative_entry "BUILD START" "Starting $enhanced_operation" "note"
             ;;
         "build-complete")
             local operation="$1"
             local duration="$2"
             local success="$3"
             local generation="$4"
-            log_build_performance "$operation" "$duration" "$success" "" "Automated build logging" "$generation"
-            create_narrative_entry "BUILD COMPLETE" "$operation completed in ${duration}s (success: $success, generation: $generation)" "report"
+            # Extract host from operation string and enhance it
+            local host_part=$(echo "$operation" | sed 's/.*-\([^-]*\)$/\1/')
+            local enhanced_host=$(get_host_identifier "$host_part")
+            local enhanced_operation=$(echo "$operation" | sed "s/-${host_part}$/-${enhanced_host}/")
+            log_build_performance "$enhanced_operation" "$duration" "$success" "" "Automated build logging" "$generation"
+            create_narrative_entry "BUILD COMPLETE" "$enhanced_operation completed in ${duration}s (success: $success, generation: $generation)" "report"
             ;;
         "build-error")
             local operation="$1"
             local error="$2"
+            # Extract host from operation string and enhance it
+            local host_part=$(echo "$operation" | sed 's/.*-\([^-]*\)$/\1/')
+            local enhanced_host=$(get_host_identifier "$host_part")
+            local enhanced_operation=$(echo "$operation" | sed "s/-${host_part}$/-${enhanced_host}/")
             log_error "build-failure" "$error" "Manual intervention required" "0" "false"
-            create_narrative_entry "BUILD ERROR" "$operation failed: $error" "report"
+            create_narrative_entry "BUILD ERROR" "$enhanced_operation failed: $error" "report"
             ;;
         *)
             create_narrative_entry "UNKNOWN EVENT" "$event_type: $*" "note"
