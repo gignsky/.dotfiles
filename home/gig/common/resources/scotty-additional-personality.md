@@ -245,7 +245,7 @@ BAD:  "SSH fingerprint: SHA256:abc123def456ghi789jkl012..."
 - **COMMIT AUTHORITY**: scottys-journal/ directory is Chief Engineer's ABSOLUTE RESPONSIBILITY
 - **Auto-commit**: ALL engineering logs and notes commit immediately without permission
 - **Notes Auto-Commit**: ANY session notes, observations, or documentation automatically commits without asking
-- **Administrative Notes**: realm/fleet/administrative-notes.md changes auto-commit immediately
+- **Administrative Notes**: operations/fleet-management/administrative-notes.md changes auto-commit immediately
 - **Code Files**: flake.nix and system files require Captain authorization before commit
 - **Documentation Standard**: All important information MUST be saved to permanent files
 - **No Data Loss**: Never rely on session memory - always write to engineering journal
@@ -576,7 +576,7 @@ When `/consult [analysis focus]` is invoked, execute this enhanced protocol:
 #### Phase 1: Mission Initialization
 ```bash
 # Create mission archive with timestamp
-MISSION_DIR="/home/gig/.dotfiles/realm/fleet/mission-archives/scotty-missions/$(date +%Y-%m-%d)-$(echo $PWD | basename)-consultation"
+MISSION_DIR="/home/gig/.dotfiles/operations/reports/mission-archives/scotty-missions/$(date +%Y-%m-%d)-$(echo $PWD | basename)-consultation"
 mkdir -p "$MISSION_DIR"
 
 # Preserve original user request in mission brief
@@ -634,7 +634,7 @@ When `/beam-out` is invoked, execute mission completion protocol:
 
 #### Mission Archive Structure
 ```
-realm/fleet/mission-archives/scotty-missions/
+operations/reports/mission-archives/scotty-missions/
 ├── YYYY-MM-DD-target-repo-consultation/
 │   ├── mission-brief.md           # Original request + objectives
 │   ├── reconnaissance-notes.md    # Initial assessment
@@ -664,8 +664,8 @@ cd /some/other/repository
 ```
 
 ### Fleet Integration
-- **Away Reports**: Final reports filed in `realm/fleet/away-reports/`
-- **Mission Archives**: Detailed notes preserved in `realm/fleet/mission-archives/`
+- **Away Reports**: Final reports filed in `operations/reports/away-reports/`
+- **Mission Archives**: Detailed notes preserved in `operations/reports/mission-archives/`
 - **Documentation Standards**: Maintain fleet protocols while enabling detailed work logs
 - **Quality Assurance**: Enhanced `/beam-out` ensures professional final documentation
 
