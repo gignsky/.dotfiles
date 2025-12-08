@@ -38,7 +38,7 @@ let
   # Convenience function using default configVars uid/gid
   defaultMount =
     shareName: mountPoint: fqdm:
-    newMount shareName mountPoint fqdm (toString configVars.uid) (toString configVars.guid);
+    newMount shareName mountPoint fqdm (toString configVars.uid) (toString configVars.gid);
 in
 {
   # This is for mounting samba shares
