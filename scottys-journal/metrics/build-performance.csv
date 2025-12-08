@@ -53,3 +53,5 @@ date,host,operation,duration_seconds,success,error_type,git_commit,git_branch,gi
 2025-12-08 18:45:47,merlin,home-manager-rebuild-merlin,2,true,,c237c905dedaf7280679e96de78eccb559f56095,main,1_modified,d43233f960c9bbc98ff347f2182f8b4e1d0310f1a02304a65cabb1e5be881f57,53,Automated home-manager rebuild with Scotty engineering logs
 2025-12-08 18:46:41,merlin,home-manager-rebuild-merlin-gen53,2,true,,c237c90,main,clean,,53,Generation 53→53 successful rebuild - font repo fix + flake infrastructure improvements
 2025-12-08 18:47:55,merlin,nixos-rebuild-merlin,10,true,,a635a286ce03a4c9aff54926eaa9305e03d42cb4,main,clean,d43233f960c9bbc98ff347f2182f8b4e1d0310f1a02304a65cabb1e5be881f57,54,Automated build logging
+2025-12-08 18:48:47,merlin,home-manager-rebuild-merlin,10,true,,f133e38f82cd2f28dc5e464aeab8ae2dc4bb0ffc,main,clean,d43233f960c9bbc98ff347f2182f8b4e1d0310f1a02304a65cabb1e5be881f57,53,Automated home-manager rebuild with Scotty engineering logs
+2025-12-08 18:49:27,merlin,home-manager-rebuild-gen53,10,true,,f133e38,main,clean,unknown,53,Samba→core service + Tailscale enabled - Generation 53→53
