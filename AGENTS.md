@@ -1,7 +1,7 @@
 # NixOS Configuration Repository Guidelines
 
 ## Fleet Operations Overview
-This repository operates under **Lord Gig's Realm** organizational structure. All agents are officers with specific ranks, assignments, and operational protocols. See `realm/fleet/OPERATIONS-MANUAL.md` for complete command structure and procedures.
+This repository operates under **Lord Gig's Realm** organizational structure. All agents are officers with specific ranks, assignments, and operational protocols. See `operations/fleet-management/OPERATIONS-MANUAL.md` for complete command structure and procedures.
 
 ## Agent Instructions
 - **Keep this file current**: Agents should frequently suggest modifications to this AGENTS.md file when they discover changes that make it inaccurate or require updates to keep it current with the codebase.
@@ -19,7 +19,7 @@ When consulting on repositories outside your primary assignment:
    - Document expedition objectives clearly
 
 2. **Quest Documentation Standards**
-   - **REQUIRED**: Create quest report in `realm/fleet/away-reports/YYYY-MM-DD_[quest-type].md`
+   - **REQUIRED**: Create quest report in `operations/reports/away-reports/YYYY-MM-DD_[quest-type].md`
    - **Progressive Documentation**: Make frequent small notes throughout expedition - compile into final report at end
    - **"COMMIT SMALL & COMMIT OFTEN"**: Document progress incrementally to preserve detail and progression
    - Include: technical findings, solutions implemented, repository status, recommendations
@@ -34,7 +34,7 @@ When consulting on repositories outside your primary assignment:
    - Clean up temporary worktrees if used
 
 ### Repository Assignment System
-- **Primary Assignment**: Officer's main repository and domain expertise (see `realm/fleet/OPERATIONS-MANUAL.md` for current assignments)
+- **Primary Assignment**: Officer's main repository and domain expertise (see `operations/fleet-management/OPERATIONS-MANUAL.md` for current assignments)
 - **Expeditions of Consultation**: Temporary consultation work in other repositories
 - **Cross-Domain Authority**: Senior officers may override normal assignment boundaries for critical operations
 
@@ -98,7 +98,7 @@ When consulting on repositories outside your primary assignment:
 - **Authority**: A directive of Lord Gig during comprehensive AGENTS.md review
 - **Changes**: Established Lord Gig's Realm fleet operations framework
   - Added Expedition of Consultation protocols with safety checks
-  - Implemented Quest Reports system in `realm/fleet/away-reports/`
+  - Implemented Quest Reports system in `operations/reports/away-reports/`
   - Added progressive documentation requirements ("COMMIT SMALL & COMMIT OFTEN")
   - Established worktree isolation options for sensitive operations
 - **Context**: Need for systematic cross-repository consultation while maintaining safety and documentation standards
@@ -110,6 +110,17 @@ When consulting on repositories outside your primary assignment:
   - Renamed `FLEET-OPERATIONS-MANUAL.md` to `OPERATIONS-MANUAL.md` for clarity
   - Updated all references to point to new filename
 - **Context**: Simplified naming convention, more direct and accessible
+- **Implementation**: Chief Engineer Montgomery Scott
+
+**Stardate 2025-12-08.1 - Repository Organization Modernization**
+- **Authority**: A directive of Lord Gig  
+- **Changes**: Implemented comprehensive repository reorganization
+  - Created `docs/` structure: guides/, planning/, creative/, standards/
+  - Established `operations/` hub: logs/, reports/, metrics/, fleet-management/
+  - Added `archives/` for historical content preservation
+  - Updated all file references to reflect new directory structure
+  - Created comprehensive README.md files for each directory with filing guidelines
+- **Context**: Systematic organization of scattered documentation, musings, and operational content
 - **Implementation**: Chief Engineer Montgomery Scott
 
 **Stardate 2025-12-03.3 - Authority Language Standardization**
