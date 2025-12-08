@@ -85,7 +85,7 @@
 
     # private repo with fancy fonts
     fancy-fonts = {
-      url = "git+ssh://git@github.com/gignsky/personal-fonts-nix";
+      url = "git+ssh://git@github.com/gignsky/fancy-fonts";
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
