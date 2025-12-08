@@ -393,3 +393,33 @@
 - **Development Tools**: Font development and generation tool availability
 
 **Status**: Awaiting credential location and coordination with Gabby for repository access
+
+### Nix-Sweep Package Maintenance and Contribution
+**Added**: 2025-12-08 by Chief Engineer Montgomery Scott per Lord Gig directive
+**Priority**: Low
+**Scope**: Remove internal nix-sweep usage and contribute package to nixpkgs
+
+**Objective**: Transition from internal nix-sweep usage to official nixpkgs package contribution
+
+**Action Items**:
+1. **Remove Internal Usage**: Clean up any internal nix-sweep references or implementations from the repository
+2. **Package for nixpkgs**: Create proper nixpkgs packaging for nix-sweep tool
+   - Research existing nix-sweep tools and naming conflicts
+   - Create proper derivation with dependencies, tests, and documentation
+   - Follow nixpkgs contribution guidelines and review process
+   - Submit pull request to nixpkgs repository
+3. **Documentation**: Document packaging process and contribution experience for future reference
+
+**Benefits**:
+- **Community Contribution**: Make nix-sweep available to broader Nix community
+- **Maintenance**: Shift maintenance burden to nixpkgs maintainers
+- **Clean Repository**: Remove tool-specific code from dotfiles repository
+- **Learning Experience**: Gain experience with nixpkgs contribution process
+
+**Implementation Notes**:
+- **Priority Focus**: Packaging for nixpkgs is more important than immediate removal
+- **Research Phase**: Investigate existing similar tools in nixpkgs to avoid duplication
+- **Quality Standards**: Ensure package meets nixpkgs quality and testing standards
+- **Long-term Support**: Consider maintenance commitments for contributed package
+
+**Status**: Planning phase - research nixpkgs contribution requirements and existing tools
