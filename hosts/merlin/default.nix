@@ -51,9 +51,11 @@
   # Tailscale configuration
   tailscale.enable = false;
 
-  # Bootloader.
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.efi.canTouchEfiVariables = true;
+  boot.loader = {
+    # Bootloader.
+    systemd-boot.enable = true;
+    efi.canTouchEfiVariables = true;
+  };
 
   # Configure keymap in X11
   services.xserver.xkb = {
