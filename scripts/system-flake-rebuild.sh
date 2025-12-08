@@ -110,7 +110,7 @@ else
 fi
 
 # Capture previous generation for comparison
-previous_gen=$(nixos-rebuild list-generations 2>/dev/null | grep current | grep -o '[0-9]*' | head -n 1 || echo "0")
+previous_gen=$(nixos-rebuild list-generations 2>/dev/null | grep -E "(current|True)" | grep -o '[0-9]*' | head -n 1 || echo "0")
 
 # Find the last nixos-rebuild commit for this host
 echo "=== ANALYZING CONFIGURATION CHANGES SINCE LAST REBUILD ==="
