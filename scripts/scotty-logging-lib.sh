@@ -136,26 +136,34 @@ _commit_batch_logs() {
     rm -f "${batch_files[@]}"
     _debug_log "Batch files removed"
     
-    # Commit the logs
+    # Commit the logs (WSL-compatible)
     _debug_log "Changing directory to ${HOME}/.dotfiles"
     cd "${HOME}/.dotfiles"
     _debug_log "Current directory: $(pwd)"
     
-    _debug_log "Adding scottys-journal/ to git"
-    git add scottys-journal/ 2>/dev/null
-    _debug_log "Git add completed, exit code: $?"
-    
-    _debug_log "Starting git commit with --no-verify to avoid pre-commit hook hang"
-    if git commit --no-verify -m "📊 Scotty: Batch commit engineering logs ($(date '+%H:%M'))" >/dev/null 2>&1; then
-        local commit_exit_code=0
-        _debug_log "Git commit completed successfully"
+    if [ "$(hostname)" != "nixos" ]; then
+        # Full git commit on non-WSL systems
+        _debug_log "Adding scottys-journal/ to git"
+        git add scottys-journal/ 2>/dev/null
+        _debug_log "Git add completed, exit code: $?"
+        
+        _debug_log "Starting git commit with --no-verify to avoid pre-commit hook hang"
+        if git commit --no-verify -m "📊 Scotty: Batch commit engineering logs ($(date '+%H:%M'))" >/dev/null 2>&1; then
+            local commit_exit_code=0
+            _debug_log "Git commit completed successfully"
+        else
+            local commit_exit_code=$?
+            _debug_log "Git commit failed with exit code: $commit_exit_code"
+        fi
+        _debug_log "Git commit completed, exit code: $commit_exit_code"
+        echo "✅ Batched logs committed successfully"
     else
-        local commit_exit_code=$?
-        _debug_log "Git commit failed with exit code: $commit_exit_code"
+        # WSL-safe: process logs but don't auto-commit
+        _debug_log "WSL detected: processing logs without auto-commit to prevent hangs"
+        git add scottys-journal/ 2>/dev/null || true
+        _debug_log "WSL: logs staged for manual commit"
+        echo "✅ Batched logs processed successfully (WSL: staged for manual commit)"
     fi
-    _debug_log "Git commit completed, exit code: $commit_exit_code"
-    
-    echo "✅ Batched logs committed successfully"
     _debug_log "Exiting _commit_batch_logs function"
 }
 
