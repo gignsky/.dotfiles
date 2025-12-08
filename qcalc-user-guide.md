@@ -144,36 +144,256 @@ qalc "0o52"             # Octal to decimal: 42
 qalc "0x2A"             # Hexadecimal to decimal: 42
 ```
 
-## Unit Conversions
+## 📏 **UNIT CONVERSIONS** - Beyond Basic Calculator
 
+One of qcalc's most powerful features is comprehensive unit conversion across dozens of categories.
+
+### **Length Conversions**
 ```bash
-# Length
+# Basic length conversions
 qalc "5 feet to meters"           # 1.524 m
 qalc "100 km to miles"            # 62.1371 miles
 qalc "2.5 inches to cm"           # 6.35 cm
+qalc "1 yard to meters"           # 0.9144 m
+qalc "50 mm to inches"            # 1.9685 inches
 
-# Weight
+# Construction and surveying
+qalc "100 feet to yards"          # 33.3333 yards
+qalc "1 mile to feet"             # 5280 feet
+qalc "500 meters to yards"        # 546.807 yards
+qalc "1 nautical mile to km"      # 1.852 km
+```
+
+### **🏡 AREA CONVERSIONS** - Real Estate & Land Management
+
+Perfect for property calculations, landscaping, and land development:
+
+```bash
+# Square feet to acres (very common in real estate)
+qalc "43560 sqft to acres"        # 1 acre (exact conversion)
+qalc "10000 sqft to acres"        # 0.229568 acres
+qalc "5000 square feet to acres"  # 0.114784 acres
+qalc "87120 sq ft to acres"       # 2 acres
+
+# Acres to square feet (reverse conversion)
+qalc "1 acre to sqft"             # 43560 square feet
+qalc "0.5 acres to square feet"   # 21780 square feet
+qalc "2.5 acre to sqft"           # 108900 square feet
+
+# Other area conversions
+qalc "1 acre to square meters"    # 4046.86 square meters
+qalc "1 hectare to acres"         # 2.47105 acres
+qalc "1000 sqft to square meters" # 92.903 square meters
+qalc "100 square meters to sqft"  # 1076.39 square feet
+
+# Large area conversions
+qalc "1 square mile to acres"     # 640 acres
+qalc "1 square km to acres"       # 247.105 acres
+qalc "1000 hectares to sq miles"  # 3.861 square miles
+```
+
+### **🏠 Practical Real Estate Examples**
+```bash
+# House lot calculations
+qalc "150 ft * 100 ft to acres"   # Lot size: 0.344 acres
+qalc "0.25 acres to sqft"         # Quarter-acre lot: 10890 sq ft
+
+# Property development
+qalc "40 acres to sqft"           # Development tract: 1742400 sq ft
+qalc "500000 sqft to acres"       # Large development: 11.48 acres
+
+# Landscaping calculations
+qalc "50 ft * 30 ft to sqyards"   # Lawn area: 166.67 sq yards
+qalc "200 sqyards to sqft"        # 1800 square feet
+
+# International property
+qalc "500 square meters to acres" # 0.123553 acres
+qalc "2 acres to hectares"        # 0.809371 hectares
+```
+
+### **Volume Conversions**
+```bash
+# Liquid volumes
+qalc "1 gallon to liters"         # 3.78541 liters
+qalc "500 ml to fluid ounces"     # 16.907 fl oz
+qalc "2 cups to ml"               # 473.176 ml
+qalc "1 liter to quarts"          # 1.05669 quarts
+
+# Large volumes (pools, tanks)
+qalc "10000 gallons to cubic feet" # 1336.81 cubic feet
+qalc "1 cubic meter to gallons"   # 264.172 gallons
+
+# Cooking measurements
+qalc "2 tablespoons to ml"        # 29.5735 ml
+qalc "1 cup to grams flour"       # ~120 grams (varies by ingredient)
+```
+
+### **Weight/Mass Conversions**
+```bash
+# Common weight conversions
 qalc "150 lbs to kg"              # 68.0389 kg
 qalc "2 kg to pounds"             # 4.40925 lbs
+qalc "1 ton to pounds"            # 2000 lbs (US ton)
+qalc "1 tonne to pounds"          # 2204.62 lbs (metric ton)
 
-# Temperature
-qalc "32 fahrenheit to celsius"   # 0°C
-qalc "100 celsius to fahrenheit"  # 212°F
+# Precious metals/jewelry
+qalc "1 troy ounce to grams"      # 31.1035 grams
+qalc "10 grams to troy ounces"    # 0.321507 troy ounces
+
+# Large weights
+qalc "5 tons to kg"               # 4535.92 kg
+qalc "1000 kg to tons"            # 1.10231 tons
+```
+
+### **Temperature Conversions**
+```bash
+# Common temperature conversions
+qalc "32 fahrenheit to celsius"   # 0°C (freezing)
+qalc "100 celsius to fahrenheit"  # 212°F (boiling)
+qalc "98.6 fahrenheit to celsius" # 37°C (body temperature)
+qalc "350 fahrenheit to celsius"  # 176.667°C (oven temperature)
+
+# Scientific temperatures
 qalc "273.15 kelvin to celsius"   # 0°C
+qalc "0 kelvin to fahrenheit"     # -459.67°F (absolute zero)
+qalc "room temperature to kelvin" # ~295.15 K (if room temp defined)
+```
 
-# Time
-qalc "2 hours to minutes"         # 120 min
+### **Time Conversions**
+```bash
+# Basic time units
+qalc "2 hours to minutes"         # 120 minutes
 qalc "365 days to hours"          # 8760 hours
 qalc "1 year to seconds"          # 31557600 seconds
+qalc "90 minutes to hours"        # 1.5 hours
 
-# Data/Computing
+# Work time calculations
+qalc "40 hours to days"           # 1.66667 days (work week)
+qalc "2 weeks to hours"           # 336 hours
+qalc "1 year to work days"        # ~250 work days (approximate)
+```
+
+### **Energy & Power Conversions**
+```bash
+# Energy conversions
+qalc "1 kWh to joules"            # 3.6 MJ (megajoules)
+qalc "1 calorie to joules"        # 4.184 joules
+qalc "1 BTU to kWh"               # 0.000293071 kWh
+
+# Power conversions
+qalc "1 horsepower to watts"      # 745.7 watts
+qalc "1000 watts to horsepower"   # 1.341 horsepower
+```
+
+### **Data/Computing Conversions**
+```bash
+# Digital storage (binary)
 qalc "1 GB to MB"                 # 1024 MB
 qalc "500 MB to bytes"            # 524288000 bytes
 qalc "1 TB to GB"                 # 1024 GB
+qalc "8 bits to bytes"            # 1 byte
 
-# Currency (if exchange rates are available)
+# Decimal vs Binary storage
+qalc "1 GiB to GB"                # 1.07374 GB (binary vs decimal)
+qalc "1000 GB to TiB"             # 0.909495 TiB
+
+# Network speeds
+qalc "100 Mbps to MBps"           # 12.5 MBps (megabytes per second)
+qalc "1 Gbps to Mbps"             # 1000 Mbps
+```
+
+### **Pressure Conversions**
+```bash
+# Atmospheric pressure
+qalc "1 atm to psi"               # 14.6959 psi
+qalc "30 psi to bar"              # 2.06843 bar
+qalc "1 bar to pascal"            # 100000 pascals
+
+# Automotive (tire pressure)
+qalc "35 psi to bar"              # 2.41317 bar
+qalc "2.5 bar to psi"             # 36.2594 psi
+```
+
+### **Currency Conversions (Live Exchange Rates)**
+```bash
+# Major currencies (requires internet for live rates)
 qalc "100 USD to EUR"             # Current exchange rate
 qalc "50 GBP to USD"              # Current exchange rate
+qalc "1000 JPY to USD"            # Current exchange rate
+
+# Update exchange rates
+qalc -e                           # Update rates before conversion
+```
+
+### **🔧 Advanced Unit Conversion Techniques**
+
+#### **Compound Units**
+```bash
+# Speed conversions
+qalc "60 mph to km/h"             # 96.5606 km/h
+qalc "100 km/h to mph"            # 62.1371 mph
+qalc "speed of light to mph"      # 670616629 mph
+
+# Fuel economy
+qalc "30 mpg to L/100km"          # 7.84 L/100km
+qalc "8 L/100km to mpg"           # 29.4 mpg
+
+# Flow rates
+qalc "10 gallons/minute to L/s"   # 0.630902 L/s
+qalc "100 cfm to m3/s"            # 0.0471947 m³/s
+```
+
+#### **Custom Unit Definitions**
+```bash
+# Define custom units for specific calculations
+qalc
+> 1 myacre = 40000 sqft           # Define custom acre size
+> 5 myacre to sqft                # 200000 sqft
+> 1 section = 640 acres           # Land surveying unit
+> 0.5 section to acres            # 320 acres
+```
+
+#### **Unit Arithmetic**
+```bash
+# Calculate with mixed units
+qalc "100 ft * 50 ft"             # 5000 square feet
+qalc "10 acres / 200 ft"          # 2178 feet (width for given area/length)
+qalc "55 mph * 2.5 hours"         # 137.5 miles (distance)
+
+# Density and rate calculations
+qalc "150 lbs / 5.8 ft"           # Weight per foot
+qalc "1000 sqft / $50000"         # Cost per square foot
+```
+
+### **🏗️ Construction & Engineering Examples**
+
+```bash
+# Building materials
+qalc "1000 sqft * 0.5 inches"     # Concrete volume needed
+qalc "40 lb concrete bag to kg"   # 18.14 kg bags
+qalc "2x4x8 lumber volume"        # Board feet calculation
+
+# Land surveying
+qalc "1 chain to feet"            # 66 feet (surveying chain)
+qalc "1 furlong to chains"        # 10 chains
+qalc "1 section to square miles"  # 1 square mile
+```
+
+### **Unit Conversion Tips**
+
+1. **Use descriptive names**: `square feet`, `sq ft`, `sqft` all work
+2. **Compound units**: Use `/` for per-unit (mph = miles/hour)
+3. **Multiple conversions**: Chain conversions with multiple `to` statements
+4. **List available units**: Use `list units` to see all available units
+5. **Case insensitive**: `FEET`, `feet`, `Feet` all work the same
+6. **Abbreviations supported**: `ft`, `m`, `kg`, `lb`, etc.
+
+**Most useful for daily life:**
+```bash
+qalc "AREA sqft to acres"         # Real estate calculations
+qalc "TEMPERATURE fahrenheit to celsius"  # International communication  
+qalc "DISTANCE miles to km"       # Travel planning
+qalc "WEIGHT lbs to kg"           # Health and fitness tracking
 ```
 
 ## Variables and Functions
