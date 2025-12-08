@@ -197,3 +197,66 @@
 4. Migrate to GitLab-based solution when infrastructure available
 
 **Status**: Pending technical research and infrastructure planning
+
+### Email Infrastructure Modernization Initiative
+**Added**: 2025-12-08 by Chief Engineer Montgomery Scott per Lord Gig directive  
+**Priority**: Medium-High  
+**Scope**: Declarative email configuration and centralized mailserver deployment
+
+**Objective**: Establish comprehensive, declarative email infrastructure management across the realm
+
+**Components**:
+
+1. **Thunderbird Declarative Configuration**:
+   - **Goal**: Configure Thunderbird via home-manager for all NixOS hosts
+   - **Benefits**: Unified email client setup, consistent configurations across machines
+   - **Implementation**: Research home-manager Thunderbird options and configuration patterns
+   - **Scope**: Email accounts, filters, signatures, preferences, extensions
+   - **Status**: Research and design phase
+
+2. **Centralized Mailserver Deployment**:
+   - **Technology**: [simple-nixos-mailserver](https://gitlab.com/simple-nixos-mailserver/nixos-mailserver/) 
+   - **Reference**: [Reddit success story](https://www.reddit.com/r/NixOS/comments/xwo2x5/ridiculously_easy_mail_server_setup_with_nixos/) - "ridiculously easy" setup with 10/10 results
+   - **Features**: Full flake support, comprehensive mail server functionality
+   - **Hosting**: VPS deployment for reliability and uptime
+   - **Containerization**: Consider Docker/Podman deployment for easier management and migration
+   - **Multi-domain**: Handle email for all owned domains from centralized location
+
+3. **Security & Secret Management**:
+   - **Options**: agenix or sops-nix for password and certificate management
+   - **Integration**: Seamless secret handling in mailserver configuration
+   - **Backup**: Email data and configuration backup strategies
+
+4. **Architecture Considerations**:
+   - **Reliability**: Single VPS vs distributed setup analysis
+   - **Scalability**: Plan for multiple domains and increased email volume
+   - **Redundancy**: Backup MX records and failover planning
+   - **Monitoring**: Email delivery monitoring and alerting
+
+**Implementation Strategy**:
+1. **Phase 1**: Research home-manager Thunderbird configuration options
+2. **Phase 2**: Deploy test mailserver using nixos-mailserver on VPS
+3. **Phase 3**: Configure domain DNS and MX records
+4. **Phase 4**: Migrate existing email accounts to centralized server
+5. **Phase 5**: Deploy declarative Thunderbird configurations
+
+**Benefits**:
+- **Consistency**: Uniform email configuration across all devices
+- **Control**: Full ownership of email infrastructure and data
+- **Privacy**: Reduced dependence on external email providers
+- **Integration**: Seamless integration with existing NixOS infrastructure
+- **Maintenance**: Declarative configuration enables easy updates and changes
+
+**Resource Requirements**:
+- **VPS**: Reliable VPS with sufficient storage and bandwidth for email
+- **Domains**: DNS management access for MX record configuration
+- **Time**: Several engineering sessions for initial setup and testing
+- **Documentation**: Comprehensive setup and maintenance documentation
+
+**Risk Assessment**:
+- **Single Point of Failure**: VPS-based deployment creates dependency
+- **Complexity**: Email server management requires ongoing maintenance
+- **Deliverability**: Initial reputation building for new mail server
+- **Backup**: Critical need for robust backup and recovery procedures
+
+**Status**: Awaiting resource allocation and implementation timeline planning

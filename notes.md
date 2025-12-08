@@ -293,3 +293,17 @@ Ti
   rebuild and home-manager switch that somehow call the logger and engineer's
   report in the background and return control of the shell to the user in the
   meantime.
+- **EMAIL INFRASTRUCTURE SETUP**:
+  - **Configure Thunderbird declaratively** for all NixOS hosts using home-manager
+    - Research thunderbird home-manager options and configuration patterns
+    - Set up unified email account configurations across all machines
+    - Configure filters, signatures, and preferences declaratively
+  - **Deploy centralized mailserver** for domain email management
+    - **Primary Option**: Use [simple-nixos-mailserver](https://gitlab.com/simple-nixos-mailserver/nixos-mailserver/) 
+      as recommended in [this Reddit post](https://www.reddit.com/r/NixOS/comments/xwo2x5/ridiculously_easy_mail_server_setup_with_nixos/)
+    - **Target**: VPS deployment (possibly containerized) for reliability
+    - **Scope**: Handle emails from all owned domains in centralized location
+    - **Consider**: Distributed setup vs single-point-of-failure analysis
+    - **Integration**: Use agenix or sops-nix for password/secret management
+    - **Features**: The nixos-mailserver provides 10/10 mail server with flake support
+  - **Benefits**: Unified email management, declarative configuration, reduced reliance on external providers
