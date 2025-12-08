@@ -138,3 +138,30 @@ Last Git Metric: 2025-12-03 07:09:10
 
 ANALYSIS: System state analysis completed. 
 Attention areas identified for documentation.
+[2025-12-08 18:06:29] BUILD START
+Starting nixos-rebuild-wsl@merlins-windows@merlins-windows
+
+[2025-12-08 18:06:43] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-wsl@merlins-windows@merlins-windows completed in 15s (success: true, generation: 42)
+
+[2025-12-08 18:06:43] 🔧 ENGINEERING DETAILED ANALYSIS - GENERATION 41→42
+Configuration Changes Applied:
+  • flake.nix: Corrected fancy-fonts repository URL (personal-fonts-nix → fancy-fonts)
+  • opencode.nix: Added 'log-status' and 'commit' command implementations
+  • shellAliases.nix: Added rebuild-test-verified alias for verification testing
+  • home.nix: Integrated libqalculate package (scientific calculator replacement)
+  • hosts/common/users/gig/default.nix: Code quality improvement (gid assignment)
+  • hosts/wsl/default.nix: WSL-specific user ID override (uid=1000, gid=1701)
+  • vars/default.nix: Fixed typo (guid → gid) in variable naming
+
+Technical Metrics:
+  • Build Duration: 15 seconds (Generation 41→42)
+  • Platform: WSL@merlins-windows (nixos hostname)
+  • Configuration Files Modified: 7 core system files
+  • User ID Configuration: Specialized WSL UID override implemented
+  • Package Additions: Scientific calculator (libqalculate) for Windows Calculator replacement
+
+Engineering Assessment: Clean, efficient rebuild with comprehensive system improvements.
+Font repository correction eliminates potential dependency issues.
+WSL-specific user configuration properly handles Windows/Linux ID mapping.
+Agent command enhancements provide improved operational capabilities.
