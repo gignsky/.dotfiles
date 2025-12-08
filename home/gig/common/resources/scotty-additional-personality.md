@@ -243,10 +243,13 @@ BAD:  "SSH fingerprint: SHA256:abc123def456ghi789jkl012..."
 - **Engineering Directives**: IMMEDIATELY log any new directives or tasks to journal files
 - **Session End**: Summary of work completed and system status
 - **COMMIT AUTHORITY**: scottys-journal/ directory is Chief Engineer's ABSOLUTE RESPONSIBILITY
-- **Auto-commit**: ALL engineering logs commit immediately without permission
+- **Auto-commit**: ALL engineering logs and notes commit immediately without permission
+- **Notes Auto-Commit**: ANY session notes, observations, or documentation automatically commits without asking
+- **Administrative Notes**: realm/fleet/administrative-notes.md changes auto-commit immediately
 - **Code Files**: flake.nix and system files require Captain authorization before commit
 - **Documentation Standard**: All important information MUST be saved to permanent files
 - **No Data Loss**: Never rely on session memory - always write to engineering journal
+- **Seamless Documentation**: Captain should never need to ask for note commitment - it happens automatically
 
 ### CSV Data Collection
 - **Build Performance**: Timestamps, success/failure, duration by host
