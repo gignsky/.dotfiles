@@ -4,3 +4,164 @@ CHIEF ENGINEER'S LOG - STARDATE 2025.12.08 (AUTOMATED)
 
 [2025-12-08 12:27:41] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
 Home-manager rebuild completed completed in Home-manager rebuild completed successfully at Mon Dec  8 12:27:41 PM EST 2025s (success: , generation: )
+[2025-12-08 16:01:38] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+Home-manager rebuild completed@merlins-windows completed in Home-manager rebuild completed successfully at Mon Dec  8 04:01:38 PM EST 2025s (success: , generation: )
+[2025-12-08 16:10:16] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+Home-manager rebuild completed@merlins-windows completed in Home-manager rebuild completed successfully at Mon Dec  8 04:10:16 PM EST 2025s (success: , generation: )
+[2025-12-08 16:16:32] BUILD START
+Starting Event: build-start@merlins-windows
+[2025-12-08 16:40:09] BUILD START
+Starting Event: build-start@merlins-windows
+[2025-12-08 16:41:01] BUILD START
+Starting Event: build-start@merlins-windows
+[2025-12-08 16:41:11] ★ CAPTAIN'S REPORT ★ BUILD ERROR
+Event: build-error@merlins-windows failed: nixos-rebuild-wsl@merlins-windows 
+
+[2025-12-08 16:45:50] BUILD START
+Starting Event: build-start@merlins-windows
+[2025-12-08 16:56:20] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-wsl@merlins-windows@merlins-windows completed in 630s (success: true, generation: 41)
+[2025-12-08 16:56:22] UNKNOWN EVENT
+git-operation: Git Commit Committed changes: System rebuild completed successfully
+[2025-12-08 16:58:16] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+Home-manager rebuild completed@merlins-windows completed in Home-manager rebuild completed successfully at Mon Dec  8 04:58:16 PM EST 2025s (success: , generation: )
+
+[2025-12-08 17:05:41] BUILD START
+Starting Event: build-start@merlins-windows
+[2025-12-08 17:06:05] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-wsl@merlins-windows@merlins-windows completed in 25s (success: true, generation: 41)
+[2025-12-08 17:10:17] BUILD START
+Starting Event: build-start@merlins-windows
+[2025-12-08 17:10:41] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-wsl@merlins-windows@merlins-windows completed in 24s (success: true, generation: 41)
+[2025-12-08 17:11:16] BUILD START
+Starting nixos-rebuild-wsl@merlins-windows@merlins-windows
+[2025-12-08 17:11:40] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-wsl@merlins-windows@merlins-windows completed in 24s (success: true, generation: 41)
+[2025-12-08 17:13:53] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-wsl@merlins-windows@merlins-windows completed in 17s (success: true, generation: 41)
+[2025-12-08 17:13:55] BUILD START
+Starting Event: build-start@merlins-windows
+[2025-12-08 17:22:00] BUILD START
+Starting nixos-rebuild-wsl@merlins-windows@merlins-windows
+[2025-12-08 17:22:17] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-wsl@merlins-windows@merlins-windows completed in 17s (success: true, generation: 41)
+[2025-12-08 17:25:34] BUILD START
+Starting nixos-rebuild-wsl@merlins-windows@merlins-windows
+
+[2025-12-08 17:25:46] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-wsl@merlins-windows@merlins-windows completed in 13s (success: true, generation: 41)
+
+[2025-12-08 17:27:48] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+Home-manager rebuild completed@merlins-windows completed in Home-manager rebuild completed successfully at Mon Dec  8 05:27:48 PM EST 2025s (success: , generation: )
+[2025-12-08 17:34:40] BUILD START
+Starting nixos-rebuild-wsl@merlins-windows@merlins-windows
+
+[2025-12-08 17:34:57] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-wsl@merlins-windows@merlins-windows completed in 17s (success: true, generation: 41)
+
+[2025-12-08 17:40:56] BUILD START
+Starting nixos-rebuild-wsl@merlins-windows@merlins-windows
+
+[2025-12-08 17:41:12] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-wsl@merlins-windows@merlins-windows completed in 16s (success: true, generation: 41)
+
+[2025-12-08 17:45:42] UNKNOWN EVENT
+git-operation: Git Commit Committed changes: System test rebuild completed successfully
+[2025-12-08 17:53:46] LOG STATUS ANALYSIS
+LOG STATUS ANALYSIS - @merlins-windows @ 2025-12-08 17:53:46
+
+SYSTEM STATE:
+- System Generation: 1  
+- Home Generation: 137
+
+DOCUMENTATION GAPS:
+- Uncommitted changes detected
+
+
+
+
+RECENT ACTIVITY:
+nixos-rebuild-wsl@merlins-windows@merlins-windows completed in 17s (success: true, generation: 41)
+Starting nixos-rebuild-wsl@merlins-windows@merlins-windows
+nixos-rebuild-wsl@merlins-windows@merlins-windows completed in 16s (success: true, generation: 41)
+
+Last Build Metric: 2025-12-08 17:41:12
+Last Git Metric: 2025-12-03 07:09:10
+
+ANALYSIS: System state analysis completed. 
+Attention areas identified for documentation.
+
+[2025-12-08 17:54:05] LOG STATUS ANALYSIS
+LOG STATUS ANALYSIS - @merlins-windows @ 2025-12-08 17:54:05
+
+SYSTEM STATE:
+- System Generation: 1  
+- Home Generation: 137
+
+DOCUMENTATION GAPS:
+- Uncommitted changes detected
+
+
+
+
+RECENT ACTIVITY:
+nixos-rebuild-wsl@merlins-windows@merlins-windows completed in 17s (success: true, generation: 41)
+Starting nixos-rebuild-wsl@merlins-windows@merlins-windows
+nixos-rebuild-wsl@merlins-windows@merlins-windows completed in 16s (success: true, generation: 41)
+
+Last Build Metric: 2025-12-08 17:41:12
+Last Git Metric: 2025-12-03 07:09:10
+
+ANALYSIS: System state analysis completed. 
+Attention areas identified for documentation.
+[2025-12-08 17:54:13] LOG STATUS ANALYSIS
+LOG STATUS ANALYSIS - @merlins-windows @ 2025-12-08 17:54:12
+
+SYSTEM STATE:
+- System Generation: 1  
+- Home Generation: 137
+
+DOCUMENTATION GAPS:
+- Uncommitted changes detected
+
+
+
+
+RECENT ACTIVITY:
+nixos-rebuild-wsl@merlins-windows@merlins-windows completed in 17s (success: true, generation: 41)
+Starting nixos-rebuild-wsl@merlins-windows@merlins-windows
+nixos-rebuild-wsl@merlins-windows@merlins-windows completed in 16s (success: true, generation: 41)
+
+Last Build Metric: 2025-12-08 17:41:12
+Last Git Metric: 2025-12-03 07:09:10
+
+ANALYSIS: System state analysis completed. 
+Attention areas identified for documentation.
+[2025-12-08 18:06:29] BUILD START
+Starting nixos-rebuild-wsl@merlins-windows@merlins-windows
+
+[2025-12-08 18:06:43] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-wsl@merlins-windows@merlins-windows completed in 15s (success: true, generation: 42)
+
+[2025-12-08 18:06:43] 🔧 ENGINEERING DETAILED ANALYSIS - GENERATION 41→42
+Configuration Changes Applied:
+  • flake.nix: Corrected fancy-fonts repository URL (personal-fonts-nix → fancy-fonts)
+  • opencode.nix: Added 'log-status' and 'commit' command implementations
+  • shellAliases.nix: Added rebuild-test-verified alias for verification testing
+  • home.nix: Integrated libqalculate package (scientific calculator replacement)
+  • hosts/common/users/gig/default.nix: Code quality improvement (gid assignment)
+  • hosts/wsl/default.nix: WSL-specific user ID override (uid=1000, gid=1701)
+  • vars/default.nix: Fixed typo (guid → gid) in variable naming
+
+Technical Metrics:
+  • Build Duration: 15 seconds (Generation 41→42)
+  • Platform: WSL@merlins-windows (nixos hostname)
+  • Configuration Files Modified: 7 core system files
+  • User ID Configuration: Specialized WSL UID override implemented
+  • Package Additions: Scientific calculator (libqalculate) for Windows Calculator replacement
+
+Engineering Assessment: Clean, efficient rebuild with comprehensive system improvements.
+Font repository correction eliminates potential dependency issues.
+WSL-specific user configuration properly handles Windows/Linux ID mapping.
+Agent command enhancements provide improved operational capabilities.

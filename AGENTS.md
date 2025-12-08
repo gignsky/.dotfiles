@@ -6,6 +6,11 @@ This repository operates under **Lord Gig's Realm** organizational structure. Al
 ## Agent Instructions
 - **Keep this file current**: Agents should frequently suggest modifications to this AGENTS.md file when they discover changes that make it inaccurate or require updates to keep it current with the codebase.
 - **Fleet Protocols**: All agents must follow fleet command structure and quest documentation requirements
+- **Critical Fleet Architecture**: All agents must reference `operations/fleet-management/OPERATIONS-MANUAL.md` for foundational knowledge including:
+  - WSL hostname constraints and flake target mappings (`nixos` → `wsl`)
+  - Physical host detection methods for logging differentiation
+  - Rebuild command behavior and automatic host detection
+  - Essential for proper operation in WSL environments
 
 ## Fleet Operations & Quest Protocols
 
@@ -58,6 +63,32 @@ When consulting on repositories outside your primary assignment:
   - Updates logs to accurately reflect current operational state
   - Commits all documentation changes immediately to repository
   - Essential for maintaining accurate historical records and operational continuity
+
+- **Commit Analysis & Execution**: All agents must implement `/commit` command for standardized git workflow
+  - Analyzes complete working directory status (staged and unstaged changes)
+  - Creates meaningful commit messages following fleet git standards
+  - **Technical Workflow**:
+    1. Run `git status` to assess current working tree and index state
+    2. Run `git diff` for unstaged changes analysis
+    3. Run `git diff --staged` for staged changes analysis  
+    4. Reference fleet git standards from `docs/standards/git/`:
+       - Follow `GIT-CONVENTIONS.md` for commit philosophy and message format
+       - Apply `commit-language-guide.md` for descriptive language (avoid "final", "update")
+       - Use `gigis-commitus.md` for proper type classification and agent signatures
+    5. Analyze changes and group by logical functionality per Conventional Commits overlay
+    6. Create commit messages following Lord Gig's Standards of Commitence
+    7. Include proper agent signatures and technical metadata when available
+  - **Safety Protocols**:
+    - Never commit untracked files without explicit analysis and user confirmation
+    - Handle pre-commit hook failures gracefully with retry logic
+    - Respect existing staging decisions but can reorganize if logically beneficial
+    - Follow repository-specific commit message conventions and fleet standards
+  - **Standards Compliance**:
+    - Use conventional commits with Lord Gig's extensions (`eng:`, `agent:`, `nix:`, etc.)
+    - Avoid generic language per commit-language-guide.md principles
+    - Include agent signatures in footers: `Chief-Engineer: [AgentName] <timestamp>`
+    - Add technical metadata when available (build times, generation numbers, scope impact)
+    - Maintain clean history principles from GIT-CONVENTIONS.md
 
 ## Build Commands
 - **System rebuild**: `just rebuild` or `scripts/system-flake-rebuild.sh [HOST]`
@@ -123,8 +154,13 @@ When consulting on repositories outside your primary assignment:
 - **Context**: Systematic organization of scattered documentation, musings, and operational content
 - **Implementation**: Chief Engineer Montgomery Scott
 
-**Stardate 2025-12-03.3 - Authority Language Standardization**
+**Stardate 2025-12-08.2 - Universal /commit Command Implementation**
 - **Authority**: A directive of Lord Gig
-- **Changes**: Corrected authority references to proper "A directive of Lord Gig" format throughout documentation
-- **Context**: Maintains proper formality while acknowledging close working relationship 
+- **Changes**: Added standardized `/commit` command to Universal Agent Commands
+  - Comprehensive git working directory analysis (staged and unstaged changes)
+  - Integration with fleet git standards from `docs/standards/git/` documentation
+  - Safety protocols for staging decisions and pre-commit hook handling
+  - Standards compliance with Lord Gig's Conventional Commits overlay
+  - Agent signature requirements and technical metadata inclusion
+- **Context**: Fleet-wide standardization of git commit workflow with proper documentation references
 - **Implementation**: Chief Engineer Montgomery Scott
