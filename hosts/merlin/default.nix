@@ -49,7 +49,7 @@
   };
 
   # Tailscale configuration
-  tailscale.enable = true;
+  tailscale.enable = false;
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
