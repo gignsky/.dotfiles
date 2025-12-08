@@ -84,6 +84,9 @@
     python312 # For Python-based MCP servers
     uv # Modern Python package installer for MCP servers
 
+    # Calculator replacement for Windows Calculator
+    libqalculate # Powerful scientific calculator with qalc CLI
+
     ################################################################
     ## look through and decide if these might be good to have then sort them throughout the configuration of the home files and the dotfiles, all new packages should start here for testing purposes if not used in a nix-shell -p command
     ################################################################
