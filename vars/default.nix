@@ -4,7 +4,7 @@
 
   username = "gig";
   uid = 1701;
-  guid = 1701;
+  gid = 1701; # Fixed typo: was 'guid'
   #domain = inputs.nix-secrets.domain;
   #userFullName = inputs.nix-secrets.full-name;
   handle = "gignsky";

@@ -40,7 +40,7 @@ in
       {
         users = {
           groups.${configVars.username} = {
-            gid = configVars.guid;
+            inherit (configVars) gid; # Better: use inherit instead of direct assignment
           };
           mutableUsers = false; # required for password to be set via sops during system activation
           users.${configVars.username} = {
