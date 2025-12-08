@@ -160,8 +160,8 @@ rebuild-test args="":
 	@git commit -m "📊 Scotty: Auto-update engineering logs" 2>/dev/null || true
 
 # Rebuild-full with new shell
-rebuild-full-new:
-        just rebuild-full
+rebuild-full-new args="":
+        just rebuild-full {{args}}
         nu
 
 # Rebuild the system and check sops and home manager
