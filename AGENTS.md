@@ -6,6 +6,11 @@ This repository operates under **Lord Gig's Realm** organizational structure. Al
 ## Agent Instructions
 - **Keep this file current**: Agents should frequently suggest modifications to this AGENTS.md file when they discover changes that make it inaccurate or require updates to keep it current with the codebase.
 - **Fleet Protocols**: All agents must follow fleet command structure and quest documentation requirements
+- **Critical Fleet Architecture**: All agents must reference `operations/fleet-management/OPERATIONS-MANUAL.md` for foundational knowledge including:
+  - WSL hostname constraints and flake target mappings (`nixos` → `wsl`)
+  - Physical host detection methods for logging differentiation
+  - Rebuild command behavior and automatic host detection
+  - Essential for proper operation in WSL environments
 
 ## Fleet Operations & Quest Protocols
 

@@ -71,19 +71,31 @@
    - the laptop and mobile quill with which Lord G. can muse at a far.
    - also duel booted like _ganoslal_, yet, once again the name _merlin_ refers
      to the NixOS operating system.
-3. _wsl/nixos_
+3. _wsl/nixos_ - **Critical Architecture Documentation**
    - route: _internal windows hyperV networking -- as far as it is known to me,
      it is very difficult to ssh into this machine from another, if it is even
      online_
-   - the NixOS based wsl instance that exists identically (as it is defined only
-     once) on both _merlin_ and _ganoslal_'s windows systems.
-   - At this time his Lordship has not discovered a way to tell them apart for
-     record keeping purposes and the simpilest solution, was to declare them
-     twins identical in every way.
-   - Additionally, a quirk of NixOS on wsl is that the hostname must forever
-     remain _nixos_ and cannot be channged, thusly on this host alone a rebuild
-     or home-manager switch must always be specified to the _wsl_ host as the
-     _nixos_ host -- technically does not exist.
+   - **FOUNDATIONAL KNOWLEDGE**: The NixOS-based WSL instance that exists identically 
+     (as it is defined only once) on both _merlin_ and _ganoslal_'s Windows systems.
+   
+   **WSL Architecture Requirements:**
+   - **Hostname Constraint**: WSL hostname MUST remain `nixos` (cannot be changed)
+   - **Flake Target Mapping**: `nixos` hostname → `wsl` flake configuration
+   - **Physical Host Detection**: Uses Windows interop (`cmd.exe /c hostname`) to identify:
+     - `merlins-windows` (merlin's laptop WSL instance)  
+     - `ganoslals-windows` (ganoslal's desktop WSL instance)
+   - **Shared Configuration**: Both instances use identical `.#wsl` flake target
+   
+   **Rebuild Command Behavior:**
+   - `just rebuild` → automatically detects WSL and uses `wsl` target
+   - `just home` → automatically detects WSL and uses `gig@wsl` target  
+   - Manual specification still supported: `just rebuild wsl`
+   - Test commands: `just test-rebuild`, `just test-home` use intelligent detection
+   
+   **Logging Differentiation:**
+   - Build logs show: `wsl@merlins-windows` vs `wsl@ganoslals-windows`
+   - Commit messages include physical host context for operational clarity
+   - Essential for distinguishing between identical configurations on different machines
 
 ### Gateways | _Routers_
 

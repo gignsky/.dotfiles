@@ -328,3 +328,35 @@
 - **Device Support**: Broad compatibility with audio hardware and Bluetooth devices
 
 **Status**: Planning phase - assess current audio configuration gaps and optimization opportunities
+
+### Engineering Log System Enhancement
+**Added**: 2025-12-08 by Chief Engineer Montgomery Scott per Lord Gig directive  
+**Priority**: Medium  
+**Scope**: Improve log indexing and organization system
+
+**Objective**: Enhance the engineering logging system to include index numbers in addition to dates for improved clarity and navigation
+
+**Current State**:
+- Logs identified by date only (e.g., `2025-12-08-automated.log`)
+- Multiple log entries per day can create confusion
+- Difficult to reference specific log sequences or events
+
+**Proposed Enhancement**:
+- **Index Numbering**: Add sequential index numbers to log files and entries
+- **Format Options**: Consider `2025-12-08-001-automated.log` or internal entry indexing
+- **Cross-Reference**: Enable better tracking of related events across multiple logs
+- **Navigation**: Improved log browsing and historical reference capabilities
+
+**Implementation Considerations**:
+- **Backwards Compatibility**: Ensure existing log references continue to work
+- **Index Management**: Determine index scope (daily reset vs continuous numbering)
+- **Automation**: Integrate indexing into existing logging infrastructure
+- **Documentation**: Update logging conventions and agent instructions
+
+**Research Areas**:
+- **Index Strategy**: Daily sequential (001, 002, 003) vs timestamp-based vs continuous
+- **File Naming**: Optimal balance between clarity and compatibility
+- **Cross-Log Relationships**: Enable linking related events across different log files
+- **Search Enhancement**: Improve log searchability with index-based queries
+
+**Status**: Administrative note for future implementation - requires system design and testing
