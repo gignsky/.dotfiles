@@ -32,4 +32,14 @@ Starting Event: build-start@merlins-windows
 nixos-rebuild-wsl@merlins-windows@merlins-windows completed in 25s (success: true, generation: 41)
 [2025-12-08 17:10:17] BUILD START
 Starting Event: build-start@merlins-windows
+[2025-12-08 17:10:41] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-wsl@merlins-windows@merlins-windows completed in 24s (success: true, generation: 41)
+[2025-12-08 17:11:16] BUILD START
+Starting nixos-rebuild-wsl@merlins-windows@merlins-windows
+[2025-12-08 17:11:40] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-wsl@merlins-windows@merlins-windows completed in 24s (success: true, generation: 41)
+[2025-12-08 17:13:53] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-wsl@merlins-windows@merlins-windows completed in 17s (success: true, generation: 41)
+[2025-12-08 17:13:55] BUILD START
+Starting Event: build-start@merlins-windows
 
