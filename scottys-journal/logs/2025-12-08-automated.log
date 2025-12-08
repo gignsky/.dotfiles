@@ -42,4 +42,3 @@ nixos-rebuild-wsl@merlins-windows@merlins-windows completed in 24s (success: tru
 nixos-rebuild-wsl@merlins-windows@merlins-windows completed in 17s (success: true, generation: 41)
 [2025-12-08 17:13:55] BUILD START
 Starting Event: build-start@merlins-windows
-
