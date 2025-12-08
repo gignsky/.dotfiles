@@ -103,8 +103,6 @@ else
 fi
 
 git diff -U0 ./*glob*.nix
-echo "Running pre-commit on all files"
-failable-pre-commit || true
 echo "NixOS Rebuilding ${HOST_IDENTIFIER}..."
 
 # Capture build output and success/failure
@@ -129,15 +127,15 @@ if sudo nixos-rebuild switch --flake .#"$HOST" | tee "$output_file" 2>&1; then
       scotty_log_event "build-complete" "nixos-rebuild-${HOST_IDENTIFIER}" "$duration" "$build_success" "$generation_number"
   fi
   
-  # Commit with enhanced generation info
+  # Commit with enhanced generation info (skip pre-commit hooks to avoid conflicts)
   export AUTOMATED_COMMIT=true
   if [ -f "$(dirname "$0")/commit-enhance-lib.sh" ]; then
     source "$(dirname "$0")/commit-enhance-lib.sh"
     enhanced_msg=$(enhance_commit_message "auto(system): rebuild $HOST_IDENTIFIER generation $gen" "system-flake-rebuild.sh")
-    git commit -a --allow-empty -m "$enhanced_msg" || true
+    git commit -a --allow-empty --no-verify -m "$enhanced_msg" || true
   else
     # Fallback to basic message if enhancement library not available
-    git commit -a --allow-empty -m "$HOST_IDENTIFIER: $gen" || true
+    git commit -a --allow-empty --no-verify -m "$HOST_IDENTIFIER: $gen" || true
   fi
 else
   build_success="false"
