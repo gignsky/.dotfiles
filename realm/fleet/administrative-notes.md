@@ -260,3 +260,36 @@
 - **Backup**: Critical need for robust backup and recovery procedures
 
 **Status**: Awaiting resource allocation and implementation timeline planning
+
+### Bluetooth Device Management Requirements
+**Added**: 2025-12-08 by Chief Engineer Montgomery Scott per Lord Gig directive
+**Priority**: Medium  
+**Scope**: Linux native OS bluetooth device management (specifically merlin host)
+
+**Objective**: Implement proper bluetooth device management solution for Linux systems
+
+**Requirements**:
+- **Target System**: merlin host (Linux native OS)
+- **Functionality**: Comprehensive bluetooth device pairing, management, and configuration
+- **Integration**: Should work well with NixOS/Linux ecosystem
+- **User Experience**: Simplified bluetooth device management interface
+
+**Research Targets**:
+- **Primary Candidate**: 'btman' - recommended by Gabby
+- **Alternative Solutions**: Investigate other bluetooth management tools available in nixpkgs
+- **GUI vs CLI**: Evaluate both graphical and command-line bluetooth management options
+- **Home Manager Integration**: Assess declarative bluetooth configuration possibilities
+
+**Implementation Considerations**:
+- **NixOS Packaging**: Ensure chosen solution is available in nixpkgs or can be packaged
+- **System Dependencies**: Bluetooth stack requirements and compatibility
+- **User Permissions**: Proper user/group permissions for bluetooth device access
+- **Configuration Management**: Integration with existing home-manager setup
+
+**Evaluation Criteria**:
+- **Reliability**: Stable bluetooth device pairing and connection management
+- **Features**: Device discovery, pairing, connection profiles, audio codec support
+- **Maintenance**: Active development and community support
+- **Documentation**: Clear setup and usage documentation
+
+**Status**: Research phase - evaluate btman and alternative solutions
