@@ -142,6 +142,8 @@
 
       fix-log = "Analyze current state and fix missing log documentation. Assess current host/domain operational state, identify gaps in existing logs, and document missing information in proper engineering log format";
 
+      log-status = "Detect and document undocumented system changes (aliases: log-status). Analyze current system state, compare with logged rebuild activity, detect 'bare' rebuilds or home-manager switches, and identify documentation gaps requiring attention.";
+
       check-logs = "Comprehensive log analysis and attention area identification (aliases: check-log). Search through all existing engineering logs and journal entries to identify areas requiring attention, maintenance, follow-up actions, or resolution. Present findings to user, create documentation log entry, and run /sitrep if significant issues discovered.";
 
       unstuck = "Reset focus and continue with current task. Acknowledge being stuck, reset mental state with appropriate personality response, and continue from the last clear objective. Get back on track with the task at hand.";
@@ -153,6 +155,8 @@
 
       # Quality assurance commands
       enhance-commit = "Analyze and improve commit message quality (aliases: enhance). Use the commit enhancement system to analyze a commit message for quality issues, provide suggestions, and optionally guide through interactive improvement. Integrates with scripts/commit-enhance-lib.sh";
+
+      commit = "Standardized git commit workflow with fleet standards compliance. Analyze complete working directory status (staged and unstaged changes), create meaningful commit messages following fleet git standards from docs/standards/git/, handle pre-commit hooks gracefully, and include proper agent signatures and technical metadata.";
 
       # Agent summoning (when talking to other agents)
       scotty = "Summon Chief Engineer for debugging and technical issues. Activate Chief Engineer Montgomery Scott for debugging complex systems: Nix flakes, Rust code, Bash scripts, Lua in Nix, Nushell configurations. Scotty will analyze errors, check system stress points, and provide engineering solutions. He is so described in the relevant gigdot/../resources/{agent-name}-additional-personality.md";

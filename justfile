@@ -62,7 +62,7 @@ rebuild-pre:
 
 dont-fuck-my-build:
   @nix develop -c echo '*The Pre-Commit has been given a chance to Update!*'
-  git ls-files --others --exclude-standard -- '*.nix' | xargs -r git add -v
+  git ls-files --others --exclude-standard -- '*.nix' '*.sh' | xargs -r git add -v
   nix flake update nix-secrets --commit-lock-file
   @nix-shell -p lolcat --run 'echo "Very little chance your build is fucked! 👍" | lolcat 2> /dev/null'
 
@@ -129,11 +129,7 @@ clean:
 rebuild-post:
 	# just check-sops
 	@nix-shell -p lolcat --run 'echo "[POST] Rebuilt." | lolcat 2> /dev/null'
-	@echo "📊 Logging rebuild to engineering records..."
-	@just log-commit "System rebuild completed successfully"
-	@echo "🧹 Cleaning up engineering logs..."
-	@git add scottys-journal/ 2>/dev/null || true
-	@git commit -m "📊 Scotty: Auto-update engineering logs" 2>/dev/null || true
+	@echo "✅ Rebuild completed successfully - engineering logs handled by rebuild script"
 
 # Rebuild the system
 rebuild args="":
@@ -142,10 +138,11 @@ rebuild args="":
 	nix run .#system-flake-rebuild -- {{args}}
 	just rebuild-post
 
-# Rebuild the system verbosely
+# Rebuild the system verbosely (with SCOTTY_DEBUG)
 rebuild-v args="":
 	just rebuild-pre
-	nix run .#system-flake-rebuild-verbose -- {{args}}
+	@nix-shell -p lolcat --run 'echo "[REBUILD-V] Attempting Verbose Rebuild..." | lolcat' 2> /dev/null 
+	env SCOTTY_DEBUG=true nix run .#system-flake-rebuild -- {{args}}
 	just rebuild-post
 
 # Test rebuilds the system
@@ -170,29 +167,29 @@ rebuild-full args="":
 	just home {{args}}
 
 # Bare rebuild commands (minimal, no logging, no scripts)
-rebuild-bare host=`hostname`:
+rebuild-bare host=`scripts/get-flake-target.sh`:
 	@echo "Bare system rebuild for {{host}}..."
 	sudo nixos-rebuild switch --flake .#{{host}}
 
-home-bare host=`hostname`:
+home-bare host=`scripts/get-flake-target.sh`:
 	@echo "Bare home-manager rebuild for gig@{{host}}..."
 	home-manager switch --flake .#gig@{{host}}
 
-rebuild-full-bare host=`hostname`:
+rebuild-full-bare host=`scripts/get-flake-target.sh`:
 	@echo "Bare full rebuild for {{host}}..."
 	sudo nixos-rebuild switch --flake .#{{host}}
 	home-manager switch --flake .#gig@{{host}}
 
 # Test rebuild commands (dry-run evaluation without applying)
-test-rebuild host=`hostname`:
+test-rebuild host=`scripts/get-flake-target.sh`:
 	@echo "Testing system rebuild for {{host}} (evaluation only)..."
 	nixos-rebuild dry-run --flake .#{{host}} --verbose
 
-test-home host=`hostname`:
+test-home host=`scripts/get-flake-target.sh`:
 	@echo "Testing home-manager rebuild for gig@{{host}} (evaluation only)..."
 	home-manager build --flake .#gig@{{host}} --verbose
 
-test-rebuild-full host=`hostname`:
+test-rebuild-full host=`scripts/get-flake-target.sh`:
 	@echo "Testing full rebuild for {{host}} (evaluation only)..."
 	nixos-rebuild dry-run --flake .#{{host}} --verbose
 	home-manager build --flake .#gig@{{host}} --verbose
@@ -260,9 +257,7 @@ pre-home:
 # Runs after every home rebuild
 post-home:
 	@nix-shell -p lolcat --run 'echo "[POST-HOME] Finished." | lolcat 2> /dev/null'
-	@echo "📊 Batching home-manager rebuild log..."
-	@bash -c 'cd ~/.dotfiles && source scripts/scotty-logging-lib.sh && scotty_batch_log "build-complete" "Home-manager rebuild completed" "Home-manager rebuild completed successfully at $(date)"'
-	@echo "✅ Post-home complete - log batched"
+	@echo "✅ Home-manager rebuild completed - engineering logs handled by rebuild script"
 
 simple-home *ARGS:
 	nix run .#home-manager-flake-rebuild -- {{ ARGS }}
@@ -271,6 +266,13 @@ home *ARGS:
   just pre-home
   @nix-shell -p lolcat --run 'echo "[HOME] Attempting Home Rebuild..." | lolcat 2> /dev/null'
   just simple-home {{ ARGS }}
+  just post-home
+
+# Rebuild home-manager verbosely (with SCOTTY_DEBUG)
+home-v *ARGS:
+  just pre-home
+  @nix-shell -p lolcat --run 'echo "[HOME-V] Attempting Verbose Home Rebuild..." | lolcat 2> /dev/null'
+  env SCOTTY_DEBUG=true just simple-home {{ ARGS }}
   just post-home
 
 # Runs just home
@@ -592,3 +594,8 @@ log-commit message="":
 	@git add scottys-journal/ 2>/dev/null || true
 	@git commit -m "📊 Scotty: Auto-commit engineering logs" 2>/dev/null || true
 	@echo "✅ Engineering logs committed to repository"
+
+# Scotty's system state analysis and gap detection
+log-status:
+	@echo "🔍 Running Chief Engineer's system state analysis..."
+	@bash -c 'cd ~/.dotfiles && source scripts/scotty-logging-lib.sh && log_status'
