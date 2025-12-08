@@ -166,9 +166,22 @@ fi
 git diff -U0 ./*glob*.nix
 echo "NixOS Rebuilding ${HOST_IDENTIFIER}..."
 
-# Capture build output and success/failure
+# Capture build output and success/failure with robust exit code handling
 output_file=$(mktemp)
-if sudo nixos-rebuild switch --flake .#"$HOST" | tee "$output_file" 2>&1; then
+
+# Use pipefail to ensure we capture the exit code of nixos-rebuild, not tee
+set -o pipefail
+
+# Run nixos-rebuild and capture both output and exit code properly
+echo "Starting nixos-rebuild switch for ${HOST_IDENTIFIER}..."
+if sudo nixos-rebuild switch --flake .#"$HOST" 2>&1 | tee "$output_file"; then
+  nixos_rebuild_exit_code=${PIPESTATUS[0]}
+else
+  nixos_rebuild_exit_code=${PIPESTATUS[0]}
+fi
+
+# Double-check the actual exit code from nixos-rebuild (not tee)
+if [ "$nixos_rebuild_exit_code" -eq 0 ]; then
   build_success="true"
   
   # Extract generation number from nixos-rebuild output or list-generations
@@ -207,6 +220,7 @@ if sudo nixos-rebuild switch --flake .#"$HOST" | tee "$output_file" 2>&1; then
     git commit -a --allow-empty --no-verify -m "$HOST_IDENTIFIER: $gen" || true
   fi
 else
+  echo "nixos-rebuild failed with exit code: $nixos_rebuild_exit_code"
   build_success="false"
   end_time=$(date +%s)
   duration=$((end_time - start_time))
