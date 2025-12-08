@@ -105,69 +105,127 @@ _check_batch_commit_needed() {
 
 # Commit all pending batch logs
 _commit_batch_logs() {
+    echo "🔍 DEBUG: Entering _commit_batch_logs function"
+    
     local batch_files=($(find "$BATCH_LOG_DIR" -name "*.batch" 2>/dev/null))
-    [ ${#batch_files[@]} -eq 0 ] && return 0
+    echo "🔍 DEBUG: Found ${#batch_files[@]} batch files: ${batch_files[*]}"
+    
+    [ ${#batch_files[@]} -eq 0 ] && {
+        echo "🔍 DEBUG: No batch files found, returning early"
+        return 0
+    }
     
     echo "📊 Processing batched engineering logs..."
     
+    echo "🔍 DEBUG: Starting batch file processing loop"
     for batch_file in "${batch_files[@]}"; do
+        echo "🔍 DEBUG: Processing batch file: $batch_file"
         _process_batch_file "$batch_file"
+        echo "🔍 DEBUG: Completed processing: $batch_file"
     done
+    echo "🔍 DEBUG: Batch file processing loop completed"
     
     # Clean up batch files
+    echo "🔍 DEBUG: Removing batch files: ${batch_files[*]}"
     rm -f "${batch_files[@]}"
+    echo "🔍 DEBUG: Batch files removed"
     
     # Commit the logs
+    echo "🔍 DEBUG: Changing directory to ${HOME}/.dotfiles"
     cd "${HOME}/.dotfiles"
+    echo "🔍 DEBUG: Current directory: $(pwd)"
+    
+    echo "🔍 DEBUG: Adding scottys-journal/ to git"
     git add scottys-journal/ 2>/dev/null
-    git commit -m "📊 Scotty: Batch commit engineering logs ($(date '+%H:%M'))" 2>/dev/null
+    echo "🔍 DEBUG: Git add completed, exit code: $?"
+    
+    echo "🔍 DEBUG: Starting git commit (this is where hangs usually occur)"
+    if git commit --no-verify -m "📊 Scotty: Batch commit engineering logs ($(date '+%H:%M'))" >/dev/null 2>&1; then
+        local commit_exit_code=0
+        echo "🔍 DEBUG: Git commit completed successfully"
+    else
+        local commit_exit_code=$?
+        echo "🔍 DEBUG: Git commit failed with exit code: $commit_exit_code"
+    fi
+    echo "🔍 DEBUG: Git commit completed, exit code: $commit_exit_code"
     
     echo "✅ Batched logs committed successfully"
+    echo "🔍 DEBUG: Exiting _commit_batch_logs function"
 }
 
 # Process individual batch file into proper logs
 _process_batch_file() {
     local batch_file="$1"
+    echo "🔍 DEBUG: _process_batch_file called with: $batch_file"
+    
+    # Check if batch file exists and is readable
+    if [[ ! -f "$batch_file" ]] || [[ ! -r "$batch_file" ]]; then
+        echo "🔍 DEBUG: ERROR - Batch file not found or not readable: $batch_file"
+        return 1
+    fi
+    
     local current_entry=""
     local entry_type=""
     local entry_timestamp=""
     local entry_title=""
     local entry_content=""
     local in_entry=false
+    local entry_count=0
     
-    while IFS= read -r line; do
+    echo "🔍 DEBUG: Starting to read batch file line by line"
+    
+    # FIX: Use process substitution instead of input redirection to avoid file descriptor issues
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        echo "🔍 DEBUG: Processing line: '$line'"
         case "$line" in
             "---BATCH-ENTRY-START---")
+                echo "🔍 DEBUG: Found batch entry start"
                 in_entry=true
                 entry_type=""
                 entry_timestamp=""
                 entry_title=""
                 entry_content=""
+                entry_count=$((entry_count + 1))
+                echo "🔍 DEBUG: Entry count incremented to: $entry_count"
                 ;;
             "---BATCH-ENTRY-END---")
+                echo "🔍 DEBUG: Found batch entry end (entry #$entry_count)"
                 if [ "$in_entry" = true ]; then
                     # Process this entry using existing logging functions
                     if [ -n "$entry_type" ] && [ -n "$entry_title" ]; then
+                        echo "🔍 DEBUG: Processing entry: type='$entry_type', title='$entry_title'"
                         # Use the original logging function but bypass batching
                         _direct_log_entry "$entry_type" "$entry_title" "$entry_content" "$entry_timestamp"
+                        echo "🔍 DEBUG: Entry processing completed"
+                    else
+                        echo "🔍 DEBUG: Skipping entry - missing type or title"
                     fi
                 fi
                 in_entry=false
                 ;;
             TYPE:*)
                 entry_type="${line#TYPE: }"
+                echo "🔍 DEBUG: Set entry_type='$entry_type'"
                 ;;
             TIMESTAMP:*)
                 entry_timestamp="${line#TIMESTAMP: }"
+                echo "🔍 DEBUG: Set entry_timestamp='$entry_timestamp'"
                 ;;
             TITLE:*)
                 entry_title="${line#TITLE: }"
+                echo "🔍 DEBUG: Set entry_title='$entry_title'"
                 ;;
             CONTENT:*)
                 entry_content="${line#CONTENT: }"
+                echo "🔍 DEBUG: Set entry_content='$entry_content'"
+                ;;
+            *)
+                echo "🔍 DEBUG: Unrecognized line format: '$line'"
                 ;;
         esac
     done < "$batch_file"
+    
+    echo "🔍 DEBUG: Finished processing batch file, processed $entry_count entries"
 }
 
 # Direct logging bypass for batch processing
