@@ -293,3 +293,38 @@
 - **Documentation**: Clear setup and usage documentation
 
 **Status**: Research phase - evaluate btman and alternative solutions
+
+### Audio System Configuration Requirements
+**Added**: 2025-12-08 by Chief Engineer Montgomery Scott per Lord Gig directive
+**Priority**: Medium  
+**Scope**: Comprehensive audio configuration for NixOS hosts
+
+**Objective**: Implement proper audio system configuration and optimization for all NixOS hosts
+
+**Requirements**:
+- **Target Systems**: All NixOS hosts (merlin, ganoslal, mganos)
+- **Audio Stack**: PipeWire/PulseAudio configuration optimization
+- **Quality**: High-quality audio output and input handling
+- **Compatibility**: Support for various audio devices and formats
+- **Integration**: Seamless integration with NixOS/home-manager setup
+
+**Implementation Areas**:
+- **Audio Server Configuration**: Optimize PipeWire/PulseAudio settings
+- **Codec Support**: Ensure comprehensive audio codec availability
+- **Device Management**: Proper audio device detection and configuration
+- **Bluetooth Audio**: High-quality Bluetooth audio codec support (complements Bluetooth device management)
+- **Hardware Integration**: Host-specific audio hardware optimization
+
+**Technical Considerations**:
+- **NixOS Audio Modules**: Leverage hardware.pulseaudio, services.pipewire configurations
+- **User Session Audio**: Proper user-space audio service management
+- **Real-time Audio**: Low-latency configuration for audio applications
+- **Home Manager Integration**: Declarative audio service and application configuration
+
+**Evaluation Criteria**:
+- **Audio Quality**: Clear, high-fidelity audio output across devices
+- **Latency**: Minimal audio delay for interactive applications
+- **Reliability**: Stable audio service operation without dropouts
+- **Device Support**: Broad compatibility with audio hardware and Bluetooth devices
+
+**Status**: Planning phase - assess current audio configuration gaps and optimization opportunities
