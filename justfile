@@ -169,30 +169,42 @@ rebuild-full args="":
 	just rebuild {{args}}
 	just home {{args}}
 
+# Helper function to map system hostname to flake host configuration
+# WSL reports hostname as 'nixos' but flake config uses 'wsl'
+_get_flake_host:
+	#!/usr/bin/env bash
+	SYSTEM_HOST=$(hostname)
+	# Check if running in WSL environment and hostname is 'nixos'
+	if [[ "$SYSTEM_HOST" == "nixos" ]] && grep -qi microsoft /proc/version 2>/dev/null; then
+		echo "wsl"
+	else
+		echo "$SYSTEM_HOST"
+	fi
+
 # Bare rebuild commands (minimal, no logging, no scripts)
-rebuild-bare host=`hostname`:
+rebuild-bare host=`just _get_flake_host`:
 	@echo "Bare system rebuild for {{host}}..."
 	sudo nixos-rebuild switch --flake .#{{host}}
 
-home-bare host=`hostname`:
+home-bare host=`just _get_flake_host`:
 	@echo "Bare home-manager rebuild for gig@{{host}}..."
 	home-manager switch --flake .#gig@{{host}}
 
-rebuild-full-bare host=`hostname`:
+rebuild-full-bare host=`just _get_flake_host`:
 	@echo "Bare full rebuild for {{host}}..."
 	sudo nixos-rebuild switch --flake .#{{host}}
 	home-manager switch --flake .#gig@{{host}}
 
 # Test rebuild commands (dry-run evaluation without applying)
-test-rebuild host=`hostname`:
+test-rebuild host=`just _get_flake_host`:
 	@echo "Testing system rebuild for {{host}} (evaluation only)..."
 	nixos-rebuild dry-run --flake .#{{host}} --verbose
 
-test-home host=`hostname`:
+test-home host=`just _get_flake_host`:
 	@echo "Testing home-manager rebuild for gig@{{host}} (evaluation only)..."
 	home-manager build --flake .#gig@{{host}} --verbose
 
-test-rebuild-full host=`hostname`:
+test-rebuild-full host=`just _get_flake_host`:
 	@echo "Testing full rebuild for {{host}} (evaluation only)..."
 	nixos-rebuild dry-run --flake .#{{host}} --verbose
 	home-manager build --flake .#gig@{{host}} --verbose
