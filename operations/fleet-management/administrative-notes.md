@@ -423,3 +423,62 @@
 - **Long-term Support**: Consider maintenance commitments for contributed package
 
 **Status**: Planning phase - research nixpkgs contribution requirements and existing tools
+
+### MCP Server for Centralized Agent Repository Investigation
+**Added**: 2025-12-08 by Chief Engineer Montgomery Scott  
+**Priority**: Strategic Planning  
+**Scope**: Fleet-wide agent operations enhancement
+
+#### Background Context
+Current agent logging infrastructure operates on local repository basis:
+- Scotty's engineering logs stored in `scottys-journal/logs/`
+- Agent reports in `operations/reports/`
+- Metrics tracking via local CSV files
+- Cross-repository consultation requires manual quest reports
+
+#### Strategic Opportunity: MCP Server Integration
+**Concept**: Develop custom MCP server to provide centralized agent repository with remote read/write capabilities
+
+**Technical Architecture**:
+- **MCP Server**: Custom implementation for agent log management
+- **DeepWiki Integration**: Leverage existing DeepWiki MCP server capabilities for repository documentation and history research
+- **Remote Operations**: Agents can access centralized logging regardless of local repository availability
+- **Cross-Environment Support**: WSL, physical hosts, expedition environments
+
+#### Potential Benefits
+1. **Unified Agent Operations**: All agent logs in centralized, accessible location
+2. **Enhanced Expedition Support**: Agents on consultation missions can log to home base
+3. **Historical Analysis**: DeepWiki integration provides advanced repository analysis
+4. **Scalable Architecture**: Supports fleet expansion and multi-repository operations
+5. **Redundancy**: Reduces dependency on local repository availability
+
+#### Implementation Considerations
+- **MCP Server Development**: Custom server for agent-specific operations
+- **Authentication/Security**: Fleet-wide access control and agent verification
+- **Synchronization**: Bidirectional sync between local and centralized repositories
+- **Fallback Mechanisms**: Graceful degradation when remote services unavailable
+- **Integration Points**: OpenCode MCP configuration, agent libraries, logging infrastructure
+
+#### Research Phase Requirements
+1. **MCP Server Capabilities Assessment**: Analyze MCP protocol for custom server development
+2. **DeepWiki Integration Analysis**: Evaluate existing DeepWiki functionality for agent needs
+3. **Technical Feasibility Study**: Architecture design for centralized agent operations
+4. **Security Framework Design**: Fleet-wide authentication and authorization model
+5. **Migration Strategy**: Transition from local to hybrid local/remote logging
+
+#### Success Metrics
+- Agent expedition efficiency improvement
+- Reduced manual quest report overhead  
+- Enhanced cross-repository analysis capabilities
+- Improved fleet operational visibility
+
+#### Next Steps
+1. **Research Phase**: Investigate MCP server development requirements
+2. **Prototype Development**: Create minimal viable MCP server for agent operations
+3. **DeepWiki Integration Testing**: Evaluate compatibility and capabilities
+4. **Fleet Pilot Program**: Test with select agents on controlled expeditions
+5. **Full Implementation**: Roll out to entire agent fleet
+
+**Status**: Planning Phase - Investigation Required  
+**Timeline**: Strategic Initiative - No immediate deadline  
+**Dependencies**: MCP protocol research, DeepWiki capabilities assessment
