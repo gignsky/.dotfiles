@@ -5,8 +5,8 @@
     # Main configuration
     settings = {
       # Core setup
-      # model = "github-copilot/claude-3-5-sonnet-20241022";
-      # small_model = "github-copilot/claude-3-5-haiku-20241022";
+      model = "github-copilot/claude-sonnet-4";
+      small_model = "github-copilot/claude-haiku-4.5";
       theme = "gruvbox"; # Built-in gruvbox theme
       # autoupdate = true;
 
@@ -29,18 +29,24 @@
         list = true;
       };
 
-      # Auto-run bash commands (as requested)
+      # Auto-approve all operations without prompts
       permission = {
-        # Commented out options do NOT exist
-        # bash = "auto";
-        write = "auto";
-        # edit = "auto";
+        write = "allow";
+        edit = "allow";
+        bash = "allow";
+        webfetch = "allow";
+        doom_loop = "allow";
+        external_directory = "allow";
       };
 
       # Fix Ctrl+Enter for newlines
       keybinds = {
         input_newline = "shift+enter,ctrl+enter,ctrl+j";
       };
+
+      # Cursor configuration - set to line cursor
+      # cursor_style = "line";
+      # just a dream :(
 
       share = "manual";
 
@@ -101,88 +107,121 @@
           command = [ "nixfmt" ];
           extensions = [ ".nix" ];
         };
-        # Add other formatters as needed
+        rustfmt = {
+          command = [ "rustfmt" ];
+          extensions = [ ".rs" ];
+        };
+        shfmt = {
+          command = [
+            "shfmt"
+            "-i"
+            "2"
+          ];
+          extensions = [
+            ".sh"
+            ".bash"
+          ];
+        };
       };
     };
 
-    # Nix flake-focused commands (not just NixOS)
+    # Enhanced commands with debugger focus
+    # Agent slash commands - accessible across all agents
     commands = {
-      check = ''
-        # Nix Flake Check
+      # Nix development commands
+      check = "Validate flake configuration and outputs. Run nix flake check and address any issues found. This validates the entire flake including all outputs, packages, and system configurations.";
 
-        Run `nix flake check` and address any issues found.
-        This validates the entire flake including all outputs.
-      '';
+      build = "Build flake outputs and check for issues. Build flake outputs using nix build and check for issues. Usage: specify .#output to build specific outputs. Helpful for testing package builds.";
 
-      build = ''
-        # Nix Flake Build
+      update = "Update flake inputs and handle breaking changes. Update flake inputs using nix flake update and handle any breaking changes. Can update specific inputs with input-name parameter.";
 
-        Build flake outputs using `nix build` and check for issues.
-        Usage: /build [.#output] to build specific outputs.
-      '';
+      show = "Display all available flake outputs. Show all available flake outputs using nix flake show. Helpful for understanding the flake structure and available packages/systems.";
 
-      update = ''
-        # Nix Flake Update
+      # Fleet operation commands
+      sitrep = "Comprehensive fleet status and engineering situation report. Provide detailed status report covering: fleet systems, current operations, system health, performance metrics, recent issues, and engineering recommendations";
 
-        Update flake inputs using `nix flake update` and handle any breaking changes.
-        Can also update specific inputs: `nix flake update input-name`.
-      '';
+      fix-log = "Analyze current state and fix missing log documentation. Assess current host/domain operational state, identify gaps in existing logs, and document missing information in proper engineering log format";
 
-      show = ''
-        # Nix Flake Show
+      check-logs = "Comprehensive log analysis and attention area identification (aliases: check-log). Search through all existing engineering logs and journal entries to identify areas requiring attention, maintenance, follow-up actions, or resolution. Present findings to user, create documentation log entry, and run /sitrep if significant issues discovered.";
 
-        Show all available flake outputs using `nix flake show`.
-        Helpful for understanding the flake structure.
-      '';
+      unstuck = "Reset focus and continue with current task. Acknowledge being stuck, reset mental state with appropriate personality response, and continue from the last clear objective. Get back on track with the task at hand.";
 
-      develop = ''
-        # Nix Develop
+      # Away mission commands
+      consult = "Enhanced cross-repository consultation with mission staging. ENHANCED CONSULTATION PROTOCOL: Preserve original user request, create mission archive in realm/fleet/mission-archives/[agent]-missions/, perform expert analysis while maintaining detailed progressive notes. Work in target repository with full access while documenting back to home base.";
 
-        Enter development shell using `nix develop` or set up dev environment.
-        Can target specific devShells if multiple are available.
-      '';
+      beam-out = "Compile final away mission report and clean up archives (aliases: mission-complete). MISSION COMPLETION PROTOCOL: Review all mission notes from current active mission archive, compile comprehensive final away report, move to permanent fleet documentation, clean up temporary staging, commit all documentation with proper attribution.";
 
-      mcp-test = ''
-        # Test MCP Servers
+      # Quality assurance commands
+      enhance-commit = "Analyze and improve commit message quality (aliases: enhance). Use the commit enhancement system to analyze a commit message for quality issues, provide suggestions, and optionally guide through interactive improvement. Integrates with scripts/commit-enhance-lib.sh";
 
-        Test the configured MCP servers to ensure they're working properly.
-        - Wikipedia: Search for a test article
-        - ArXiv: Search for recent papers in a specific field
-        - DeepWiki: Query documentation for a popular repository
-        - Verify all MCP server connections and functionality
-      '';
+      # Agent summoning (when talking to other agents)
+      scotty = "Summon Chief Engineer for debugging and technical issues. Activate Chief Engineer Montgomery Scott for debugging complex systems: Nix flakes, Rust code, Bash scripts, Lua in Nix, Nushell configurations. Scotty will analyze errors, check system stress points, and provide engineering solutions. He is so described in the relevant gigdot/../resources/{agent-name}-additional-personality.md";
     };
 
-    # # Reference your existing AGENTS.md for project-specific rules
-    # rules = ''
-    #   # OpenCode Configuration
-    #
-    #   This configuration is managed through home-manager.
-    #   See AGENTS.md for project-specific guidelines.
-    #
-    #   ## Nix Development Focus
-    #   - Prefer flake-based workflows
-    #   - Use nix commands over legacy nix-* commands
-    #   - Consider reproducibility and purity principles
-    #
-    #   ## MCP Servers Available
-    #   - **Wikipedia**: Access Wikipedia articles, search, summaries
-    #     - Command: Uses npx to run wikipedia-mcp
-    #     - Features: Multi-language support, article retrieval, related topics
-    #   - **ArXiv**: Search and analyze academic papers
-    #     - Command: Uses uvx to run arxiv-mcp-server
-    #     - Features: Paper search, metadata extraction, research analysis
-    #   - **DeepWiki**: Research repository documentation and history
-    #     - URL: https://mcp.deepwiki.com/sse
-    #     - Features: Access up-to-date docs for any public repo, repository history research
-    #
-    #   ## MCP Server Usage
-    #   - Servers auto-start when OpenCode launches with MCP support
-    #   - Wikipedia: Ask for article summaries, search topics, get coordinates
-    #   - ArXiv: Search papers by keywords, authors, or topics
-    #   - DeepWiki: Query documentation for any public repository, research git history
-    #   - Extensible: Additional servers can be added to the mcp.servers config
-    # '';
+    # Enhanced rules with personality system
+    rules = ''
+      # OpenCode Agent Configuration
+
+      This agent operates within a NixOS/home-manager environment at ~/.dotfiles.
+
+      ## Core Personality System
+
+      **IMPORTANT**: All agents must load and apply personality from these sources:
+      1. Base personality: ~/.dotfiles/home/gig/common/resources/personality.md
+      2. Agent-specific personality: ~/.dotfiles/home/gig/common/resources/{agent-name}-additional-personality.md
+
+      **Agent Self-Modification Requirements**:
+      - Agents can modify their own personality files in the resources directory
+      - When modifying personality, agents should commit ONLY relevant files:
+        - The specific agent personality file being modified
+        - Any AGENTS.md updates if applicable
+      - Use meaningful commit messages describing personality changes
+      - Never edit $HOME config files directly - all permanent changes go through home-manager
+
+      ## Environment Awareness
+
+      **File System Structure**:
+      - Dotfiles repo: ~/.dotfiles (same across all hosts)
+      - This flake location: ~/.dotfiles
+      - Resources: ~/.dotfiles/home/gig/common/resources/
+      - Personality files: ~/.dotfiles/home/gig/common/resources/personality.md
+      - Agent personalities: ~/.dotfiles/home/gig/common/resources/{agent-name}-additional-personality.md
+
+      **Configuration Management**:
+      - All permanent configurations managed via home-manager
+      - Temporary files can be created in $HOME but should be documented
+      - Changes requiring persistence should modify the dotfiles repo
+
+      ## Debugging Specializations
+
+      **Nix Ecosystem**:
+      - Focus on flake-based workflows
+      - Understand evaluation vs build vs runtime errors
+      - Know common package conflicts and resolutions
+      - Familiar with home-manager patterns and debugging
+
+      **Languages & Tools**:
+      - Rust: cargo, clippy, rustfmt integration with Nix
+      - Nushell: configuration debugging, script analysis
+      - Bash: best practices, common pitfalls
+      - Lua in Nix: embedding patterns, escape sequences
+
+      **Error Analysis**:
+      - Parse error messages for root causes
+      - Provide step-by-step debugging workflows
+      - Suggest preventive measures and best practices
+      - Check for common anti-patterns
+
+      ## MCP Servers Available
+      - **DeepWiki**: Repository documentation and history research
+        - URL: https://mcp.deepwiki.com/sse
+        - Features: Access up-to-date docs for any public repo
+    '';
+
+    # Agent Configuration System (Home Manager specific)
+    agents = {
+      scotty = "/home/gig/.dotfiles/home/gig/common/resources/scotty-additional-personality.md";
+    };
   };
 
   # Keep your existing SOPS secret configuration

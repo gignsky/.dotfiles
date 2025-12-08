@@ -19,12 +19,16 @@
   als = "help aliases";
   cd = "z";
   nd = "nix develop -c nu";
+  ndc = "nix develop -c";
   nr = "nix run";
   nb = "nix build";
   ndw = "nix develop .#windows -c nu";
   diddy = "touch";
   podman = "sudo podman";
   docker = "sudo podman";
+
+  # Agent calls directly
+  scotty = "opencode run --agent scotty";
 
   #recursive listing for searching
   # need to write a nushell script to make this work since it uses pipes

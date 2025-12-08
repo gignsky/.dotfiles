@@ -1,0 +1,2 @@
+date,host,disk_usage_gb,memory_usage_gb,cpu_load_avg,network_active,notes
+2025-11-25,ganoslal,null,null,null,true,"Scotty agent implementation session - metrics collection not yet automated"

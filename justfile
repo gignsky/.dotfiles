@@ -40,78 +40,162 @@ pull-rebuild:
 	@nix-shell -p lolcat --run "echo 'Rebuilt.' | lolcat 2> /dev/null"
 
 pull-home:
-	@nix-shell -p lolcat --run "echo 'Rebuilding Home-Manager...' | lolcat 2> /dev/null"
-	just pull
-	just home
-	@nix-shell -p lolcat --run "echo 'Home-Manager Rebuilt.' | lolcat 2> /dev/null"
+  @nix-shell -p lolcat --run "echo 'Rebuilding Home-Manager...' | lolcat 2> /dev/null"
+  just pull
+  just home
+  @nix-shell -p lolcat --run "echo 'Home-Manager Rebuilt.' | lolcat 2> /dev/null"
 
 pull-rebuild-full:
-	@nix-shell -p lolcat --run "echo 'Full Rebuild Running...' | lolcat 2> /dev/null"
-	just pull-rebuild
-	just pull-home
-	@nix-shell -p lolcat --run "echo 'Full Rebuild Complete.' | lolcat 2> /dev/null"
+  @nix-shell -p lolcat --run "echo 'Full Rebuild Running...' | lolcat 2> /dev/null"
+  just pull-rebuild
+  just pull-home
+  @nix-shell -p lolcat --run "echo 'Full Rebuild Complete.' | lolcat 2> /dev/null"
 
 pull-nix-secrets:
-	cd ~/nix-secrets && git fetch && git pull && cd ~/.dotfiles
+  cd ~/nix-secrets && git fetch && git pull && cd ~/.dotfiles
 
 # Run before every rebuild, every time
 rebuild-pre:
-	@nix-shell -p lolcat --run 'echo "[PRE] Rebuilding NixOS..." | lolcat 2> /dev/null'
-	just dont-fuck-my-build
-	@nix-shell -p lolcat --run 'echo "Updating Nix-Secrets Repo..." | lolcat 2> /dev/null'
+  @nix-shell -p lolcat --run 'echo "[PRE] Rebuilding NixOS..." | lolcat 2> /dev/null'
+  just dont-fuck-my-build
+  @nix-shell -p lolcat --run 'echo "Updating Nix-Secrets Repo..." | lolcat 2> /dev/null'
 
 dont-fuck-my-build:
-	git ls-files --others --exclude-standard -- '*.nix' | xargs -r git add -v
-	nix flake update nix-secrets --commit-lock-file
-	@nix-shell -p lolcat --run 'echo "Very little chance your build is fucked! 👍" | lolcat 2> /dev/null'
+  @nix develop -c echo '*The Pre-Commit has been given a chance to Update!*'
+  git ls-files --others --exclude-standard -- '*.nix' | xargs -r git add -v
+  nix flake update nix-secrets --commit-lock-file
+  @nix-shell -p lolcat --run 'echo "Very little chance your build is fucked! 👍" | lolcat 2> /dev/null'
 
 switch args="":
 	just rebuild {{args}}
 	just home
 
 clean:
+  @echo "🧹 Starting smart clean process..."
+  # First: Failsafe logging checkpoint (in case OpenCode gets broken)
+  @echo "📝 Pre-clean failsafe logging checkpoint..."
+  @bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Smart clean initiated - preserving OpenCode history"' 
+  
+  # Clean standard caches (safe)
   rm -rfv ~/.cargo/
   rm -rfv ~/.cache/pre-commit/
   rm -rfv ~/.cache/nvf/
   rm -rfv ~/.cache/starship/
   rm -rfv ~/.config/zsh/zplug
-  rm -rfv ~/.local/share/opencode
   rm -rfv result
+  
+  # Smart OpenCode cleanup - preserve history, clean configuration
+  @echo "🔧 Smart OpenCode cleanup (preserving history)..."
+  @if [ -d ~/.local/share/opencode ]; then \
+    echo "📁 Backing up OpenCode history..."; \
+    mkdir -p /tmp/opencode-backup; \
+    cp -r ~/.local/share/opencode/log /tmp/opencode-backup/ 2>/dev/null || true; \
+    cp -r ~/.local/share/opencode/storage /tmp/opencode-backup/ 2>/dev/null || true; \
+    cp ~/.local/share/opencode/auth.json /tmp/opencode-backup/ 2>/dev/null || true; \
+    echo "🗑️ Cleaning OpenCode config (will rebuild)..."; \
+    rm -rf ~/.local/share/opencode/snapshot 2>/dev/null || true; \
+    rm -rf ~/.local/share/opencode/exports 2>/dev/null || true; \
+    rm -rf ~/.local/share/opencode/bin 2>/dev/null || true; \
+    echo "📂 Restoring OpenCode history..."; \
+    cp -r /tmp/opencode-backup/log ~/.local/share/opencode/ 2>/dev/null || true; \
+    cp -r /tmp/opencode-backup/storage ~/.local/share/opencode/ 2>/dev/null || true; \
+    cp /tmp/opencode-backup/auth.json ~/.local/share/opencode/ 2>/dev/null || true; \
+    rm -rf /tmp/opencode-backup; \
+    echo "✅ OpenCode history preserved, config cleaned"; \
+  else \
+    echo "ℹ️ OpenCode not yet initialized - nothing to clean"; \
+  fi
+  
+  @if [ -d ~/.config/opencode ]; then \
+    echo "🧹 Cleaning OpenCode config directory (preserving node_modules temporarily)..."; \
+    mkdir -p /tmp/opencode-node-backup; \
+    cp -r ~/.config/opencode/node_modules /tmp/opencode-node-backup/ 2>/dev/null || true; \
+    rm -rf ~/.config/opencode; \
+    mkdir -p ~/.config/opencode; \
+    cp -r /tmp/opencode-node-backup/node_modules ~/.config/opencode/ 2>/dev/null || true; \
+    rm -rf /tmp/opencode-node-backup; \
+    echo "✅ OpenCode config cleaned (node_modules preserved for faster rebuild)"; \
+  fi
+  
+  # Quick results cleanup
   quick-results
+  
+  # Post-clean failsafe logging
+  @echo "📝 Post-clean failsafe logging checkpoint..."
+  @bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Smart clean completed - OpenCode ready for rebuild"'
+  @echo "✅ Smart clean complete - OpenCode history preserved, configuration reset for rebuild"
 
 # Run after every rebuild, some of the time
 rebuild-post:
 	# just check-sops
 	@nix-shell -p lolcat --run 'echo "[POST] Rebuilt." | lolcat 2> /dev/null'
+	@echo "📊 Logging rebuild to engineering records..."
+	@just log-commit "System rebuild completed successfully"
+	@echo "🧹 Cleaning up engineering logs..."
+	@git add scottys-journal/ 2>/dev/null || true
+	@git commit -m "📊 Scotty: Auto-update engineering logs" 2>/dev/null || true
 
 # Rebuild the system
 rebuild args="":
 	just rebuild-pre
 	@nix-shell -p lolcat --run 'echo "[REBUILD] Attempting Rebuild..." | lolcat' 2> /dev/null 
-	scripts/system-flake-rebuild.sh {{args}}
+	nix run .#system-flake-rebuild -- {{args}}
 	just rebuild-post
 
 # Rebuild the system verbosely
 rebuild-v args="":
 	just rebuild-pre
-	scripts/system-flake-rebuild-verbose.sh {{args}}
+	nix run .#system-flake-rebuild-verbose -- {{args}}
 	just rebuild-post
 
 # Test rebuilds the system
 rebuild-test args="":
 	just rebuild-pre
-	scripts/system-flake-rebuild-test.sh {{args}}
+	nix run .#system-flake-rebuild-test -- {{args}}
 	@nix-shell -p lolcat --run 'echo "[TEST] Finished." | lolcat 2> /dev/null'
+	@echo "📊 Logging test rebuild to engineering records..."
+	@just log-commit "System test rebuild completed successfully"
+	@echo "🧹 Cleaning up engineering logs..."
+	@git add scottys-journal/ 2>/dev/null || true
+	@git commit -m "📊 Scotty: Auto-update engineering logs" 2>/dev/null || true
 
 # Rebuild-full with new shell
-rebuild-full-new:
-        just rebuild-full
+rebuild-full-new args="":
+        just rebuild-full {{args}}
         nu
 
 # Rebuild the system and check sops and home manager
 rebuild-full args="":
 	just rebuild {{args}}
 	just home {{args}}
+
+# Bare rebuild commands (minimal, no logging, no scripts)
+rebuild-bare host=`hostname`:
+	@echo "Bare system rebuild for {{host}}..."
+	sudo nixos-rebuild switch --flake .#{{host}}
+
+home-bare host=`hostname`:
+	@echo "Bare home-manager rebuild for gig@{{host}}..."
+	home-manager switch --flake .#gig@{{host}}
+
+rebuild-full-bare host=`hostname`:
+	@echo "Bare full rebuild for {{host}}..."
+	sudo nixos-rebuild switch --flake .#{{host}}
+	home-manager switch --flake .#gig@{{host}}
+
+# Test rebuild commands (dry-run evaluation without applying)
+test-rebuild host=`hostname`:
+	@echo "Testing system rebuild for {{host}} (evaluation only)..."
+	nixos-rebuild dry-run --flake .#{{host}} --verbose
+
+test-home host=`hostname`:
+	@echo "Testing home-manager rebuild for gig@{{host}} (evaluation only)..."
+	home-manager build --flake .#gig@{{host}} --verbose
+
+test-rebuild-full host=`hostname`:
+	@echo "Testing full rebuild for {{host}} (evaluation only)..."
+	nixos-rebuild dry-run --flake .#{{host}} --verbose
+	home-manager build --flake .#gig@{{host}} --verbose
 
 single-update:
 	nix run github:gignsky/nix-update-input
@@ -176,9 +260,12 @@ pre-home:
 # Runs after every home rebuild
 post-home:
 	@nix-shell -p lolcat --run 'echo "[POST-HOME] Finished." | lolcat 2> /dev/null'
+	@echo "📊 Batching home-manager rebuild log..."
+	@bash -c 'cd ~/.dotfiles && source scripts/scotty-logging-lib.sh && scotty_batch_log "build-complete" "Home-manager rebuild completed" "Home-manager rebuild completed successfully at $(date)"'
+	@echo "✅ Post-home complete - log batched"
 
 simple-home *ARGS:
-	./scripts/home-manager-flake-rebuild.sh {{ ARGS }}
+	nix run .#home-manager-flake-rebuild -- {{ ARGS }}
 
 home *ARGS:
   just pre-home
@@ -197,7 +284,7 @@ nu home:
 new home:
   just clean
   just home
-  nu
+  exec nu
 
 home-trace:
 	just dont-fuck-my-build
@@ -215,7 +302,7 @@ pre-build:
 
 build *args:
 	just pre-build
-	scripts/flake-build.sh {{args}}
+	nix run .#flake-build -- {{args}}
 	just post-build
 
 post-build:
@@ -272,7 +359,7 @@ cleanup-vm:
 # helper justfile arg
 call-vm:
     @nix-shell -p lolcat --run 'echo "[VM] Running VM..." | lolcat 2> /dev/null'
-    - nix shell nixpkgs#qemu --command bash -c 'bash scripts/run-iso-vm.sh result/iso/*.iso ./tmp-iso/nixos-vm/vm.img'
+    - nix run .#run-iso-vm -- result/iso/*.iso ./tmp-iso/nixos-vm/vm.img
     @nix-shell -p lolcat --run 'echo "[VM] VM Closed." | lolcat 2> /dev/null'
 
 # run vm with minimal iso - while not deleting files afterwards
@@ -288,7 +375,7 @@ vm-full:
 # reconnect to vm that has already been created
 vm-reconnect:
 	@nix-shell -p lolcat --run 'echo "[VM] Reconnecting to VM..." | lolcat 2> /dev/null'
-	- nix shell nixpkgs#qemu --command bash -c 'bash scripts/run-iso-vm.sh result/iso/*.iso ./tmp-iso/nixos-vm/vm.img --choose'
+	- nix run .#run-iso-vm -- result/iso/*.iso ./tmp-iso/nixos-vm/vm.img --choose
 	@nix-shell -p lolcat --run 'echo "[VM] VM Closed." | lolcat 2> /dev/null'
 
 # run vm with minimal iso - while deleting files afterwards
@@ -430,7 +517,7 @@ store-photo:
 
 bootstrap *args:
 	just dont-fuck-my-build
-	~/.dotfiles/scripts/bootstrap-nixos.sh {{args}}
+	nix run .#bootstrap-nixos -- {{args}}
 
 #   echo $SOPS_FILE
 #   PS_AGE_KEY_FILE=~/.config/sops/age/keys.txt
@@ -473,3 +560,35 @@ bootstrap *args:
 #
 # sync-secrets USER HOST:
 #   rsync -av --filter=':- .gitignore' -e "ssh -l {{USER}}" . {{USER}}@{{HOST}}:nix-secrets/
+
+# Interactive script packager with fzf selection and OpenCode test generation
+package-script:
+	nix run .#package-script
+
+# Check hardware configuration synchronization
+check-hardware:
+	nix run .#check-hardware-config
+
+# Batched logging commands for reduced commit noise
+batch-commit-logs:
+	@echo "📊 Committing batched engineering logs..."
+	@bash -c 'cd ~/.dotfiles && source scripts/scotty-logging-lib.sh && _commit_batch_logs'
+
+batch-status:
+	@echo "📊 Batch logging status:"
+	@bash -c 'cd ~/.dotfiles && if [ -d ".batch-logs" ]; then find .batch-logs -name "*.batch" -exec echo "  📄 {}" \; -exec grep -c "^---BATCH-ENTRY-START---" {} \; 2>/dev/null | paste - - | sed "s/\t/ entries: /"; else echo "  No pending batch logs"; fi'
+
+# Manual engineering log entry for commits
+log-commit message="":
+	@if [ -z "{{message}}" ]; then \
+		echo "📝 Logging most recent commit to engineering records..."; \
+		bash -c 'cd ~/.dotfiles && source scripts/scotty-logging-lib.sh && scotty_log_event "git-commit" "$$(git log -1 --pretty=%s)"'; \
+	else \
+		echo "📝 Logging custom message to engineering records..."; \
+		bash -c 'cd ~/.dotfiles && source scripts/scotty-logging-lib.sh && scotty_log_event "git-commit" "{{message}}"'; \
+	fi
+	@echo "✅ Engineering log entry created successfully"
+	@echo "🧹 Auto-committing engineering logs..."
+	@git add scottys-journal/ 2>/dev/null || true
+	@git commit -m "📊 Scotty: Auto-commit engineering logs" 2>/dev/null || true
+	@echo "✅ Engineering logs committed to repository"

@@ -65,6 +65,25 @@
     stripping (with command strip and flags -S -p) in  /nix/store/i5qljn09445jw1kdfv08ci5pmy79zlg2-dnsenum-1.2.4.2/bin
    ```
 
+## Black Friday 2025 GPU Expansion Planning
+
+**Current Issue**: AMD GPU DRM driver incompatibility (v2.50.0 vs required
+3.x.x) affecting 6-monitor setup with dual-GPU configuration.
+
+**Expansion Option**: Add second NVIDIA GPU in parallel with existing RTX 3060
+Ti
+
+- **Target Cards**: RTX 3030/3050 (budget) or RTX 5050 (splurge)
+- **Requirements**:
+  - Must fit 4x PCIe slot (check motherboard compatibility)
+  - Need larger PSU with additional GPU power connectors
+  - Calculate total wattage: current 200W + new GPU wattage + 20% headroom
+- **Benefits**:
+  - Eliminates AMD driver compatibility issues
+  - Unified NVIDIA driver stack across all 6 monitors
+  - Better multi-GPU performance with same vendor
+- **Black Friday Timing**: Monitor sales for GPU + PSU combo deals
+
 ## Things to do...
 
 - Read following pages:
@@ -270,3 +289,26 @@
     that the agents have a uniform (low-traffic) place-to-go to update
     themselves and their logs
 - update gigvim to turn tree sitter back on, or at least check.
+- SCOTTY!! -- we should add to admin notes that we need a 'fast' version of
+  rebuild and home-manager switch that somehow call the logger and engineer's
+  report in the background and return control of the shell to the user in the
+  meantime.
+- **EMAIL INFRASTRUCTURE SETUP**:
+  - **Configure Thunderbird declaratively** for all NixOS hosts using home-manager
+    - Research thunderbird home-manager options and configuration patterns
+    - Set up unified email account configurations across all machines
+    - Configure filters, signatures, and preferences declaratively
+  - **Deploy centralized mailserver** for domain email management
+    - **Primary Option**: Use [simple-nixos-mailserver](https://gitlab.com/simple-nixos-mailserver/nixos-mailserver/) 
+      as recommended in [this Reddit post](https://www.reddit.com/r/NixOS/comments/xwo2x5/ridiculously_easy_mail_server_setup_with_nixos/)
+    - **Target**: VPS deployment (possibly containerized) for reliability
+    - **Scope**: Handle emails from all owned domains in centralized location
+    - **Consider**: Distributed setup vs single-point-of-failure analysis
+    - **Integration**: Use agenix or sops-nix for password/secret management
+    - **Features**: The nixos-mailserver provides 10/10 mail server with flake support
+  - **Benefits**: Unified email management, declarative configuration, reduced reliance on external providers
+- **BLUETOOTH DEVICE MANAGEMENT**:
+  - **Need**: Program to manage bluetooth devices in Linux native OS (specifically merlin)
+  - **Recommendation**: Gabby suggests 'btman' as potential solution
+  - **Priority**: Medium - required for proper bluetooth device management on merlin host
+  - **Research**: Investigate btman and alternative bluetooth management tools for NixOS/Linux
