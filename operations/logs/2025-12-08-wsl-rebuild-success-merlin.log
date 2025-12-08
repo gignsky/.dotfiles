@@ -1,34 +1,41 @@
-**Engineering Log - WSL@Merlin Rebuild Success**  
+**Engineering Log - WSL@Merlin Rebuild FAILURE - CORRECTED**  
 Stardate: 2025-12-08  
 Vessel: Merlin (Windows WSL)  
 Operation: NixOS Configuration Rebuild  
 
+**CORRECTION NOTICE**: This log was initially incorrectly reported as successful.
+
 **TECHNICAL STATUS**
-- Generation: 41 → 41 (same generation, configuration refresh)
-- Build Duration: 17 seconds (excellent performance)
-- Status: SUCCESS ✅
+- Generation: FAILED - No generation created
+- Build Duration: Failed after ~10 seconds during evaluation
+- Status: FAILURE 🚨
 
-**CONFIGURATION CHANGES**
-1. **flake.nix**: Updated fancy-fonts repository URL
-   - Changed: `git+ssh://git@github.com/gignsky/personal-fonts-nix`
-   - To: `git+ssh://git@github.com/gignsky/fancy-fonts`
-   - Impact: Repository URL correction for font dependency
+**ATTEMPTED CONFIGURATION CHANGES**
+1. **Samba Service Promotion**: FAILED
+   - File: hosts/common/optional/samba.nix → hosts/common/core/samba.nix
+   - Error: Referenced non-existent `configVars.guid` (should be `gid`)
+   - Impact: Evaluation failure prevented any system changes
 
-2. **home/gig/home.nix**: Added libqalculate package
-   - Package: libqalculate (scientific calculator with qalc CLI)
-   - Purpose: Windows Calculator replacement
-   - Location: Added to testing packages section
+2. **Tailscale Activation**: NOT ATTEMPTED  
+   - File: hosts/merlin/default.nix
+   - Status: Not reached due to prior evaluation error
 
 **ENGINEERING ASSESSMENT**
-- Repository URL fix ensures proper font dependency resolution
-- Calculator addition enhances WSL mathematical capabilities  
-- Fast build time indicates no dependency conflicts
-- Same generation number suggests configuration refresh rather than system change
+- Configuration evaluation error in Samba module
+- Variable naming inconsistency (`guid` vs `gid`) 
+- Build failed before any actual system changes
+- Automated logging system incorrectly reported success
 
 **OPERATIONAL NOTES**
-- WSL environment performing optimally on Merlin vessel
-- No errors detected in build process
-- Configuration changes minimal but functionally significant
+- WSL environment stable (no changes applied due to failure)
+- Configuration error caught during evaluation phase
+- Issue subsequently fixed by Captain (variable naming correction)
+- False positive demonstrates need for better error detection in rebuild scripts
+
+**LESSONS LEARNED**
+- Automated rebuild logging needs improved failure detection
+- Variable naming consistency critical across configuration modules
+- Evaluation errors can be masked by misleading success reports
 
 Chief Engineer: Montgomery Scott  
-2025-12-08 17:35:14
+2025-12-08 18:51:00 (CORRECTED ENTRY)
