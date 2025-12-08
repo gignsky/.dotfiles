@@ -257,9 +257,7 @@ pre-home:
 # Runs after every home rebuild
 post-home:
 	@nix-shell -p lolcat --run 'echo "[POST-HOME] Finished." | lolcat 2> /dev/null'
-	@echo "📊 Batching home-manager rebuild log..."
-	@bash -c 'cd ~/.dotfiles && source scripts/scotty-logging-lib.sh && scotty_batch_log "build-complete" "Home-manager rebuild completed" "Home-manager rebuild completed successfully at $(date)"'
-	@echo "✅ Post-home complete - log batched"
+	@echo "✅ Home-manager rebuild completed - engineering logs handled by rebuild script"
 
 simple-home *ARGS:
 	nix run .#home-manager-flake-rebuild -- {{ ARGS }}
