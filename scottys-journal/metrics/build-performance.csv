@@ -42,3 +42,4 @@ date,host,operation,duration_seconds,success,error_type,git_commit,git_branch,gi
 2025-12-08 17:34:57,nixos,nixos-rebuild-wsl@merlins-windows@merlins-windows,17,true,,52516855d27d7c3a280b237bc27a40e65c5f3ad4,develop,1_modified,d43233f960c9bbc98ff347f2182f8b4e1d0310f1a02304a65cabb1e5be881f57,41,Automated build logging
 2025-12-08 17:37:01,nixos,home-manager-rebuild-wsl@merlins-windows,16,true,,5d6fb7f9c4050da05fb4dab405d205c8a6f7e6ac,develop,clean,d43233f960c9bbc98ff347f2182f8b4e1d0310f1a02304a65cabb1e5be881f57,137,Automated home-manager rebuild with Scotty engineering logs
 2025-12-08 17:37:09,wsl@merlins-windows,home-manager,16,SUCCESS,137,flake.nix home/gig/home.nix,fancy-fonts URL fix + libqalculate addition
+2025-12-08 17:41:12,nixos,nixos-rebuild-wsl@merlins-windows@merlins-windows,16,true,,eca45979b648e3fca19f41b2aa9fe4f85f0a786d,develop,1_modified,d43233f960c9bbc98ff347f2182f8b4e1d0310f1a02304a65cabb1e5be881f57,41,Automated build logging
