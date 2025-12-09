@@ -118,7 +118,7 @@ clean:
   fi
   
   # Quick results cleanup
-  quick-results
+  nix run .#quick-results
   
   # Post-clean failsafe logging
   @echo "📝 Post-clean failsafe logging checkpoint..."
@@ -309,7 +309,7 @@ build *args:
 
 post-build:
 	@nix-shell -p lolcat --run 'echo "Build Finished." | lolcat 2> /dev/null'
-	quick-results
+	nix run .#quick-results
 
 #
 # test:
@@ -326,7 +326,7 @@ setup-vm-pre:
 setup-vm-post:
 	@nix-shell -p lolcat --run 'echo "[VM] Running VM post-setup..." | lolcat 2> /dev/null'
 	@nix-shell -p lolcat --run 'echo "[VM] Showing Results..." | lolcat 2> /dev/null'
-	quick-results
+	nix run .#quick-results
 	@nix-shell -p lolcat --run 'echo "[VM] Making tmp-iso dir..." | lolcat 2> /dev/null'
 	mkdir -p ./tmp-iso/nixos-vm
 	@nix-shell -p lolcat --run 'echo "[VM] Creating qemu img from ISO..." | lolcat 2> /dev/null'
