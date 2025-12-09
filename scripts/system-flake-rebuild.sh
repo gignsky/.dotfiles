@@ -47,11 +47,12 @@ done
 
 if [ "$LOGGING_LIB_FOUND" = false ]; then
     # Fallback: define basic logging functions if library is not found
-    echo "DEBUG: Using fallback logging functions"
+    # echo "DEBUG: Using fallback logging functions"
     scotty_log_event() { echo "[$1] $*" >&2; }
     log_build_performance() { echo "Build: $1 took $2 seconds (success: $3)" >&2; }
 else
-    echo "DEBUG: Scotty logging library loaded from: ${lib_path}"
+    # echo "DEBUG: Scotty logging library loaded from: ${lib_path}"
+    true
 fi
 
 # Enhanced host detection with intelligent WSL mapping
@@ -95,48 +96,50 @@ authenticate_sudo() {
 
 authenticate_sudo
 
-echo "DEBUG: Authentication completed successfully"
+# echo "DEBUG: Authentication completed successfully"
 
 failable-pre-commit() {
   nix develop -c pre-commit run --all-files
 }
 
-echo "DEBUG: About to set -e"
+# echo "DEBUG: About to set -e"
 set -e
-echo "DEBUG: About to pushd"
+# echo "DEBUG: About to pushd"
 pushd . || exit
-echo "DEBUG: pushd completed successfully"
+# echo "DEBUG: pushd completed successfully"
 
 # Log build start with enhanced host information (WSL uses direct logging)
 start_time=$(date +%s)
-echo "DEBUG: About to log build start for ${HOST_IDENTIFIER}"
+# echo "DEBUG: About to log build start for ${HOST_IDENTIFIER}"
 
 # Debug: Check if scotty_log_event function is available
 if command -v scotty_log_event >/dev/null 2>&1; then
-    echo "DEBUG: scotty_log_event function is available"
+    # echo "DEBUG: scotty_log_event function is available"
+    true
 elif type scotty_log_event >/dev/null 2>&1; then
-    echo "DEBUG: scotty_log_event is defined as a function"
+    # echo "DEBUG: scotty_log_event is defined as a function"  
+    true
 else
-    echo "DEBUG: ERROR - scotty_log_event not found!"
+    echo "ERROR: scotty_log_event not found!"
     exit 1
 fi
 
 if [ "$(hostname)" = "nixos" ]; then
     # WSL: Use direct logging to avoid batch processing hangs
-    echo "DEBUG: Using WSL logging path"
+    # echo "DEBUG: Using WSL logging path"
     BYPASS_BATCH=1 scotty_log_event "build-start" "nixos-rebuild-${HOST_IDENTIFIER}" || {
-        echo "DEBUG: WSL logging failed, using fallback"
+        # echo "DEBUG: WSL logging failed, using fallback"
         echo "[build-start] nixos-rebuild-${HOST_IDENTIFIER}" >&2
     }
 else
     # Native Linux: Use normal batched logging with fallback
-    echo "DEBUG: Using normal logging path"
+    # echo "DEBUG: Using normal logging path"
     scotty_log_event "build-start" "nixos-rebuild-${HOST_IDENTIFIER}" || {
-        echo "DEBUG: Normal logging failed, using fallback"
+        # echo "DEBUG: Normal logging failed, using fallback"
         echo "[build-start] nixos-rebuild-${HOST_IDENTIFIER}" >&2
     }
 fi
-echo "DEBUG: Logging completed successfully"
+# echo "DEBUG: Logging completed successfully"
 
 # Capture previous generation for comparison
 previous_gen=$(nixos-rebuild list-generations 2>/dev/null | grep -E "(current|True)" | grep -o '[0-9]*' | head -n 1 || echo "0")
