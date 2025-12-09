@@ -282,3 +282,11 @@ Starting Event: build-start
 [2025-12-08 20:01:48] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
 nixos-rebuild-merlin completed in 440s (success: true, generation: 61)
 
+[2025-12-08 20:05:52] UNKNOWN EVENT
+system-operation: Smart clean initiated - preserving OpenCode history
+
+[2025-12-08 20:05:54] UNKNOWN EVENT
+system-operation: Smart clean completed - OpenCode ready for rebuild
+
+[2025-12-08 20:10:00] ENGINEERING ISSUE DOCUMENTATION
+WezTerm configuration syntax error identified - runtime impact assessment complete
