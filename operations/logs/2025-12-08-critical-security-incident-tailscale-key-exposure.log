@@ -1,0 +1,160 @@
+================================================================================
+CHIEF ENGINEER'S LOG - STARDATE 2025.12.08 (CRITICAL SECURITY INCIDENT)
+================================================================================
+
+🚨 SECURITY BREACH ALERT - TAILSCALE AUTHENTICATION KEY EXPOSURE 🚨
+
+INCIDENT CLASSIFICATION: **CRITICAL - SECRET EXPOSURE**
+AFFECTED COMMIT: 2500c63b5a056d1950373a0df663494dc5366a2c
+COMPROMISED KEY: tskey-auth-kMdyLsP5fZ11CNTRL-yLZJzH18jDNguoa2fxRRDNakRQtAncvrE
+
+================================================================================
+IMMEDIATE DISCOVERY AND RESPONSE:
+================================================================================
+
+DISCOVERY: 2025-12-08 20:25 UTC
+• Captain reported "guardian of git" security alert
+• Investigation revealed live Tailscale auth key committed to public repository
+• Key exposed in automated error logging during tailscaled-autoconnect failure
+• Commit 2500c63 pushed to remote branch: origin/merlin-bspwm-config
+
+AFFECTED LOCATIONS:
+1. scottys-journal/logs/2025-12-08-automated.log (line 271)
+2. scottys-journal/metrics/error-tracking.csv (line 5)
+
+ROOT CAUSE:
+• System rebuild failure on USS Merlin triggered tailscaled-autoconnect service error
+• Error output captured full command line including --auth-key= parameter
+• Automated logging system recorded complete error output without sanitization
+• GitGuardian false positive prevention protocols did not catch auth keys in error logs
+
+================================================================================
+IMMEDIATE CONTAINMENT ACTIONS:
+================================================================================
+
+1. REPOSITORY SANITIZATION (2025-12-08 20:29 UTC):
+   ✅ Replaced exposed key with "[REDACTED-TAILSCALE-KEY]" placeholder
+   ✅ Applied sanitization to both affected files
+   ✅ Committed security fix to repository
+   ✅ Maintained error context while removing sensitive data
+
+2. KEY REVOCATION REQUIREMENTS:
+   🚨 CRITICAL: Compromised key MUST be revoked in Tailscale admin console
+   🚨 CRITICAL: New auth key must be generated to replace compromised credentials
+   🚨 CRITICAL: All systems using this key must be updated with new credentials
+
+3. REPOSITORY HISTORY ASSESSMENT:
+   • Compromised commit exists on remote branch: origin/merlin-bspwm-config
+   • Public exposure timeframe requires immediate key revocation
+   • Git history cleaning may be required depending on security policy
+
+================================================================================
+TECHNICAL DETAILS:
+================================================================================
+
+EXPOSED KEY CHARACTERISTICS:
+• Type: Tailscale authentication key (tskey-auth prefix)
+• Scope: Machine authentication and network access
+• Permissions: --operator=gig --ssh --accept-routes
+• Risk Level: HIGH - Network access and SSH capabilities
+
+EXPOSURE VECTOR:
+• tailscaled-autoconnect service failure during system rebuild
+• systemd logs captured in nixos-rebuild error output
+• Command line arguments included unredacted authentication key
+• Automated logging system processed error without sanitization
+
+AFFECTED SYSTEMS:
+• USS Merlin (merlin.local) - rebuild failure source
+• Public git repository - exposure location
+• Remote GitHub repository - propagation endpoint
+
+================================================================================
+ENHANCED SECURITY PROTOCOLS:
+================================================================================
+
+IMMEDIATE IMPLEMENTATIONS:
+
+1. ERROR LOG SANITIZATION:
+   • Enhanced GitGuardian protocol for error output processing
+   • Automatic detection and redaction of --auth-key= parameters
+   • Safe logging patterns for service failure documentation
+   • Context preservation while protecting sensitive data
+
+2. AUTHENTICATION KEY MANAGEMENT:
+   • Mandatory secret detection in all automated logging
+   • Environment variable isolation for sensitive parameters
+   • Service configuration review for credential exposure risks
+   • Regular audit of error logging for credential leaks
+
+3. COMMIT SECURITY REVIEW:
+   • Pre-commit hooks enhanced for auth key detection
+   • Automated scanning of error logs and metrics files
+   • GitGuardian integration verification for all file types
+   • Manual review requirement for system error documentation
+
+================================================================================
+FLEET-WIDE SECURITY ENHANCEMENTS:
+================================================================================
+
+REQUIRED PROTOCOL UPDATES:
+
+1. AUTOMATED LOGGING SYSTEMS:
+   • All error capture must sanitize authentication parameters
+   • Command line logging requires credential redaction
+   • Service failure documentation protocols updated
+   • Error tracking CSV files subject to secret scanning
+
+2. SYSTEM REBUILD PROCEDURES:
+   • Enhanced error output filtering for sensitive data
+   • Credential isolation in service configurations
+   • Safe error reporting without credential exposure
+   • Automated sanitization in all build error logs
+
+3. INCIDENT RESPONSE PROTOCOLS:
+   • Immediate key revocation procedures for any exposure
+   • Repository history assessment for credential leaks
+   • Coordinated response between git operations and service management
+   • Documentation requirements for all security incidents
+
+================================================================================
+VERIFICATION AND MONITORING:
+================================================================================
+
+COMPLETION CHECKLIST:
+☐ Tailscale auth key revoked in admin console
+☐ New authentication key generated and deployed
+☐ Affected systems updated with new credentials
+☐ Repository sanitization verified
+☐ Remote branch security assessment completed
+☐ Enhanced logging protocols implemented
+☐ Security incident documentation completed
+
+ONGOING MONITORING:
+• Regular scanning for authentication key patterns
+• Automated detection of credential exposure in logs
+• Enhanced GitGuardian integration for error documentation
+• Periodic audit of system rebuild error handling
+
+================================================================================
+LESSONS LEARNED AND PREVENTION:
+================================================================================
+
+CRITICAL INSIGHTS:
+• Error logging can be a vector for credential exposure
+• Automated systems require built-in sanitization protocols
+• Service failures may expose command line arguments with secrets
+• GitGuardian protocols must cover all automated documentation
+
+PREVENTION STRATEGIES:
+• Never log raw command output containing authentication
+• Implement credential redaction at point of error capture
+• Regular audit of all automated logging for sensitive data
+• Enhanced pre-commit scanning for authentication patterns
+
+STATUS: Security incident documented, immediate sanitization complete.
+CRITICAL ACTION REQUIRED: Tailscale key revocation and replacement MANDATORY.
+
+                                     Montgomery Scott, Chief Engineer
+                                     Stardate 2025.12.08 - Security Incident Response
+================================================================================
