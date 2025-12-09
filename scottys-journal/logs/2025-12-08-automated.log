@@ -305,3 +305,6 @@ system-operation: Smart clean completed - OpenCode ready for rebuild
 [2025-12-08 23:06:19] BUILD START
 Starting Event: build-start
 
+[2025-12-08 23:06:34] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-merlin completed in 15s (success: true, generation: 62)
+
