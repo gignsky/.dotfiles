@@ -6,7 +6,7 @@
 
       local config = wezterm.config_builder()
 
-      config.font_size = 14.0
+      config.font_size = 12.0
       config.font = wezterm.font_with_fallback({
         "MonoLisa Variable",
         "Cartograph CF",
