@@ -264,3 +264,58 @@ system-operation: Smart clean initiated - preserving OpenCode history
 [2025-12-08 19:16:26] UNKNOWN EVENT
 system-operation: Smart clean completed - OpenCode ready for rebuild
 
+[2025-12-08 19:39:13] BUILD START
+Starting Event: build-start
+
+[2025-12-08 19:40:17] ★ CAPTAIN'S REPORT ★ BUILD ERROR
+Event: build-error failed: nixos-rebuild-merlin Dec 08 19:39:31 merlin tailscaled-autoconnect-start[15810]:         tailscale up --auth-key=[REDACTED-TAILSCALE-KEY] --operator=gig --ssh --accept-routes Dec 08 19:39:31 merlin systemd[1]: tailscaled-autoconnect.service: Main process exited, code=exited, status=1/FAILURE Dec 08 19:39:31 merlin systemd[1]: tailscaled-autoconnect.service: Failed with result 'exit-code'. Dec 08 19:39:31 merlin systemd[1]: Failed to start tailscaled-autoconnect.service. Command 'systemd-run -E LOCALE_ARCHIVE -E NIXOS_INSTALL_BOOTLOADER --collect --no-ask-password --pipe --quiet --service-type=exec --unit=nixos-rebuild-switch-to-configuration /nix/store/3jrg3w8cfvz6qsd36kzh74sn7v73fbzj-nixos-system-merlin-25.11.20251122.050e09e/bin/switch-to-configuration switch' returned non-zero exit status 4. 
+
+[2025-12-08 19:40:17] BUILD START
+Starting Event: build-start
+
+[2025-12-08 19:40:33] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-merlin completed in 16s (success: true, generation: 60)
+
+[2025-12-08 19:54:28] BUILD START
+Starting Event: build-start
+
+[2025-12-08 20:01:48] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-merlin completed in 440s (success: true, generation: 61)
+
+[2025-12-08 20:05:52] UNKNOWN EVENT
+system-operation: Smart clean initiated - preserving OpenCode history
+
+[2025-12-08 20:05:54] UNKNOWN EVENT
+system-operation: Smart clean completed - OpenCode ready for rebuild
+
+[2025-12-08 20:10:00] ENGINEERING ISSUE DOCUMENTATION
+WezTerm configuration syntax error identified - runtime impact assessment complete
+[2025-12-08 20:09:30] UNKNOWN EVENT
+system-operation: Smart clean initiated - preserving OpenCode history
+
+[2025-12-08 20:09:32] UNKNOWN EVENT
+system-operation: Smart clean completed - OpenCode ready for rebuild
+
+[2025-12-08 20:13:55] UNKNOWN EVENT
+system-operation: Smart clean initiated - preserving OpenCode history
+
+[2025-12-08 20:13:56] UNKNOWN EVENT
+system-operation: Smart clean completed - OpenCode ready for rebuild
+
+[2025-12-08 23:06:19] BUILD START
+Starting Event: build-start
+
+[2025-12-08 23:06:34] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-merlin completed in 15s (success: true, generation: 62)
+
+[2025-12-08 23:10:38] UNKNOWN EVENT
+system-operation: Smart clean initiated - preserving OpenCode history
+
+[2025-12-08 23:10:39] UNKNOWN EVENT
+system-operation: Smart clean completed - OpenCode ready for rebuild
+
+[2025-12-08 23:10:54] UNKNOWN EVENT
+system-operation: Smart clean initiated - preserving OpenCode history
+
+[2025-12-08 23:10:55] UNKNOWN EVENT
+system-operation: Smart clean completed - OpenCode ready for rebuild
