@@ -355,3 +355,4 @@ Ti
     - Test font generation and customization capabilities
     - Document process for future font updates and modifications
   - **Benefits**: Enable custom MonoLisa variants for development environments
+- see if I can embed a default font in gigvim.
