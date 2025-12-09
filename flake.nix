@@ -56,7 +56,7 @@
     # Secrets management
     sops-nix = {
       url = "github:mic92/sops-nix/master";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # optnix.url = "github:water-sucks/optnix";

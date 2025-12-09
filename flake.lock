@@ -19536,7 +19536,7 @@
     "sops-nix_18": {
       "inputs": {
         "nixpkgs": [
-          "nixpkgs-unstable"
+          "nixpkgs"
         ]
       },
       "locked": {
