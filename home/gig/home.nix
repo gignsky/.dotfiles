@@ -87,6 +87,12 @@
     # Calculator replacement for Windows Calculator
     libqalculate # Powerful scientific calculator with qalc CLI
 
+    # Bluetooth and Audio Management
+    bluetuith # TUI Bluetooth manager - excellent for pairing/connecting devices
+    pwvucontrol # Modern PipeWire volume control GUI
+    helvum # PipeWire patchbay for advanced audio routing
+    # blueman        # Alternative GUI Bluetooth manager (uncomment if preferred over TUI)
+
     ################################################################
     ## look through and decide if these might be good to have then sort them throughout the configuration of the home files and the dotfiles, all new packages should start here for testing purposes if not used in a nix-shell -p command
     ################################################################
