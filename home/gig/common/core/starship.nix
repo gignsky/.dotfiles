@@ -5,10 +5,6 @@ _: {
   programs.starship = {
     enable = true;
     enableZshIntegration = true;
-    presets = [
-      "nerd-font-symbols"
-      "bracketed-segments"
-    ];
     enableNushellIntegration = true;
     settings = {
       # # Get editor completions based on the config schema
