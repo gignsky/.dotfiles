@@ -3,11 +3,7 @@
 
   inputs = {
     #################### Official NixOS and HM Package Sources ####################
-    # FIXME: TEMPORARY UNSTABLE UPGRADE FOR OPENCODE TESTING
-    # Original stable: nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
-    # 25.11 readiness: keep this line commented for quick switch when 25.11 drops
-    # nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     # nixpkgs-local.url = "git+file:///home/gig/local_repos/nixpkgs";
     # nixos-anywhere.url = "github:nix-community/nixos-anywhere";
@@ -15,7 +11,7 @@
     nixos-wsl = {
       url = "github:nix-community/NixOS-WSL/main";
       # inputs = {
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
+      inputs.nixpkgs.follows = "nixpkgs";
       # flake-utils.follows = "flake-utils"; # unnecessary as of 2/13/25
       # };
     };
@@ -32,12 +28,8 @@
     flake-utils.url = "github:numtide/flake-utils";
 
     # Home manager
-    # FIXME: TEMPORARY UPGRADE TO MASTER FOR UNSTABLE COMPATIBILITY
     home-manager = {
-      url = "github:nix-community/home-manager/master";
-      # Original: url = "github:nix-community/home-manager/release-25.05";
-      # 25.11 readiness: keep this line commented for quick switch when 25.11 drops
-      # url = "github:nix-community/home-manager/release-25.11";
+      url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -522,7 +514,7 @@
             git
             pre-commit # Manual pre-commit setup
             lolcat
-            nixfmt-rfc-style
+            nixfmt
             nil
             age
             ssh-to-age
