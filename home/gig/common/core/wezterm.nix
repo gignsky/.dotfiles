@@ -6,14 +6,14 @@
     #   "Cartograph CF",
     #   "GoMono Nerd Font Mono"
     # })
-    # config.font = "MonoLisa Variable"
+    # config.font = wezterm.font "Cartograph CF"
     extraConfig = ''
       local wezterm = require("wezterm")
 
       local config = wezterm.config_builder()
 
       config.font_size = 12.0
-      config.font = wezterm.font "Cartograph CF"
+      config.font = "MonoLisa Variable"
 
       config.hide_tab_bar_if_only_one_tab = true
 
