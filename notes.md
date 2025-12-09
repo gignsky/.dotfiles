@@ -355,3 +355,5 @@ Ti
     - Test font generation and customization capabilities
     - Document process for future font updates and modifications
   - **Benefits**: Enable custom MonoLisa variants for development environments
+- need to configure gigvim to ignore notes files by default when fuzzyfinding
+  files and grepping for things
