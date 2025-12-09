@@ -255,3 +255,12 @@ system-operation: Smart clean initiated - preserving OpenCode history
 [2025-12-08 19:13:57] UNKNOWN EVENT
 system-operation: Smart clean completed - OpenCode ready for rebuild
 
+[2025-12-08 19:15:19] UNKNOWN EVENT
+system-operation: Smart clean initiated - preserving OpenCode history
+
+[2025-12-08 19:16:24] UNKNOWN EVENT
+system-operation: Smart clean initiated - preserving OpenCode history
+
+[2025-12-08 19:16:26] UNKNOWN EVENT
+system-operation: Smart clean completed - OpenCode ready for rebuild
+
