@@ -240,3 +240,27 @@ Starting Event: build-start
 [2025-12-08 19:02:36] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
 nixos-rebuild-merlin completed in 14s (success: true, generation: 57)
 
+[2025-12-08 19:06:17] BUILD START
+Starting Event: build-start
+
+[2025-12-08 19:06:31] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-merlin completed in 14s (success: true, generation: 58)
+
+[2025-12-08 19:13:36] UNKNOWN EVENT
+system-operation: Smart clean initiated - preserving OpenCode history
+
+[2025-12-08 19:13:56] UNKNOWN EVENT
+system-operation: Smart clean initiated - preserving OpenCode history
+
+[2025-12-08 19:13:57] UNKNOWN EVENT
+system-operation: Smart clean completed - OpenCode ready for rebuild
+
+[2025-12-08 19:15:19] UNKNOWN EVENT
+system-operation: Smart clean initiated - preserving OpenCode history
+
+[2025-12-08 19:16:24] UNKNOWN EVENT
+system-operation: Smart clean initiated - preserving OpenCode history
+
+[2025-12-08 19:16:26] UNKNOWN EVENT
+system-operation: Smart clean completed - OpenCode ready for rebuild
+
