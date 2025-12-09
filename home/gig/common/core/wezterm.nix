@@ -1,17 +1,19 @@
 {
   programs.wezterm = {
     enable = true;
+    # config.font = wezterm.font_with_fallback({
+    #   "MonoLisa Variable",
+    #   "Cartograph CF",
+    #   "GoMono Nerd Font Mono"
+    # })
+    # config.font = "MonoLisa Variable"
     extraConfig = ''
       local wezterm = require("wezterm")
 
       local config = wezterm.config_builder()
 
       config.font_size = 12.0
-      config.font = wezterm.font_with_fallback({
-        "MonoLisa Variable",
-        "Cartograph CF",
-        "GoMono Nerd Font Mono"
-      })
+      config.font = "Cartograph CF"
 
       config.hide_tab_bar_if_only_one_tab = true
 
