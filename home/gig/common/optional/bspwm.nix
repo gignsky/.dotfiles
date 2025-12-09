@@ -65,12 +65,6 @@
       "firefox" = {
         desktop = "^2";
       };
-      "code" = {
-        desktop = "^3";
-      };
-      "Code" = {
-        desktop = "^3";
-      };
     };
     extraConfig = ''
       # Load host-specific monitor configuration
