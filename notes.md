@@ -1,5 +1,10 @@
 # FIXME: _**GITLAB** Extra Seat_ is being charged to my account, I need to fix this issue immediately
 
+# Wallpaper resources:
+
+- https://artvee.com/
+- https://www.nga.gov/artworks?keyword=landscape&sortOrder=DEFAULT&artobj_subject=Subject%20Types-%3A%3A-Landscape&pageSize=30&pageNumber=1&lastFacet=artobj_subject
+
 ## Black Friday / Cyber Monday Shopping...
 
 1. Ultrawide Monitor?
@@ -294,33 +299,43 @@ Ti
   report in the background and return control of the shell to the user in the
   meantime.
 - **EMAIL INFRASTRUCTURE SETUP**:
-  - **Configure Thunderbird declaratively** for all NixOS hosts using home-manager
+  - **Configure Thunderbird declaratively** for all NixOS hosts using
+    home-manager
     - Research thunderbird home-manager options and configuration patterns
     - Set up unified email account configurations across all machines
     - Configure filters, signatures, and preferences declaratively
   - **Deploy centralized mailserver** for domain email management
-    - **Primary Option**: Use [simple-nixos-mailserver](https://gitlab.com/simple-nixos-mailserver/nixos-mailserver/) 
-      as recommended in [this Reddit post](https://www.reddit.com/r/NixOS/comments/xwo2x5/ridiculously_easy_mail_server_setup_with_nixos/)
+    - **Primary Option**: Use
+      [simple-nixos-mailserver](https://gitlab.com/simple-nixos-mailserver/nixos-mailserver/)
+      as recommended in
+      [this Reddit post](https://www.reddit.com/r/NixOS/comments/xwo2x5/ridiculously_easy_mail_server_setup_with_nixos/)
     - **Target**: VPS deployment (possibly containerized) for reliability
     - **Scope**: Handle emails from all owned domains in centralized location
     - **Consider**: Distributed setup vs single-point-of-failure analysis
     - **Integration**: Use agenix or sops-nix for password/secret management
-    - **Features**: The nixos-mailserver provides 10/10 mail server with flake support
-  - **Benefits**: Unified email management, declarative configuration, reduced reliance on external providers
+    - **Features**: The nixos-mailserver provides 10/10 mail server with flake
+      support
+  - **Benefits**: Unified email management, declarative configuration, reduced
+    reliance on external providers
 - **BLUETOOTH DEVICE MANAGEMENT**:
-  - **Need**: Program to manage bluetooth devices in Linux native OS (specifically merlin)
+  - **Need**: Program to manage bluetooth devices in Linux native OS
+    (specifically merlin)
   - **Recommendation**: Gabby suggests 'btman' as potential solution
-  - **Priority**: Medium - required for proper bluetooth device management on merlin host
-  - **Research**: Investigate btman and alternative bluetooth management tools for NixOS/Linux
+  - **Priority**: Medium - required for proper bluetooth device management on
+    merlin host
+  - **Research**: Investigate btman and alternative bluetooth management tools
+    for NixOS/Linux
 - **NUSHELL MAN PAGE CONVERSION PROJECT**:
-  - **Concept**: Create program to convert traditional bash/zsh man pages to nushell-compatible documentation
-  - **Problem**: Many man pages are generated for POSIX shells but not ported to nushell, causing documentation gaps
+  - **Concept**: Create program to convert traditional bash/zsh man pages to
+    nushell-compatible documentation
+  - **Problem**: Many man pages are generated for POSIX shells but not ported to
+    nushell, causing documentation gaps
   - **Potential Solution**: Parser/converter that:
     - Extracts command syntax and options from traditional man pages
-    - Converts bash-style examples to nushell equivalent syntax  
+    - Converts bash-style examples to nushell equivalent syntax
     - Generates nushell help documentation format
     - Handles shell-specific differences (pipes, variables, etc.)
-  - **Implementation Ideas**: 
+  - **Implementation Ideas**:
     - Use nushell-binary-engine for Rust integration
     - Parse man page source files (roff/troff format) or rendered output
     - Build conversion rules for common shell patterns
@@ -328,9 +343,12 @@ Ti
   - **Benefits**: Bridge documentation gap, improve nushell ecosystem adoption
   - **Priority**: Medium - would significantly improve nushell usability
 - **MONOLISA FONT DEVELOPMENT SETUP**:
-  - **Access Issue**: Need to input MonoLisa credentials into Gabby's MonoLisa font repository
-  - **Purpose**: Enable creation of new versions and customizations of MonoLisa font
-  - **Priority**: Medium - required for font development and customization workflow
+  - **Access Issue**: Need to input MonoLisa credentials into Gabby's MonoLisa
+    font repository
+  - **Purpose**: Enable creation of new versions and customizations of MonoLisa
+    font
+  - **Priority**: Medium - required for font development and customization
+    workflow
   - **Action Items**:
     - Locate MonoLisa license credentials and account details
     - Coordinate with Gabby to configure repository access
