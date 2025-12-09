@@ -273,3 +273,6 @@ Event: build-error failed: nixos-rebuild-merlin Dec 08 19:39:31 merlin tailscale
 [2025-12-08 19:40:17] BUILD START
 Starting Event: build-start
 
+[2025-12-08 19:40:33] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-merlin completed in 16s (success: true, generation: 60)
+
