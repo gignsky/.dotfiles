@@ -290,3 +290,9 @@ system-operation: Smart clean completed - OpenCode ready for rebuild
 
 [2025-12-08 20:10:00] ENGINEERING ISSUE DOCUMENTATION
 WezTerm configuration syntax error identified - runtime impact assessment complete
+[2025-12-08 20:09:30] UNKNOWN EVENT
+system-operation: Smart clean initiated - preserving OpenCode history
+
+[2025-12-08 20:09:32] UNKNOWN EVENT
+system-operation: Smart clean completed - OpenCode ready for rebuild
+
