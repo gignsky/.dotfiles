@@ -13,7 +13,7 @@
       local config = wezterm.config_builder()
 
       config.font_size = 12.0
-      config.font = wezterm.font "MonoLisa Variable"
+      -- config.font = wezterm.font "MonoLisa Variable"
 
       config.hide_tab_bar_if_only_one_tab = true
 
