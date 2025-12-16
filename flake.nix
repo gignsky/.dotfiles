@@ -539,8 +539,7 @@
             # personal packages
             quick-results
             upjust
-            upflake
-            upspell
+            locker
             #necessary for bootstrapping
             ripgrep
             ;

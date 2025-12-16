@@ -57,8 +57,9 @@
     man-db
     # shell packages defined in this repo
     supertree
+    locker
     # quick-results
-    # upjust
+    upjust
     # cargo-update
 
     #nix tools
