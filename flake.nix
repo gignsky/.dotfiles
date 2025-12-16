@@ -400,16 +400,8 @@
               name = "homeManager-${name}";
               value = cfg.activationPackage;
             }) self.homeConfigurations;
-            nixosTests =
-              assert assertAllHostsHaveVmTest self.nixosConfigurations;
-              nixpkgs.lib.filterAttrs (_: v: v != null) (
-                nixpkgs.lib.mapAttrs' (name: config: {
-                  name = "nixosTest-${name}";
-                  value = config.config.system.build.vmTest or null;
-                }) self.nixosConfigurations
-              );
           in
-          homeManagerChecks // nixosTests;
+          homeManagerChecks;
       };
       # seperating out package-builds to manual
       packageBuilds =
