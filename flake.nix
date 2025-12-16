@@ -84,16 +84,19 @@
     # Recursive tarballs
     wrapd = {
       url = "github:gignsky/wrapd";
-      flake = true;
+      inputs.dotfiles.follows = ""; # Break circular dependency - use current flake
     };
 
     # tax-matrix - currently on develop branch
     # tax-matrix = {
     #   url = "github:gignsky/tax-matrix/develop";
-    #   flake = true;
+    # inputs.gigdot.follows = "";  # Break circular dependency
     # };
 
-    gigvim.url = "github:gignsky/gigvim";
+    gigvim = {
+      url = "github:gignsky/gigvim";
+      inputs.gigdot.follows = ""; # Break circular dependency - use current flake
+    };
 
     # nufetch.url = "github:gignsky/nufetch";
   };
