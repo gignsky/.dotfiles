@@ -400,8 +400,12 @@
               name = "homeManager-${name}";
               value = cfg.activationPackage;
             }) self.homeConfigurations;
+            packageBuilds = nixpkgs.lib.mapAttrs' (name: pkg: {
+              name = "build-${name}";
+              value = pkg;
+            }) (import ./pkgs { inherit pkgs; });
           in
-          homeManagerChecks;
+          homeManagerChecks // packageBuilds;
       };
       # seperating out package-builds to manual
       packageBuilds =
