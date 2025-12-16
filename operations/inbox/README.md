@@ -21,13 +21,19 @@ Files should include priority in their content:
 - Include priority in content header
 - Keep descriptions concise but descriptive
 
-## Quick Commands (Future)
-- `just inbox` - List current inbox items with priorities
-- `just inbox-status` - Show count by priority level
-- `just outbox-process` - Process approved items from outbox
+## Quick Commands ~~(Future)~~
+- `just inbox` - List current inbox items with priorities ✅ **Implemented 2025-12-16**
+- `just inbox-status` - Show count by priority level ✅ **Implemented 2025-12-16**  
+- ~~`just outbox-process` - Process approved items from outbox~~ *(Future enhancement)*
 
 ## Status Indicators
 - Items can be annotated with Captain's notes inline
 - Create `.captain-notes` files for longer commentary
 - Move to outbox when ready for implementation
 - Delete if no action needed (document decision in file)
+
+## Future Enhancements
+- [ ] Auto-categorization with subdirectories (urgent/, administrative/, engineering/)
+- ~~[ ] Template-based item filing with standardized formats~~ ✅ **Completed 2025-12-16** - `.inbox-template.md` created
+- [ ] Integration with engineering logs (auto-create inbox items for Captain decisions)
+- [ ] Outbox processing automation (`just outbox-process` command)

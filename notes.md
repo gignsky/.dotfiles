@@ -363,12 +363,15 @@ Ti
     improved network segmentation
   - **Research needed**: Layer 3 switch configuration for routing, DHCP, and
     firewall capabilities
-- need to convert scotty logs to markdown for better viewing... maybe in the
-  future something better than markdown will exist.
-- need to figure out how to do strikethroughs in markdown, and then make scotty
-  use them.
 - Need to figure out a better way to do nix options, even if that means writing
   my own tool
 - would be ideal if I had access to agents inside of vim, but not doing
   autocomplete, this should be HIGH PRIORITY SCOTTY
 - add the ability for opencode to properly rename sessions with reasonable names
+- ~~need to convert scotty logs to markdown for better viewing... maybe in the
+  future something better than markdown will exist.~~ ✅ **Started conversion
+  process 2025-12-16** - Key logs converted to .md format, ongoing migration in
+  progress
+- ~~need to figure out how to do strikethroughs in markdown, and then make
+  scotty use them.~~ ✅ **Implemented 2025-12-16** - Using `~~text~~` for
+  strikethroughs, documented in agent instructions
