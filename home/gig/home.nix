@@ -19,6 +19,7 @@
     # inputs.nix-colors.homeManagerModules.default
     ./common/core
     ./common/optional/direnv.nix
+    ./common/optional/bat.nix
     # direnvModule
   ];
   nix = {
