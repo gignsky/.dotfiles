@@ -374,3 +374,4 @@ Ti
 - add the ability for opencode to properly rename sessions with reasonable names
 - should modify git-dev for gigvim so that it can search a users repos and
   optionally open them since I often find myself wanting to do this
+- need to get to work on personal-website ;) ASAP -- generate becky agent
