@@ -4,8 +4,9 @@
 
 set -euo pipefail
 
-DOTFILES_DIR="${HOME}/.dotfiles"
-NOTES_DIR="$DOTFILES_DIR/operations/inbox"
+# Detect the current git repository root to support worktrees
+REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo "${HOME}/.dotfiles")
+NOTES_DIR="$REPO_ROOT/operations/inbox"
 TEMP_NOTE="/tmp/order-capture-$(date +%Y%m%d-%H%M%S).md"
 
 # Function to capture user input in nvim

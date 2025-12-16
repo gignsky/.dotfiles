@@ -3,8 +3,10 @@
 
 set -euo pipefail
 
-INBOX_DIR="${HOME}/.dotfiles/operations/inbox"
-OUTBOX_DIR="${HOME}/.dotfiles/operations/outbox"
+# Detect the current git repository root to support worktrees
+REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || echo "${HOME}/.dotfiles")
+INBOX_DIR="${REPO_ROOT}/operations/inbox"
+OUTBOX_DIR="${REPO_ROOT}/operations/outbox"
 
 show_inbox_status() {
     echo "📥 Captain's Operational Inbox Status:"
