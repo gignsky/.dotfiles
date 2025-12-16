@@ -602,52 +602,11 @@ log-status:
 
 # Captain's Operational Inbox Management
 inbox:
-	@echo "📥 Captain's Operational Inbox Status:"
-	@echo ""
-	@if [ -d "operations/inbox" ]; then \
-		cd operations/inbox && \
-		total=$$(find . -name "*.md" ! -name "README.md" | wc -l); \
-		if [ $$total -eq 0 ]; then \
-			echo "  ✅ Inbox empty - no items pending review"; \
-		else \
-			echo "  📊 Total items: $$total"; \
-			echo ""; \
-			echo "  📋 Items by priority:"; \
-			urgent=$$(grep -l "URGENT" *.md 2>/dev/null | wc -l); \
-			high=$$(grep -l "HIGH" *.md 2>/dev/null | wc -l); \
-			medium=$$(grep -l "MEDIUM" *.md 2>/dev/null | wc -l); \
-			low=$$(grep -l "LOW" *.md 2>/dev/null | wc -l); \
-			[ $$urgent -gt 0 ] && echo "    🔴 URGENT: $$urgent"; \
-			[ $$high -gt 0 ] && echo "    🟡 HIGH: $$high"; \
-			[ $$medium -gt 0 ] && echo "    🟠 MEDIUM: $$medium"; \
-			[ $$low -gt 0 ] && echo "    🟢 LOW: $$low"; \
-			echo ""; \
-			echo "  📄 Items:"; \
-			for file in *.md; do \
-				[ "$$file" = "README.md" ] && continue; \
-				priority=$$(grep -o "\*\*PRIORITY:\*\* [A-Z]*" "$$file" 2>/dev/null | sed 's/\*\*PRIORITY:\*\* //'); \
-				[ -z "$$priority" ] && priority="UNSET"; \
-				echo "    $$file ($$priority)"; \
-			done; \
-		fi; \
-	else \
-		echo "  ❌ Inbox directory not found"; \
-	fi
+	@nix run .#inbox-manager
 
 inbox-status:
-	@echo "📊 Quick Inbox Status:"
-	@if [ -d "operations/inbox" ]; then \
-		cd operations/inbox && \
-		total=$$(find . -name "*.md" ! -name "README.md" | wc -l); \
-		urgent=$$(grep -l "URGENT" *.md 2>/dev/null | wc -l); \
-		oldest=$$(find . -name "*.md" ! -name "README.md" -printf '%T@ %p\n' 2>/dev/null | sort -n | head -1 | cut -d' ' -f2- | sed 's|^./||'); \
-		if [ $$total -eq 0 ]; then \
-			echo "  ✅ Empty inbox"; \
-		else \
-			echo "  📊 $$total items total"; \
-			[ $$urgent -gt 0 ] && echo "  🔴 $$urgent URGENT items"; \
-			[ -n "$$oldest" ] && echo "  📅 Oldest: $$oldest"; \
-		fi; \
-	else \
-		echo "  ❌ Inbox not found"; \
-	fi
+	@nix run .#inbox-manager -- quick
+
+# Quick thought capture and agent dispatch
+order:
+	@nix run .#order-capture

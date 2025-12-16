@@ -10,4 +10,3 @@ Starting Event: build-start
 
 [2025-12-09 05:36:37] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
 nixos-rebuild-merlin completed in 26s (success: true, generation: 66)
-

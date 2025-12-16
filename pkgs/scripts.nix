@@ -192,6 +192,33 @@ let
       ];
       description = "Interactive script packager with fzf selection and OpenCode test generation";
     };
+
+    # Operational inbox management
+    inbox-manager = makeScriptPackage {
+      name = "inbox-manager";
+      scriptPath = ../scripts/inbox-manager.sh;
+      dependencies = with pkgs; [
+        bash
+        coreutils
+        findutils
+        gnugrep
+        gnused
+      ];
+      description = "Captain's operational inbox management and status reporting";
+    };
+
+    # Order capture and agent dispatch system
+    order-capture = makeScriptPackage {
+      name = "order-capture";
+      scriptPath = ../scripts/order-capture.sh;
+      dependencies = with pkgs; [
+        bash
+        coreutils
+        git
+        neovim
+      ];
+      description = "Quick thought capture with intelligent filing and agent task assignment";
+    };
   };
 
 in

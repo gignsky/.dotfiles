@@ -263,4 +263,3 @@ system-operation: Smart clean initiated - preserving OpenCode history
 
 [2025-12-08 19:16:26] UNKNOWN EVENT
 system-operation: Smart clean completed - OpenCode ready for rebuild
-
