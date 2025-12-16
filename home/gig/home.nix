@@ -4,6 +4,8 @@
   # flakeRoot,
   # inputs,
   overlays,
+  outputs,
+  system,
   lib,
   # , config,
   pkgs,
@@ -56,10 +58,10 @@
     bat-extras.batman
     man-db
     # shell packages defined in this repo
-    supertree
-    # quick-results
-    # upjust
-    # cargo-update
+    outputs.packages.${system}.supertree
+    # outputs.packages.${system}.quick-results
+    # outputs.packages.${system}.upjust
+    # outputs.packages.${system}.cargo-update
 
     #nix tools
     nix-du
@@ -134,8 +136,8 @@
   nixpkgs = {
     # You can add overlays here
     overlays = [
-      # Add overlays your own flake exports (from overlays and pkgs dir):
-      overlays.additions
+      # Custom packages are available as flake packages instead of overlay
+      # overlays.additions  # Removed to avoid circular dependencies
       # overlays.modifications
       overlays.unstable-packages
 

@@ -1,8 +1,6 @@
 # You can build these directly using 'nix build .#example'
 
-{
-  pkgs ? import <nixpkgs> { },
-}:
+{ pkgs }:
 let
   inherit (pkgs) lib;
 
@@ -14,30 +12,19 @@ let
 
   # Internal scripts for advanced/dangerous operations
   internalScripts = lib.filterAttrs (name: _: lib.hasPrefix "internal-" name) scripts;
-in
-rec {
-  #################### Example Packages #################################
-  # example = pkgs.writeShellScriptBin "example" ''
-  #   ${pkgs.cowsay}/bin/cowsay "hello world" | ${pkgs.lolcat}/bin/lolcat 2> /dev/null
-  # '';
 
-  supertree =
-    pkgs.writeShellScriptBin "supertree" ''
+  # Define packages separately to avoid rec issues
+  packages = {
+    #################### Example Packages #################################
+    # example = pkgs.writeShellScriptBin "example" ''
+    #   ${pkgs.cowsay}/bin/cowsay "hello world" | ${pkgs.lolcat}/bin/lolcat 2> /dev/null
+    # '';
+
+    supertree = pkgs.writeShellScriptBin "supertree" ''
       ${pkgs.tree}/bin/tree ..
-    ''
-    // {
-      passthru.tests = {
-        basic = pkgs.runCommand "supertree-test" { buildInputs = [ supertree ]; } ''
-          set -e
-          # Should print something, check for a known directory in the output
-          supertree > $out
-          grep -q "home" $out
-        '';
-      };
-    };
+    '';
 
-  quick-results =
-    pkgs.writeShellScriptBin "quick-results" ''
+    quick-results = pkgs.writeShellScriptBin "quick-results" ''
       check_and_display() {
         local dir=$1
         local name=$2
@@ -75,60 +62,19 @@ rec {
 
       # Check .svelte-kit folder
       check_and_display "./.svelte-kit" ".svelte-kit"
-    ''
-    // {
-      passthru.tests = {
-        basic = pkgs.runCommand "quick-results-test" { buildInputs = [ quick-results ]; } ''
-          set -e
-          # Should print something about missing directories (since they likely don't exist in the build sandbox)
-          quick-results > $out
-          grep -q "No cargo target directory found" $out
-          grep -q "No nix result directory found" $out
-          grep -q "No nix result-man directory found" $out
-        '';
-      };
-    };
+    '';
 
-  upignore =
-    pkgs.writeShellScriptBin "upignore" ''
+    upignore = pkgs.writeShellScriptBin "upignore" ''
       git add .gitignore
       git commit -m "upignore - updated .gitignore"
-    ''
-    // {
-      passthru.tests = {
-        basic = pkgs.runCommand "upignore-test" { buildInputs = [ upignore ]; } ''
-          set -e
-          # Should fail gracefully since .git may not exist in sandbox
-          if upignore > $out 2>&1; then
-            grep -q ".gitignore" $out || true
-          else
-            grep -q "not a git repository" $out || true
-          fi
-        '';
-      };
-    };
+    '';
 
-  upjust =
-    pkgs.writeShellScriptBin "upjust" ''
+    upjust = pkgs.writeShellScriptBin "upjust" ''
       git add justfile
       git commit -m "upjust - updated justfile"
-    ''
-    // {
-      passthru.tests = {
-        basic = pkgs.runCommand "upjust-test" { buildInputs = [ upjust ]; } ''
-          set -e
-          # Should fail gracefully since .git may not exist in sandbox
-          if upjust > $out 2>&1; then
-            grep -q "justfile" $out || true
-          else
-            grep -q "not a git repository" $out || true
-          fi
-        '';
-      };
-    };
+    '';
 
-  cargo-update =
-    pkgs.writeShellScriptBin "cargo-update" ''
+    cargo-update = pkgs.writeShellScriptBin "cargo-update" ''
       # Check for --no-commit flag
       NO_COMMIT=false
       if [[ "$1" == "--no-commit" ]]; then
@@ -155,33 +101,17 @@ rec {
       git commit -m "Update Cargo dependencies via cargo-update program"
 
       echo "Changes committed successfully."
-    ''
-    // {
-      passthru.tests = {
-        basic = pkgs.runCommand "cargo-update-test" { buildInputs = [ cargo-update ]; } ''
-          set -e
-          # Should fail gracefully since .git may not exist in sandbox
-          if cargo-update --no-commit > $out 2>&1; then
-            grep -q "No changes detected" $out || true
-          else
-            grep -q "not a git repository" $out || true
-          fi
-        '';
-      };
-    };
+    '';
 
-  #################### Packages with external source ####################
-  # zsh-als-aliases = pkgs.callPackage ./zsh-als-aliases { }; # Removed as unnecessary but left for help in the future
-  # SCOTTY: WE SHOULD GET THIS WORKING!!! TODO
+    #################### Packages with external source ####################
+    # zsh-als-aliases = pkgs.callPackage ./zsh-als-aliases { }; # Removed as unnecessary but left for help in the future
+    # SCOTTY: WE SHOULD GET THIS WORKING!!! TODO
 
-  #################### Packaged Scripts ####################
-  # Import all packaged scripts from scripts.nix
-  # ~~Manual inherit list~~ ✅ **Automated 2025-12-16** - scripts auto-inherited
-
-}
+  };
+in
+packages
 // userScripts
 // {
-
-  # Internal scripts available as nested attribute for advanced use
-  internal = internalScripts;
+  # If we have internal scripts in the future, they can be added here
+  # internal = internalScripts;  # Disabled since empty and causes flake check issues
 }

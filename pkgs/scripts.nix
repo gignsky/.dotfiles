@@ -1,9 +1,7 @@
 # Script packaging utilities
 # Converts shell scripts to proper Nix packages with dependency injection
 
-{
-  pkgs ? import <nixpkgs> { },
-}:
+{ pkgs }:
 
 let
   # Helper function to create a packaged script from a .sh file
@@ -137,37 +135,36 @@ let
       description = "Runs pre-commit checks on the flake";
     };
 
-    # # ISO VM runner
-    # run-iso-vm = makeScriptPackage {
-    #   name = "run-iso-vm";
-    #   scriptPath = ../scripts/run-iso-vm.sh;
-    #   dependencies = with pkgs; [
-    #     bash
-    #     nix
-    #     qemu
-    #   ];
-    #   description = "Runs the ISO installer in a VM for testing";
-    # };
-    #
+    # ISO VM runner
+    run-iso-vm = makeScriptPackage {
+      name = "run-iso-vm";
+      scriptPath = ../scripts/run-iso-vm.sh;
+      dependencies = with pkgs; [
+        bash
+        nix
+        qemu
+      ];
+      description = "Runs the ISO installer in a VM for testing";
+    };
 
-    # # Interactive script packager with fzf selection and OpenCode integration
-    # package-script = makeScriptPackage {
-    #   name = "package-script";
-    #   scriptPath = ../scripts/package-script.sh;
-    #   dependencies = with pkgs; [
-    #     bash
-    #     nix
-    #     git
-    #     fzf
-    #     gnugrep
-    #     gawk
-    #     gnused
-    #     coreutils
-    #     findutils
-    #     bat
-    #   ];
-    #   description = "Interactive script packager with fzf selection and OpenCode test generation";
-    # };
+    # Interactive script packager with fzf selection and OpenCode integration
+    package-script = makeScriptPackage {
+      name = "package-script";
+      scriptPath = ../scripts/package-script.sh;
+      dependencies = with pkgs; [
+        bash
+        nix
+        git
+        fzf
+        gnugrep
+        gawk
+        gnused
+        coreutils
+        findutils
+        bat
+      ];
+      description = "Interactive script packager with fzf selection and OpenCode test generation";
+    };
 
     # Operational inbox management
     inbox-manager = makeScriptPackage {
@@ -194,6 +191,35 @@ let
         neovim
       ];
       description = "Quick thought capture with intelligent filing and agent task assignment";
+    };
+
+    # Flake build utility
+    flake-build = makeScriptPackage {
+      name = "flake-build";
+      scriptPath = ../scripts/flake-build.sh;
+      dependencies = with pkgs; [
+        bash
+        nix
+        coreutils
+      ];
+      description = "Builds flake packages with enhanced options";
+    };
+
+    # NixOS bootstrap installer
+    bootstrap-nixos = makeScriptPackage {
+      name = "bootstrap-nixos";
+      scriptPath = ../scripts/bootstrap-nixos.sh;
+      dependencies = with pkgs; [
+        bash
+        nix
+        git
+        openssh
+        coreutils
+        hostname
+        gnugrep
+        gawk
+      ];
+      description = "Bootstrap NixOS installation on target systems";
     };
   };
 

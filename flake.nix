@@ -135,15 +135,15 @@
           configLib
           ;
       };
-      customPkgs = import ./pkgs { inherit pkgs; };
-      pkgs =
-        import nixpkgs {
-          inherit system;
-          config = {
-            allowUnfree = true;
-          };
-        }
-        // customPkgs;
+      basePkgs = import nixpkgs {
+        inherit system;
+        config = {
+          allowUnfree = true;
+        };
+      };
+      customPkgs = import ./pkgs { pkgs = basePkgs; };
+      # Keep pkgs clean for modules, make custom packages available separately
+      pkgs = basePkgs;
       assertAllHostsHaveVmTest =
         configs:
         let
@@ -245,7 +245,7 @@
       homeConfigurations = {
         # ganoslalWSL
         "gig@wsl" = home-manager.lib.homeManagerConfiguration {
-          inherit pkgs; # Home-manager requires 'pkgs' instance
+          inherit pkgs; # Now pkgs is clean basePkgs
           extraSpecialArgs = {
             inherit
               inputs
@@ -265,7 +265,7 @@
 
         # spacedock - unused with spacedock having a wsl instance
         "gig@spacedock" = home-manager.lib.homeManagerConfiguration {
-          inherit pkgs; # Home-manager requires 'pkgs' instance
+          inherit pkgs; # Now pkgs is clean basePkgs
           extraSpecialArgs = {
             inherit
               inputs
@@ -282,7 +282,7 @@
 
         # merlin - unused with merlin having a wsl instance
         "gig@merlin" = home-manager.lib.homeManagerConfiguration {
-          inherit pkgs; # Home-manager requires 'pkgs' instance
+          inherit pkgs; # Now pkgs is clean basePkgs
           extraSpecialArgs = {
             inherit
               inputs
@@ -298,7 +298,7 @@
 
         # ganoslal - unused with ganoslal having a wsl instance
         "gig@ganoslal" = home-manager.lib.homeManagerConfiguration {
-          inherit pkgs; # Home-manager requires 'pkgs' instance
+          inherit pkgs; # Now pkgs is clean basePkgs
           extraSpecialArgs = {
             inherit
               inputs
@@ -339,7 +339,7 @@
       # );
       # nixosModules = { inherit (import ./modules/nixos); };
 
-      packages.${system} = import ./pkgs { inherit pkgs; };
+      packages.${system} = customPkgs;
 
       # Custom modifications/overrides to upstream packages.
       overlays = import ./overlays { inherit inputs; };
@@ -538,7 +538,7 @@
             # unstable.statix
             # personal packages
             # quick-results
-            upjust
+            # upjust
             #necessary for bootstrapping
             ripgrep
             ;
