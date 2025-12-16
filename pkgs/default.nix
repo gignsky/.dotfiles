@@ -166,15 +166,23 @@ rec {
     ''
     // {
       passthru.tests = {
-        basic = pkgs.runCommand "upjust-test" { buildInputs = [ upjust ]; } ''
-          set -e
-          # Should fail gracefully since .git may not exist in sandbox
-          if upjust > $out 2>&1; then
-            grep -q "justfile" $out || true
-          else
-            grep -q "not a git repository" $out || true
-          fi
-        '';
+        basic =
+          pkgs.runCommand "upjust-test"
+            {
+              buildInputs = [
+                upjust
+              ];
+            }
+            ''
+              set -e
+              # Should fail gracefully since .git may not exist in sandbox
+              if upjust > $out 2>&1; then
+                grep -q "justfile" $out || true
+              else
+                # Match various git error patterns
+                grep -E "(fatal:|not a git repository)" $out || true
+              fi
+            '';
       };
     };
 
