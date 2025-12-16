@@ -372,3 +372,5 @@ Ti
 - would be ideal if I had access to agents inside of vim, but not doing
   autocomplete, this should be HIGH PRIORITY SCOTTY
 - add the ability for opencode to properly rename sessions with reasonable names
+- should modify git-dev for gigvim so that it can search a users repos and
+  optionally open them since I often find myself wanting to do this
