@@ -63,6 +63,40 @@
 - Network segmentation and security zone planning
 - **Status**: Evaluate expansion priorities when administrative support available
 
+### Network Infrastructure Upgrade - Layer 3 Switch Router Configuration
+**Added**: 2025-12-16 by Chief Engineer Montgomery Scott per Lord Gig directive  
+**Priority**: High  
+**Scope**: Transition primary routing from Archer device to layer 3 switch
+
+**Objective**: Configure layer 3 switch as primary network router to improve performance and management capabilities
+
+**Requirements**:
+- **Router Services Migration**: Transfer DHCP, routing, and firewall services from Archer to layer 3 switch
+- **VLAN Implementation**: Configure network segmentation and traffic management
+- **Security Policies**: Implement appropriate firewall rules and access controls
+- **Performance Optimization**: Leverage enhanced packet processing capabilities
+
+**Technical Considerations**:
+- Layer 3 switch routing capability assessment and licensing requirements
+- IP addressing scheme redesign for optimal VLAN structure
+- Management interface configuration for remote administration
+- Power and cooling infrastructure requirements
+- Migration timeline to minimize network downtime
+
+**Expected Benefits**:
+- **Enhanced Performance**: Superior packet processing compared to consumer router
+- **Advanced VLAN Support**: Professional-grade network segmentation capabilities  
+- **Improved Management**: Granular control over routing policies and traffic flow
+- **Scalability**: Better foundation for future network expansion and fleet growth
+
+**Implementation Dependencies**:
+- Layer 3 switch specification review and capability verification
+- Current Archer configuration documentation and backup
+- Network topology planning and VLAN design
+- Testing environment setup for validation
+
+**Status**: Requirement documented - awaiting implementation planning and resource allocation
+
 ### Agentic Task Management System
 - **Goal**: Enable crew members to work autonomously on assigned features
 - **Process**: Discussion → separate branch work → Merge Request upon completion
