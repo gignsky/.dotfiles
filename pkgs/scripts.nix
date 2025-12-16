@@ -125,31 +125,6 @@ let
       description = "Rebuilds NixOS system with verbose output for debugging";
     };
 
-    # Bootstrap script
-    bootstrap-nixos = makeScriptPackage {
-      name = "bootstrap-nixos";
-      scriptPath = ../scripts/bootstrap-nixos.sh;
-      dependencies = with pkgs; [
-        bash
-        git
-        nix
-        gnugrep
-        coreutils
-      ];
-      description = "Bootstraps a new NixOS installation with dotfiles";
-    };
-
-    # Flake build script
-    flake-build = makeScriptPackage {
-      name = "flake-build";
-      scriptPath = ../scripts/flake-build.sh;
-      dependencies = with pkgs; [
-        bash
-        nix
-      ];
-      description = "Builds specific flake targets with proper error handling";
-    };
-
     # Pre-commit script
     pre-commit-flake-check = makeScriptPackage {
       name = "pre-commit-flake-check";
@@ -162,36 +137,37 @@ let
       description = "Runs pre-commit checks on the flake";
     };
 
-    # ISO VM runner
-    run-iso-vm = makeScriptPackage {
-      name = "run-iso-vm";
-      scriptPath = ../scripts/run-iso-vm.sh;
-      dependencies = with pkgs; [
-        bash
-        nix
-        qemu
-      ];
-      description = "Runs the ISO installer in a VM for testing";
-    };
+    # # ISO VM runner
+    # run-iso-vm = makeScriptPackage {
+    #   name = "run-iso-vm";
+    #   scriptPath = ../scripts/run-iso-vm.sh;
+    #   dependencies = with pkgs; [
+    #     bash
+    #     nix
+    #     qemu
+    #   ];
+    #   description = "Runs the ISO installer in a VM for testing";
+    # };
+    #
 
-    # Interactive script packager with fzf selection and OpenCode integration
-    package-script = makeScriptPackage {
-      name = "package-script";
-      scriptPath = ../scripts/package-script.sh;
-      dependencies = with pkgs; [
-        bash
-        nix
-        git
-        fzf
-        gnugrep
-        gawk
-        gnused
-        coreutils
-        findutils
-        bat
-      ];
-      description = "Interactive script packager with fzf selection and OpenCode test generation";
-    };
+    # # Interactive script packager with fzf selection and OpenCode integration
+    # package-script = makeScriptPackage {
+    #   name = "package-script";
+    #   scriptPath = ../scripts/package-script.sh;
+    #   dependencies = with pkgs; [
+    #     bash
+    #     nix
+    #     git
+    #     fzf
+    #     gnugrep
+    #     gawk
+    #     gnused
+    #     coreutils
+    #     findutils
+    #     bat
+    #   ];
+    #   description = "Interactive script packager with fzf selection and OpenCode test generation";
+    # };
 
     # Operational inbox management
     inbox-manager = makeScriptPackage {

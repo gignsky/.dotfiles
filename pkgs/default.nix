@@ -119,44 +119,6 @@ rec {
       };
     };
 
-  upspell =
-    pkgs.writeShellScriptBin "upspell" ''
-      git add .cspell/custom-dictionary-workspace.txt
-      git commit -m "upspell - updated spellfile"
-    ''
-    // {
-      passthru.tests = {
-        basic = pkgs.runCommand "upspell-test" { buildInputs = [ upspell ]; } ''
-          set -e
-          # Should fail gracefully since .git may not exist in sandbox
-          if upspell > $out 2>&1; then
-            grep -q "custom-dictionary-workspace.txt" $out || true
-          else
-            grep -q "not a git repository" $out || true
-          fi
-        '';
-      };
-    };
-
-  upflake =
-    pkgs.writeShellScriptBin "upflake" ''
-      git add flake.lock
-      git commit -m "upflake - updated flake.lock"
-    ''
-    // {
-      passthru.tests = {
-        basic = pkgs.runCommand "upflake-test" { buildInputs = [ upflake ]; } ''
-          set -e
-          # Should fail gracefully since .git may not exist in sandbox
-          if upflake > $out 2>&1; then
-            grep -q "flake.lock" $out || true
-          else
-            grep -q "not a git repository" $out || true
-          fi
-        '';
-      };
-    };
-
   cargo-update =
     pkgs.writeShellScriptBin "cargo-update" ''
       # Check for --no-commit flag
@@ -211,10 +173,6 @@ rec {
     home-manager-flake-rebuild
     system-flake-rebuild-test
     system-flake-rebuild-verbose
-    bootstrap-nixos
-    flake-build
     pre-commit-flake-check
-    run-iso-vm
-    package-script
     ;
 }
