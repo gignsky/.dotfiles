@@ -539,7 +539,7 @@
             # personal packages
             quick-results
             upjust
-            flock
+            locker
             #necessary for bootstrapping
             ripgrep
             ;
