@@ -13,6 +13,69 @@ rec {
   #   ${pkgs.cowsay}/bin/cowsay "hello world" | ${pkgs.lolcat}/bin/lolcat 2> /dev/null
   # '';
 
+  flock =
+    pkgs.writeShellScriptBin "flock" ''
+      echo "Locking Flake with Current flake.nix content" | ${pkgs.lolcat}/bin/lolcat
+
+      COMMIT=""
+
+      # Parse command line args 
+      while [[ $# -gt 0 ]]; do
+        case "$1" in
+          -y|--yes)
+          COMMIT=true
+          echo "Auto-committing (--yes flag provided)"
+          ;;
+        -n|--no)
+          COMMIT=false
+          echo "Not committing (--no flag provided)"
+          ;;
+        "")
+          # No arguments, ask interactively
+          echo -n "Commit lock file? [Y/n]: "
+          read -r commit
+          if [[ "$commit" =~ ^[Nn]([Oo])?$ ]]; then
+            COMMIT=false
+          else
+            COMMIT=true
+          fi
+          ;;
+        *)
+          echo "Usage: flock [-y|--yes] [-n|--no]"
+          echo "  -y, --yes    Automatically commit the lock file"
+          echo "  -n, --no     Don't commit the lock file"
+          echo "  (no args)    Ask interactively"
+          exit 1
+          ;;
+        esac
+      done
+
+      # If no flags provided, ask interactively
+      if [[ -z "$COMMIT" ]]; then
+        echo -n "Commit lock file? [Y/n]: "
+        read -r commit
+        if [[ "$commit" =~ ^[Nn]([Oo])?$ ]]; then
+          COMMIT=false
+        else
+          COMMIT=true
+        fi
+      fi
+
+      # Execute based on decision
+      if $COMMIT; then
+        nix flake lock --commit-lock-file
+        echo "flake.lock updated! -- COMMITTED" | ${pkgs.cowsay}/bin/cowsay | ${pkgs.lolcat}/bin/lolcat
+      else
+        nix flake lock
+        echo "flake.lock updated! -- NOT COMMITTED" | ${pkgs.cowsay}/bin/cowsay | ${pkgs.lolcat}/bin/lolcat
+      fi
+    ''
+    // {
+      passthru.tests = {
+        basic = pkgs.runCommand "flock-test" { buildInputs = [ flock ]; } '''';
+      };
+    };
+
   supertree =
     pkgs.writeShellScriptBin "supertree" ''
       ${pkgs.tree}/bin/tree ..
