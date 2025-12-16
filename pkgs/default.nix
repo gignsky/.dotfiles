@@ -15,40 +15,36 @@ rec {
 
   flock =
     pkgs.writeShellScriptBin "flock" ''
-      echo "Locking Flake with Current flake.nix content" | ${pkgs.lolcat}/bin/lolcat
-
       COMMIT=""
 
       # Parse command line args 
       while [[ $# -gt 0 ]]; do
-        case "$1" in
+        case $1 in
           -y|--yes)
-          COMMIT=true
-          echo "Auto-committing (--yes flag provided)"
-          ;;
-        -n|--no)
-          COMMIT=false
-          echo "Not committing (--no flag provided)"
-          ;;
-        "")
-          # No arguments, ask interactively
-          echo -n "Commit lock file? [Y/n]: "
-          read -r commit
-          if [[ "$commit" =~ ^[Nn]([Oo])?$ ]]; then
-            COMMIT=false
-          else
             COMMIT=true
-          fi
-          ;;
-        *)
-          echo "Usage: flock [-y|--yes] [-n|--no]"
-          echo "  -y, --yes    Automatically commit the lock file"
-          echo "  -n, --no     Don't commit the lock file"
-          echo "  (no args)    Ask interactively"
-          exit 1
-          ;;
+            shift
+            ;;
+          -n|--no)
+            COMMIT=false
+            shift
+            ;;
+          -h|--help)
+            echo "Usage: flock [-y|--yes] [-n|--no] [-h|--help]"
+            echo "  -y, --yes    Automatically commit the lock file"
+            echo "  -n, --no     Don't commit the lock file"  
+            echo "  -h, --help   Show this help message"
+            echo "  (no args)    Ask interactively"
+            exit 0
+            ;;
+          *)
+            echo "Unknown option: $1"
+            echo "Usage: flock [-y|--yes] [-n|--no] [-h|--help]"
+            exit 1
+            ;;
         esac
       done
+
+      echo "Locking Flake with Current flake.nix content" | ${pkgs.lolcat}/bin/lolcat
 
       # If no flags provided, ask interactively
       if [[ -z "$COMMIT" ]]; then
