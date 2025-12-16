@@ -21,6 +21,7 @@
   nd = "nix develop -c nu";
   ndc = "nix develop -c";
   nr = "nix run";
+  nfs = "nix flake show";
   nb = "nix build";
   ndw = "nix develop .#windows -c nu";
   diddy = "touch";
