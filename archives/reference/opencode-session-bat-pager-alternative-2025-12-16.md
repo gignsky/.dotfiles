@@ -1,4 +1,16 @@
-# New session - 2025-12-16T09:01:11.477Z
+# OpenCode Session: bat as Alternative to less Command
+
+**Archive Date:** 2025-12-16  
+**Archive Reason:** Completed consultation session about command-line pager alternatives  
+**Category:** Tool recommendations and terminal utilities  
+**Status:** Incomplete session (ended during home-manager configuration exploration)  
+**Value:** Reference for future questions about terminal pagers and bat configuration  
+
+**Session Summary:** User inquiry about better alternatives to the `less` command for viewing rich text output. Session explored `bat` as a superior pager with syntax highlighting, line numbers, and Git integration. Discussion was heading toward NixOS/home-manager configuration when session ended.
+
+---
+
+# Original OpenCode Session Export
 
 **Session ID:** ses_4d99b9e4affeKtceHs2yBxtN2y **Created:** 12/16/2025, 4:01:11
 AM **Updated:** 12/16/2025, 4:01:51 AM
