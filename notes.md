@@ -371,3 +371,4 @@ Ti
   my own tool
 - would be ideal if I had access to agents inside of vim, but not doing
   autocomplete, this should be HIGH PRIORITY SCOTTY
+- add the ability for opencode to properly rename sessions with reasonable names
