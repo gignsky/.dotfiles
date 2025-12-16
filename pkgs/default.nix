@@ -161,8 +161,8 @@ rec {
 
   upjust =
     pkgs.writeShellScriptBin "upjust" ''
-      git add justfile
-      git commit -m "upjust - updated justfile"
+      ${pkgs.git}/bin/git add justfile
+      ${pkgs.git}/bin/git commit -m "upjust - updated justfile"
     ''
     // {
       passthru.tests = {
