@@ -59,7 +59,7 @@
     supertree
     flock
     # quick-results
-    # upjust
+    upjust
     # cargo-update
 
     #nix tools
