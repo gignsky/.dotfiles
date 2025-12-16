@@ -539,6 +539,7 @@
             # personal packages
             quick-results
             upjust
+            flock
             #necessary for bootstrapping
             ripgrep
             ;
