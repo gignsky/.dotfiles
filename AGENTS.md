@@ -53,7 +53,12 @@ When consulting on repositories outside your primary assignment:
 - **Log Integrity Repair**: All agents must implement `/fix-log` command for documentation maintenance
   - Analyzes current state of agent's domain/specialization area
   - Identifies gaps or missing information in existing logs
-  - Documents findings in agent-specific log format and voice
+  - **REQUIRED FORMAT**: Documents findings in **Markdown format** (.md files) with proper structure:
+    - Use markdown headers (`#`, `##`, `###`) for organization
+    - Apply syntax highlighting for code blocks (\`\`\`nix, \`\`\`bash, etc.)
+    - Include emoji indicators for status (✅, 🔧, ⚠️, 🔴)
+    - Use markdown lists, tables, and emphasis for clarity
+    - Add YAML frontmatter if beneficial for categorization
   - **Enhanced Quality Assurance Protocol**:
     - Checks git working tree and index for any uncommitted changes
     - If non-log changes detected, runs `/check` (flake validation) before committing

@@ -440,7 +440,17 @@ STATUS SUMMARY:
 ================================================================================
 ```
 
-### Enhanced Check-Logs Process Steps:
+### Engineering Log Standards
+
+**MARKDOWN FORMAT REQUIREMENT**: All engineering logs must be created as `.md` files with proper markdown structure:
+- **Headers**: Use `#`, `##`, `###` for hierarchical organization
+- **Code Blocks**: Apply syntax highlighting (\`\`\`nix, \`\`\`bash, \`\`\`json, etc.)
+- **Status Indicators**: Use emoji-based visual status (✅, 🔧, ⚠️, 🔴, 📊)
+- **Lists and Tables**: Organize data with markdown lists, tables, checkboxes
+- **Emphasis**: Use **bold** and *italic* for important information
+- **Cross-References**: Link to related files with markdown links `[text](path)`
+
+**NEVER CREATE .log FILES**: All new engineering documentation must use .md format for rich text capabilities and better integration with fleet documentation standards.
 1. **Log Discovery**: Systematically locate all scottys-journal/ files and related documentation
 2. **Content Analysis**: Search for keywords indicating unresolved issues:
    - "TODO", "FIXME", "WARNING", "ERROR", "CRITICAL"
