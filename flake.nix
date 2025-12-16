@@ -537,7 +537,7 @@
             #unstable packages
             # unstable.statix
             # personal packages
-            quick-results
+            # quick-results
             upjust
             #necessary for bootstrapping
             ripgrep
