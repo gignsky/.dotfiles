@@ -44,6 +44,9 @@
 
   # Services
 
+  # Media control daemon for bluetooth headset controls
+  services.playerctld.enable = true;
+
   # Lorri service for direnv integration, direnv is enabled by default.
   # services.lorri.enable = true;
 
@@ -86,6 +89,20 @@
 
     # Calculator replacement for Windows Calculator
     libqalculate # Powerful scientific calculator with qalc CLI
+
+    # Bluetooth and Audio Management
+    bluetuith # TUI Bluetooth manager - excellent for pairing/connecting devices
+    pwvucontrol # Modern PipeWire volume control GUI
+    helvum # PipeWire patchbay for advanced audio routing
+    # blueman        # Alternative GUI Bluetooth manager (uncomment if preferred over TUI)
+
+    # Advanced Audio Features for OnePlus Buds 3
+    playerctl # Media control daemon for play/pause/skip via bluetooth controls
+    pavucontrol # PulseAudio volume control with codec selection
+    pulseaudio # PulseAudio compatibility layer for advanced bluetooth features
+    easyeffects # Audio effects processing including spatial audio/surround emulation
+    calf # Audio plugins for EasyEffects including convolution reverb
+    lsp-plugins # Additional audio processing plugins
 
     ################################################################
     ## look through and decide if these might be good to have then sort them throughout the configuration of the home files and the dotfiles, all new packages should start here for testing purposes if not used in a nix-shell -p command
