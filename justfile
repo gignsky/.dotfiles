@@ -602,11 +602,17 @@ log-status:
 
 # Captain's Operational Inbox Management
 inbox:
+	@nix shell nixpkgs#lolcat -c sh -c 'echo "📥 Initializing Captain'\''s Operational Inbox..." | lolcat'
 	@nix run .#inbox-manager
+	@nix shell nixpkgs#lolcat -c sh -c 'echo "✅ Inbox status check complete." | lolcat'
 
 inbox-status:
+	@nix shell nixpkgs#lolcat -c sh -c 'echo "📊 Checking quick inbox status..." | lolcat'
 	@nix run .#inbox-manager -- quick
+	@nix shell nixpkgs#lolcat -c sh -c 'echo "✅ Quick status check complete." | lolcat'
 
 # Quick thought capture and agent dispatch
 order:
+	@nix shell nixpkgs#lolcat -c sh -c 'echo "🚀 Starting Lord Gig'\''s Order Capture System..." | lolcat'
 	@nix run .#order-capture
+	@nix shell nixpkgs#lolcat -c sh -c 'echo "🎯 Order capture complete!" | lolcat'
