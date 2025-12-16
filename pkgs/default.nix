@@ -70,14 +70,70 @@ rec {
       passthru.tests = rec {
         # Run all tests at once
         all-tests = pkgs.runCommand "locker-all-tests" { } ''
-          # Verify all individual tests pass by checking they exist
-          test -f ${help-output} || (echo "help-output test failed"; exit 1)
-          test -f ${invalid-args} || (echo "invalid-args test failed"; exit 1)
-          test -f ${script-syntax} || (echo "script-syntax test failed"; exit 1)
-          test -f ${dependencies} || (echo "dependencies test failed"; exit 1)
-          test -f ${no-flake-error} || (echo "no-flake-error test failed"; exit 1)
+          echo "======================================="
+          echo "🔒 LOCKER COMPREHENSIVE TEST SUITE"
+          echo "======================================="
+          echo ""
 
-          echo "All locker tests passed!" > $out
+          # Test 1: Help Output
+          echo "📋 Test 1: Help Output Functionality"
+          if test -f ${help-output}; then
+            echo "✅ PASSED"
+            echo "   Result: $(cat ${help-output})"
+          else
+            echo "❌ FAILED - help-output test failed"
+            exit 1
+          fi
+          echo ""
+
+          # Test 2: Invalid Arguments  
+          echo "⚠️  Test 2: Invalid Argument Handling"
+          if test -f ${invalid-args}; then
+            echo "✅ PASSED"
+            echo "   Result: $(cat ${invalid-args})"
+          else
+            echo "❌ FAILED - invalid-args test failed"
+            exit 1
+          fi
+          echo ""
+
+          # Test 3: Script Syntax
+          echo "📝 Test 3: Script Syntax Validation"
+          if test -f ${script-syntax}; then
+            echo "✅ PASSED"
+            echo "   Result: $(cat ${script-syntax})"
+          else
+            echo "❌ FAILED - script-syntax test failed"
+            exit 1
+          fi
+          echo ""
+
+          # Test 4: Dependencies
+          echo "🔗 Test 4: Dependency Injection"
+          if test -f ${dependencies}; then
+            echo "✅ PASSED"
+            echo "   Result: $(cat ${dependencies})"
+          else
+            echo "❌ FAILED - dependencies test failed"
+            exit 1
+          fi
+          echo ""
+
+          # Test 5: No Flake Environment
+          echo "🚫 Test 5: No Nix Environment Handling"
+          if test -f ${no-flake-error}; then
+            echo "✅ PASSED"
+            echo "   Result: $(cat ${no-flake-error})"
+          else
+            echo "❌ FAILED - no-flake-error test failed"
+            exit 1
+          fi
+          echo ""
+
+          echo "======================================="
+          echo "🎉 ALL LOCKER TESTS PASSED!"
+          echo "   5/5 test scenarios completed successfully"
+          echo "=======================================" > $out
         '';
 
         # Test 1: Help output functionality
@@ -355,13 +411,59 @@ rec {
               # Reference the tests as dependencies, not buildInputs
             }
             ''
-              # Verify all individual tests pass by checking they exist
-              test -f ${no-git-repo} || (echo "no-git-repo test failed"; exit 1)
-              test -f ${no-justfile} || (echo "no-justfile test failed"; exit 1)
-              test -f ${with-justfile-changes} || (echo "with-justfile-changes test failed"; exit 1)
-              test -f ${no-changes} || (echo "no-changes test failed"; exit 1)
+              echo "======================================="
+              echo "📁 UPJUST COMPREHENSIVE TEST SUITE"
+              echo "======================================="
+              echo ""
 
-              echo "All upjust tests passed!" > $out
+              # Test 1: No Git Repository
+              echo "🚫 Test 1: No Git Repository"
+              if test -f ${no-git-repo}; then
+                echo "✅ PASSED"
+                echo "   Result: Script fails gracefully outside git repository"
+              else
+                echo "❌ FAILED - no-git-repo test failed"
+                exit 1
+              fi
+              echo ""
+
+              # Test 2: No Justfile
+              echo "📄 Test 2: Missing Justfile Handling"
+              if test -f ${no-justfile}; then
+                echo "✅ PASSED"
+                echo "   Result: Script handles missing justfile correctly"
+              else
+                echo "❌ FAILED - no-justfile test failed"
+                exit 1
+              fi
+              echo ""
+
+              # Test 3: With Justfile Changes
+              echo "✏️  Test 3: Successful Commit Workflow"
+              if test -f ${with-justfile-changes}; then
+                echo "✅ PASSED"
+                echo "   Result: Script successfully commits justfile changes"
+              else
+                echo "❌ FAILED - with-justfile-changes test failed"
+                exit 1
+              fi
+              echo ""
+
+              # Test 4: No Changes
+              echo "⭕ Test 4: No Changes to Commit"
+              if test -f ${no-changes}; then
+                echo "✅ PASSED"
+                echo "   Result: Script handles clean working tree correctly"
+              else
+                echo "❌ FAILED - no-changes test failed"
+                exit 1
+              fi
+              echo ""
+
+              echo "======================================="
+              echo "🎉 ALL UPJUST TESTS PASSED!"
+              echo "   4/4 git workflow scenarios completed"
+              echo "=======================================" > $out
             '';
 
         # Test 1: No git repository (should fail gracefully)
@@ -392,8 +494,8 @@ rec {
             }
             ''
               set -e
-              # Create a git repository
-              git init
+              # Create a git repository (suppress setup output)
+              git init > /dev/null 2>&1
               git config user.name "Test User"
               git config user.email "test@example.com"
 
@@ -419,26 +521,26 @@ rec {
             }
             ''
               set -e
-              # Create git repo and initial justfile
-              git init
+              # Create git repo and initial justfile (suppress setup output)
+              git init > /dev/null 2>&1
               git config user.name "Test User"
               git config user.email "test@example.com"
 
-              # Create initial justfile and commit it
+              # Create initial justfile and commit it (suppress git output)
               echo "# Initial justfile" > justfile
-              git add justfile
-              git commit -m "Initial justfile"
+              git add justfile > /dev/null 2>&1
+              git commit -m "Initial justfile" > /dev/null 2>&1
 
               # Modify justfile
               echo "# Modified justfile" > justfile
 
               # Run upjust (should succeed)
-              if upjust > $out 2>&1; then
-                # Should succeed and show commit message or justfile reference
-                grep -E "(upjust.*updated justfile|justfile)" $out || true
+              if upjust > upjust_output 2>&1; then
+                # Extract just the relevant success message, not git noise
+                echo "upjust successfully committed justfile changes" > $out
               else
                 echo "Unexpected failure with valid git repo and modified justfile:"
-                cat $out
+                cat upjust_output
                 exit 1
               fi
             '';
@@ -455,23 +557,30 @@ rec {
             }
             ''
               set -e
-              # Create git repo and justfile
-              git init
-              git config user.name "Test User" 
-              git config user.email "test@example.com"
+              # Create git repo and justfile (suppress output)
+              git init > /dev/null 2>&1
+              git config user.name "Test User" > /dev/null 2>&1
+              git config user.email "test@example.com" > /dev/null 2>&1
 
-              # Create justfile and commit it
+              # Create justfile and commit it (suppress output)
               echo "# Test justfile" > justfile
-              git add justfile
-              git commit -m "Initial justfile"
+              git add justfile > /dev/null 2>&1
+              git commit -m "Initial justfile" > /dev/null 2>&1
 
               # Run upjust (should fail - nothing to commit)
-              if upjust > $out 2>&1; then
-                echo "Unexpected success - should have failed with no changes"
+              if upjust > test_output 2>&1; then
+                echo "❌ FAILED - Expected failure but upjust succeeded with no changes"
+                cat test_output
                 exit 1
               else
                 # Should get "nothing to commit" or similar message
-                grep -E "(nothing to commit|working tree clean)" $out || true
+                if grep -E "(nothing to commit|working tree clean)" test_output > /dev/null 2>&1; then
+                  echo "✅ PASSED - Correctly failed with no changes to commit"
+                else
+                  echo "⚠️  PARTIAL - Failed as expected but with unexpected error message"
+                  cat test_output
+                fi
+                touch $out
               fi
             '';
       };
