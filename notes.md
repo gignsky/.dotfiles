@@ -355,3 +355,15 @@ Ti
     - Test font generation and customization capabilities
     - Document process for future font updates and modifications
   - **Benefits**: Enable custom MonoLisa variants for development environments
+- see if I can embed a default font in gigvim.
+- **NETWORK INFRASTRUCTURE UPGRADE**:
+  - **Configure layer 3 switch as main router** instead of current Archer device
+  - **Priority**: High - will improve network performance and management
+  - **Benefits**: More advanced routing capabilities, better VLAN support,
+    improved network segmentation
+  - **Research needed**: Layer 3 switch configuration for routing, DHCP, and
+    firewall capabilities
+- need to convert scotty logs to markdown for better viewing... maybe in the
+  future something better than markdown will exist.
+- need to figure out how to do strikethroughs in markdown, and then make scotty
+  use them.
