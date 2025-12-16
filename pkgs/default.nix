@@ -165,22 +165,131 @@ rec {
       ${pkgs.git}/bin/git commit -m "upjust - updated justfile"
     ''
     // {
-      passthru.tests = {
-        basic =
-          pkgs.runCommand "upjust-test"
+      passthru.tests = rec {
+        # Run all tests at once
+        all-tests =
+          pkgs.runCommand "upjust-all-tests"
+            {
+              # Reference the tests as dependencies, not buildInputs
+            }
+            ''
+              # Verify all individual tests pass by checking they exist
+              test -f ${no-git-repo} || (echo "no-git-repo test failed"; exit 1)
+              test -f ${no-justfile} || (echo "no-justfile test failed"; exit 1)
+              test -f ${with-justfile-changes} || (echo "with-justfile-changes test failed"; exit 1)
+              test -f ${no-changes} || (echo "no-changes test failed"; exit 1)
+
+              echo "All upjust tests passed!" > $out
+            '';
+
+        # Test 1: No git repository (should fail gracefully)
+        no-git-repo =
+          pkgs.runCommand "upjust-no-git-test"
+            {
+              buildInputs = [ upjust ];
+            }
+            ''
+              set -e
+              # Should fail gracefully since .git doesn't exist
+              if upjust > $out 2>&1; then
+                grep -q "justfile" $out || true
+              else
+                grep -E "(fatal:|not a git repository)" $out || true
+              fi
+            '';
+
+        # Test 2: Git repo exists but no justfile (should fail)
+        no-justfile =
+          pkgs.runCommand "upjust-no-justfile-test"
             {
               buildInputs = [
                 upjust
+                pkgs.git
+                pkgs.coreutils
               ];
             }
             ''
               set -e
-              # Should fail gracefully since .git may not exist in sandbox
+              # Create a git repository
+              git init
+              git config user.name "Test User"
+              git config user.email "test@example.com"
+
+              # Run upjust (should fail - no justfile to add)
               if upjust > $out 2>&1; then
-                grep -q "justfile" $out || true
+                echo "Unexpected success - should have failed without justfile"
+                exit 1
               else
-                # Match various git error patterns
-                grep -E "(fatal:|not a git repository)" $out || true
+                # Should get error about pathspec not matching files
+                grep -E "(pathspec.*did not match|No such file)" $out || true
+              fi
+            '';
+
+        # Test 3: Git repo with justfile that has changes (should succeed)
+        with-justfile-changes =
+          pkgs.runCommand "upjust-with-changes-test"
+            {
+              buildInputs = [
+                upjust
+                pkgs.git
+                pkgs.coreutils
+              ];
+            }
+            ''
+              set -e
+              # Create git repo and initial justfile
+              git init
+              git config user.name "Test User"
+              git config user.email "test@example.com"
+
+              # Create initial justfile and commit it
+              echo "# Initial justfile" > justfile
+              git add justfile
+              git commit -m "Initial justfile"
+
+              # Modify justfile
+              echo "# Modified justfile" > justfile
+
+              # Run upjust (should succeed)
+              if upjust > $out 2>&1; then
+                # Should succeed and show commit message or justfile reference
+                grep -E "(upjust.*updated justfile|justfile)" $out || true
+              else
+                echo "Unexpected failure with valid git repo and modified justfile:"
+                cat $out
+                exit 1
+              fi
+            '';
+
+        # Test 4: Git repo with justfile but no changes (should fail)
+        no-changes =
+          pkgs.runCommand "upjust-no-changes-test"
+            {
+              buildInputs = [
+                upjust
+                pkgs.git
+                pkgs.coreutils
+              ];
+            }
+            ''
+              set -e
+              # Create git repo and justfile
+              git init
+              git config user.name "Test User" 
+              git config user.email "test@example.com"
+
+              # Create justfile and commit it
+              echo "# Test justfile" > justfile
+              git add justfile
+              git commit -m "Initial justfile"
+
+              # Run upjust (should fail - nothing to commit)
+              if upjust > $out 2>&1; then
+                echo "Unexpected success - should have failed with no changes"
+                exit 1
+              else
+                # Should get "nothing to commit" or similar message
+                grep -E "(nothing to commit|working tree clean)" $out || true
               fi
             '';
       };
