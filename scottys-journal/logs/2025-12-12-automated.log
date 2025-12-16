@@ -1,0 +1,20 @@
+================================================================================
+CHIEF ENGINEER'S LOG - STARDATE 2025.12.12 (AUTOMATED)
+================================================================================
+
+[2025-12-12 15:45:04] BUILD START
+Starting nixos-rebuild-wsl@ganoslal@ganoslal
+
+[2025-12-12 15:46:24] ★ CAPTAIN'S REPORT ★ BUILD ERROR
+nixos-rebuild-wsl@ganoslal@ganoslal failed: unpacking 'github:nix-community/nixos-vscode-server/6d5f074e4811d143d44169ba4af09b20ddb6937d?narHash=sha256-foGgZu8%2BbCNIGeuDqQ84jNbmKZpd%2BJvnrL2WlyU4tuU%3D' into the Git cache... unpacking 'github:nix-community/NixOS-WSL/59bf0375c5db92ef19456e7a659b627adb675fe2?narHash=sha256-%2BSqngIVSellamVTFUnSVn%2BtGEGJZ4OSmbQvd7MxpGwQ%3D' into the Git cache... unpacking 'github:mic92/sops-nix/c482a1c1bbe030be6688ed7dc84f7213f304f1ec?narHash=sha256-1m84V2ROwNEbqeS9t37/mkry23GBhfMt8qb6aHHmjuc%3D' into the Git cache... building the system configuration... copying path '/nix/store/cjjpqrp9xy44j5fjh3mygyxy3i7mslj2-source' from 'https://cache.nixos.org'... 
+
+[2025-12-12 15:47:31] BUILD START
+Starting nixos-rebuild-wsl@ganoslal@ganoslal
+[2025-12-12 15:53:10] BUILD START
+Starting nixos-rebuild-wsl@ganoslal@ganoslal
+
+[2025-12-12 15:54:57] BUILD START
+Starting nixos-rebuild-wsl@ganoslal@ganoslal
+
+[2025-12-12 15:55:09] ★ CAPTAIN'S REPORT ★ BUILD ERROR
+nixos-rebuild-wsl@ganoslal@ganoslal failed: warning: Git tree '/home/gig/.dotfiles' is dirty building the system configuration... warning: Git tree '/home/gig/.dotfiles' is dirty 
