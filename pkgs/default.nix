@@ -4,8 +4,16 @@
   pkgs ? import <nixpkgs> { },
 }:
 let
+  inherit (pkgs) lib;
+
   # Import packaged scripts
   scripts = import ./scripts.nix { inherit pkgs; };
+
+  # All user-facing scripts (no internal- prefix)
+  userScripts = lib.filterAttrs (name: _: !(lib.hasPrefix "internal-" name)) scripts;
+
+  # Internal scripts for advanced/dangerous operations
+  internalScripts = lib.filterAttrs (name: _: lib.hasPrefix "internal-" name) scripts;
 in
 rec {
   #################### Example Packages #################################
@@ -164,15 +172,16 @@ rec {
 
   #################### Packages with external source ####################
   # zsh-als-aliases = pkgs.callPackage ./zsh-als-aliases { }; # Removed as unnecessary but left for help in the future
+  # SCOTTY: WE SHOULD GET THIS WORKING!!! TODO
 
   #################### Packaged Scripts ####################
   # Import all packaged scripts from scripts.nix
-  inherit (scripts)
-    check-hardware-config
-    system-flake-rebuild
-    home-manager-flake-rebuild
-    system-flake-rebuild-test
-    system-flake-rebuild-verbose
-    pre-commit-flake-check
-    ;
+  # ~~Manual inherit list~~ ✅ **Automated 2025-12-16** - scripts auto-inherited
+
+}
+// userScripts
+// {
+
+  # Internal scripts available as nested attribute for advanced use
+  internal = internalScripts;
 }
