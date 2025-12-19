@@ -34,3 +34,10 @@ system-operation: Smart clean completed - OpenCode ready for rebuild
 [2025-12-19 14:50:55] SYSTEM OPERATION
 [@ganoslal:feature/improving-auto-logs] [@ganoslal:feature/improving-auto-logs] Smart clean completed - OpenCode ready for rebuild, caches cleared
 
+[2025-12-19 15:07:42] SYSTEM OPERATION
+[@ganoslal:hotfix/better-logging] Test context deduplication fix - ensuring no double context after rebase
+[2025-12-19 15:09:19] SYSTEM OPERATION
+[@ganoslal:hotfix/better-logging] Smart clean initiated - preserving OpenCode history, cleaning caches
+
+[2025-12-19 15:09:27] SYSTEM OPERATION
+[@ganoslal:hotfix/better-logging] Smart clean completed - OpenCode ready for rebuild, caches cleared

@@ -166,19 +166,25 @@ rebuild-full args="":
 	just rebuild {{args}}
 	just home {{args}}
 
-# Bare rebuild commands (minimal, no logging, no scripts)
+# Bare rebuild commands (minimal logging, no pre/post scripts)
 rebuild-bare host=`scripts/get-flake-target.sh`:
 	@echo "Bare system rebuild for {{host}}..."
+	@bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Bare system rebuild initiated" "minimal rebuild for host {{host}}, no pre/post hooks"'
 	sudo nixos-rebuild switch --flake .#{{host}}
+	@bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Bare system rebuild completed" "nixos-rebuild switch for {{host}} finished successfully"'
 
 home-bare host=`scripts/get-flake-target.sh`:
 	@echo "Bare home-manager rebuild for gig@{{host}}..."
+	@bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Bare home-manager rebuild initiated" "minimal home-manager rebuild for gig@{{host}}, no pre/post hooks"'
 	home-manager switch --flake .#gig@{{host}}
+	@bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Bare home-manager rebuild completed" "home-manager switch for gig@{{host}} finished successfully"'
 
 rebuild-full-bare host=`scripts/get-flake-target.sh`:
 	@echo "Bare full rebuild for {{host}}..."
+	@bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Bare full rebuild initiated" "minimal system and home-manager rebuild for {{host}}, no pre/post hooks"'
 	sudo nixos-rebuild switch --flake .#{{host}}
 	home-manager switch --flake .#gig@{{host}}
+	@bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Bare full rebuild completed" "both system and home-manager rebuilt for {{host}} successfully"'
 
 # Test rebuild commands (dry-run evaluation without applying)
 test-rebuild host=`scripts/get-flake-target.sh`:
