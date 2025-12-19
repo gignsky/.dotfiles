@@ -19,6 +19,7 @@
     # inputs.nix-colors.homeManagerModules.default
     ./common/core
     ./common/optional/direnv.nix
+    ./common/optional/bat.nix
     # direnvModule
   ];
   nix = {
@@ -56,8 +57,9 @@
     man-db
     # shell packages defined in this repo
     supertree
+    locker
     # quick-results
-    # upjust
+    upjust
     # cargo-update
 
     #nix tools

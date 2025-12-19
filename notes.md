@@ -367,3 +367,10 @@ Ti
   future something better than markdown will exist.
 - need to figure out how to do strikethroughs in markdown, and then make scotty
   use them.
+- Need to figure out a better way to do nix options, even if that means writing
+  my own tool
+- would be ideal if I had access to agents inside of vim, but not doing
+  autocomplete, this should be HIGH PRIORITY SCOTTY
+- add the ability for opencode to properly rename sessions with reasonable names
+- should modify git-dev for gigvim so that it can search a users repos and
+  optionally open them since I often find myself wanting to do this
