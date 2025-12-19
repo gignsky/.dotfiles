@@ -5,6 +5,8 @@ _: {
   programs.starship = {
     enable = true;
     enableZshIntegration = true;
+    enableBashIntegration = true;
+    enableFishIntegration = true;
     enableNushellIntegration = true;
     settings = {
       # # Get editor completions based on the config schema
