@@ -610,10 +610,17 @@ _original_scotty_log_event() {
             ;;
         "system-operation")
             local operation_desc="$1"
-            local current_branch=$(git branch --show-current 2>/dev/null || echo "unknown")
-            local hostname=$(get_host_identifier)
-            local enhanced_context="[$hostname:$current_branch] $operation_desc"
-            create_narrative_entry "SYSTEM OPERATION" "$enhanced_context" "note"
+            # Check if context is already present (from failsafe_log)
+            if [[ "$operation_desc" =~ ^\[@[^:]+:[^]]+\].*$ ]]; then
+                # Context already present, use as-is
+                create_narrative_entry "SYSTEM OPERATION" "$operation_desc" "note"
+            else
+                # Add context for direct calls
+                local current_branch=$(git branch --show-current 2>/dev/null || echo "unknown")
+                local hostname=$(get_host_identifier)
+                local enhanced_context="[$hostname:$current_branch] $operation_desc"
+                create_narrative_entry "SYSTEM OPERATION" "$enhanced_context" "note"
+            fi
             ;;
         *)
             # Enhanced unknown event logging with context
