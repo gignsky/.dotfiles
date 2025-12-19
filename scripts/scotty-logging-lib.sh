@@ -31,17 +31,26 @@ fi
 # For critical operations when normal logging might fail (e.g., during clean)
 failsafe_log() {
     local message="$1"
+    local context="${2:-}"  # Optional additional context
     local fallback_log="${HOME}/.dotfiles/failsafe-operations.log"
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    local current_branch=$(git branch --show-current 2>/dev/null || echo "unknown")
+    local hostname=$(get_host_identifier 2>/dev/null || hostname || echo "unknown")
+    
+    # Build enhanced message with context
+    local enhanced_message="[$hostname:$current_branch] $message"
+    if [ -n "$context" ]; then
+        enhanced_message="$enhanced_message - $context"
+    fi
     
     # Try normal logging first
     if command -v scotty_log_event >/dev/null 2>&1; then
-        scotty_log_event "system-operation" "$message" && return 0
+        scotty_log_event "system-operation" "$enhanced_message" && return 0
     fi
     
     # Failsafe: Write to emergency log
-    echo "[${timestamp}] FAILSAFE LOG: $message" >> "$fallback_log"
-    echo "⚠️ Logged to failsafe: $message" >&2
+    echo "[${timestamp}] FAILSAFE LOG: $enhanced_message" >> "$fallback_log"
+    echo "⚠️ Logged to failsafe: $enhanced_message" >&2
 }
 
 # BATCHED LOGGING SYSTEM
@@ -589,7 +598,7 @@ _original_scotty_log_event() {
             log_build_performance "$enhanced_operation" "$duration" "$success" "" "Automated build logging" "$generation"
             create_narrative_entry "BUILD COMPLETE" "$enhanced_operation completed in ${duration}s (success: $success, generation: $generation)" "report"
             ;;
-        "build-error")
+         "build-error")
             local operation="$1"
             local error="$2"
             # Extract host from operation string and enhance it
@@ -599,8 +608,19 @@ _original_scotty_log_event() {
             log_error "build-failure" "$error" "Manual intervention required" "0" "false"
             create_narrative_entry "BUILD ERROR" "$enhanced_operation failed: $error" "report"
             ;;
+        "system-operation")
+            local operation_desc="$1"
+            local current_branch=$(git branch --show-current 2>/dev/null || echo "unknown")
+            local hostname=$(get_host_identifier)
+            local enhanced_context="[$hostname:$current_branch] $operation_desc"
+            create_narrative_entry "SYSTEM OPERATION" "$enhanced_context" "note"
+            ;;
         *)
-            create_narrative_entry "UNKNOWN EVENT" "$event_type: $*" "note"
+            # Enhanced unknown event logging with context
+            local current_branch=$(git branch --show-current 2>/dev/null || echo "unknown")
+            local hostname=$(get_host_identifier)
+            local enhanced_context="[$hostname:$current_branch] $event_type: $*"
+            create_narrative_entry "UNKNOWN EVENT" "$enhanced_context" "note"
             ;;
     esac
 }
