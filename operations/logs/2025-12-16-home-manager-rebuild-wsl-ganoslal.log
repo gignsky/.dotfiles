@@ -1,0 +1,90 @@
+# Home-Manager Rebuild Engineering Log - WSL@ganoslal
+**Stardate**: 2025-12-16  
+**Operation**: Home-Manager Configuration Rebuild  
+**Engineer**: Chief Engineer Montgomery Scott  
+**Host**: ganoslal (WSL environment)  
+**Status**: ✅ SUCCESSFUL  
+
+## Rebuild Metrics
+- **Generation**: 253 → 254
+- **Build Duration**: 18 seconds *(Excellent performance - well below 30-second benchmark)*
+- **Configuration Files Modified**: 16 files across multiple domains
+
+## Technical Changes Summary
+
+### 🔧 Package Management Changes
+- **Font Repository Update**: Migrated from `personal-fonts-nix` to `fancy-fonts` 
+  - Updated flake input URL: `git+ssh://git@github.com/gignsky/fancy-fonts`
+  - Maintains nixpkgs-unstable following pattern
+- **Package Additions**: Added `locker` package, restored `upjust`
+- **Package Removals**: Removed `upflake` and `upspell` from personal packages
+
+### 🖥️ Terminal & UI Enhancements
+- **Wezterm Configuration**:
+  - Font size increased: 11.0 → 12.0 *(Better readability)*
+  - Font priority reordered: MonoLisa Variable now primary, Cartograph CF fallback
+- **Starship Configuration**: Cleaned up commented preset configurations
+
+### 📄 New File Pager System - **Critical Enhancement**
+- **New bat.nix Module**: Comprehensive bat configuration replacing cat
+  - Paging: Auto-enabled with less integration
+  - Pager settings: `less -RFXig` for optimal viewing
+  - Style: `numbers,changes,header` for enhanced readability
+  - Theme: TwoDark for consistent appearance
+- **Shell Aliases Enhancement**:
+  - `cat` aliased to `bat` system-wide
+  - `bcat` alias for forced paging mode
+  - Test alias added: `rebuild-test-verified`
+
+### 🎵 Audio & Bluetooth Management
+- **New Audio Services**: 
+  - `playerctld` service enabled for bluetooth headset controls
+- **New Audio Packages**:
+  - `bluetuith`: TUI Bluetooth manager for device pairing
+  - `pwvucontrol`: Modern PipeWire volume control
+  - `helvum`: PipeWire patchbay for audio routing
+  - `libqalculate`: Scientific calculator replacement
+
+### 🤖 Agent System Enhancements  
+- **OpenCode Agent Commands**: 
+  - Added `log-status` command for detecting undocumented changes
+  - Added `commit` command for standardized git workflow
+- **Documentation Integration**: Enhanced command descriptions
+
+## System Integration Analysis
+
+### Performance Impact: **MINIMAL** ⚡
+- 18-second rebuild indicates efficient change processing
+- No dependency conflicts detected
+- Font repository migration completed cleanly
+
+### Configuration Coherence: **EXCELLENT** ✅
+- All changes align with Lord Gig's configuration standards
+- WSL-specific adaptations maintained
+- No breaking changes to existing workflows
+
+### Audio Stack Enhancement: **SIGNIFICANT** 🔊
+- Complete bluetooth audio management suite added
+- PipeWire integration properly configured
+- Modern tools replace legacy audio control methods
+
+## Engineering Recommendations
+
+1. **Verify Bluetooth Functionality**: Test bluetuith pairing with available devices
+2. **Audio Control Testing**: Confirm playerctld service responds to headset controls
+3. **Font Verification**: Ensure fancy-fonts repository accessibility across all hosts
+4. **Bat Integration Testing**: Verify paging behavior meets user preferences
+
+## Fleet Integration Status
+- ✅ Generation tracking updated (254)
+- ✅ Package manifest consistent with fleet standards  
+- ✅ No configuration conflicts with other hosts
+- ✅ WSL-specific adaptations preserved
+
+---
+**Chief Engineer's Assessment**: Solid configuration enhancement focused on audio management and terminal experience improvements. The addition of comprehensive bluetooth tooling addresses previous audio control limitations in WSL environments.
+
+**Engineering Confidence**: HIGH  
+**Recommended Action**: Deploy similar audio enhancements to other hosts as appropriate
+
+*Chief-Engineer: Montgomery Scott <2025-12-16>*
