@@ -41,3 +41,26 @@ system-operation: Smart clean completed - OpenCode ready for rebuild
 
 [2025-12-19 15:09:27] SYSTEM OPERATION
 [@ganoslal:hotfix/better-logging] Smart clean completed - OpenCode ready for rebuild, caches cleared
+[2025-12-19 15:17:02] SYSTEM OPERATION
+[@ganoslal:fixing/rumdl] Smart clean initiated - preserving OpenCode history, cleaning caches
+
+[2025-12-19 15:17:08] SYSTEM OPERATION
+[@ganoslal:fixing/rumdl] Smart clean completed - OpenCode ready for rebuild, caches cleared
+
+[2025-12-19 15:17:08] SYSTEM OPERATION
+[@ganoslal:fixing/rumdl] Bare home-manager rebuild initiated - minimal home-manager rebuild for gig@wsl, no pre/post hooks
+
+[2025-12-19 15:17:59] SYSTEM OPERATION
+[@ganoslal:fixing/rumdl] Bare home-manager rebuild completed - home-manager switch for gig@wsl finished successfully
+
+[2025-12-19 15:19:31] SYSTEM OPERATION
+[@ganoslal:fixing/rumdl] Bare home-manager rebuild initiated - minimal home-manager rebuild for gig@wsl, no pre/post hooks
+
+[2025-12-19 15:20:16] SYSTEM OPERATION
+[@ganoslal:fixing/rumdl] Bare home-manager rebuild completed - home-manager switch for gig@wsl finished successfully
+
+[2025-12-19 15:21:50] SYSTEM OPERATION
+[@ganoslal:fixing/rumdl] Bare home-manager rebuild initiated - minimal home-manager rebuild for gig@wsl, no pre/post hooks
+
+[2025-12-19 15:22:25] SYSTEM OPERATION
+[@ganoslal:fixing/rumdl] Bare home-manager rebuild completed - home-manager switch for gig@wsl finished successfully
