@@ -367,3 +367,4 @@ Ti
   future something better than markdown will exist.
 - need to figure out how to do strikethroughs in markdown, and then make scotty
   use them.
+- at some point I need to work on the tinderr for plex app
