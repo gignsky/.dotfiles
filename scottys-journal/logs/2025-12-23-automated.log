@@ -19,3 +19,12 @@ Starting Event: build-start
 [2025-12-23 16:54:58] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
 nixos-rebuild-merlin completed in 25s (success: true, generation: 87)
 
+[2025-12-23 16:55:28] SYSTEM OPERATION
+[:merlin/bspwm-config-two] [:merlin/bspwm-config-two] Bare home-manager rebuild initiated - minimal home-manager rebuild for gig@merlin, no pre/post hooks
+
+[2025-12-23 16:55:46] SYSTEM OPERATION
+[:merlin/bspwm-config-two] [:merlin/bspwm-config-two] Bare home-manager rebuild completed - home-manager switch for gig@merlin finished successfully
+
+[2025-12-23 16:57:34] BUILD START
+Starting Event: build-start
+
