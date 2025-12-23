@@ -61,10 +61,11 @@
 
     # optnix.url = "github:water-sucks/optnix";
 
-    git-aliases = {
-      url = "github:KamilKleina/git-aliases.nu";
-      flake = false;
-    };
+    # # Reenable to get aliases working again
+    # git-aliases = {
+    #   url = "github:KamilKleina/git-aliases.nu";
+    #   flake = false;
+    # };
 
     #################### Personal Repositories ####################
 
