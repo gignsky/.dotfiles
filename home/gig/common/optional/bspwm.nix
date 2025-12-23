@@ -144,6 +144,12 @@
         XF86AudioRaiseVolume            Volume up
         XF86AudioLowerVolume            Volume down
         XF86AudioMute                   Mute toggle
+
+        <b>Brightness:</b>
+        XF86MonBrightnessUp             Brightness up (Function keys)
+        XF86MonBrightnessDown           Brightness down (Function keys)
+        super + plus / super + minus     Brightness up/down (alternative)
+        super + shift + plus/minus       Large brightness adjustment
         "'';
 
       # Close window
@@ -187,6 +193,16 @@
       "XF86AudioRaiseVolume" = "pactl set-sink-volume @DEFAULT_SINK@ +5%";
       "XF86AudioLowerVolume" = "pactl set-sink-volume @DEFAULT_SINK@ -5%";
       "XF86AudioMute" = "pactl set-sink-mute @DEFAULT_SINK@ toggle";
+
+      # Brightness controls (Framework 16 function keys)
+      "XF86MonBrightnessUp" = "brightnessctl set +10%";
+      "XF86MonBrightnessDown" = "brightnessctl set 10%-";
+
+      # Alternative brightness bindings (in case function keys don't work)
+      "super + plus" = "brightnessctl set +10%";
+      "super + minus" = "brightnessctl set 10%-";
+      "super + shift + plus" = "brightnessctl set +25%";
+      "super + shift + minus" = "brightnessctl set 25%-";
     };
   };
 
