@@ -5,6 +5,7 @@
     #################### Official NixOS and HM Package Sources ####################
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs-pkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     # nixpkgs-local.url = "git+file:///home/gig/local_repos/nixpkgs";
     # nixos-anywhere.url = "github:nix-community/nixos-anywhere";
 
@@ -79,24 +80,33 @@
     # private repo with fancy fonts
     fancy-fonts = {
       url = "git+ssh://git@github.com/gignsky/fancy-fonts";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
+      inputs.nixpkgs.follows = "nixpkgs-pkgs";
     };
 
     # Recursive tarballs
     wrapd = {
       url = "github:gignsky/wrapd";
-      inputs.dotfiles.follows = ""; # Break circular dependency - use current flake
+      inputs = {
+        dotfiles.follows = ""; # Break circular dependency - use current flake
+        nixpkgs.follows = "nixpkgs-pkgs";
+      };
     };
 
-    # tax-matrix - currently on develop branch
+    # # tax-matrix - currently on develop branch
     # tax-matrix = {
     #   url = "github:gignsky/tax-matrix/develop";
-    # inputs.gigdot.follows = "";  # Break circular dependency
+    #   inputs = {
+    #     nixpkgs.follows = "nixpkgs-pkgs";
+    #     gigdot.follows = ""; # Break circular dependency
+    #   };
     # };
 
     gigvim = {
       url = "github:gignsky/gigvim";
-      inputs.gigdot.follows = ""; # Break circular dependency - use current flake
+      inputs = {
+        nixpkgs.follows = "nixpkgs-pkgs";
+        gigdot.follows = ""; # Break circular dependency
+      };
     };
 
     # nufetch.url = "github:gignsky/nufetch";
