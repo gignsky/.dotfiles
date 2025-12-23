@@ -11,7 +11,7 @@
         save = true; # Remember session choice
 
         # Optional: Performance optimizations
-        animation = "none"; # Disable animations for faster boot
+        # animation = "none"; # Disable animations for faster boot
         hide_borders = false;
         hide_key_hints = false;
       };
