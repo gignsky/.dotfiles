@@ -10,10 +10,7 @@
 
     nixos-wsl = {
       url = "github:nix-community/NixOS-WSL/main";
-      # inputs = {
       inputs.nixpkgs.follows = "nixpkgs";
-      # flake-utils.follows = "flake-utils"; # unnecessary as of 2/13/25
-      # };
     };
 
     # nixos-hardware, to fix hardware issues and firmware for specific machines
