@@ -97,28 +97,28 @@
     # nixos-anywhere.url = "github:nix-community/nixos-anywhere";
 
     # Nix Sweep, a nix store tool -- need to package it
-    # nix-sweep.url = "github:jzbor/nix-sweep";
+    nix-sweep.url = "github:jzbor/nix-sweep";
 
     # Flake Utils (used internally by some other utilities and locked to this one version for sanities sake)
     # flake-utils.url = "github:numtide/flake-utils";
 
-    # vscode-server = {
-    #   url = "github:nix-community/nixos-vscode-server";
-    #   inputs = {
-    #     nixpkgs.follows = "nixpkgs";
-    #     # flake-utils.follows = "flake-utils";
-    #   };
-    # };
+    vscode-server = {
+      url = "github:nix-community/nixos-vscode-server";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        # flake-utils.follows = "flake-utils";
+      };
+    };
 
     # flake-iter.url = "github:determinatesystems/flake-iter";
 
     # optnix.url = "github:water-sucks/optnix";
 
-    # # Reenable to get aliases working again
-    # git-aliases = {
-    #   url = "github:KamilKleina/git-aliases.nu";
-    #   flake = false;
-    # };
+    # Reenable to get aliases working again
+    git-aliases = {
+      url = "github:KamilKleina/git-aliases.nu";
+      flake = false;
+    };
 
   };
 
