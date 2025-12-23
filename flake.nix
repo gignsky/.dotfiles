@@ -22,7 +22,7 @@
     nix-sweep.url = "github:jzbor/nix-sweep";
 
     # Flake Utils (used internally by some other utilities and locked to this one version for sanities sake)
-    flake-utils.url = "github:numtide/flake-utils";
+    # flake-utils.url = "github:numtide/flake-utils";
 
     # Home manager
     home-manager = {
@@ -34,7 +34,7 @@
       url = "github:nix-community/nixos-vscode-server";
       inputs = {
         nixpkgs.follows = "nixpkgs";
-        flake-utils.follows = "flake-utils";
+        # flake-utils.follows = "flake-utils";
       };
     };
     # flake-iter.url = "github:determinatesystems/flake-iter";
