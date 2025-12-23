@@ -39,3 +39,9 @@ nixos-rebuild-merlin completed in 17s (success: true, generation: 88)
 [2025-12-23 17:53:40] BUILD START
 Starting Event: build-start
 
+[2025-12-23 18:18:21] ★ CAPTAIN'S REPORT ★ BUILD ERROR
+Event: build-error failed: nixos-rebuild-merlin error: Cannot build '/nix/store/jrhs9zi6v5h2zk42bwvirfm0xp0zrzmv-nixos-system-merlin-25.11.20251206.d9bc5c7.drv'.        Reason: 1 dependency failed.        Output paths:          /nix/store/iscqas274916bfi0695sa1maaq04xjvr-nixos-system-merlin-25.11.20251206.d9bc5c7 Command 'nix --extra-experimental-features 'nix-command flakes' build --print-out-paths '.#nixosConfigurations."merlin".config.system.build.toplevel' --no-link' returned non-zero exit status 1. 
+
+[2025-12-23 18:18:21] BUILD START
+Starting Event: build-start
+
