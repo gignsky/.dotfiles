@@ -51,7 +51,7 @@
   };
 
   # Tailscale configuration
-  tailscale.enable = false;
+  tailscale.enable = true;
 
   boot.loader = {
     # Bootloader.
