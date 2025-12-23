@@ -7,8 +7,6 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
     # Unstable
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
-    # Unstable for Packages
-    nixpkgs-pkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     # Local
     # nixpkgs-local.url = "git+file:///home/gig/local_repos/nixpkgs";
 
@@ -60,7 +58,6 @@
     # private repo with fancy fonts
     fancy-fonts = {
       url = "git+ssh://git@github.com/gignsky/fancy-fonts";
-      inputs.nixpkgs.follows = "nixpkgs-pkgs";
     };
 
     # Recursive tarballs
@@ -68,7 +65,6 @@
       url = "github:gignsky/wrapd";
       inputs = {
         dotfiles.follows = ""; # Break circular dependency - use current flake
-        nixpkgs.follows = "nixpkgs-pkgs";
       };
     };
 
@@ -76,7 +72,6 @@
     # tax-matrix = {
     #   url = "github:gignsky/tax-matrix/develop";
     #   inputs = {
-    #     nixpkgs.follows = "nixpkgs-pkgs";
     #     gigdot.follows = ""; # Break circular dependency
     #   };
     # };
@@ -84,7 +79,6 @@
     gigvim = {
       url = "github:gignsky/gigvim";
       inputs = {
-        # nixpkgs.follows = "nixpkgs-pkgs";
         gigdot.follows = ""; # Break circular dependency
       };
     };
