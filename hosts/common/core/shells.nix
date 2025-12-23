@@ -33,7 +33,8 @@ in
 
     # Personal packages
     # wrap.wrap # example for overlays
-    inputs.wrapd.packages.${system}.wrapd
+    # Temporarily disabled due to Rust 1.86.0 source corruption in nixpkgs-unstable
+    # inputs.wrapd.packages.${system}.wrapd
     # inputs.tax-matrix.packages.${system}.tax-matrix
   ];
 
