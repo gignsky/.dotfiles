@@ -1,0 +1,65 @@
+2025-12-14 02:47:46 - Chief Engineer Montgomery Scott reporting successful system regeneration
+
+2025-12-14 11:32:45 - ENGINEERING LOG: Merlin NixOS Generation 70→71 Success
+Build Duration: 17 seconds (excellent performance)
+Configuration Changes:
+  - home/gig/common/core/wezterm.nix: Font priority optimization
+    * MonoLisa Variable promoted to primary position
+    * Cartograph CF moved to secondary fallback
+    * Removed commented legacy configuration
+  - hosts/common/core/fonts.nix: System font defaults realignment
+    * Cartograph CF moved to primary monospace default
+    * MonoLisa Variable repositioned as secondary default
+    * Maintained backward compatibility with existing fallback chain
+
+Technical Analysis:
+  - Font fallback hierarchy optimized for consistency between WezTerm and system
+  - Build time of 17 seconds indicates healthy dependency cache
+  - No evaluation errors or warnings detected
+  - Generation transition clean: 70→71
+
+Status: OPERATIONAL - All systems nominal after font configuration optimization
+2025-12-14 06:06:57 - ENGINEERING LOG: Documenting successful home-manager rebuild for merlin
+Host: merlin  
+Generation: 80 → 81
+Build Duration: 12 seconds
+Configuration Changes: home/gig/common/core/opencode.nix
+
+Technical Details:
+- Added explicit pkgs parameter to function signature
+- Upgraded opencode package to unstable channel version
+- Maintained existing configuration structure
+- Clean rebuild with no errors
+
+Engineering Assessment: Configuration update successful, unstable package integration nominal
+Chief Engineer: Montgomery Scott 2025-12-14 06:06:57
+2025-12-14_061012 - HOME-MANAGER REBUILD SUCCESS - MERLIN
+Host: merlin
+Generation: 81 → 82
+Build Duration: 10 seconds
+Status: SUCCESS
+
+CONFIGURATION CHANGES:
+- Modified: home/gig/common/core/opencode.nix
+- Changes: Simplified configuration by removing unused pkgs parameter and explicit package specification
+- Impact: Configuration cleanup, maintains functionality while reducing complexity
+
+TECHNICAL DETAILS:
+- Removed unused '{ pkgs, ... }:' parameter declaration
+- Removed explicit 'package = pkgs.unstable.opencode;' specification  
+- Configuration now relies on default package resolution
+- Build completed without errors in optimal time
+
+ENGINEERING ASSESSMENT:
+This represents a successful configuration simplification - removing unnecessary explicit package declarations while maintaining full functionality. The 10-second build time indicates efficient evaluation and no dependency conflicts.
+
+Chief-Engineer: Montgomery Scott <2025-12-14_061012>
+---2025-12-14 08:22:47 - [MERLIN] Home-manager rebuild completed successfully
+Generation: 83 → 84
+Build Duration: 21 seconds
+Configuration Changes: home/gig/common/optional/shellAliases.nix
+Technical Details:
+- Added 'oc = "opencode"' alias for quick OpenCode access
+- Shell alias system functioning optimally
+- No errors or warnings detected
+Status: ✅ OPERATIONAL

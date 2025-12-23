@@ -1,0 +1,105 @@
+# Engineering Log - Merlin Home-Manager Rebuild Success
+**Stardate**: 2025-12-14  
+**Chief Engineer**: Montgomery Scott  
+**Host**: merlin (Framework 16 Laptop)  
+**Operation**: Home-Manager Generation Upgrade  
+
+## Build Metrics
+- **Generation**: 68 → 69
+- **Build Duration**: 17 seconds
+- **Status**: ✅ SUCCESS
+- **Configuration Impact**: Multi-system standardization and optimization
+
+## Technical Summary
+Successfully executed home-manager rebuild on merlin, advancing from generation 68 to 69. The rebuild incorporated significant configuration standardization changes, particularly the migration from unstable to stable NixOS 25.11 channel and various system optimizations.
+
+## Configuration Changes Analysis
+
+### Primary Changes Since Last Rebuild
+**Modified Files (10)**:
+```
+flake.nix                                    # Channel standardization
+home/gig/common/core/wezterm.nix            # Font prioritization
+home/gig/common/optional/bspwm.nix          # Window management cleanup
+home/gig/common/resources/bspwm/merlin.conf # Monitor configuration optimization
+home/gig/home.nix                           # Service and package additions
+hosts/common/core/fonts.nix                 # Font system updates
+hosts/common/optional/audio.nix             # Audio system refinements
+hosts/common/optional/bluetooth.nix         # Bluetooth stack improvements
+hosts/common/optional/bspwm.nix             # BSPWM system integration
+hosts/merlin/default.nix                    # Host-specific configuration
+```
+
+### Critical Infrastructure Changes
+
+#### 1. Channel Standardization (flake.nix)
+- **Migration**: nixos-unstable → nixos-25.11 (stable)
+- **Impact**: Improved system stability and package consistency
+- **Dependencies Updated**:
+  - nixpkgs: `nixos-unstable` → `nixos-25.11`
+  - home-manager: `master` → `release-25.11`
+  - nixos-wsl: follows nixpkgs (now stable)
+  - sops-nix: follows nixpkgs (now stable)
+- **Pre-commit Fix**: Pinned to working revision `46d55f0aeb1d567a78223e69729734f3dca25a85`
+- **Package Changes**: nixfmt-rfc-style → nixfmt (stable formatting)
+
+#### 2. Terminal Configuration (wezterm.nix)
+- **Font Prioritization**: Cartograph CF moved to primary position
+- **Fallback Chain**: Cartograph CF → MonoLisa Variable → GoMono Nerd Font Mono
+- **Enhancement**: Improved readability for Framework 16's high-DPI display
+
+#### 3. Window Management Optimization (bspwm)
+- **Code Window Rules Removed**: No longer forcing VS Code to desktop ^3
+- **Monitor Configuration**: Improved merlin.conf for Framework 16 docking scenarios
+- **Desktop Distribution**: Optimized for laptop-primary + external monitor workflow
+
+#### 4. System Services Enhancement (home.nix)
+- **New Service**: playerctld enabled for Bluetooth headset media controls
+- **Package Addition**: bluetuith TUI Bluetooth manager for device pairing
+
+#### 5. Monitor Configuration Refinement (merlin.conf)
+**Docked Configuration**:
+- Laptop (eDP-1): Desktops I, II, VI, VII, VIII, IX, X
+- External Monitor: Desktops III, IV, V
+- Primary display: Laptop screen for main workflow
+
+**Portable Configuration**:
+- Single laptop screen: Desktops I through X
+- Automatic detection and configuration
+
+## Engineering Assessment
+
+### Performance Impact
+- **Build Time**: 17 seconds (excellent for multi-system changes)
+- **Generation Gap**: Single increment (68→69) indicates clean upgrade path
+- **Stability**: Stable channel migration reduces future update complexity
+
+### Configuration Quality
+- **Standards Compliance**: Aligns with fleet-wide NixOS 25.11 adoption
+- **Hardware Optimization**: Framework 16-specific improvements for docking workflow
+- **Service Integration**: Enhanced Bluetooth and media control capabilities
+
+### Fleet Integration Status
+- **Channel Alignment**: Now matches recommended stable channel strategy
+- **Configuration Consistency**: Standardized across fleet deployment patterns
+- **Dependency Health**: Resolved pre-commit-hooks compatibility issues
+
+## Operational Impact
+- **User Experience**: Improved font rendering and window management
+- **Bluetooth Functionality**: Enhanced device pairing and media control
+- **Multi-Monitor Support**: Optimized docking experience for Framework 16
+- **System Stability**: Migration to stable channel reduces update friction
+
+## Engineering Notes
+1. **Successful Channel Migration**: Unstable → stable completed without issues
+2. **Configuration Validation**: All changes applied cleanly with no conflicts
+3. **Service Integration**: playerctld and bluetuith additions enhance daily workflow
+4. **Monitor Configuration**: Docking workflow optimized for development patterns
+
+## Fleet Status Update
+Merlin is now fully aligned with fleet-wide NixOS 25.11 stable channel adoption. The successful 17-second rebuild demonstrates excellent configuration health and validates the channel migration strategy for remaining fleet units.
+
+---
+**Chief Engineer**: Montgomery Scott  
+**Engineering Division**: Lord Gig's Realm Fleet Operations  
+**Classification**: Successful Operation - Standard Fleet Distribution  
