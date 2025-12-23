@@ -69,3 +69,12 @@ Documentation: Captain's report filed as 2025-12-23-merlin-generation-90-success
 [2025-12-23 18:46:33] BUILD START
 Starting Event: build-start
 
+[2025-12-23 18:46:54] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-merlin completed in 21s (success: true, generation: 91)
+
+[2025-12-23 18:47:09] SYSTEM OPERATION
+[:merlin/bspwm-config-two] [:merlin/bspwm-config-two] Smart clean initiated - preserving OpenCode history, cleaning caches
+
+[2025-12-23 18:47:11] SYSTEM OPERATION
+[:merlin/bspwm-config-two] [:merlin/bspwm-config-two] Smart clean completed - OpenCode ready for rebuild, caches cleared
+
