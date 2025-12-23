@@ -84,3 +84,9 @@ Starting Event: build-start
 [2025-12-23 18:49:01] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
 nixos-rebuild-merlin completed in 17s (success: true, generation: 92)
 
+[2025-12-23 18:58:47] SYSTEM OPERATION
+[:merlin/bspwm-config-two] [:merlin/bspwm-config-two] Smart clean initiated - preserving OpenCode history, cleaning caches
+
+[2025-12-23 18:58:49] SYSTEM OPERATION
+[:merlin/bspwm-config-two] [:merlin/bspwm-config-two] Smart clean completed - OpenCode ready for rebuild, caches cleared
+
