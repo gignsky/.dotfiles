@@ -8,7 +8,8 @@
     # Unstable
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     # Unstable for Packages
-    nixpkgs-pkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    # nixpkgs-pkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs-pkgs.url = "github:NixOS/nixpkgs/cab778239e705082fe97bb4990e0d24c50924c04";
     # Local
     # nixpkgs-local.url = "git+file:///home/gig/local_repos/nixpkgs";
 
