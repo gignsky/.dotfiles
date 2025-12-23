@@ -44,7 +44,7 @@
     # flake-iter.url = "github:determinatesystems/flake-iter";
 
     # Pre-commit hooks for managing Git hooks declaratively
-    pre-commit-hooks.url = "github:cachix/git-hooks.nix";
+    pre-commit-hooks.url = "github:cachix/git-hooks.nix/46d55f0aeb1d567a78223e69729734f3dca25a85";
 
     # Dev tools
     # treefmt-nix.url = "github:numtide/treefmt-nix";
