@@ -7,3 +7,12 @@ CHIEF ENGINEER'S LOG - STARDATE 2025.12.23 (AUTOMATED)
 
 [2025-12-23 16:15:20] SYSTEM OPERATION
 [:develop] [:develop] Bare full rebuild completed - both system and home-manager rebuilt for merlin successfully
+[2025-12-23 16:52:36] SYSTEM OPERATION
+[:merlin/bspwm-config-two] [:merlin/bspwm-config-two] Smart clean initiated - preserving OpenCode history, cleaning caches
+
+[2025-12-23 16:52:38] SYSTEM OPERATION
+[:merlin/bspwm-config-two] [:merlin/bspwm-config-two] Smart clean completed - OpenCode ready for rebuild, caches cleared
+
+[2025-12-23 16:54:33] BUILD START
+Starting Event: build-start
+
