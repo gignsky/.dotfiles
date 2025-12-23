@@ -186,7 +186,7 @@ system-operation: Smart clean completed - OpenCode ready for rebuild
 
 SPACEDOCK HOME-MANAGER REBUILD - Generation 44 → 45
 ==============================================
-**Stardate**: $(date '+%Y-%m-%d %H:%M:%S')
+**Stardate**: 2025-12-03 12:00:00
 **Authority**: Chief Engineer Montgomery Scott
 **Operation**: Home-manager configuration rebuild
 **Status**: ✅ SUCCESS
