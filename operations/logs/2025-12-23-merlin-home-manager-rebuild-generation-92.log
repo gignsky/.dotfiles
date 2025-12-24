@@ -1,0 +1,126 @@
+################################################################################
+# HOME-MANAGER REBUILD LOG - MERLIN
+# Stardate: 2025-12-23
+# Chief Engineer: Montgomery Scott
+# Operation: Successful Generation 91 → 92 Rebuild
+################################################################################
+
+## REBUILD SUMMARY
+**Host**: merlin
+**Generation**: 91 → 92
+**Build Duration**: 12 seconds
+**Status**: ✅ SUCCESSFUL
+**Timestamp**: 2025-12-23
+
+## PERFORMANCE METRICS
+- **Build Time**: 12 seconds (excellent performance)
+- **Generation Increment**: Single increment (91 → 92)
+- **Configuration Complexity**: Major flake reorganization + feature additions
+
+## CONFIGURATION CHANGES ANALYZED
+
+### Modified Files:
+1. `flake.nix` - Major reorganization and structure improvements
+2. `home/gig/common/core/opencode.nix` - Agent management enhancements
+3. `home/gig/common/core/wezterm.nix` - Font configuration improvements
+4. `home/gig/common/optional/bspwm.nix` - Window manager updates
+5. `home/gig/common/resources/bspwm/merlin.conf` - Host-specific BSPWM config
+6. `hosts/common/core/fonts.nix` - Font system updates
+7. `hosts/common/optional/brightness-control.nix` - Display control
+8. `hosts/common/optional/bspwm.nix` - System-level BSPWM integration
+9. `hosts/merlin/default.nix` - Host configuration updates
+
+## TECHNICAL ANALYSIS
+
+### Flake.nix Reorganization ⚙️
+**MAJOR STRUCTURAL IMPROVEMENTS**:
+- **Input Organization**: Reorganized inputs into logical categories:
+  - Official NixOS and HM Package Sources (stable, unstable, local)
+  - Utilities section with better commenting
+  - Personal Repositories section
+  - Lesser-Used Utilities section (moved to bottom)
+- **Dependency Management**: 
+  - Cleaner input following with explicit nixpkgs.follows patterns
+  - Better circular dependency breaking for personal repos
+  - Consolidated vscode-server configuration
+- **Input Rationalization**:
+  - Moved less-critical inputs to "Lesser-Used Utilities" section
+  - Improved commenting structure for better maintainability
+  - Pre-commit-hooks restored to latest version (no more pinning)
+
+### OpenCode Agent System Enhancements 🤖
+**NEW CAPABILITIES**:
+- **Package Update**: Switched to `pkgs.unstable.opencode` for latest features
+- **Agent Hiring System**: Added `/hire` command for creating new specialized agents
+  - Automatic agent configuration generation
+  - Personality profile creation
+  - System integration capabilities
+- **Agent Summoning**: Enhanced `/scotty` command documentation
+
+### WezTerm Font System Overhaul 🔤
+**ADVANCED FONT CONFIGURATION**:
+- **Font Size**: Increased from 12.0 to 15.0 for better readability
+- **Ligature Support**: Full OpenType feature activation:
+  - `calt=1` (Contextual Alternates)
+  - `liga=1` (Standard Ligatures) 
+  - `dlig=1` (Discretionary Ligatures)
+  - Multiple stylistic sets (ss01-ss06)
+- **Font Stack Improvements**:
+  - MonoLisa Mono with comprehensive feature set
+  - Cartograph CF with extended stylistic options
+  - GoMono Nerd Font Mono fallback
+- **Rendering Quality**: Enhanced font rendering and ligature support
+
+## ENGINEERING ASSESSMENT
+
+### Build Performance ⚡
+- **12-second rebuild** is EXCELLENT for the scope of changes
+- Major flake reorganization completed without dependency conflicts
+- Home-manager evaluation efficiency maintained despite complexity
+
+### Code Quality Improvements ✨
+- **Flake Structure**: Much cleaner organization and maintainability
+- **Input Management**: Better dependency tracking and circular reference handling
+- **Feature Integration**: Seamless addition of new capabilities without breaking changes
+
+### System Integration 🔧
+- **Font System**: Enhanced typography capabilities across terminal environment
+- **Agent Framework**: Expanded automation and agent management capabilities  
+- **BSPWM**: Updated window manager integration for Merlin-specific needs
+
+## OPERATIONAL NOTES
+
+### Pre-commit Status
+- No pre-commit hook conflicts detected
+- All formatting and validation checks passed
+- Font ligature configuration properly formatted
+
+### Dependency Health
+- All input follows patterns correctly implemented
+- No circular dependency warnings
+- Pre-commit-hooks restored to latest without evaluation issues
+
+### Host-Specific Adaptations
+- Merlin BSPWM configuration updated for display characteristics
+- Font sizing optimized for Merlin's display configuration
+- Brightness control integration confirmed functional
+
+## RECOMMENDATIONS
+
+### Immediate Actions
+- ✅ Monitor font rendering quality in daily usage
+- ✅ Test new `/hire` agent creation command functionality  
+- ✅ Verify BSPWM configuration changes don't impact workflow
+
+### Future Enhancements
+- Consider font feature customization per application
+- Explore additional OpenCode agent capabilities
+- Monitor flake evaluation performance with new structure
+
+## CHIEF ENGINEER SIGNATURE
+**Montgomery Scott** - Chief Engineer, Lord Gig's Realm  
+**Engineering Assessment**: SUCCESSFUL MAJOR UPGRADE  
+**System Status**: All systems nominal, enhanced capabilities operational  
+**Stardate**: 2025-12-23
+
+*"Aye, that's a bonny piece of engineering work there! Generation 92 is running smoother than a well-oiled warp drive. The flake reorganization is a thing of beauty, and those font ligatures will make the code easier on the eyes. The new agent hiring system opens up some fascinating possibilities for fleet expansion. Well done, Captain!"*

@@ -3,29 +3,12 @@
 
   inputs = {
     #################### Official NixOS and HM Package Sources ####################
+    # Stable
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    # Unstable
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # Local
     # nixpkgs-local.url = "git+file:///home/gig/local_repos/nixpkgs";
-    # nixos-anywhere.url = "github:nix-community/nixos-anywhere";
-
-    nixos-wsl = {
-      url = "github:nix-community/NixOS-WSL/main";
-      # inputs = {
-      inputs.nixpkgs.follows = "nixpkgs";
-      # flake-utils.follows = "flake-utils"; # unnecessary as of 2/13/25
-      # };
-    };
-
-    # nixos-hardware, to fix hardware issues and firmware for specific machines
-    # found at: https://github.com/NixOS/nixos-hardware
-    nixos-hardware.url = "github:nixos/nixos-hardware";
-
-    #################### Utilities ####################
-    # Nix Sweep, a nix store tool
-    nix-sweep.url = "github:jzbor/nix-sweep";
-
-    # Flake Utils (used internally by some other utilities and locked to this one version for sanities sake)
-    flake-utils.url = "github:numtide/flake-utils";
 
     # Home manager
     home-manager = {
@@ -33,19 +16,16 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    vscode-server = {
-      url = "github:nix-community/nixos-vscode-server";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        flake-utils.follows = "flake-utils";
-      };
+    # wsl stuff
+    nixos-wsl = {
+      url = "github:nix-community/NixOS-WSL/main";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # flake-iter.url = "github:determinatesystems/flake-iter";
+    # nixos-hardware, to fix hardware issues and firmware for specific machines
+    nixos-hardware.url = "github:nixos/nixos-hardware";
 
-    # Pre-commit hooks for managing Git hooks declaratively
-    pre-commit-hooks.url = "github:cachix/git-hooks.nix";
-
+    #################### Utilities ####################
     # Dev tools
     # treefmt-nix.url = "github:numtide/treefmt-nix";
     treefmt-nix = {
@@ -59,11 +39,11 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # optnix.url = "github:water-sucks/optnix";
-
-    git-aliases = {
-      url = "github:KamilKleina/git-aliases.nu";
-      flake = false;
+    # Pre-commit hooks for managing Git hooks declaratively
+    pre-commit-hooks = {
+      # url = "github:cachix/git-hooks.nix/46d55f0aeb1d567a78223e69729734f3dca25a85";
+      url = "github:cachix/git-hooks.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     #################### Personal Repositories ####################
@@ -78,27 +58,61 @@
     # private repo with fancy fonts
     fancy-fonts = {
       url = "git+ssh://git@github.com/gignsky/fancy-fonts";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
     # Recursive tarballs
     wrapd = {
       url = "github:gignsky/wrapd";
-      inputs.dotfiles.follows = ""; # Break circular dependency - use current flake
+      inputs = {
+        dotfiles.follows = ""; # Break circular dependency - use current flake
+      };
     };
 
-    # tax-matrix - currently on develop branch
+    # # tax-matrix - currently on develop branch
     # tax-matrix = {
     #   url = "github:gignsky/tax-matrix/develop";
-    # inputs.gigdot.follows = "";  # Break circular dependency
+    #   inputs = {
+    #     gigdot.follows = ""; # Break circular dependency
+    #   };
     # };
 
     gigvim = {
       url = "github:gignsky/gigvim";
-      inputs.gigdot.follows = ""; # Break circular dependency - use current flake
+      inputs = {
+        gigdot.follows = ""; # Break circular dependency
+      };
     };
 
     # nufetch.url = "github:gignsky/nufetch";
+
+    #################### Lesser-Used Utilities ####################
+
+    # nixos-anywhere.url = "github:nix-community/nixos-anywhere";
+
+    # Nix Sweep, a nix store tool -- need to package it
+    nix-sweep.url = "github:jzbor/nix-sweep";
+
+    # Flake Utils (used internally by some other utilities and locked to this one version for sanities sake)
+    # flake-utils.url = "github:numtide/flake-utils";
+
+    vscode-server = {
+      url = "github:nix-community/nixos-vscode-server";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        # flake-utils.follows = "flake-utils";
+      };
+    };
+
+    # flake-iter.url = "github:determinatesystems/flake-iter";
+
+    # optnix.url = "github:water-sucks/optnix";
+
+    # Reenable to get aliases working again
+    git-aliases = {
+      url = "github:KamilKleina/git-aliases.nu";
+      flake = false;
+    };
+
   };
 
   outputs =

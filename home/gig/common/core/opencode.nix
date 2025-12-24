@@ -1,6 +1,8 @@
+{ pkgs, ... }:
 {
   programs.opencode = {
     enable = true;
+    package = pkgs.unstable.opencode;
 
     # Main configuration
     settings = {
@@ -157,6 +159,9 @@
       enhance-commit = "Analyze and improve commit message quality (aliases: enhance). Use the commit enhancement system to analyze a commit message for quality issues, provide suggestions, and optionally guide through interactive improvement. Integrates with scripts/commit-enhance-lib.sh";
 
       commit = "Standardized git commit workflow with fleet standards compliance. Analyze complete working directory status (staged and unstaged changes), create meaningful commit messages following fleet git standards from docs/standards/git/, handle pre-commit hooks gracefully, and include proper agent signatures and technical metadata.";
+
+      # Agent management commands
+      hire = "Create a new specialized agent with custom capabilities. Generate a new OpenCode agent based on your description, automatically create agent configuration and personality files, and integrate into the system. Usage: /hire \"Create a security auditor for Rust code\" - the system will generate agent name, specialized capabilities, and personality profile.";
 
       # Agent summoning (when talking to other agents)
       scotty = "Summon Chief Engineer for debugging and technical issues. Activate Chief Engineer Montgomery Scott for debugging complex systems: Nix flakes, Rust code, Bash scripts, Lua in Nix, Nushell configurations. Scotty will analyze errors, check system stress points, and provide engineering solutions. He is so described in the relevant gigdot/../resources/{agent-name}-additional-personality.md";

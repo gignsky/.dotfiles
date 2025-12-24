@@ -20,9 +20,9 @@ in
       enable = true;
       defaultFonts = {
         monospace = [
-          "Monolisa Variable"
           "Cartograph CF"
           "Artifex CF"
+          "Monolisa Variable"
           "GoMono Nerd Font Mono"
           "Times Newer Roman"
         ];
@@ -32,6 +32,7 @@ in
         serif = [
           "Artifex CF"
           "Times Newer Roman"
+          "GoMono Nerd Font Mono"
         ];
         # Set emoji font if needed
         # emoji = [

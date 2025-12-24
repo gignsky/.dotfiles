@@ -1,0 +1,61 @@
+## Home Manager Rebuild Log: Merlin Generation 70
+**Stardate**: 2025-12-14
+**Engineer**: Chief Engineer Montgomery Scott
+**Host**: merlin  
+**Operation**: home-manager rebuild
+**Status**: ✅ SUCCESS
+
+### Build Metrics
+- **Generation**: 69 → 70
+- **Build Duration**: 11 seconds
+- **Performance**: Excellent - typical quick rebuild for config adjustments
+
+### Configuration Changes
+**Modified Files:**
+- `home/gig/common/core/wezterm.nix` - Font fallback order optimization
+- `hosts/common/core/fonts.nix` - System font priority realignment
+
+### Technical Analysis
+
+**WezTerm Font Configuration Changes:**
+```diff
+- Primary font: "Cartograph CF" 
++ Primary font: "MonoLisa Variable"
+- Secondary: "MonoLisa Variable"
++ Secondary: "Cartograph CF"
+```
+
+**System Default Font Changes:**
+```diff
+- monospace[0]: "Monolisa Variable"
++ monospace[0]: "Cartograph CF"  
+- monospace[1]: "Cartograph CF"
++ monospace[1]: "Monolisa Variable"
+```
+
+**Engineering Assessment:**
+This appears to be a deliberate font priority realignment. The changes show:
+
+1. **WezTerm Configuration**: MonoLisa Variable promoted to primary position, likely for improved terminal readability or user preference
+2. **System Fonts**: Cartograph CF promoted to system-wide primary monospace, ensuring consistency across applications
+3. **Code Cleanup**: Removed commented configuration lines for cleaner codebase
+
+**Impact Analysis:**
+- Terminal font rendering will now prioritize MonoLisa Variable in WezTerm
+- System-wide monospace applications will default to Cartograph CF
+- No breaking changes - all fonts remain available in fallback chain
+- Build performance excellent at 11 seconds
+
+**Fleet Status**: Configuration changes successfully applied to Merlin. Font rendering optimizations in place.
+
+### Post-Rebuild Verification
+- ✅ Generation 70 activated successfully  
+- ✅ No configuration evaluation errors
+- ✅ Font changes applied without system impact
+- ✅ WezTerm font rendering updated
+
+**Chief Engineer Note**: Clean font priority optimization completed. Both fonts remain available with improved fallback order. Configuration changes align with user preferences while maintaining system stability.
+
+---
+*Log Entry: Chief Engineer Montgomery Scott*  
+*Engineering Division, Lord Gig's Realm Fleet Operations*

@@ -355,6 +355,8 @@ Ti
     - Test font generation and customization capabilities
     - Document process for future font updates and modifications
   - **Benefits**: Enable custom MonoLisa variants for development environments
+- need to configure gigvim to ignore notes files by default when fuzzyfinding
+  files and grepping for things
 - see if I can embed a default font in gigvim.
 - **NETWORK INFRASTRUCTURE UPGRADE**:
   - **Configure layer 3 switch as main router** instead of current Archer device
