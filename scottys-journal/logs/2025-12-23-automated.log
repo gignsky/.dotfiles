@@ -94,3 +94,9 @@ nixos-rebuild-merlin completed in 17s (success: true, generation: 92)
 
 [2025-12-23 19:09:17] SYSTEM OPERATION
 [:feature/better-ccls] [:feature/better-ccls] Smart clean completed - OpenCode ready for rebuild, caches cleared
+[2025-12-23 19:11:41] SYSTEM OPERATION
+[:merlin/bspwm-config-two] [:merlin/bspwm-config-two] Smart clean initiated - preserving OpenCode history, cleaning caches
+
+[2025-12-23 19:11:43] SYSTEM OPERATION
+[:merlin/bspwm-config-two] [:merlin/bspwm-config-two] Smart clean completed - OpenCode ready for rebuild, caches cleared
+
