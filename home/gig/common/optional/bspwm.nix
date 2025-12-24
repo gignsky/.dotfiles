@@ -115,8 +115,8 @@
         type = "internal/date";
         interval = 5;
 
-        date = "%Y-%m-%d";
-        time = "%H:%M";
+        date = "%m/%d/%Y";
+        time = "%I:%M %p";
 
         format-prefix = "  ";
         format-prefix-foreground = "#88C0D0";
