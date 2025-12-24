@@ -1,29 +1,33 @@
 # BSPWM Visual Enhancement Suite - System Enhancement Protocol
 
-**Status**: Planning  
-**Priority**: High  
-**Estimated Scope**: 1-2 sessions  
-**Lead Engineer**: Montgomery Scott  
-**Created**: 2025-12-14  
-**Last Updated**: 2025-12-14  
+**Status**: Planning\
+**Priority**: High\
+**Estimated Scope**: 1-2 sessions\
+**Lead Engineer**: Montgomery Scott\
+**Created**: 2025-12-14\
+**Last Updated**: 2025-12-14
 
 ## Objective
 
-Transform the bspwm window manager setup on Merlin into a visually stunning and functionally rich desktop environment. This enhancement focuses on implementing a professional status bar, dynamic wallpapers with transparency effects, and polish that makes the desktop both beautiful and productive.
+Transform the bspwm window manager setup on Merlin into a visually stunning and
+functionally rich desktop environment. This enhancement focuses on implementing
+a professional status bar, dynamic wallpapers with transparency effects, and
+polish that makes the desktop both beautiful and productive.
 
 **Goals:**
+
 - Implement comprehensive status bar with system monitoring
-- Add animated/rotating wallpapers with transparency effects  
+- Add animated/rotating wallpapers with transparency effects
 - Create a cohesive visual theme that enhances productivity
 - Ensure all enhancements integrate seamlessly with existing bspwm configuration
 
 ## Current Plan
 
 - ~~Initial bspwm configuration~~ ✓ (completed 2025-12-08)
-- ~~SEP protocol implementation~~ ✓ (completed 2025-12-14)  
+- ~~SEP protocol implementation~~ ✓ (completed 2025-12-14)
+- Status bar implementation (Polybar - primary choice)
 - WezTerm terminal configuration optimization (Phase 0)
 - Foundation configuration review and optimization (Phase 1)
-- Status bar implementation (Polybar - primary choice)
 - ~~Waybar exploration~~ (skipped - focused on Polybar for bspwm)
 - Transparency and compositor effects enhancement
 - Animated/rotating wallpaper system
@@ -42,7 +46,7 @@ Transform the bspwm window manager setup on Merlin into a visually stunning and 
 
 - [ ] **Status Bar (Polybar)**:
   - System resource monitoring (CPU, RAM, disk)
-  - Workspace indicators with bspwm integration  
+  - Workspace indicators with bspwm integration
   - Audio controls and volume display
   - Network status and connectivity info
   - Date/time display with customizable format
@@ -69,6 +73,7 @@ Transform the bspwm window manager setup on Merlin into a visually stunning and 
 ## Implementation Checklist
 
 ### Phase 0: WezTerm Terminal Configuration
+
 - [ ] Review current WezTerm configuration and settings
 - [ ] Optimize font rendering and typography
 - [ ] Configure color schemes and visual appearance
@@ -79,6 +84,7 @@ Transform the bspwm window manager setup on Merlin into a visually stunning and 
 - [ ] Document final configuration choices
 
 ### Phase 1: Foundation Configuration Review
+
 - [ ] Review current bspwm basic configuration settings
 - [ ] Analyze Merlin-specific bspwm config file (`merlin.conf`)
 - [ ] Explore and optimize core bspwm options:
@@ -92,14 +98,16 @@ Transform the bspwm window manager setup on Merlin into a visually stunning and 
 - [ ] Optimize any suboptimal settings discovered
 
 ### Phase 2: Status Bar Foundation
+
 - [ ] Install and configure Polybar package in NixOS configuration
 - [ ] Create basic Polybar configuration file
-- [ ] Implement bspwm workspace integration  
+- [ ] Implement bspwm workspace integration
 - [ ] Add system resource monitoring modules
 - [ ] Configure audio and network status displays
 - [ ] Test status bar functionality and positioning
 
 ### Phase 3: Visual Effects Enhancement
+
 - [ ] Enhance existing Picom configuration
 - [ ] Implement window transparency rules
 - [ ] Add blur effects for inactive windows
@@ -108,6 +116,7 @@ Transform the bspwm window manager setup on Merlin into a visually stunning and 
 - [ ] Test performance impact of visual effects
 
 ### Phase 4: Wallpaper System
+
 - [ ] Choose and implement animated wallpaper solution
 - [ ] Set up wallpaper rotation system
 - [ ] Integrate dynamic color scheme generation
@@ -115,6 +124,7 @@ Transform the bspwm window manager setup on Merlin into a visually stunning and 
 - [ ] Test wallpaper system stability and performance
 
 ### Phase 5: Theme Integration & Polish
+
 - [ ] Select and configure GTK theme
 - [ ] Install and configure icon pack
 - [ ] Optimize font rendering settings
@@ -125,24 +135,37 @@ Transform the bspwm window manager setup on Merlin into a visually stunning and 
 ## Technical Notes
 
 ### 2025-12-14 - Initial Analysis
+
 - **Current bspwm setup**: Functional with basic transparency via Picom
-- **Monitor configuration**: Dynamic dual-monitor support already implemented for Merlin
-- **Performance considerations**: Framework 16 laptop should handle visual effects well
-- **Integration points**: Need to coordinate with existing sxhkd hotkeys and bspwm rules
-- **Foundation review needed**: Captain identified need for Phase 1 to review and optimize basic bspwm configuration before visual enhancements
-- **Terminal priority**: Captain identified WezTerm configuration as new Phase 0 - essential foundation before window manager optimization
+- **Monitor configuration**: Dynamic dual-monitor support already implemented
+  for Merlin
+- **Performance considerations**: Framework 16 laptop should handle visual
+  effects well
+- **Integration points**: Need to coordinate with existing sxhkd hotkeys and
+  bspwm rules
+- **Foundation review needed**: Captain identified need for Phase 1 to review
+  and optimize basic bspwm configuration before visual enhancements
+- **Terminal priority**: Captain identified WezTerm configuration as new Phase
+  0 - essential foundation before window manager optimization
 
 ### WezTerm Configuration Planning
+
 - **Current status**: WezTerm installed and functional but may need optimization
-- **Priority areas**: Font rendering, color schemes, keybindings, transparency integration
-- **Integration goal**: Seamless coordination with bspwm and overall desktop theme
+- **Priority areas**: Font rendering, color schemes, keybindings, transparency
+  integration
+- **Integration goal**: Seamless coordination with bspwm and overall desktop
+  theme
 
 ### Status Bar Research
-- **Polybar advantages**: Mature, excellent bspwm integration, highly customizable  
-- **Configuration approach**: NixOS declarative configuration vs traditional config files
+
+- **Polybar advantages**: Mature, excellent bspwm integration, highly
+  customizable
+- **Configuration approach**: NixOS declarative configuration vs traditional
+  config files
 - **Module priorities**: Workspaces, resources, audio, network, date/time
 
-### Visual Effects Planning  
+### Visual Effects Planning
+
 - **Compositor choice**: Picom already installed and working
 - **Transparency strategy**: Selective application to avoid productivity impact
 - **Animation balance**: Smooth but not distracting effects
