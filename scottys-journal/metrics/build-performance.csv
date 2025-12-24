@@ -83,3 +83,4 @@ date,host,operation,duration_seconds,success,error_type,git_commit,git_branch,gi
 2025-12-19 15:27:11,nixos,nixos-rebuild-wsl@ganoslal@ganoslal,61,true,,af93b02018a6d644c6f3cc50aa8cff3480eea3e9,develop,1_modified,07fbae1789bad9d1f61fc6838f98d2f9abf6efaf43488ac8f42b45503fb98729,167,Automated build logging
 2025-12-19 15:28:49,nixos,home-manager-rebuild-wsl@ganoslal,39,true,,bf5179ee7defb70c7fa1e0711c84be10bcb95e90,develop,clean,07fbae1789bad9d1f61fc6838f98d2f9abf6efaf43488ac8f42b45503fb98729,261,Automated home-manager rebuild with Scotty engineering logs
 2025-12-19T15:29:37-05:00,wsl@ganoslal,home-manager,rebuild,SUCCESS,39,generation-261,nixos-25.11-migration
+2025-12-23 19:09:48,merlin,home-manager-rebuild-merlin,14,true,,a886d6ff5ec074da25cd1714d28bf54b3eda00fa,feature/better-ccls,1_modified,07fbae1789bad9d1f61fc6838f98d2f9abf6efaf43488ac8f42b45503fb98729,91,Automated home-manager rebuild with Scotty engineering logs
