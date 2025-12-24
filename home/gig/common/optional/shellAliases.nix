@@ -11,7 +11,6 @@
   rd = "rmdir";
   rdd = "rm -rfv";
   cls = "clear";
-  # ccls = "{ clear and nix run nixpkgs#fastfetch }"; # Replaced by nushell function in nushell folder
   md = "mkdir";
   syst = "systemctl";
   cat = "bat";
