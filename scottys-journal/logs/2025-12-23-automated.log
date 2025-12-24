@@ -7,3 +7,9 @@ CHIEF ENGINEER'S LOG - STARDATE 2025.12.23 (AUTOMATED)
 
 [2025-12-23 16:15:20] SYSTEM OPERATION
 [:develop] [:develop] Bare full rebuild completed - both system and home-manager rebuilt for merlin successfully
+[2025-12-23 19:09:14] SYSTEM OPERATION
+[:feature/better-ccls] [:feature/better-ccls] Smart clean initiated - preserving OpenCode history, cleaning caches
+
+[2025-12-23 19:09:17] SYSTEM OPERATION
+[:feature/better-ccls] [:feature/better-ccls] Smart clean completed - OpenCode ready for rebuild, caches cleared
+
