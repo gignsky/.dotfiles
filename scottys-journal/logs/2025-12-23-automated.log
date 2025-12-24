@@ -163,3 +163,9 @@ Documentation: Success logged in engineering metrics and automated logs.
 [2025-12-23 20:44:57] SYSTEM OPERATION
 [:merlin/bspwm-config-three] [:merlin/bspwm-config-three] Smart clean completed - OpenCode ready for rebuild, caches cleared
 
+[2025-12-23 20:49:27] SYSTEM OPERATION
+[:merlin/bspwm-config-three] [:merlin/bspwm-config-three] Smart clean initiated - preserving OpenCode history, cleaning caches
+
+[2025-12-23 20:49:29] SYSTEM OPERATION
+[:merlin/bspwm-config-three] [:merlin/bspwm-config-three] Smart clean completed - OpenCode ready for rebuild, caches cleared
+
