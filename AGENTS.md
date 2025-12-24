@@ -5,6 +5,10 @@ This repository operates under **Lord Gig's Realm** organizational structure. Al
 
 ## Agent Instructions
 - **Keep this file current**: Agents should frequently suggest modifications to this AGENTS.md file when they discover changes that make it inaccurate or require updates to keep it current with the codebase.
+- **Shell Environment**: All agents operate in a **Nushell** environment by default, NOT bash. Command syntax should use Nushell conventions:
+  - Use `;` instead of `&&` for command chaining
+  - Use `out+err>` instead of `2>&1` for error redirection  
+  - Follow Nushell syntax patterns for piping and data manipulation
 - **Fleet Protocols**: All agents must follow fleet command structure and quest documentation requirements
 - **Critical Fleet Architecture**: All agents must reference `operations/fleet-management/OPERATIONS-MANUAL.md` for foundational knowledge including:
   - WSL hostname constraints and flake target mappings (`nixos` → `wsl`)
@@ -42,6 +46,33 @@ When consulting on repositories outside your primary assignment:
 - **Primary Assignment**: Officer's main repository and domain expertise (see `operations/fleet-management/OPERATIONS-MANUAL.md` for current assignments)
 - **Expeditions of Consultation**: Temporary consultation work in other repositories
 - **Cross-Domain Authority**: Senior officers may override normal assignment boundaries for critical operations
+
+## System Enhancement Protocols (SEP)
+
+**Purpose**: Structured approach for planning, implementing, and tracking feature development projects with comprehensive documentation and progress tracking.
+
+**Location**: `engineering/enhancement-protocols/`
+
+**Protocol Requirements**:
+- **Planning Phase**: Create new SEP document outlining objectives, requirements, and implementation plan
+- **Progressive Documentation**: Update SEP with checkboxes, technical notes, and discoveries as work progresses
+- **Continuity Support**: Maintain detailed progress to enable pickup by any engineer at any time
+- **Template Usage**: Use `engineering/enhancement-protocols/template.md` as starting point
+- **Naming Convention**: Use descriptive names like `001-feature-description.md`
+
+**SEP Structure**:
+- **Objective**: Clear statement of goals and rationale
+- **Current Plan**: High-level roadmap with strikethrough for completed/changed items  
+- **Technical Requirements**: Specific technical needs and constraints
+- **Implementation Checklist**: Detailed task breakdown with checkboxes
+- **Technical Notes**: Ongoing discoveries, issues, and solutions
+- **Resources & References**: Links, documentation, and examples
+
+**Agent Responsibilities**:
+- Create SEP documents when beginning substantial feature work
+- Maintain SEP progress throughout implementation
+- Document technical decisions and discoveries in real-time
+- Update completion status and lessons learned upon completion
 
 ## Universal Agent Commands
 - **Situation Reports**: All agents must implement `/sitrep` command for standardized status reporting
@@ -154,13 +185,20 @@ When consulting on repositories outside your primary assignment:
 - **Context**: Systematic organization of scattered documentation, musings, and operational content
 - **Implementation**: Chief Engineer Montgomery Scott
 
-**Stardate 2025-12-08.2 - Universal /commit Command Implementation**
+**Stardate 2025-12-08.3 - Nushell Shell Environment Documentation**
 - **Authority**: A directive of Lord Gig
-- **Changes**: Added standardized `/commit` command to Universal Agent Commands
-  - Comprehensive git working directory analysis (staged and unstaged changes)
-  - Integration with fleet git standards from `docs/standards/git/` documentation
-  - Safety protocols for staging decisions and pre-commit hook handling
-  - Standards compliance with Lord Gig's Conventional Commits overlay
-  - Agent signature requirements and technical metadata inclusion
-- **Context**: Fleet-wide standardization of git commit workflow with proper documentation references
+- **Changes**: Added explicit shell environment documentation to Agent Instructions
+  - Documented that all agents operate in Nushell environment by default, NOT bash
+  - Added specific Nushell syntax guidelines (`;` vs `&&`, `out+err>` vs `2>&1`)
+  - Included Nushell-specific command patterns and data manipulation conventions
+- **Context**: Fleet-wide standardization of shell environment awareness for consistent operations
+- **Implementation**: Chief Engineer Montgomery Scott
+
+**Stardate 2025-12-08.4 - Pre-commit Hooks Dependency Fix**
+- **Authority**: A directive of Lord Gig during flake validation emergency
+- **Changes**: Fixed critical flake validation failure caused by pre-commit-hooks dependency
+  - Pinned pre-commit-hooks input to working version `46d55f0aeb1d567a78223e69729734f3dca25a85`
+  - Resolved `rumdl` package dependency error that was preventing flake evaluation
+  - Updated flake.lock to roll back problematic pre-commit-hooks version from 2025-12-06
+- **Context**: Recent flake.lock update introduced incompatible pre-commit-hooks version causing evaluation failures
 - **Implementation**: Chief Engineer Montgomery Scott
