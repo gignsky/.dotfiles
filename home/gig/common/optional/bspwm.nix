@@ -128,7 +128,7 @@
       "module/cpu" = {
         type = "internal/cpu";
         interval = 2;
-        format-prefix = " ";
+        format-prefix = " CPU ";
         format-prefix-foreground = "#88C0D0";
         label = "%percentage:2%%";
       };
@@ -137,7 +137,7 @@
       "module/memory" = {
         type = "internal/memory";
         interval = 2;
-        format-prefix = " ";
+        format-prefix = " RAM ";
         format-prefix-foreground = "#88C0D0";
         label = "%percentage_used%%";
       };
@@ -149,7 +149,7 @@
 
         mount-0 = "/";
 
-        label-mounted = " %percentage_used%%";
+        label-mounted = " DISK %percentage_used%%";
         label-unmounted = " %mountpoint% not mounted";
         label-unmounted-foreground = "#4C566A";
       };
@@ -159,10 +159,10 @@
         type = "internal/pulseaudio";
 
         format-volume = "<label-volume> <bar-volume>";
-        label-volume = " %percentage%%";
+        label-volume = " VOL %percentage%%";
         label-volume-foreground = "#D8DEE9";
 
-        label-muted = " muted";
+        label-muted = " MUTED";
         label-muted-foreground = "#4C566A";
 
         bar-volume-width = 10;
@@ -189,10 +189,10 @@
         interface-type = "wireless";
         interval = 3;
 
-        format-connected = "<ramp-signal> <label-connected>";
+        format-connected = "<ramp-signal> WIFI <label-connected>";
         label-connected = "%essid%";
 
-        format-disconnected = "";
+        format-disconnected = " WIFI OFF";
 
         ramp-signal-0 = "";
         ramp-signal-1 = "";
@@ -208,11 +208,11 @@
         interface-type = "wired";
         interval = 3;
 
-        format-connected-prefix = " ";
+        format-connected-prefix = " ETH ";
         format-connected-prefix-foreground = "#88C0D0";
         label-connected = "%local_ip%";
 
-        format-disconnected = "";
+        format-disconnected = " ETH OFF";
       };
 
       # Battery module (for laptops)
@@ -222,9 +222,9 @@
         adapter = "ADP1";
         full-at = 98;
 
-        format-charging = "<animation-charging> <label-charging>";
-        format-discharging = "<animation-discharging> <label-discharging>";
-        format-full-prefix = " ";
+        format-charging = "<animation-charging> BAT <label-charging>";
+        format-discharging = "<animation-discharging> BAT <label-discharging>";
+        format-full-prefix = " BAT ";
         format-full-prefix-foreground = "#A3BE8C";
         format-full = "<label-full>";
 
