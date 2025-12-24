@@ -151,3 +151,15 @@ Technical Analysis: Build completed with no configuration changes detected.
 Performance Metrics: 10-second duration indicates optimal cache utilization.
 Fleet Status: merlin home-manager environment fully operational and synchronized.
 Documentation: Success logged in engineering metrics and automated logs.
+[2025-12-23 20:44:09] SYSTEM OPERATION
+[:merlin/bspwm-config-three] [:merlin/bspwm-config-three] Smart clean initiated - preserving OpenCode history, cleaning caches
+
+[2025-12-23 20:44:11] SYSTEM OPERATION
+[:merlin/bspwm-config-three] [:merlin/bspwm-config-three] Smart clean completed - OpenCode ready for rebuild, caches cleared
+
+[2025-12-23 20:44:55] SYSTEM OPERATION
+[:merlin/bspwm-config-three] [:merlin/bspwm-config-three] Smart clean initiated - preserving OpenCode history, cleaning caches
+
+[2025-12-23 20:44:57] SYSTEM OPERATION
+[:merlin/bspwm-config-three] [:merlin/bspwm-config-three] Smart clean completed - OpenCode ready for rebuild, caches cleared
+
