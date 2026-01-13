@@ -2,6 +2,7 @@
   # Basics
   # quit = "exit"; # Should update to use new super-exit program
   _ = "sudo";
+  files = "nix run nixpkgs#kdePackages.filelight";
   dot = "cd ~/.dotfiles";
   work = "cd ~/workingFile/";
   # ll = "ls -lh";
