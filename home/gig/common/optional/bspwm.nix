@@ -282,15 +282,15 @@
     };
     rules = {
       "Discord" = {
-        desktop = "^8";
+        desktop = "^9";
         follow = true;
       };
       "youtube-music" = {
-        desktop = "^1";
+        desktop = "^9";
         follow = true;
       };
       "ytmusicdesktop" = {
-        desktop = "^1";
+        desktop = "^9";
         follow = true;
       };
       # "Firefox" = {
