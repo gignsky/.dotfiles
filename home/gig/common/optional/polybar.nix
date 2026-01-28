@@ -42,9 +42,9 @@
         module-margin-right = 1;
 
         # Font configuration
-        font-0 = "DejaVu Sans:size=10;2";
-        font-1 = "Font Awesome 6 Free:style=Solid:size=10;2";
-        font-2 = "Font Awesome 6 Brands:size=10;2";
+        font-0 = "DejaVu Sans:size=11;2";
+        font-1 = "Font Awesome 6 Free:style=Solid:size=11;2";
+        font-2 = "Font Awesome 6 Brands:size=11;2";
 
         # Module layout
         modules-left = "bspwm";
