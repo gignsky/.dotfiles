@@ -377,3 +377,5 @@ Ti
 - need to get to work on personal-website ;) ASAP -- generate becky agent
 - get new darr running
 - rewrite tax-matrix in rust
+- Investigate the 'pv' program in nixpkgs that should be a better version of
+  copy or cut
