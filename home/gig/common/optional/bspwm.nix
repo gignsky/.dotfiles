@@ -120,7 +120,8 @@
         type = "internal/date";
         interval = 5;
 
-        date = "%Y-%m-%d";
+        # date = "%Y-%m-%d";
+        date = "%m/%d";
         time = "%H:%M";
 
         format-prefix = "  ";
