@@ -1,15 +1,17 @@
 { pkgs, configVars, ... }:
 {
-  environment.systemPackages = [
-    pkgs.nps
-  ];
+  environment = {
+    systemPackages = [
+      pkgs.nps
+    ];
 
-  # setting env vars
-  environment.sessionVariables = {
-    # forcing flake mode
-    NIX_PACKAGE_SEARCH_EXPERIMENTAL = "true";
-    # NIX_PACKAGE_SEARCH_MULTI_LINE = "true";
-    NIX_PACKAGE_SEARCH_TRUNCATE = "true"; # Can only be enabled if multi-line is off
+    # setting env vars
+    sessionVariables = {
+      # forcing flake mode
+      NIX_PACKAGE_SEARCH_EXPERIMENTAL = "true";
+      # NIX_PACKAGE_SEARCH_MULTI_LINE = "true";
+      NIX_PACKAGE_SEARCH_TRUNCATE = "true"; # Can only be enabled if multi-line is off
+    };
   };
 
   # automating cache refresh
