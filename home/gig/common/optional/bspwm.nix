@@ -41,13 +41,13 @@
 
   # Polybar status bar configuration
   services.polybar = {
-    package = pkgs.polybar.override {
-      alsaSupport = true;
-      githubSupport = true;
-      mpdSupport = true;
-      pulseSupport = true;
-    };
     enable = false;
+    # package = pkgs.polybar.override {
+    #   alsaSupport = true;
+    #   githubSupport = true;
+    #   mpdSupport = true;
+    #   pulseSupport = true;
+    # };
     config = {
       "bar/main" = {
         # Bar positioning and appearance
