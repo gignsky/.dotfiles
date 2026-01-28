@@ -5,6 +5,8 @@
 - https://artvee.com/
 - https://www.nga.gov/artworks?keyword=landscape&sortOrder=DEFAULT&artobj_subject=Subject%20Types-%3A%3A-Landscape&pageSize=30&pageNumber=1&lastFacet=artobj_subject
 
+## Info about usenet found [here](https://www.harley.com/usenet/index.html)
+
 ## Black Friday / Cyber Monday Shopping...
 
 1. Ultrawide Monitor?
