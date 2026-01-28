@@ -379,3 +379,4 @@ Ti
 - rewrite tax-matrix in rust
 - Investigate the 'pv' program in nixpkgs that should be a better version of
   copy or cut
+- look into the program 'recyclarr'
