@@ -13,3 +13,17 @@ Starting Event: build-start
 
 [2026-01-28 00:49:13] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
 nixos-rebuild-merlin completed in 22s (success: true, generation: 102)
+[2026-01-28 01:22:02] BUILD START
+Starting Event: build-start
+
+[2026-01-28 01:38:37] ★ CAPTAIN'S REPORT ★ BUILD ERROR
+Event: build-error failed: nixos-rebuild-merlin Jan 28 01:22:18 merlin tailscaled-autoconnect-start[12685]:         tailscale up --auth-key=[REDACTED-TAILSCALE-KEY-2026-01-28] --operator=gig --ssh --accept-routes Jan 28 01:22:18 merlin systemd[1]: tailscaled-autoconnect.service: Main process exited, code=exited, status=1/FAILURE Jan 28 01:22:18 merlin systemd[1]: tailscaled-autoconnect.service: Failed with result 'exit-code'. Jan 28 01:22:18 merlin systemd[1]: Failed to start tailscaled-autoconnect.service. Command 'systemd-run -E LOCALE_ARCHIVE -E NIXOS_INSTALL_BOOTLOADER --collect --no-ask-password --pipe --quiet --service-type=exec --unit=nixos-rebuild-switch-to-configuration /nix/store/12j8z0q7fpz3anbza6s07ngp5rbw03dc-nixos-system-merlin-25.11.20251223.76701a1/bin/switch-to-configuration switch' returned non-zero exit status 4. 
+
+[2026-01-28 01:38:37] BUILD START
+Starting Event: build-start
+
+[2026-01-28 01:46:35] ★ CAPTAIN'S REPORT ★ BUILD ERROR
+Event: build-error failed: nixos-rebuild-merlin Jan 28 01:38:51 merlin tailscaled-autoconnect-start[20250]:         tailscale up --auth-key=[REDACTED-TAILSCALE-KEY-2026-01-28] --operator=gig --ssh --accept-routes Jan 28 01:38:51 merlin systemd[1]: tailscaled-autoconnect.service: Main process exited, code=exited, status=1/FAILURE Jan 28 01:38:51 merlin systemd[1]: tailscaled-autoconnect.service: Failed with result 'exit-code'. Jan 28 01:38:51 merlin systemd[1]: Failed to start tailscaled-autoconnect.service. Command 'systemd-run -E LOCALE_ARCHIVE -E NIXOS_INSTALL_BOOTLOADER --collect --no-ask-password --pipe --quiet --service-type=exec --unit=nixos-rebuild-switch-to-configuration /nix/store/6wpwn3by79wwva7rfk976yd47cxhnjwn-nixos-system-merlin-25.11.20251223.76701a1/bin/switch-to-configuration switch' returned non-zero exit status 4. 
+
+[2026-01-28 01:46:35] BUILD START
+Starting Event: build-start
