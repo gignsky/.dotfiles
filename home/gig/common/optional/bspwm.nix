@@ -28,10 +28,14 @@
       source = configLib.relativeToRoot "home/gig/common/resources/bspwm/default.conf";
       executable = true;
     };
-    # NixOS logo wallpaper
+    # LOTR wallpaper
     ".background-image" = {
-      source = configLib.relativeToRoot "home/gig/common/resources/wallpapers/nixos-logo.png";
+      source = configLib.relativeToRoot "home/gig/common/resources/wallpapers/tolkien/desktop/4k-doors-of-durin-horizontal.webp";
     };
+    # # NixOS logo wallpaper
+    # ".background-image" = {
+    #   source = configLib.relativeToRoot "home/gig/common/resources/wallpapers/nixos-logo.png";
+    # };
   };
 
   # bspwm window manager configuration
