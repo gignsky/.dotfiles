@@ -194,7 +194,7 @@
 
       # Minimize & Restore windows
       "super + m" = "bspc node -g hidden";
-      "super + shift + m" = "bspc node $(bspc query -N -n .hidden | tail -n1) -g hidden=off";
+      "super + shift + m" = "bspc query -N -n .window.hidden | xargs -I {} bspc node {} --flag hidden=off";
 
       # Screenshots
       "Print" = "maim -s | xclip -selection clipboard -t image/png";
