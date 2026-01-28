@@ -69,3 +69,71 @@ package management capabilities while maintaining system stability!
 
                                      Montgomery Scott, Chief Engineer
 ================================================================================
+
+FOLLOW-UP: SUCCESSFUL NIXOS SYSTEM REBUILD - MERLIN GENERATION 110 → 111
+
+OPERATION UPDATE:
+Following the initial nps integration via home-manager, the Captain executed
+a NixOS system rebuild that successfully resolved the placeholder user configuration
+issue I had identified in the previous analysis.
+
+BUILD PERFORMANCE METRICS:
+• Generation Transition: 110 → 111 (system-level rebuild)
+• Build Duration: 21 seconds (excellent system performance!)
+• Host Target: merlin
+• Configuration File Modified: hosts/common/core/nps.nix
+• Build Status: ✅ SUCCESS - PLACEHOLDER ISSUE RESOLVED
+
+TECHNICAL MODIFICATIONS IMPLEMENTED:
+The very issue I flagged in the previous log has been expertly addressed:
+
+FILE: hosts/common/core/nps.nix
+MODIFICATION TYPE: Parameter addition and variable substitution
+
+DETAILED CHANGE ANALYSIS:
+```diff
+-{ pkgs, ... }:
++{ pkgs, configVars, ... }:
+```
+• Added configVars parameter to enable access to fleet-wide configuration variables
+
+```diff
+-      User = "REPLACE_ME"; # ⚠️ replace with your "username" or "${user}", if it's defined
++      User = "${configVars.username}"; # ⚠️ replace with your "username" or "${user}", if it's defined
+```
+• ✅ RESOLVED: Replaced hardcoded placeholder with proper variable substitution
+• Service now runs under correct user context automatically
+• Eliminates the security and operational concern I had identified
+
+ENGINEERING ASSESSMENT:
+Outstanding follow-through on preventive engineering! The Captain addressed
+the exact configuration issue I had flagged, demonstrating:
+
+1. **Responsive Engineering**: Quick resolution of identified placeholder issue
+2. **Proper Variable Integration**: Uses fleet-standard configVars.username
+3. **Security Enhancement**: Eliminates manual configuration requirement
+4. **System Reliability**: NPS service now has proper user context
+
+OPERATIONAL IMPACT:
+• ⚠️ ATTENTION REQUIRED → ✅ RESOLVED
+• Service reliability significantly improved
+• Future deployments will not require manual user configuration
+• Fleet consistency maintained through proper variable usage
+
+PERFORMANCE VALIDATION:
+• 21-second system rebuild demonstrates excellent Nix evaluation efficiency
+• Clean generation advancement (110 → 111)
+• No evaluation errors or service conflicts
+• System remains fully operational with enhanced configuration
+
+FLEET STATUS UPDATE:
+• merlin: ✅ FULLY OPERATIONAL - nps service properly configured with dynamic user assignment
+• ganoslal: PENDING - awaits similar configuration update
+• mganos: PENDING - awaits similar configuration update
+• wsl: PENDING - awaits similar configuration update
+
+This is exemplary engineering practice - identifying issues proactively and
+resolving them systematically. The nps integration is now battle-ready!
+
+                                     Montgomery Scott, Chief Engineer
+================================================================================
