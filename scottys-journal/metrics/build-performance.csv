@@ -140,3 +140,4 @@ date,host,operation,duration_seconds,success,error_type,git_commit,git_branch,gi
 2026-01-28 15:50:54,merlin,home-manager-rebuild-merlin,12,true,,1041c273e382585f2d0c02fa91da319df1f76a35,merlin/test-error/2-resolve-polybar,1_modified,e771897e893676ac79dd200dbafde397a0b6fdc493659b19c2ce2d2f568cf8eb,111,Automated home-manager rebuild with Scotty engineering logs
 2025-01-28,15:51:27,merlin,home-manager,success,12,111,111,polybar-modularization
 2026-01-28 15:55:42,merlin,home-manager-rebuild-merlin,13,true,,542e377351759cc99139252da06ce75616251d25,merlin/test-error/2-resolve-polybar,clean,e771897e893676ac79dd200dbafde397a0b6fdc493659b19c2ce2d2f568cf8eb,112,Automated home-manager rebuild with Scotty engineering logs
+2026-01-28 16:02:14,merlin,nixos-rebuild-merlin,21,true,,b71b972d48ce09a38f084a5b244c953f718a7f7f,merlin/test-error-2,clean,e771897e893676ac79dd200dbafde397a0b6fdc493659b19c2ce2d2f568cf8eb,120,Automated build logging
