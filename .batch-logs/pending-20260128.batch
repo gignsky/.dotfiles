@@ -1,6 +1,0 @@
----BATCH-ENTRY-START---
-TYPE: build-error
-TIMESTAMP: 2026-01-28 01:46:42
-TITLE: Event: build-error
-CONTENT: nixos-rebuild-merlin Jan 28 01:46:42 merlin tailscaled-autoconnect-start[25514]:         tailscale up --auth-key=tskey-auth-kLwjKcDveb11CNTRL-1TCCMQfgVeGtCXhd72DCeGwsi9XUnerSJ --operator=gig --ssh --accept-routes Jan 28 01:46:42 merlin systemd[1]: tailscaled-autoconnect.service: Main process exited, code=exited, status=1/FAILURE Jan 28 01:46:42 merlin systemd[1]: tailscaled-autoconnect.service: Failed with result 'exit-code'. Jan 28 01:46:42 merlin systemd[1]: Failed to start tailscaled-autoconnect.service. Command 'systemd-run -E LOCALE_ARCHIVE -E NIXOS_INSTALL_BOOTLOADER --collect --no-ask-password --pipe --quiet --service-type=exec --unit=nixos-rebuild-switch-to-configuration /nix/store/6wpwn3by79wwva7rfk976yd47cxhnjwn-nixos-system-merlin-25.11.20251223.76701a1/bin/switch-to-configuration switch' returned non-zero exit status 4. 
----BATCH-ENTRY-END---
