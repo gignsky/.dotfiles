@@ -97,3 +97,6 @@ Event: build-error failed: nixos-rebuild-merlin Jan 28 08:03:25 merlin systemd[1
 [2026-01-28 08:05:02] BUILD START
 Starting Event: build-start
 
+[2026-01-28 08:05:21] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-merlin completed in 19s (success: true, generation: 118)
+
