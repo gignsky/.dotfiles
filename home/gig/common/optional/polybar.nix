@@ -94,7 +94,7 @@
 
         # date = "%Y-%m-%d";
         date = "%m/%d";
-        time = "%h:%M";
+        time = "%I:%M %p";
 
         format-prefix = "  ";
         format-prefix-foreground = "#88C0D0";
