@@ -70,16 +70,15 @@
         module-margin-left = 1;
         module-margin-right = 1;
 
-        # # Font configuration
-        # font-0 = "DejaVu Sans:size=10;2";
-        # font-1 = "Font Awesome 6 Free:style=Solid:size=10;2";
-        # font-2 = "Font Awesome 6 Brands:size=10;2";
+        # Font configuration
+        font-0 = "DejaVu Sans:size=10;2";
+        font-1 = "Font Awesome 6 Free:style=Solid:size=10;2";
+        font-2 = "Font Awesome 6 Brands:size=10;2";
 
         # Module layout
         modules-left = "bspwm";
         modules-center = "date";
-        # modules-right = "filesystem cpu memory pulseaudio wlan eth battery";
-        modules-right = "filesystem cpu memory wlan eth battery";
+        modules-right = "filesystem cpu memory pulseaudio wlan eth battery";
 
         # System tray
         tray-position = "right";
@@ -160,34 +159,34 @@
         label-unmounted-foreground = "#4C566A";
       };
 
-      # # PulseAudio module
-      # "module/pulseaudio" = {
-      #   type = "internal/pulseaudio";
-      #
-      #   format-volume = "<label-volume> <bar-volume>";
-      #   label-volume = " %percentage%%";
-      #   label-volume-foreground = "#D8DEE9";
-      #
-      #   label-muted = " muted";
-      #   label-muted-foreground = "#4C566A";
-      #
-      #   bar-volume-width = 10;
-      #   bar-volume-foreground-0 = "#A3BE8C";
-      #   bar-volume-foreground-1 = "#A3BE8C";
-      #   bar-volume-foreground-2 = "#A3BE8C";
-      #   bar-volume-foreground-3 = "#A3BE8C";
-      #   bar-volume-foreground-4 = "#A3BE8C";
-      #   bar-volume-foreground-5 = "#EBCB8B";
-      #   bar-volume-foreground-6 = "#D08770";
-      #   bar-volume-gradient = false;
-      #   bar-volume-indicator = "|";
-      #   bar-volume-indicator-font = 2;
-      #   bar-volume-fill = "─";
-      #   bar-volume-fill-font = 2;
-      #   bar-volume-empty = "─";
-      #   bar-volume-empty-font = 2;
-      #   bar-volume-empty-foreground = "#4C566A";
-      # };
+      # PulseAudio module
+      "module/pulseaudio" = {
+        type = "internal/pulseaudio";
+
+        format-volume = "<label-volume> <bar-volume>";
+        label-volume = " %percentage%%";
+        label-volume-foreground = "#D8DEE9";
+
+        label-muted = " muted";
+        label-muted-foreground = "#4C566A";
+
+        bar-volume-width = 10;
+        bar-volume-foreground-0 = "#A3BE8C";
+        bar-volume-foreground-1 = "#A3BE8C";
+        bar-volume-foreground-2 = "#A3BE8C";
+        bar-volume-foreground-3 = "#A3BE8C";
+        bar-volume-foreground-4 = "#A3BE8C";
+        bar-volume-foreground-5 = "#EBCB8B";
+        bar-volume-foreground-6 = "#D08770";
+        bar-volume-gradient = false;
+        bar-volume-indicator = "|";
+        bar-volume-indicator-font = 2;
+        bar-volume-fill = "─";
+        bar-volume-fill-font = 2;
+        bar-volume-empty = "─";
+        bar-volume-empty-font = 2;
+        bar-volume-empty-foreground = "#4C566A";
+      };
 
       # Wireless network module
       "module/wlan" = {
