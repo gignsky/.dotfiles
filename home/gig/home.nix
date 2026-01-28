@@ -86,7 +86,7 @@
 
     # MCP Server Dependencies
     nodejs_22 # For Wikipedia MCP server (npx)
-    python312 # For Python-based MCP servers
+    # python312 # For Python-based MCP servers - commented out to keep Python in flake environments only
     uv # Modern Python package installer for MCP servers
 
     # Calculator replacement for Windows Calculator
@@ -128,6 +128,8 @@
     # curl
     # pre-commit;
     # tree
+    puddletag # for audio file tagging
+    pipe-viewer # youtube client in terminal
   ];
 
   # programs.direnv.enable = true;

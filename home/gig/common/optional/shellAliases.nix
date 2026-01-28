@@ -2,6 +2,7 @@
   # Basics
   # quit = "exit"; # Should update to use new super-exit program
   _ = "sudo";
+  files = "nix run nixpkgs#kdePackages.filelight";
   dot = "cd ~/.dotfiles";
   work = "cd ~/workingFile/";
   # ll = "ls -lh";
@@ -11,7 +12,6 @@
   rd = "rmdir";
   rdd = "rm -rfv";
   cls = "clear";
-  # ccls = "{ clear and nix run nixpkgs#fastfetch }"; # Replaced by nushell function in nushell folder
   md = "mkdir";
   syst = "systemctl";
   cat = "bat";
@@ -22,6 +22,7 @@
   nd = "nix develop -c nu";
   ndc = "nix develop -c";
   nr = "nix run";
+  nfs = "nix flake show";
   nb = "nix build";
   ndw = "nix develop .#windows -c nu";
   diddy = "touch";
@@ -30,6 +31,7 @@
 
   # Agent calls directly
   scotty = "opencode run --agent scotty";
+  oc = "opencode";
 
   # Test alias for rebuild verification
   rebuild-test-verified = "echo 'Rebuild test successful on develop branch - Scotty'";

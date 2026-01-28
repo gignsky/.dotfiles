@@ -59,9 +59,11 @@ rec {
 
       # Execute based on decision
       if $COMMIT; then
+        git restore flake.lock
         nix flake lock --commit-lock-file
         echo "flake.lock updated! -- COMMITTED" | ${pkgs.cowsay}/bin/cowsay | ${pkgs.lolcat}/bin/lolcat
       else
+        git restore flake.lock
         nix flake lock
         echo "flake.lock updated! -- NOT COMMITTED" | ${pkgs.cowsay}/bin/cowsay | ${pkgs.lolcat}/bin/lolcat
       fi

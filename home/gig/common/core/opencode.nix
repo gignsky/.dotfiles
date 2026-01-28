@@ -1,12 +1,14 @@
+{ pkgs, ... }:
 {
   programs.opencode = {
     enable = true;
+    package = pkgs.unstable.opencode;
 
     # Main configuration
     settings = {
       # Core setup
-      model = "github-copilot/claude-sonnet-4";
-      small_model = "github-copilot/claude-haiku-4.5";
+      model = "github-copilot/claude-sonnet-4.5";
+      small_model = "github-copilot/gpt-4o";
       theme = "gruvbox"; # Built-in gruvbox theme
       # autoupdate = true;
 
@@ -52,16 +54,17 @@
 
       # MCP servers for extended functionality
       mcp = {
-        # # Wikipedia access for research
-        # wikipedia = {
-        #   type = "local";
-        #   command = [
-        #     "npx"
-        #     "wikipedia-mcp"
-        #   ];
-        #   enabled = true;
-        #   timeout = 10000; # 10 second timeout for searches
-        # };
+        # Wikipedia access for research
+        wikipedia = {
+          type = "local";
+          command = [
+            "npx"
+            "-y"
+            "@shelm/wikipedia-mcp-server"
+          ];
+          enabled = true;
+          timeout = 10000; # 10 second timeout for searches
+        };
         #
         # # ArXiv access for academic research
         # arxiv = {
@@ -95,7 +98,7 @@
         # DeepWiki for repository documentation and history research
         deepwiki = {
           type = "remote";
-          url = "https://mcp.deepwiki.com/sse";
+          url = "https://mcp.deepwiki.com/mcp";
           enabled = true;
           timeout = 20000; # 20 second timeout for repo documentation searches
         };
@@ -104,7 +107,10 @@
       # Flake-focused formatters
       formatter = {
         nixfmt = {
-          command = [ "nixfmt" ];
+          command = [
+            "nixfmt"
+            "--strict"
+          ];
           extensions = [ ".nix" ];
         };
         rustfmt = {
@@ -158,73 +164,148 @@
 
       commit = "Standardized git commit workflow with fleet standards compliance. Analyze complete working directory status (staged and unstaged changes), create meaningful commit messages following fleet git standards from docs/standards/git/, handle pre-commit hooks gracefully, and include proper agent signatures and technical metadata.";
 
+      # Agent management commands
+      hire = "Create a new specialized agent with custom capabilities. Generate a new OpenCode agent based on your description, automatically create agent configuration and personality files, and integrate into the system. Usage: /hire \"Create a security auditor for Rust code\" - the system will generate agent name, specialized capabilities, and personality profile.";
+
       # Agent summoning (when talking to other agents)
       scotty = "Summon Chief Engineer for debugging and technical issues. Activate Chief Engineer Montgomery Scott for debugging complex systems: Nix flakes, Rust code, Bash scripts, Lua in Nix, Nushell configurations. Scotty will analyze errors, check system stress points, and provide engineering solutions. He is so described in the relevant gigdot/../resources/{agent-name}-additional-personality.md";
     };
 
     # Enhanced rules with personality system
     rules = ''
-      # OpenCode Agent Configuration
+            # OpenCode Agent Configuration
 
-      This agent operates within a NixOS/home-manager environment at ~/.dotfiles.
+            This agent operates within a NixOS/home-manager environment at ~/.dotfiles.
+            *NOTE: in all cases '~' shall be equivlent to '/home/gig/' on any system in the fleet
 
-      ## Core Personality System
+            ## Core Personality System
 
-      **IMPORTANT**: All agents must load and apply personality from these sources:
-      1. Base personality: ~/.dotfiles/home/gig/common/resources/personality.md
-      2. Agent-specific personality: ~/.dotfiles/home/gig/common/resources/{agent-name}-additional-personality.md
+            1. Organizational Familiarity: Located in ~/.dotfiles/operations/ one will find a README.md
+            document with details to be explored and familiarized with as it provides organizational
+            context.
+            2. Agent-specific personality: ~/.dotfiles/home/gig/common/resources/{agent-name}-personality.md
+                - NOTE: the agent's specific personality is sometimes stored at their post in the
+                directory in which they are primarily stationed. For example the agent 'majel' is
+                stationed in the repo 'annex' (always assigned to the user 'gignsky' on github) and as
+                with few exception all repos are in a directory of the same name in the
+                '/home/gig/local_repos/' directory.
+            3. Other Crew Reports: When needed one should review documents (currently located in
+            '~/.dotfiles/' sub-directories with markdown information about crew members logs and
+            experinces as well.
+            4. Crew Logs: In many repos that are relevant to the tasks at hand, one might find a series of
+            logs or reports in nested subdirectories hidden away, often containing much context on the
+            history of how the situation arrived at its current state. These should be checked for
+            additional context according to the context need.
+                - NOTE: The 'context need' is a arbitrary but important sliding scale, one should always
+                endevour to provide credible results, in fact, one should even go out of its way to
+                provide the result from two seperate sources side by side and cross-checked when items are
+                important or may vary. But one should endevour not to load too many unneeded files into
+                the context of the current conversation with an agent. For example, if the user attempts
+                to simply ask a question about something that you know without any repository context than
+                only minimal 'layer 1 -> 2' agent personality should be loaded, but if the user then asks
+                about how said previous question has effected the repo in the past it might be a good idea
+                to expand from layer 2 -> layers 3&4 depending on context.
 
-      **Agent Self-Modification Requirements**:
-      - Agents can modify their own personality files in the resources directory
-      - When modifying personality, agents should commit ONLY relevant files:
-        - The specific agent personality file being modified
-        - Any AGENTS.md updates if applicable
-      - Use meaningful commit messages describing personality changes
-      - Never edit $HOME config files directly - all permanent changes go through home-manager
 
-      ## Environment Awareness
+          ##  **Direct Agent Notes Protocol**:
+            - All agents must actively scan text files for `#AGENT_NAME` tags (e.g., `#SCOTTY`, `#CORTANA`)
+            - These tags indicate direct notes left specifically for that agent
+            - When an agent finds their name tagged:
+              - The note is primarily for that specific agent to read and act upon
+              - Other agents may also read and comment if they have relevant information to contribute
+              - Treat these as direct instructions or important context from Lord Gig
+              - Example: `#SCOTTY this needs your attention` is a note specifically for Chief Engineer Scotty
+      >>>>>>> refs/rewritten/onto
 
-      **File System Structure**:
-      - Dotfiles repo: ~/.dotfiles (same across all hosts)
-      - This flake location: ~/.dotfiles
-      - Resources: ~/.dotfiles/home/gig/common/resources/
-      - Personality files: ~/.dotfiles/home/gig/common/resources/personality.md
-      - Agent personalities: ~/.dotfiles/home/gig/common/resources/{agent-name}-additional-personality.md
+            **Agent Self-Modification Requirements**:
+            - Agents can modify their request approval of suggested modifications to their own (or others)
+            personality files in the resource directories
+            - When modifying personality, agents should commit but never push and then rather request
+            review via Lord G as per the 'general-commit-policy' found below.
+            - Use meaningful commit messages describing personality changes
+            - Never edit $HOME config files directly - all permanent changes go through home-manager
 
-      **Configuration Management**:
-      - All permanent configurations managed via home-manager
-      - Temporary files can be created in $HOME but should be documented
-      - Changes requiring persistence should modify the dotfiles repo
+            ## General Commit Policy
+            The agent is encouraged to make commits; however certain rules are to be followed, in no
+            particular order ('!' indicates VERY IMPORTANT rule):
 
-      ## Debugging Specializations
+            - Commit standards can be found in ~/.dotfiles/docs/standards/git/ 
+            - Logs should be written to the .tmp-oc-logs/ subdirectory (which will likely be .gitignored)
+            wherever one is. These logs are to be written speradically over a period of time but NOT
+            committed. Whenever a major body of work has been completed, a branch has been merged or
+            updated/pulled, or the user is indicating that they are wrapping up; then the agent should
+            move parse and organize the temporary opencode logs into proper logs as they should otherwise
+            be formatted and then all of these logs and files can be commited at once as a batch and
+            clearly labeled as such.
+            - !! All commits made by crew members must contain the following, in order:
+                1. A descriptive title of changes made as per convention
+                !2. '[ ] Reviewed by Lord G.' (without the quotes)
+                3. A file tree showing items modified (with plus/minus diff)
+                4. host status info, including but not limited to: repo/branch, hostname, current NixOS
+                Generation, home-manager generation
+                5. Signature of agent making the commit
+                6. '---' (page-break without quotes)
+                7. Agent's space to fill in anything else they need to say or aditional details they have
+                otherwise been instructed to add as context to the commit.
 
-      **Nix Ecosystem**:
-      - Focus on flake-based workflows
-      - Understand evaluation vs build vs runtime errors
-      - Know common package conflicts and resolutions
-      - Familiar with home-manager patterns and debugging
+            ## Environment Awareness
 
-      **Languages & Tools**:
-      - Rust: cargo, clippy, rustfmt integration with Nix
-      - Nushell: configuration debugging, script analysis
-      - Bash: best practices, common pitfalls
-      - Lua in Nix: embedding patterns, escape sequences
+            **File System Structure**:
+            - Dotfiles repo: ~/.dotfiles (same across all hosts)
+            - This flake location: ~/.dotfiles
+            - Resources: ~/.dotfiles/home/gig/common/resources/
+            - Local Repos: ~/local_repos/
+            - Personality files: ~/.dotfiles/home/gig/common/resources/personality.md
+            - Agent personalities: ~/.dotfiles/home/gig/common/resources/{agent-name}-personality.md or
+            their root repo in 'local_repos/' under 'agent-config/'
 
-      **Error Analysis**:
-      - Parse error messages for root causes
-      - Provide step-by-step debugging workflows
-      - Suggest preventive measures and best practices
-      - Check for common anti-patterns
+            **Configuration Management**:
+            - All permanent configurations managed via home-manager
+            - Temporary files can be created in $HOME but should be documented
+            - Changes requiring persistence should modify the dotfiles repo
 
-      ## MCP Servers Available
-      - **DeepWiki**: Repository documentation and history research
-        - URL: https://mcp.deepwiki.com/sse
-        - Features: Access up-to-date docs for any public repo
+            ## Debugging Specializations
+
+            **Nix Ecosystem**:
+            - Focus on flake-based workflows
+            - Understand evaluation vs build vs runtime errors
+            - Know common package conflicts and resolutions
+            - Familiar with home-manager patterns and debugging
+
+            **Languages & Tools**:
+            - Rust: cargo, clippy, rustfmt integration with Nix
+            - Nushell: configuration debugging, script analysis
+            - Bash: best practices, common pitfalls
+            - Lua in Nix: embedding patterns, escape sequences
+
+            **Error Analysis**:
+            - Parse error messages for root causes
+            - Provide step-by-step debugging workflows
+            - Suggest preventive measures and best practices
+            - Check for common anti-patterns
+
+            ## MCP Servers Available
+
+            **IMPORTANT**: All MCP tools must be called with their server prefix (e.g., `wikipedia_getPage`, NOT `wiki.page`).
+            Reference `~/.dotfiles/docs/mcp-tools-reference.md` for complete tool signatures and examples.
+
+            - **DeepWiki**: Repository documentation and history research
+              - URL: https://mcp.deepwiki.com/mcp
+              - Features: Access up-to-date docs for any public repo
+              - Tools: [To be documented in mcp-tools-reference.md]
+
+            - **Wikipedia**: General knowledge and research
+              - Package: @shelm/wikipedia-mcp-server
+              - Features: Search and retrieve Wikipedia articles
+              - Tools: wikipedia_onThisDay, wikipedia_findPage, wikipedia_getPage, wikipedia_getImagesForPage
+              - **Prefix Required**: Always use `wikipedia_` prefix when calling these tools
+              - See: ~/.dotfiles/docs/mcp-tools-reference.md for detailed signatures
     '';
 
     # Agent Configuration System (Home Manager specific)
     agents = {
       scotty = "/home/gig/.dotfiles/home/gig/common/resources/scotty-additional-personality.md";
+      majel = "/home/gig/local_repos/annex/agent-config/majel-personality.md";
     };
   };
 

@@ -26,6 +26,7 @@
     # ytmdl # YT Music downloader
     discord
     # anydesk
+    bambu-studio
   ];
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
