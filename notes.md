@@ -7,6 +7,9 @@
 
 ## Info about usenet found [here](https://www.harley.com/usenet/index.html)
 
+- Further reading and other sites can be found on
+  [this reddit thread](https://www.reddit.com/r/usenet/comments/i5hjtz/bookswebsites_about_usenet/)
+
 ## Black Friday / Cyber Monday Shopping...
 
 1. Ultrawide Monitor?
