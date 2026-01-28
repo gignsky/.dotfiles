@@ -41,7 +41,7 @@
 
   # Polybar status bar configuration
   services.polybar = {
-    enable = false;
+    enable = true;
     package = pkgs.polybar.override {
       alsaSupport = true;
       githubSupport = true;
