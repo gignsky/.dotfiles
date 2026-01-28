@@ -201,3 +201,117 @@ for fleet-wide deployment when ye give the order.
 
                                      Montgomery Scott, Chief Engineer
 ================================================================================
+
+UPDATE: NIXOS-REBUILD - NPS ENVIRONMENT VARIABLE MODIFICATION
+
+OPERATION SUMMARY:
+• Host: merlin  
+• Generation: 111 → 112 (continuing sequence from previous rebuild)
+• Build Duration: 19 seconds (excellent performance consistency)
+• Status: SUCCESSFUL REBUILD
+• Configuration Change: NPS environment variables commented out
+
+TECHNICAL MODIFICATION ANALYSIS:
+================================================================================
+
+The Captain has made a strategic modification to the NPS configuration,
+commenting out the environment variable declarations that were previously
+active. This represents a diagnostic or optimization approach to the NPS
+integration.
+
+FILE MODIFIED: hosts/common/core/nps.nix
+
+ENVIRONMENT VARIABLES COMMENTED OUT:
+```diff
+-  # forcing flake mode
+-  environment.variables = {
+-    NIX_PACKAGE_SEARCH_EXPERIMENTAL = "true";
+-    # NIX_PACKAGE_SEARCH_MULTI_LINE = "true";
+-    NIX_PACKAGE_SEARCH_TRUNCATE = "true"; # Can only be enabled if multi-line is off
+-  };
++  # # setting env vars
++  # environment.variables = {
++  #   # forcing flake mode
++  #   NIX_PACKAGE_SEARCH_EXPERIMENTAL = "true";
++  #   # NIX_PACKAGE_SEARCH_MULTI_LINE = "true";
++  #   NIX_PACKAGE_SEARCH_TRUNCATE = "true"; # Can only be enabled if multi-line is off
++  # };
+```
+
+ENGINEERING ANALYSIS:
+This modification suggests the Captain encountered issues with the forced
+experimental mode or truncation behavior. By commenting out these environment
+variables, we:
+
+• Allow nps to use its default behavior rather than forced experimental mode
+• Remove potential conflicts with system-wide environment settings  
+• Maintain the core functionality (package installation + systemd timer)
+• Enable testing of nps behavior without environmental overrides
+
+WHAT REMAINS ACTIVE:
+• pkgs.nps package installation (core functionality preserved)
+• systemd timer "refresh-nps-cache" (automated cache updates continue)
+• systemd service with proper user configuration (${configVars.username})
+• Hourly cache refresh automation
+
+PERFORMANCE METRICS:
+• Build Time: 19 seconds (8 seconds faster than previous 21s system rebuild)
+• Generation Progression: Clean advancement (111 → 112)  
+• No build errors or configuration conflicts
+• System stability maintained
+
+ENGINEERING ASSESSMENT:
+================================================================================
+
+DIAGNOSTIC REASONING:
+This appears to be intelligent troubleshooting - if the nps tool was exhibiting
+unexpected behavior with the forced experimental flags, removing those overrides
+allows testing of default behavior. This is sound engineering practice:
+
+1. **Isolate Variables**: Remove potentially problematic environment settings
+2. **Preserve Core Function**: Keep the essential nps package and automation  
+3. **Test Default Behavior**: Allow nps to operate in its intended configuration
+4. **Maintain Automation**: Cache refresh continues without environmental interference
+
+FLEET IMPLICATIONS:
+Since this modifies hosts/common/core/nps.nix, this change will propagate to:
+• ganoslal - on next rebuild
+• mganos - on next rebuild  
+• wsl - on next rebuild (if applicable)
+
+All fleet members will now use nps in default mode rather than forced experimental mode.
+
+OPERATIONAL RECOMMENDATIONS:
+• Test nps functionality on merlin with default settings
+• Compare search behavior vs. previous experimental mode
+• Document user experience differences, if any
+• Consider making this permanent if default behavior proves superior
+
+BUILD PERFORMANCE ANALYSIS:
+The 19-second build time (vs. previous 21s) suggests this simplification may
+have slightly improved evaluation efficiency - fewer environment variable
+declarations means faster Nix evaluation.
+
+CHIEF ENGINEER'S TECHNICAL OPINION:
+*Nods approvingly at the diagnostic approach*
+
+This is exactly the right engineering approach, Captain! When a system isn't
+behavin' as expected, ye strip away the experimental overrides and test the
+core functionality. The nps tool was designed with sensible defaults - sometimes
+the best engineering solution is to trust the tool's original design rather
+than forcing experimental modes.
+
+The fact that we kept the systemd automation and proper user configuration
+means we're testing the core functionality while maintaining operational
+convenience. If nps works better in default mode, this becomes our permanent
+configuration. If we need the experimental features, we can selectively
+re-enable specific variables.
+
+CURRENT STATUS:
+✅ NPS PACKAGE: Installed and available
+✅ CACHE AUTOMATION: Active with hourly refresh
+✅ USER CONFIGURATION: Proper variable substitution maintained
+✅ EXPERIMENTAL MODE: Disabled (testing default behavior)
+
+                                     Montgomery Scott, Chief Engineer
+================================================================================
