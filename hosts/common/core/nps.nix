@@ -4,8 +4,9 @@
     pkgs.nps
   ];
 
-  # forcing flake mode
+  # setting env vars
   environment.variables = {
+    # forcing flake mode
     NIX_PACKAGE_SEARCH_EXPERIMENTAL = "true";
     # NIX_PACKAGE_SEARCH_MULTI_LINE = "true";
     NIX_PACKAGE_SEARCH_TRUNCATE = "true"; # Can only be enabled if multi-line is off
