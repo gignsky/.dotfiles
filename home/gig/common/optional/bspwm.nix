@@ -121,6 +121,8 @@
         super + shift + f                 Toggle fullscreen
         super + f                         Toggle floating
         super + t                         Toggle tiled
+        super + m                         Minimize window
+        super + shift + m                 Unhide/Restore last hidden window
 
         <b>Navigation:</b>
         super + h/j/k/l                   Focus window (west/south/north/east)
@@ -188,6 +190,10 @@
       # Resize windows
       "super + alt + {h,j,k,l}" = "bspc node -z {left -20 0,bottom 0 20,top 0 -20,right 20 0}";
       "super + alt + shift + {h,j,k,l}" = "bspc node -z {right -20 0,top 0 20,bottom 0 -20,left 20 0}";
+
+      # Minimize & Restore windows
+      "super + m" = "bspc node -g hidden";
+      "super + shift + m" = "bspc node $(bspc query -N -n .hidden | tail -n1) -g hidden=off";
 
       # Screenshots
       "Print" = "maim -s | xclip -selection clipboard -t image/png";
