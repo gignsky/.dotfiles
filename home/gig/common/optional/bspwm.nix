@@ -28,6 +28,7 @@
       source = configLib.relativeToRoot "home/gig/common/resources/bspwm/default.conf";
       executable = true;
     };
+    #TODO SCOTTY! REMIND ME to figure out how to make these roatate through the tolkien folder
     # LOTR wallpaper
     ".background-image" = {
       source = configLib.relativeToRoot "home/gig/common/resources/wallpapers/tolkien/desktop/4k-doors-of-durin-horizontal.webp";
