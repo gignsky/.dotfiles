@@ -115,8 +115,8 @@
         <b>Window Management:</b>
         super + w                         Close window
         super + shift + q                 Kill window
-        super + f                         Toggle fullscreen
-        super + s                         Toggle floating
+        super + shift + f                 Toggle fullscreen
+        super + f                         Toggle floating
         super + t                         Toggle tiled
 
         <b>Navigation:</b>
@@ -174,10 +174,10 @@
       "super + shift + {1-9,0,grave}" = "bspc node -d '^{1-9,10,11}'";
 
       # Toggle fullscreen
-      "super + f" = "bspc node -t fullscreen";
+      "super + shift + f" = "bspc node -t fullscreen";
 
       # Toggle floating
-      "super + s" = "bspc node -t floating";
+      "super + f" = "bspc node -t floating";
 
       # Toggle tiled
       "super + t" = "bspc node -t tiled";
