@@ -5,7 +5,7 @@
   ];
 
   # setting env vars
-  environment.variables = {
+  environment.sessionVariables = {
     # forcing flake mode
     NIX_PACKAGE_SEARCH_EXPERIMENTAL = "true";
     # NIX_PACKAGE_SEARCH_MULTI_LINE = "true";
