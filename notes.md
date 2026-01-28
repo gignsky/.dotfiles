@@ -378,3 +378,6 @@ Ti
 - should modify git-dev for gigvim so that it can search a users repos and
   optionally open them since I often find myself wanting to do this
 - at some point I need to work on the tinderr for plex app
+- need to get to work on personal-website ;) ASAP -- generate becky agent
+- get new darr running
+- rewrite tax-matrix in rust
