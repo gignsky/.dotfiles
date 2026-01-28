@@ -293,12 +293,12 @@
         desktop = "^1";
         follow = true;
       };
-      "Firefox" = {
-        desktop = "^2";
-      };
-      "firefox" = {
-        desktop = "^2";
-      };
+      # "Firefox" = {
+      #   desktop = "^1";
+      # };
+      # "firefox" = {
+      #   desktop = "^2";
+      # };
     };
     extraConfig = ''
       # Load host-specific monitor configuration
