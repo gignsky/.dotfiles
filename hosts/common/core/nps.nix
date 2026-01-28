@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, configVars, ... }:
 {
   environment.systemPackages = [
     pkgs.nps
@@ -27,7 +27,7 @@
     path = [ "/run/current-system/sw/" ];
     serviceConfig = {
       Type = "oneshot";
-      User = "REPLACE_ME"; # ⚠️ replace with your "username" or "${user}", if it's defined
+      User = "${configVars.username}"; # ⚠️ replace with your "username" or "${user}", if it's defined
     };
     script = ''
       set -eu
