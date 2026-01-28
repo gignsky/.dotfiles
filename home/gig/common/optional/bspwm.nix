@@ -5,6 +5,10 @@
 }:
 
 {
+  imports = [
+    ./polybar.nix
+  ];
+
   # Additional packages for user-level bspwm functionality
   home.packages = with pkgs; [
     dmenu # Lightweight application launcher alternative
@@ -43,33 +47,34 @@
   xsession.windowManager.bspwm = {
     enable = true;
     settings = {
-      border_width = 2;
-      window_gap = 12;
+      border_width = 5;
+      window_gap = 15;
       split_ratio = 0.52;
       borderless_monocle = true;
       gapless_monocle = true;
-      focus_follows_pointer = true;
-      pointer_follows_focus = false;
+      focus_follows_pointer = false;
+      pointer_follows_focus = true;
+      top_padding = 30; # Reserve space for polybar (30px height)
     };
     rules = {
       "Discord" = {
-        desktop = "^8";
+        desktop = "^9";
         follow = true;
       };
       "youtube-music" = {
-        desktop = "^1";
+        desktop = "^9";
         follow = true;
       };
       "ytmusicdesktop" = {
-        desktop = "^1";
+        desktop = "^9";
         follow = true;
       };
-      "Firefox" = {
-        desktop = "^2";
-      };
-      "firefox" = {
-        desktop = "^2";
-      };
+      # "Firefox" = {
+      #   desktop = "^1";
+      # };
+      # "firefox" = {
+      #   desktop = "^2";
+      # };
     };
     extraConfig = ''
       # Load host-specific monitor configuration
@@ -90,10 +95,6 @@
         bspc monitor -d I II III IV V VI VII VIII IX X
       fi
 
-      # Start compositor for better visuals
-      if command -v picom >/dev/null 2>&1; then
-        picom --backend glx -b &
-      fi
     '';
   };
 
@@ -109,7 +110,7 @@
       "super + d" = "rofi -show drun"; # Alternative launcher binding
 
       # Help window - show bspwm keybindings
-      "super + question" = ''
+      "super + shift + question" = ''
         rofi -dmenu -p "bspwm help" -i -markup-rows -no-custom -auto-select <<< "
         <b>Terminal & Applications:</b>
         super + Return                    Terminal (wezterm)
@@ -194,7 +195,8 @@
 
       # Minimize & Restore windows
       "super + m" = "bspc node -g hidden";
-      "super + shift + m" = "bspc query -N -n .window.hidden | xargs -I {} bspc node {} --flag hidden=off";
+      "super + shift + m" =
+        "bspc query -N -n .window.hidden | xargs -I {} bspc node {} --flag hidden=off";
 
       # Screenshots
       "Print" = "maim -s | xclip -selection clipboard -t image/png";
@@ -232,11 +234,6 @@
 
       # Start sxhkd hotkey daemon
       sxhkd &
-
-      # Optional: Start polybar if available
-      # if command -v polybar >/dev/null 2>&1; then
-      #   polybar &
-      # fi
     '';
   };
 }
