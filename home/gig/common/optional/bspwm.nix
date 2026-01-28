@@ -271,13 +271,13 @@
   xsession.windowManager.bspwm = {
     enable = true;
     settings = {
-      border_width = 2;
-      window_gap = 12;
+      border_width = 5;
+      window_gap = 15;
       split_ratio = 0.52;
       borderless_monocle = true;
       gapless_monocle = true;
-      focus_follows_pointer = true;
-      pointer_follows_focus = false;
+      focus_follows_pointer = false;
+      pointer_follows_focus = true;
       top_padding = 30; # Reserve space for polybar (30px height)
     };
     rules = {
