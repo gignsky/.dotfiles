@@ -130,3 +130,6 @@ nixos-rebuild-merlin completed in 21s (success: true, generation: 119)
 [2026-01-28 15:23:57] SYSTEM OPERATION
 [:merlin/test-error/2-resolve-polybar] [:merlin/test-error/2-resolve-polybar] Smart clean completed - OpenCode ready for rebuild, caches cleared
 
+[2026-01-28 16:01:52] BUILD START
+Starting Event: build-start
+
