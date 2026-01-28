@@ -5,7 +5,7 @@
 }:
 
 {
-  import = [
+  imports = [
     ./polybar.nix
   ];
 

@@ -48,8 +48,9 @@
 
         # Module layout
         modules-left = "bspwm";
-        modules-center = "date";
-        modules-right = "filesystem cpu memory pulseaudio wlan eth battery";
+        modules-center = "date pulseaudio";
+        # modules-right = "filesystem cpu memory wlan eth battery";
+        modules-right = "cpu memory wlan eth battery";
 
         # System tray
         tray-position = "right";
@@ -119,17 +120,17 @@
         label = "%percentage_used%%";
       };
 
-      # Filesystem module
-      "module/filesystem" = {
-        type = "internal/fs";
-        interval = 25;
-
-        mount-0 = "/";
-
-        label-mounted = " %percentage_used%%";
-        label-unmounted = " %mountpoint% not mounted";
-        label-unmounted-foreground = "#4C566A";
-      };
+      # # Filesystem module
+      # "module/filesystem" = {
+      #   type = "internal/fs";
+      #   interval = 25;
+      #
+      #   mount-0 = "/";
+      #
+      #   label-mounted = " %percentage_used%%";
+      #   label-unmounted = " %mountpoint% not mounted";
+      #   label-unmounted-foreground = "#4C566A";
+      # };
 
       # PulseAudio module
       "module/pulseaudio" = {
