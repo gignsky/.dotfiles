@@ -115,7 +115,6 @@
         super + space / super + d         Application launcher (rofi)
         super + ?                         Show this help window
 
-        #TODO SCOTTY: NEED TO ADD WINDOW MANAGEMENT FOR MINIMIZING WINDOWS
         <b>Window Management:</b>
         super + w                         Close window
         super + shift + q                 Kill window
