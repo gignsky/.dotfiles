@@ -41,7 +41,7 @@
 
   # Polybar status bar configuration
   services.polybar = {
-    enable = false;
+    enable = true;
     package = pkgs.polybar.override {
       alsaSupport = true;
       githubSupport = true;
@@ -55,6 +55,7 @@
         height = 30;
         radius = 0;
         fixed-center = true;
+        bottom = false; # Explicitly set to top
 
         # Colors (Nord-inspired theme)
         background = "#2E3440";
@@ -277,6 +278,7 @@
       gapless_monocle = true;
       focus_follows_pointer = true;
       pointer_follows_focus = false;
+      top_padding = 30; # Reserve space for polybar (30px height)
     };
     rules = {
       "Discord" = {
@@ -461,15 +463,8 @@
       # Start sxhkd hotkey daemon
       sxhkd &
 
-      # Start polybar status bar
-      if command -v polybar >/dev/null 2>&1; then
-        # Kill any existing polybar instances
-        killall -q polybar
-        # Wait for processes to shut down
-        while pgrep -u $UID -x polybar >/dev/null; do sleep 1; done
-        # Launch polybar
-        polybar main &
-      fi
+      # Polybar is managed by the services.polybar configuration above
+      # No need to start it manually here
     '';
   };
 }
