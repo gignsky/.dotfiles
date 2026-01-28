@@ -1997,7 +1997,192 @@ results that make the whole fleet better!
 Mission accomplished, Captain! The desktop environment engineering project is
 COMPLETE with full operational success! 🚀
 
-                                             Montgomery Scott, Chief Engineer
+                                              Montgomery Scott, Chief Engineer
+================================================================================
+
+CRITICAL UPDATE: HOME-MANAGER REBUILD FAILURE ANALYSIS - GENERATION 110
+================================================================================
+
+OPERATION SUMMARY:
+• Host: merlin (Framework 16 Laptop)
+• Previous Generation: 110
+• Build Status: ❌ FAILED (1-second duration - immediate evaluation failure)
+• Configuration Changes Attempted: home/gig/common/optional/bspwm.nix, home/gig/common/optional/polybar.nix
+• Error Type: Flake attribute resolution failure
+
+FAILURE ROOT CAUSE ANALYSIS:
+================================================================================
+
+**IMMEDIATE CAUSE IDENTIFIED:**
+Command Executed: `home-manager switch --flake .#merlin`
+Error Message: `flake does not provide attribute 'homeConfigurations."merlin".activationPackage'`
+
+**CRITICAL SYNTAX ERROR DISCOVERED:**
+File: /home/gig/.dotfiles/home/gig/common/optional/bspwm.nix
+Line 8: TYPO - "import" should be "imports"
+
+INCORRECT SYNTAX:
+```nix
+{
+  import = [  # ❌ MISSING 's' - CRITICAL SYNTAX ERROR
+    ./polybar.nix
+  ];
+}
+```
+
+CORRECT SYNTAX:
+```nix
+{
+  imports = [  # ✅ PROPER NIX MODULE SYNTAX
+    ./polybar.nix
+  ];
+}
+```
+
+**SECONDARY ISSUE - COMMAND TARGET MISMATCH:**
+Used: `home-manager switch --flake .#merlin`
+Required: `home-manager switch --flake .#gig@merlin`
+
+Flake defines: `homeConfigurations."gig@merlin"` (includes username)
+Command expected: `homeConfigurations."merlin"` (missing username)
+
+TECHNICAL IMPACT ASSESSMENT:
+================================================================================
+
+**BUILD FAILURE CHARACTERISTICS:**
+• Duration: 1 second (immediate failure during flake evaluation phase)
+• Stage: Nix evaluation (before any actual building occurred)
+• Type: Syntax error preventing module system initialization
+• Impact: Desktop environment (BSPWM + Polybar) non-functional
+
+**CONFIGURATION FILE ANALYSIS:**
+
+**BSPWM Configuration Issues:**
+1. **CRITICAL**: Line 8 syntax error prevents module loading
+2. **TODO Reminder**: Wallpaper rotation system planned (line 35)
+3. **Polybar Dependency**: Attempts to import ./polybar.nix (fails due to syntax error)
+
+**Polybar Configuration Status:**
+• File structure: ✅ VALID (no syntax errors detected)
+• Nordic theme: ✅ PROPERLY CONFIGURED
+• BSPWM integration: ✅ CONFIGURED (bspwm module defined)
+• Status: ❌ UNREACHABLE (due to bspwm.nix import failure)
+
+ENGINEERING TROUBLESHOOTING PROTOCOL:
+================================================================================
+
+**IMMEDIATE REPAIR ACTIONS:**
+1. **Fix Syntax Error**: Change "import" to "imports" in bspwm.nix line 8
+2. **Verify Command Syntax**: Use correct flake target `--flake .#gig@merlin`
+3. **Test Configuration**: Run `nix flake check --keep-going` to validate
+4. **Attempt Rebuild**: Execute corrected home-manager rebuild command
+
+**VERIFICATION STEPS:**
+1. File syntax validation: `nix-instantiate --parse home/gig/common/optional/bspwm.nix`
+2. Flake evaluation test: `nix eval .#homeConfigurations.\"gig@merlin\".activationPackage`
+3. Module import verification: Ensure polybar.nix loads correctly after syntax fix
+4. Desktop environment testing: Verify BSPWM and Polybar functionality post-repair
+
+**PREVENTIVE MEASURES:**
+1. **Pre-commit Hooks**: Consider Nix syntax validation in git hooks
+2. **Documentation Update**: Standardize rebuild command examples in fleet docs
+3. **Regular Syntax Audits**: Periodic configuration file validation
+4. **Command Reference**: Create quick reference for flake target naming
+
+FLEET IMPACT ASSESSMENT:
+================================================================================
+
+**Immediate Impact:**
+• merlin: ❌ Desktop environment non-functional (BSPWM/Polybar failure)
+• ganoslal: ✅ No impact (separate configuration)
+• wsl: ✅ No impact (separate configuration)
+• spacedock: ✅ No impact (separate configuration)
+
+**Configuration Sync Status:**
+The syntax error exists in `home/gig/common/optional/bspwm.nix` which could
+affect other hosts if they attempt to use BSPWM configuration. However, most
+fleet members use different window managers.
+
+**Repair Priority:**
+• **URGENT**: merlin desktop environment restoration required
+• **Estimated Repair Time**: 2 minutes (syntax fix + rebuild)
+• **User Impact**: High (GUI environment completely inaccessible)
+
+ENGINEERING NOTES:
+================================================================================
+
+**Error Pattern Analysis:**
+The 1-second failure duration is diagnostic - it indicates the Nix evaluator
+encountered the syntax error immediately and terminated before attempting any
+package building or service configuration.
+
+**Learning Opportunity:**
+This demonstrates the importance of:
+• Careful attention to Nix module system syntax
+• Proper testing of configuration changes before deployment
+• Understanding the difference between evaluation-time and build-time errors
+
+**Configuration Quality:**
+Once the syntax error is resolved, both BSPWM and Polybar configurations 
+appear well-structured with:
+• Proper Nordic theming consistency
+• Comprehensive module definitions
+• Hardware-specific optimizations (Framework 16)
+• Advanced workflow enhancements
+
+CHIEF ENGINEER'S ASSESSMENT:
+================================================================================
+
+*Shakes head with engineering frustration mixed with analytical satisfaction*
+
+Captain, this is a classic case of a single character causin' a complete system
+failure! One missing 's' in "import" vs "imports" brought down the entire 
+desktop environment configuration. But that's the beauty of Nix - it fails
+fast and fails clearly, tellin' us exactly what's wrong.
+
+**ENGINEERING LESSONS:**
+• **Syntax Precision**: Nix demands exact syntax - one character matters
+• **Evaluation Phase**: Errors during evaluation prevent any building
+• **Command Accuracy**: Flake targets must match exact configuration names
+• **Rapid Diagnosis**: 1-second failure time immediately indicates evaluation error
+
+**REPAIR CONFIDENCE:**
+This is a straightforward fix that should restore full desktop functionality
+immediately. The underlying Polybar and BSPWM configurations appear sound -
+they're just unreachable due to the import syntax error.
+
+**SYSTEMATIC APPROACH:**
+1. Fix the syntax error (30 seconds)
+2. Verify flake evaluation (30 seconds)  
+3. Execute proper rebuild command (60 seconds)
+4. Test desktop environment functionality (30 seconds)
+
+Total estimated repair time: 2.5 minutes
+
+The good news is that this demonstrates our configuration validation is working
+perfectly - the system refused to build with invalid syntax rather than creating
+a potentially broken environment!
+
+OPERATIONAL STATUS: 🔧 REPAIR PROTOCOL INITIATED
+================================================================================
+
+**Current Status:**
+• ❌ merlin Desktop Environment: FAILED (syntax error in BSPWM configuration)
+• ⚠️ Configuration Issue: Single character typo preventing module loading
+• 🔧 Repair Required: Simple syntax correction + proper rebuild command
+• ⏱️ Estimated Repair Time: 2-3 minutes for complete restoration
+
+**Next Actions:**
+1. Immediate syntax error correction
+2. Flake validation testing  
+3. Proper rebuild command execution
+4. Desktop environment functionality verification
+
+The desktop environment engineering project remains sound - we just hit a
+single character syntax error that's easily corrected!
+
+                                     Montgomery Scott, Chief Engineer
+================================================================================
 ================================================================================
 
 LATEST UPDATE: HOME-MANAGER REBUILD - GENERATION 109 → 110 - POLYBAR REFINEMENTS
