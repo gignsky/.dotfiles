@@ -128,6 +128,7 @@
     # curl
     # pre-commit;
     # tree
+    puddletag # for audio file tagging
   ];
 
   # programs.direnv.enable = true;
