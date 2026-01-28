@@ -134,7 +134,7 @@
       "module/cpu" = {
         type = "internal/cpu";
         interval = 2;
-        format-prefix = " ";
+        format-prefix = "CPU: ";
         format-prefix-foreground = "#88C0D0";
         label = "%percentage:2%%";
       };
@@ -143,7 +143,7 @@
       "module/memory" = {
         type = "internal/memory";
         interval = 2;
-        format-prefix = " ";
+        format-prefix = "MEM: ";
         format-prefix-foreground = "#88C0D0";
         label = "%percentage_used%%";
       };
@@ -230,7 +230,7 @@
 
         format-charging = "<animation-charging> <label-charging>";
         format-discharging = "<animation-discharging> <label-discharging>";
-        format-full-prefix = " ";
+        format-full-prefix = "BAT: ";
         format-full-prefix-foreground = "#A3BE8C";
         format-full = "<label-full>";
 
