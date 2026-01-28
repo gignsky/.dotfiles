@@ -1,0 +1,138 @@
+================================================================================
+CHIEF ENGINEER'S LOG - STARDATE 2026.01.28 (AUTOMATED)
+================================================================================
+
+[2026-01-28 00:48:37] SYSTEM OPERATION
+[:merlin/test-error-1] [:merlin/test-error-1] Smart clean initiated - preserving OpenCode history, cleaning caches
+
+[2026-01-28 00:48:40] SYSTEM OPERATION
+[:merlin/test-error-1] [:merlin/test-error-1] Smart clean completed - OpenCode ready for rebuild, caches cleared
+
+[2026-01-28 00:48:52] BUILD START
+Starting Event: build-start
+
+[2026-01-28 00:49:13] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-merlin completed in 22s (success: true, generation: 102)
+[2026-01-28 07:45:21] SYSTEM OPERATION
+[:merlin/test-error-2] [:merlin/test-error-2] Smart clean initiated - preserving OpenCode history, cleaning caches
+
+[2026-01-28 07:45:24] SYSTEM OPERATION
+[:merlin/test-error-2] [:merlin/test-error-2] Smart clean completed - OpenCode ready for rebuild, caches cleared
+
+[2026-01-28 07:45:45] BUILD START
+Starting Event: build-start
+
+[2026-01-28 07:46:08] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-merlin completed in 23s (success: true, generation: 114)
+
+[2026-01-28 07:48:11] BUILD START
+Starting Event: build-start
+
+[2026-01-28 07:48:29] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-merlin completed in 18s (success: true, generation: 115)
+
+[2026-01-28 07:51:12] SYSTEM OPERATION
+[:merlin/test-error-2] [:merlin/test-error-2] Smart clean initiated - preserving OpenCode history, cleaning caches
+
+[2026-01-28 07:51:14] SYSTEM OPERATION
+[:merlin/test-error-2] [:merlin/test-error-2] Smart clean completed - OpenCode ready for rebuild, caches cleared
+
+[2026-01-28 07:52:07] BUILD START
+Starting Event: build-start
+
+[2026-01-28 07:52:26] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-merlin completed in 19s (success: true, generation: 116)
+[2026-01-28 01:22:02] BUILD START
+Starting Event: build-start
+
+[2026-01-28 01:38:37] ★ CAPTAIN'S REPORT ★ BUILD ERROR
+Event: build-error failed: nixos-rebuild-merlin Jan 28 01:22:18 merlin tailscaled-autoconnect-start[12685]:         tailscale up --auth-key=[REDACTED-TAILSCALE-KEY-2026-01-28] --operator=gig --ssh --accept-routes Jan 28 01:22:18 merlin systemd[1]: tailscaled-autoconnect.service: Main process exited, code=exited, status=1/FAILURE Jan 28 01:22:18 merlin systemd[1]: tailscaled-autoconnect.service: Failed with result 'exit-code'. Jan 28 01:22:18 merlin systemd[1]: Failed to start tailscaled-autoconnect.service. Command 'systemd-run -E LOCALE_ARCHIVE -E NIXOS_INSTALL_BOOTLOADER --collect --no-ask-password --pipe --quiet --service-type=exec --unit=nixos-rebuild-switch-to-configuration /nix/store/12j8z0q7fpz3anbza6s07ngp5rbw03dc-nixos-system-merlin-25.11.20251223.76701a1/bin/switch-to-configuration switch' returned non-zero exit status 4. 
+
+[2026-01-28 01:38:37] BUILD START
+Starting Event: build-start
+
+[2026-01-28 01:46:35] ★ CAPTAIN'S REPORT ★ BUILD ERROR
+Event: build-error failed: nixos-rebuild-merlin Jan 28 01:38:51 merlin tailscaled-autoconnect-start[20250]:         tailscale up --auth-key=[REDACTED-TAILSCALE-KEY-2026-01-28] --operator=gig --ssh --accept-routes Jan 28 01:38:51 merlin systemd[1]: tailscaled-autoconnect.service: Main process exited, code=exited, status=1/FAILURE Jan 28 01:38:51 merlin systemd[1]: tailscaled-autoconnect.service: Failed with result 'exit-code'. Jan 28 01:38:51 merlin systemd[1]: Failed to start tailscaled-autoconnect.service. Command 'systemd-run -E LOCALE_ARCHIVE -E NIXOS_INSTALL_BOOTLOADER --collect --no-ask-password --pipe --quiet --service-type=exec --unit=nixos-rebuild-switch-to-configuration /nix/store/6wpwn3by79wwva7rfk976yd47cxhnjwn-nixos-system-merlin-25.11.20251223.76701a1/bin/switch-to-configuration switch' returned non-zero exit status 4. 
+
+[2026-01-28 01:46:35] BUILD START
+Starting Event: build-start
+[2026-01-28 03:35:46] ★ CAPTAIN'S REPORT ★ BUILD ERROR
+Event: build-error failed: nixos-rebuild-merlin Jan 28 01:46:42 merlin tailscaled-autoconnect-start[25514]:         tailscale up --auth-key=[REDACTED-TAILSCALE-KEY-2026-01-28] --operator=gig --ssh --accept-routes Jan 28 01:46:42 merlin systemd[1]: tailscaled-autoconnect.service: Main process exited, code=exited, status=1/FAILURE Jan 28 01:46:42 merlin systemd[1]: tailscaled-autoconnect.service: Failed with result 'exit-code'. Jan 28 01:46:42 merlin systemd[1]: Failed to start tailscaled-autoconnect.service. Command 'systemd-run -E LOCALE_ARCHIVE -E NIXOS_INSTALL_BOOTLOADER --collect --no-ask-password --pipe --quiet --service-type=exec --unit=nixos-rebuild-switch-to-configuration /nix/store/6wpwn3by79wwva7rfk976yd47cxhnjwn-nixos-system-merlin-25.11.20251223.76701a1/bin/switch-to-configuration switch' returned non-zero exit status 4. 
+
+[2026-01-28 03:35:46] BUILD START
+Starting Event: build-start
+
+[2026-01-28 03:36:05] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-merlin completed in 19s (success: true, generation: 109)
+
+[2026-01-28 06:38:37] BUILD START
+Starting Event: build-start
+
+[2026-01-28 06:39:11] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-merlin completed in 34s (success: true, generation: 110)
+
+[2026-01-28 06:43:02] BUILD START
+Starting Event: build-start
+
+[2026-01-28 06:43:23] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-merlin completed in 21s (success: true, generation: 111)
+
+[2026-01-28 07:15:48] BUILD START
+Starting Event: build-start
+
+[2026-01-28 07:16:07] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-merlin completed in 19s (success: true, generation: 112)
+
+[2026-01-28 07:31:51] BUILD START
+Starting Event: build-start
+
+[2026-01-28 07:32:11] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-merlin completed in 21s (success: true, generation: 113)
+[2026-01-28 08:03:07] BUILD START
+Starting Event: build-start
+
+[2026-01-28 08:05:02] ★ CAPTAIN'S REPORT ★ BUILD ERROR
+Event: build-error failed: nixos-rebuild-merlin Jan 28 08:03:25 merlin systemd[1]: refresh-nps-cache.service: Main process exited, code=exited, status=1/FAILURE Jan 28 08:03:25 merlin systemd[1]: refresh-nps-cache.service: Failed with result 'exit-code'. Jan 28 08:03:25 merlin systemd[1]: Failed to start refresh-nps-cache.service. Jan 28 08:03:25 merlin systemd[1]: refresh-nps-cache.service: Consumed 61ms CPU time, 12.4M memory peak, 2.4M read from disk. Command 'systemd-run -E LOCALE_ARCHIVE -E NIXOS_INSTALL_BOOTLOADER --collect --no-ask-password --pipe --quiet --service-type=exec --unit=nixos-rebuild-switch-to-configuration /nix/store/lkmahxgqldcksiiz9cq8dfd5i743r9c9-nixos-system-merlin-25.11.20251223.76701a1/bin/switch-to-configuration switch' returned non-zero exit status 4. 
+
+[2026-01-28 08:05:02] BUILD START
+Starting Event: build-start
+
+[2026-01-28 08:05:21] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-merlin completed in 19s (success: true, generation: 118)
+
+[2026-01-28 11:20:28] BUILD START
+Starting Event: build-start
+
+[2026-01-28 11:20:49] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-merlin completed in 21s (success: true, generation: 119)
+
+[2026-01-28 13:37:02] SYSTEM OPERATION
+[:merlin/test-error/2-resolve-polybar] [:merlin/test-error/2-resolve-polybar] Smart clean initiated - preserving OpenCode history, cleaning caches
+
+[2026-01-28 13:37:05] SYSTEM OPERATION
+[:merlin/test-error/2-resolve-polybar] [:merlin/test-error/2-resolve-polybar] Smart clean completed - OpenCode ready for rebuild, caches cleared
+
+[2026-01-28 14:44:27] SYSTEM OPERATION
+[:merlin/test-error/2-resolve-polybar] [:merlin/test-error/2-resolve-polybar] Smart clean initiated - preserving OpenCode history, cleaning caches
+
+[2026-01-28 14:44:30] SYSTEM OPERATION
+[:merlin/test-error/2-resolve-polybar] [:merlin/test-error/2-resolve-polybar] Smart clean completed - OpenCode ready for rebuild, caches cleared
+
+[2026-01-28 14:50:43] SYSTEM OPERATION
+[:merlin/test-error/2-resolve-polybar] [:merlin/test-error/2-resolve-polybar] Smart clean initiated - preserving OpenCode history, cleaning caches
+
+[2026-01-28 14:50:45] SYSTEM OPERATION
+[:merlin/test-error/2-resolve-polybar] [:merlin/test-error/2-resolve-polybar] Smart clean completed - OpenCode ready for rebuild, caches cleared
+
+[2026-01-28 15:23:55] SYSTEM OPERATION
+[:merlin/test-error/2-resolve-polybar] [:merlin/test-error/2-resolve-polybar] Smart clean initiated - preserving OpenCode history, cleaning caches
+
+[2026-01-28 15:23:57] SYSTEM OPERATION
+[:merlin/test-error/2-resolve-polybar] [:merlin/test-error/2-resolve-polybar] Smart clean completed - OpenCode ready for rebuild, caches cleared
+
+[2026-01-28 16:01:52] BUILD START
+Starting Event: build-start
+
+[2026-01-28 16:02:14] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-merlin completed in 21s (success: true, generation: 120)
+

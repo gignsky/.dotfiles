@@ -5,6 +5,10 @@
 }:
 
 {
+  imports = [
+    ./polybar.nix
+  ];
+
   # Additional packages for user-level bspwm functionality
   home.packages = with pkgs; [
     dmenu # Lightweight application launcher alternative
@@ -28,43 +32,49 @@
       source = configLib.relativeToRoot "home/gig/common/resources/bspwm/default.conf";
       executable = true;
     };
-    # NixOS logo wallpaper
+    #TODO SCOTTY! REMIND ME to figure out how to make these roatate through the tolkien folder
+    # LOTR wallpaper
     ".background-image" = {
-      source = configLib.relativeToRoot "home/gig/common/resources/wallpapers/nixos-logo.png";
+      source = configLib.relativeToRoot "home/gig/common/resources/wallpapers/tolkien/desktop/4k-doors-of-durin-horizontal.webp";
     };
+    # # NixOS logo wallpaper
+    # ".background-image" = {
+    #   source = configLib.relativeToRoot "home/gig/common/resources/wallpapers/nixos-logo.png";
+    # };
   };
 
   # bspwm window manager configuration
   xsession.windowManager.bspwm = {
     enable = true;
     settings = {
-      border_width = 2;
-      window_gap = 12;
+      border_width = 5;
+      window_gap = 15;
       split_ratio = 0.52;
       borderless_monocle = true;
       gapless_monocle = true;
-      focus_follows_pointer = true;
-      pointer_follows_focus = false;
+      focus_follows_pointer = false;
+      pointer_follows_focus = true;
+      top_padding = 30; # Reserve space for polybar (30px height)
     };
     rules = {
       "Discord" = {
-        desktop = "^8";
+        desktop = "^9";
         follow = true;
       };
       "youtube-music" = {
-        desktop = "^1";
+        desktop = "^9";
         follow = true;
       };
       "ytmusicdesktop" = {
-        desktop = "^1";
+        desktop = "^9";
         follow = true;
       };
-      "Firefox" = {
-        desktop = "^2";
-      };
-      "firefox" = {
-        desktop = "^2";
-      };
+      # "Firefox" = {
+      #   desktop = "^1";
+      # };
+      # "firefox" = {
+      #   desktop = "^2";
+      # };
     };
     extraConfig = ''
       # Load host-specific monitor configuration
@@ -85,10 +95,6 @@
         bspc monitor -d I II III IV V VI VII VIII IX X
       fi
 
-      # Start compositor for better visuals
-      if command -v picom >/dev/null 2>&1; then
-        picom --backend glx -b &
-      fi
     '';
   };
 
@@ -104,7 +110,7 @@
       "super + d" = "rofi -show drun"; # Alternative launcher binding
 
       # Help window - show bspwm keybindings
-      "super + question" = ''
+      "super + shift + question" = ''
         rofi -dmenu -p "bspwm help" -i -markup-rows -no-custom -auto-select <<< "
         <b>Terminal & Applications:</b>
         super + Return                    Terminal (wezterm)
@@ -114,9 +120,11 @@
         <b>Window Management:</b>
         super + w                         Close window
         super + shift + q                 Kill window
-        super + f                         Toggle fullscreen
-        super + s                         Toggle floating
+        super + shift + f                 Toggle fullscreen
+        super + f                         Toggle floating
         super + t                         Toggle tiled
+        super + m                         Minimize window
+        super + shift + m                 Unhide/Restore last hidden window
 
         <b>Navigation:</b>
         super + h/j/k/l                   Focus window (west/south/north/east)
@@ -173,10 +181,10 @@
       "super + shift + {1-9,0,grave}" = "bspc node -d '^{1-9,10,11}'";
 
       # Toggle fullscreen
-      "super + f" = "bspc node -t fullscreen";
+      "super + shift + f" = "bspc node -t fullscreen";
 
       # Toggle floating
-      "super + s" = "bspc node -t floating";
+      "super + f" = "bspc node -t floating";
 
       # Toggle tiled
       "super + t" = "bspc node -t tiled";
@@ -184,6 +192,11 @@
       # Resize windows
       "super + alt + {h,j,k,l}" = "bspc node -z {left -20 0,bottom 0 20,top 0 -20,right 20 0}";
       "super + alt + shift + {h,j,k,l}" = "bspc node -z {right -20 0,top 0 20,bottom 0 -20,left 20 0}";
+
+      # Minimize & Restore windows
+      "super + m" = "bspc node -g hidden";
+      "super + shift + m" =
+        "bspc query -N -n .window.hidden | xargs -I {} bspc node {} --flag hidden=off";
 
       # Screenshots
       "Print" = "maim -s | xclip -selection clipboard -t image/png";
@@ -221,11 +234,6 @@
 
       # Start sxhkd hotkey daemon
       sxhkd &
-
-      # Optional: Start polybar if available
-      # if command -v polybar >/dev/null 2>&1; then
-      #   polybar &
-      # fi
     '';
   };
 }

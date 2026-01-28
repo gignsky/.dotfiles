@@ -12,7 +12,7 @@
 
         # Optional: Performance optimizations
         # animation = "none"; # Disable animations for faster boot
-        hide_borders = false;
+        hide_borders = true;
         hide_key_hints = false;
       };
     };
