@@ -55,9 +55,9 @@
     # Perfect for file previews in vim file managers
     bat
 
-    # exa - Better 'ls' with colors and git integration
+    # eza - Better 'ls' with colors and git integration
     # Enhanced directory listings for file manager previews
-    exa
+    eza
 
     # fd - Fast 'find' alternative
     # Faster file searching for vim file managers
