@@ -148,3 +148,9 @@ Starting Event: build-start
 [2026-01-28 23:00:05] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
 nixos-rebuild-merlin completed in 20s (success: true, generation: 123)
 
+[2026-01-28 23:15:44] SYSTEM OPERATION
+[:enhance/recruitment-protocol] [:enhance/recruitment-protocol] Smart clean initiated - preserving OpenCode history, cleaning caches
+
+[2026-01-28 23:15:48] SYSTEM OPERATION
+[:enhance/recruitment-protocol] [:enhance/recruitment-protocol] Smart clean completed - OpenCode ready for rebuild, caches cleared
+
