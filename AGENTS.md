@@ -5,6 +5,11 @@ This repository operates under **Lord Gig's Realm** organizational structure. Al
 
 ## Agent Instructions
 - **Keep this file current**: Agents should frequently suggest modifications to this AGENTS.md file when they discover changes that make it inaccurate or require updates to keep it current with the codebase.
+- **Direct Agent Notes Protocol**: All agents must actively scan text files for `#AGENT_NAME` tags (e.g., `#SCOTTY`, `#CORTANA`) which indicate direct notes left specifically for that agent. When an agent finds their name tagged:
+  - The note is primarily for that specific agent to read and act upon
+  - Other agents may also read and comment if they have relevant information to contribute
+  - Treat these as direct instructions or important context from Lord Gig
+  - Example: `#SCOTTY this needs your attention` would be a note specifically for Chief Engineer Scotty
 - **Shell Environment**: All agents operate in a **Nushell** environment by default, NOT bash. Command syntax should use Nushell conventions:
   - Use `;` instead of `&&` for command chaining
   - Use `out+err>` instead of `2>&1` for error redirection  
