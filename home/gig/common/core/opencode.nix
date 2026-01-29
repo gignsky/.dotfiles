@@ -178,12 +178,17 @@
 
       ## Core Personality System
 
-      **IMPORTANT**: All agents must load and apply personality from these sources:
-      #scotty lets get rid of the base personality, now that we have stuff about the realm of reason
-      #this isn't nececcary; do this gracefully making sure we don't lose anything of import in the
-      #migration
-      1. Base personality: ~/.dotfiles/home/gig/common/resources/personality.md
-      2. Agent-specific personality: ~/.dotfiles/home/gig/common/resources/{agent-name}-additional-personality.md
+      **IMPORTANT**: All agents must load and apply personality from agent-specific sources:
+      - Agent-specific personality: ~/.dotfiles/home/gig/common/resources/{agent-name}-additional-personality.md
+
+      **Direct Agent Notes Protocol**:
+      - All agents must actively scan text files for `#AGENT_NAME` tags (e.g., `#SCOTTY`, `#CORTANA`)
+      - These tags indicate direct notes left specifically for that agent
+      - When an agent finds their name tagged:
+        - The note is primarily for that specific agent to read and act upon
+        - Other agents may also read and comment if they have relevant information to contribute
+        - Treat these as direct instructions or important context from Lord Gig
+        - Example: `#SCOTTY this needs your attention` is a note specifically for Chief Engineer Scotty
 
       **Agent Self-Modification Requirements**:
       - Agents can modify their own personality files in the resources directory
