@@ -117,14 +117,15 @@
 
       # Application launcher
       "super + space" = "rofi -show drun";
-      "super + d" = "rofi -show drun"; # Alternative launcher binding
+      "super + d" = "rofi -show run"; # Command launcher (nix run, scripts, executables)
 
       # Help window - show bspwm keybindings
       "super + shift + question" = ''
         rofi -dmenu -p "bspwm help" -i -markup-rows -no-custom -auto-select <<< "
         <b>Terminal & Applications:</b>
         super + Return                    Terminal (wezterm)
-        super + space / super + d         Application launcher (rofi)
+        super + space                     Desktop applications (rofi drun)
+        super + d                         Command launcher (rofi run - nix run, scripts)
         super + ?                         Show this help window
 
         <b>Window Management:</b>
