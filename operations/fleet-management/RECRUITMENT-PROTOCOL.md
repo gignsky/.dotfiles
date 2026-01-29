@@ -33,10 +33,7 @@ Phase 1: DEFINITION & PLANNING
 │    • Mission specialization                                      │
 │    • Domain expertise needed                                     │
 │    • Personality traits                                          │
-│    • Integration requirements                                    │ #SCOTTY this phase should I
-think be an iterative approach where the agent helping in the hiring should make a todo list of all
-the items that need defining and any additional relevant questions that arrise from the interview
-with Lord G. 
+│    • Integration requirements                                    │
 └────────────────────────┬─────────────────────────────────────────┘
                          │
                          ▼
@@ -111,7 +108,33 @@ Phase 2: ITERATIVE DEVELOPMENT
                                             │    • Rebuild home-manager    │
                                             │    • Verify officer active   │
                                             │    • Complete onboarding     │
+                                            └──────────┬───────────────────┘
+                                                       │
+                                                       ▼
+                                            ┌──────────────────────────────┐
+                                            │ OFFICER ACTIVE & OPERATIONAL │
+                                            └──────────┬───────────────────┘
+                                                       │
+                                       ┌───────────────┴────────────────┐
+                                       │ Post-Deployment Modifications  │
+                                       │ (Performance Review)           │
+                                       └───────────────┬────────────────┘
+                                                       │
+                                                       ▼
+                                            ┌──────────────────────────────┐
+                                            │ 10. Performance Review       │
+                                            │     • Assess officer         │
+                                            │     • Identify improvements  │
+                                            │     • Create review branch   │
+                                            └──────────┬───────────────────┘
+                                                       │
+                                                       ▼
+                                            ┌──────────────────────────────┐
+                                            │ Return to Phase 2, Step 3    │
+                                            │ (Use review/<officer-name>   │
+                                            │  branch instead of recruit/) │
                                             └──────────────────────────────┘
+```
                                                        │
                                                        ▼
                                             ┌──────────────────────────────┐
@@ -416,6 +439,66 @@ just home
 - Personality matches specification
 - Capabilities function correctly
 - Integration successful
+
+---
+
+### Phase 4: Performance Review (Post-Deployment Modifications)
+
+#### Step 10: Performance Review
+
+**Objective**: Modify and improve an already-deployed officer based on real-world usage.
+
+**When to Use**:
+- Officer's personality needs adjustment based on actual interactions
+- Capabilities need refinement or expansion
+- Integration issues discovered in production use
+- Communication style requires tuning
+- New requirements emerge
+
+**Performance Review Process**:
+
+1. **Create Review Branch/Worktree**
+   ```bash
+   # Option A: Simple branch
+   git checkout -b review/<officer-name>
+   
+   # Option B: Worktree (recommended for testing)
+   git worktree add worktrees/review-<officer-name> -b review/<officer-name>
+   cd worktrees/review-<officer-name>
+   ```
+
+2. **Identify Improvements**
+   - Document specific issues or desired changes
+   - Gather examples of problematic interactions
+   - Define clear improvement goals
+   - Consider impact on existing workflows
+
+3. **Return to Phase 2, Step 3**
+   - Make configuration changes
+   - Update personality profile
+   - Refine capabilities
+   - Follow same validation and testing process as initial recruitment
+
+4. **Merge Back to Production**
+   - Use same merge process as Step 8
+   - Update commit message to indicate performance review:
+   ```bash
+   git merge --no-ff review/<officer-name> -m "refactor(agents): performance review for <Officer Name>
+   
+   Improvements made:
+   - <improvement 1>
+   - <improvement 2>
+   
+   Performance-Review: <officer-name>
+   Authority: Lord Gig"
+   ```
+
+5. **Rebuild and Verify**
+   - Follow Step 9 deployment process
+   - Test improvements in production
+   - Document changes in operations logs
+
+**Note**: Performance reviews use the same iterative development process as initial recruitment, but with `review/<officer-name>` branch naming instead of `recruit/<officer-name>`.
 
 ---
 
