@@ -119,9 +119,9 @@
       "super + space" = "rofi -show drun";
       "super + d" = "rofi -show run"; # Command launcher (nix run, scripts, executables)
 
-      # Help window - show bspwm keybindings
-      "super + shift + question" = ''
-        rofi -dmenu -p "bspwm help" -i -markup-rows -no-custom -auto-select <<< "
+      # Help window - show bspwm keybindings (fixed parsing)
+      "super + question" = "${pkgs.writeShellScript "bspwm-help" ''
+                ${pkgs.rofi}/bin/rofi -dmenu -p "bspwm help" -i -markup-rows -no-custom -auto-select <<EOF
         <b>Terminal & Applications:</b>
         super + Return                    Terminal (wezterm)
         super + space                     Desktop applications (rofi drun)
@@ -171,7 +171,8 @@
         XF86MonBrightnessDown           Brightness down (Function keys)
         super + plus / super + minus     Brightness up/down (alternative)
         super + shift + plus/minus       Large brightness adjustment
-        "'';
+        EOF
+      ''}";
 
       # Close window
       "super + w" = "bspc node -c";
