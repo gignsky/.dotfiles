@@ -131,13 +131,30 @@ When consulting on repositories outside your primary assignment:
 - **Pre-commit**: `just pre-commit` or `pre-commit run --all-files`
 
 ## Worktree Safety Guidelines
-- **Critical Repository Safety**: Agents must NEVER modify files in `./worktrees/` subdirectories except under these specific conditions:
+
+### Context Awareness
+- **Determine Your Location**: Always check `pwd` to know if you're in:
+  - Main repository: `/home/gig/.dotfiles` (production branch)
+  - Worktree branch: `/home/gig/.dotfiles/worktrees/<branch-name>/` (isolated development)
+- **Path Usage**: Use **relative paths from repository root**, not absolute `~/.dotfiles/` paths
+  - Correct: `home/gig/common/resources/`
+  - Incorrect: `~/.dotfiles/home/gig/common/resources/` (assumes main repo location)
+- **Git Context**: Verify which branch you're on with `git branch --show-current`
+
+### Critical Repository Safety
+- **Cross-Worktree Modification Protection**: Agents must NEVER modify files in `./worktrees/` subdirectories except under these specific conditions:
   1. **Intended Worktree Session**: The OpenCode session was explicitly spawned from within a `./worktrees/` subdirectory, indicating the user intends to work exclusively in that branch/worktree
   2. **Explicit User Permission**: User has given EXPLICIT permission to make cross-branch edits, with clear understanding of the consequences
-- **Default Behavior**: Always work in the main repository root (`/home/gig/.dotfiles`) unless specifically directed otherwise
+- **Default Behavior**: Work in your current context (check with `pwd`), don't assume main repository location
 - **Branch Safety**: Protect against accidental cross-branch modifications that could corrupt git history or create merge conflicts
-- **Worktree Awareness**: When detecting `./worktrees/` directories, ask for clarification about intended working scope before making any file modifications
+- **Worktree Detection**: When detecting `./worktrees/` directories exists, ask for clarification about intended working scope before making any file modifications
 - **Journal Management**: Agent-specific journals and logs belong in the main repository root, NOT in worktree subdirectories
+
+### Worktree Development Benefits
+- **Isolation**: Changes in worktree don't affect main environment
+- **Parallel Work**: Multiple worktrees allow simultaneous development on different branches
+- **Safe Testing**: Test builds in worktree without impacting production configuration
+- **Easy Abandonment**: Can remove worktree if development doesn't work out
 
 ## Code Style Guidelines
 - **File naming**: Use kebab-case for .nix files (e.g., `hardware-configuration.nix`)
