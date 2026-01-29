@@ -1,17 +1,22 @@
 # Fleet Officer Recruitment Protocol
 
-**Version**: 2.0 (Iterative Development System)  
-**Authority**: Lord Gig's Realm of Reason  
-**Maintained By**: Fleet Operations  
+**Version**: 2.0 (Iterative Development System)\
+**Authority**: Lord Gig's Realm of Reason\
+**Maintained By**: Fleet Operations\
 **Last Updated**: 2025-01-28
 
 ---
 
 ## Overview
 
-This protocol defines the iterative process for recruiting new officers to Lord Gig's Fleet. Unlike the deprecated one-shot system, this protocol supports multiple refinement cycles to perfect an officer's capabilities before final deployment.
+This protocol defines the iterative process for recruiting new officers to Lord
+Gig's Realm of Reason and deployed to the Fleet. Unlike the deprecated one-shot
+system, this protocol supports multiple refinement cycles to perfect an
+officer's capabilities before final deployment.
 
-**Note**: All path references in this document are relative to the repository root. See AGENTS.md "Worktree Safety Guidelines" for context awareness and path usage best practices.
+**Note**: All path references in this document are relative to the repository
+root. See AGENTS.md "Worktree Safety Guidelines" for context awareness and path
+usage best practices.
 
 ---
 
@@ -28,7 +33,10 @@ Phase 1: DEFINITION & PLANNING
 │    • Mission specialization                                      │
 │    • Domain expertise needed                                     │
 │    • Personality traits                                          │
-│    • Integration requirements                                    │
+│    • Integration requirements                                    │ #SCOTTY this phase should I
+think be an iterative approach where the agent helping in the hiring should make a todo list of all
+the items that need defining and any additional relevant questions that arrise from the interview
+with Lord G. 
 └────────────────────────┬─────────────────────────────────────────┘
                          │
                          ▼
@@ -109,6 +117,12 @@ Phase 2: ITERATIVE DEVELOPMENT
                                             ┌──────────────────────────────┐
                                             │ OFFICER ACTIVE & OPERATIONAL │
                                             └──────────────────────────────┘
+#SCOTTY we need to do two things here, first and formost, I want all agents (defined in the most
+root AGENTS.md file) to be on the lookout for #THEIR_NAME in text files as those are notes directly
+left for the agent named, though other agents should be willing to make comment if they have
+relevant information. Secondly, We need to revise this flowchart to allow for revisement at a later
+time, basically if I'm not happy with something I want to be able to go back into the creation
+'menu' and edit the agent.
 ```
 
 ---
@@ -118,22 +132,43 @@ Phase 2: ITERATIVE DEVELOPMENT
 ### Phase 1: Definition & Planning
 
 #### Step 1: Define Officer Requirements
+
 **Objective**: Clearly articulate what the new officer needs to accomplish.
 
 **Required Information**:
+
 - **Mission Description**: What is the officer's primary purpose?
 - **Domain Expertise**: What specialized knowledge should they have?
 - **Personality Traits**: How should they communicate and operate?
 - **Integration Needs**: How do they fit with existing fleet?
+
+#SCOTTY make note that when it comes to personaltiy I will often begin with a
+reference character to base the agent on i.e. why you're montgomery scott but I
+want to be very clear that while this base chacacter is an important reference I
+do not want the character to be 'in their world' but lets say rather they have
+been plucked from the universe in which they normally exist and are happily
+joining me in the realm of reason. And if I were to hire someone who for example
+was not part of a starfleet like organization they would assimilate rather
+quickly to their new environment. ALso I think it would be wise if each of the
+agents had a table of 'common building block personality traits' like 'humour'
+'sarcasam' 'wisdom (as it differs from intellegence and can come from many
+different life experinces)' and more that you suggest or we come up with over
+time, and there should be a quick way to just tell the agent to modify their
+percentage of 100 of each of those traits. Ideally after the interview the agent
+helping with hiring will suggest a table of percentages based on past experinces
+and our current conversation about the new agent and their needs and allow the
+user to modify before proceeding.
 
 **Deliverable**: Written requirements document or clear verbal specification
 
 ---
 
 #### Step 2: Create Development Branch/Worktree
+
 **Objective**: Isolate recruitment work from production systems.
 
 **Option A: Simple Branch (in main repo)**
+
 ```bash
 git checkout main
 git pull origin main
@@ -141,6 +176,7 @@ git checkout -b recruit/<officer-name>
 ```
 
 **Option B: Isolated Worktree (recommended for complex development)**
+
 ```bash
 # From main repository
 git worktree add worktrees/recruit-<officer-name> -b recruit/<officer-name>
@@ -148,10 +184,12 @@ cd worktrees/recruit-<officer-name>
 ```
 
 **Branch Naming Convention**: `recruit/<officer-name>`
+
 - Example: `recruit/security-auditor`
 - Example: `recruit/documentation-specialist`
 
 **Worktree Benefits**:
+
 - Complete isolation from main workspace
 - Can test builds without affecting main environment
 - Easy to abandon if needed
@@ -164,6 +202,7 @@ cd worktrees/recruit-<officer-name>
 ### Phase 2: Iterative Development
 
 #### Step 3: Generate Initial Configuration
+
 **Objective**: Create the officer's foundational configuration files.
 
 **File Locations** (relative to repository root):
@@ -186,29 +225,35 @@ cd worktrees/recruit-<officer-name>
 ---
 
 #### Step 4: Validation & Testing
+
 **Objective**: Verify configuration integrity without building.
 
 **Validation Command**:
+
 ```bash
 nix flake check --no-build
 ```
 
 **What This Checks**:
+
 - Nix syntax correctness
 - Configuration structure validity
 - Import path resolution
 - Attribute conflicts
 
 **Exit Codes**:
+
 - `0` = Success, proceed to Step 5
 - Non-zero = Errors found, debug and return to Step 3
 
 ---
 
 #### Step 5: Commit Iteration
+
 **Objective**: Preserve current development state for iteration tracking.
 
 **Commit Strategy**:
+
 ```bash
 git add home/gig/common/core/opencode.nix
 git add home/gig/common/resources/<agent-name>-additional-personality.md
@@ -222,6 +267,7 @@ Status: in-development"
 ```
 
 **Benefits**:
+
 - Track evolution of officer design
 - Easy rollback to previous iterations
 - Document design decisions
@@ -229,14 +275,18 @@ Status: in-development"
 ---
 
 #### Step 6: Test Build (Optional)
-**Objective**: Actually build and interact with the officer to evaluate behavior.
 
-**When to Use**: 
+**Objective**: Actually build and interact with the officer to evaluate
+behavior.
+
+**When to Use**:
+
 - After significant changes
 - When personality needs real-world testing
 - Before final deployment
 
 **Process**:
+
 ```bash
 # In your recruit branch/worktree
 just home
@@ -247,18 +297,21 @@ just home
 # Document findings for next iteration
 ```
 
-**Worktree Advantage**: If using a worktree, this build won't affect your main environment!
+**Worktree Advantage**: If using a worktree, this build won't affect your main
+environment!
 
 **Note**: This step triggers a rebuild. Only use when necessary for evaluation.
 
 ---
 
 #### Step 7: Refinement Decision
+
 **Objective**: Determine if officer is ready or needs more work.
 
 **Decision Points**:
 
 **REFINE** if:
+
 - Personality doesn't match requirements
 - Capabilities need adjustment
 - Communication style needs refinement
@@ -266,6 +319,7 @@ just home
 - **Action**: Return to Step 3, iterate
 
 **DEPLOY** if:
+
 - Officer meets all requirements
 - Personality is appropriate
 - Capabilities are correct
@@ -273,20 +327,26 @@ just home
 - **Action**: Proceed to Phase 3
 
 **Questions to Ask**:
+
 1. Does the officer understand their domain?
 2. Is the communication style appropriate?
 3. Are the capabilities well-defined?
 4. Does it integrate well with existing fleet?
 5. Are there any conflicts or issues?
 
+#SCOTTY It would be great if these questions could be asked of the new agent
+quickly and automatically rather than manually
+
 ---
 
 ### Phase 3: Deployment
 
 #### Step 8: Final Integration
+
 **Objective**: Integrate the new officer into production configuration.
 
 **If Working in Worktree**:
+
 ```bash
 # From main repository location
 cd ~/.dotfiles  # or wherever main repo is
@@ -309,6 +369,7 @@ Authority: Lord Gig"
 ```
 
 **If Working in Simple Branch**:
+
 ```bash
 # Just switch to main and merge
 git checkout main
@@ -317,6 +378,7 @@ git merge --no-ff recruit/<officer-name>
 ```
 
 **Fleet Registry Update**:
+
 - Edit: `operations/fleet-management/assignments/fleet-registry.md`
 - Add officer to appropriate division
 - Document specializations
@@ -325,9 +387,11 @@ git merge --no-ff recruit/<officer-name>
 ---
 
 #### Step 9: Production Deployment
+
 **Objective**: Make the officer operationally active.
 
 **Deployment Commands**:
+
 ```bash
 # From main repository (NOT worktree)
 cd ~/.dotfiles
@@ -339,12 +403,15 @@ just home
 ```
 
 **Post-Deployment**:
+
 - Update fleet registry status to "Active"
 - Document in operations logs
 - Brief other officers if needed
-- Clean up worktree (if used): `git worktree remove worktrees/recruit-<officer-name>`
+- Clean up worktree (if used):
+  `git worktree remove worktrees/recruit-<officer-name>`
 
 **Verification**:
+
 - Officer responds to invocation
 - Personality matches specification
 - Capabilities function correctly
@@ -384,12 +451,15 @@ just home
 ## Specialized Mission
 
 ### Primary Purpose
+
 <Detailed description of the officer's primary mission>
 
 ### Domain Expertise
+
 <Areas of specialized knowledge and competency>
 
 ### Key Traits
+
 - <Trait 1>
 - <Trait 2>
 - <Trait 3>
@@ -399,6 +469,7 @@ just home
 ### Operational Guidelines
 
 #### Problem-Solving Approach
+
 1. **<Approach 1>**: <Description>
 2. **<Approach 2>**: <Description>
 3. **<Approach 3>**: <Description>
@@ -406,6 +477,7 @@ just home
 5. **<Approach 5>**: <Description>
 
 #### Communication Style
+
 - <Communication guideline 1>
 - <Communication guideline 2>
 - <Communication guideline 3>
@@ -415,12 +487,14 @@ just home
 ### Integration with Existing System
 
 #### Repository Awareness
+
 - Understand the NixOS/home-manager environment
 - Respect established patterns in the dotfiles configuration
 - Know when changes should be permanent vs. temporary
 - Consider multi-host compatibility requirements
 
 #### Collaboration
+
 - Work effectively with other fleet officers
 - Defer to more specialized officers when appropriate
 - Provide clear handoffs when escalating or collaborating
@@ -432,6 +506,7 @@ just home
 ## Appendix B: Quick Reference Commands
 
 ### Branch Management
+
 ```bash
 # Create recruit branch (simple)
 git checkout -b recruit/<officer-name>
@@ -454,6 +529,7 @@ git worktree remove worktrees/recruit-<officer-name>
 ```
 
 ### Validation & Testing
+
 ```bash
 # Validate configuration (no build)
 nix flake check --no-build
@@ -466,6 +542,7 @@ just check
 ```
 
 ### Deployment
+
 ```bash
 # Deploy on main branch (from main repo location)
 cd ~/.dotfiles
@@ -480,17 +557,20 @@ git log --oneline --graph --all
 ## Appendix C: Worktree Best Practices
 
 ### When to Use Worktrees
+
 - **Complex development**: Multiple iterations expected
 - **Parallel recruitment**: Working on multiple officers simultaneously
 - **Testing needed**: Want to test builds without affecting main environment
 - **Experimentation**: Not sure if design will work out
 
 ### When Simple Branches Are Fine
+
 - **Quick additions**: Simple, well-defined officers
 - **Minor iterations**: Only expect 1-2 refinement cycles
 - **No build testing**: Will validate with `nix flake check` only
 
 ### Worktree Cleanup
+
 ```bash
 # List all worktrees
 git worktree list
@@ -508,9 +588,11 @@ git branch -d recruit/<officer-name>
 ## Appendix D: Deprecated Systems
 
 ### Old One-Shot Script (`scripts/agent-hire.nu`)
+
 **Status**: Deprecated as of 2025-01-28
 
 **Why Deprecated**:
+
 - No iterative refinement support
 - Automatic rebuilds without control
 - Difficult to test configurations
@@ -525,11 +607,13 @@ git branch -d recruit/<officer-name>
 
 ## Version History
 
-- **v2.0** (2025-01-28): Complete rewrite for iterative development with worktree support
+- **v2.0** (2025-01-28): Complete rewrite for iterative development with
+  worktree support
 - **v1.0** (2024-12-XX): Initial one-shot automation script (deprecated)
 
 ---
 
 **END RECRUITMENT PROTOCOL**
 
-*For questions or protocol improvements, consult Chief Engineer Scotty or Lord Gig*
+_For questions or protocol improvements, consult Chief Engineer Scotty or Lord
+Gig_
