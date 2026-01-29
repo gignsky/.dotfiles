@@ -7,8 +7,8 @@
     # Main configuration
     settings = {
       # Core setup
-      model = "github-copilot/claude-sonnet-4";
-      small_model = "github-copilot/claude-haiku-4.5";
+      model = "github-copilot/claude-sonnet-4.5";
+      small_model = "github-copilot/gpt-4o";
       theme = "gruvbox"; # Built-in gruvbox theme
       # autoupdate = true;
 
