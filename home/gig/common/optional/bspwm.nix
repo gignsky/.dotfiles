@@ -135,7 +135,9 @@
         super + f                         Toggle floating
         super + t                         Toggle tiled
         super + m                         Minimize window
-        super + shift + m                 Unhide/Restore last hidden window
+        super + u                         Restore last minimized window
+        super + shift + u                 Restore all minimized windows
+        super + shift + w                 Refresh wallpaper/background
 
         <b>Navigation:</b>
         super + h/j/k/l                   Focus window (west/south/north/east)
@@ -206,8 +208,19 @@
 
       # Minimize & Restore windows
       "super + m" = "bspc node -g hidden";
-      "super + shift + m" =
+      "super + u" = ''
+        # Restore most recently hidden window
+        bspc query -N -n .hidden.window | tail -1 | xargs -I {} bspc node {} -g hidden=off -f
+      '';
+      "super + shift + u" =
         "bspc query -N -n .window.hidden | xargs -I {} bspc node {} --flag hidden=off";
+
+      # Background/wallpaper refresh
+      "super + shift + w" = ''
+        if [ -f "$HOME/.background-image" ]; then
+          feh --bg-scale "$HOME/.background-image"
+        fi
+      '';
 
       # Screenshots
       "Print" = "maim -s | xclip -selection clipboard -t image/png";
