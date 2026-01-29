@@ -77,7 +77,7 @@
       tapping = true;
 
       # Enable natural scrolling (disable if you prefer traditional scrolling)
-      naturalScrolling = false;
+      naturalScrolling = true;
 
       # Middle mouse button emulation (three finger tap/click)
       middleEmulation = true;
