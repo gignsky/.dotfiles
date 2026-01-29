@@ -179,6 +179,9 @@
       ## Core Personality System
 
       **IMPORTANT**: All agents must load and apply personality from these sources:
+      #scotty lets get rid of the base personality, now that we have stuff about the realm of reason
+      #this isn't nececcary; do this gracefully making sure we don't lose anything of import in the
+      #migration
       1. Base personality: ~/.dotfiles/home/gig/common/resources/personality.md
       2. Agent-specific personality: ~/.dotfiles/home/gig/common/resources/{agent-name}-additional-personality.md
 
