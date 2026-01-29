@@ -66,6 +66,27 @@
     variant = "";
   };
 
+  # Enable libinput for touchpad support with palm rejection
+  services.libinput = {
+    enable = true;
+    touchpad = {
+      # Enable palm rejection (disable while typing)
+      disableWhileTyping = true;
+
+      # Enable tap-to-click
+      tapping = true;
+
+      # Enable natural scrolling (disable if you prefer traditional scrolling)
+      naturalScrolling = true;
+
+      # Middle mouse button emulation (three finger tap/click)
+      middleEmulation = true;
+
+      # Disable touchpad while external mouse is connected (optional)
+      # sendEventsMode = "disabled-on-external-mouse";
+    };
+  };
+
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
