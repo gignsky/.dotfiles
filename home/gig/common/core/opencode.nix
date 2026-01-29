@@ -106,7 +106,7 @@
       # Flake-focused formatters
       formatter = {
         nixfmt = {
-          command = [ "nixfmt" ];
+          command = [ "nixfmt" "--strict" ];
           extensions = [ ".nix" ];
         };
         rustfmt = {
