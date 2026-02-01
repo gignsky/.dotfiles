@@ -385,3 +385,4 @@ Ti
 - Investigate the 'pv' program in nixpkgs that should be a better version of
   copy or cut
 - look into the program 'recyclarr'
+- add steam user for big picture mode
