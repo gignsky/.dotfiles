@@ -74,11 +74,11 @@
         "rev": "b4f2123109d6a42f930a2f7b13ed9a989dc807f5",
         "revCount": 18,
         "type": "git",
-        "url": "ssh://git@github.com/gignsky/fancy-fonts"
+        "url": "ssh://git@github.com/gignsky/fancy-fonts.git"
       },
       "original": {
         "type": "git",
-        "url": "ssh://git@github.com/gignsky/fancy-fonts"
+        "url": "ssh://git@github.com/gignsky/fancy-fonts.git"
       }
     },
     "flake-compat": {
