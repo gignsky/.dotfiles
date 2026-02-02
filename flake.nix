@@ -57,7 +57,7 @@
 
     # private repo with fancy fonts
     fancy-fonts = {
-      url = "git+ssh://git@github.com/gignsky/fancy-fonts";
+      url = "git+ssh://git@github.com/gignsky/fancy-fonts.git";
     };
 
     # Recursive tarballs
