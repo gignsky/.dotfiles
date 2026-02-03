@@ -54,16 +54,17 @@
 
       # MCP servers for extended functionality
       mcp = {
-        # # Wikipedia access for research
-        # wikipedia = {
-        #   type = "local";
-        #   command = [
-        #     "npx"
-        #     "wikipedia-mcp"
-        #   ];
-        #   enabled = true;
-        #   timeout = 10000; # 10 second timeout for searches
-        # };
+        # Wikipedia access for research
+        wikipedia = {
+          type = "local";
+          command = [
+            "npx"
+            "-y"
+            "@shelm/wikipedia-mcp-server"
+          ];
+          enabled = true;
+          timeout = 10000; # 10 second timeout for searches
+        };
         #
         # # ArXiv access for academic research
         # arxiv = {
@@ -276,6 +277,9 @@
       - **DeepWiki**: Repository documentation and history research
         - URL: https://mcp.deepwiki.com/sse
         - Features: Access up-to-date docs for any public repo
+      - **Wikipedia**: General knowledge and research
+        - Package: @shelm/wikipedia-mcp-server
+        - Features: Search and retrieve Wikipedia articles
     '';
 
     # Agent Configuration System (Home Manager specific)
