@@ -14,3 +14,9 @@ nixos-rebuild-merlin completed in 27s (success: true, generation: 126)
 [2026-02-03 17:06:41] SYSTEM OPERATION
 [:recruitment/library-computer] [:recruitment/library-computer] Smart clean completed - OpenCode ready for rebuild, caches cleared
 
+[2026-02-03 17:19:04] SYSTEM OPERATION
+[:recruitment/library-computer] [:recruitment/library-computer] Smart clean initiated - preserving OpenCode history, cleaning caches
+
+[2026-02-03 17:19:06] SYSTEM OPERATION
+[:recruitment/library-computer] [:recruitment/library-computer] Smart clean completed - OpenCode ready for rebuild, caches cleared
+
