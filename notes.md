@@ -1,5 +1,19 @@
 # FIXME: _**GITLAB** Extra Seat_ is being charged to my account, I need to fix this issue immediately
 
+# SCOTTY, excamine my nushell configuration defined within, and figure out if there is a way to
+
+accomplish the following: If I find myself in the root of a directory like this
+one and I know I want to open 'opencode.nix' but I know not all the path to get
+to it, I could do it by just calling 'vi' and the fuzzyfinding the file from
+there, but I like the speed of being able to type 'vi path/to/file' but with the
+filepath being just the name. I know that my 'cd' command has been replaced by
+zoxide and can do a similar thing to what I am describing with directories, but
+please help me find a way to search the directory I'm in for a file mid-command.
+----- on a side note, I have sometimes (i think when trying to quit my terminal
+via 'ctrl-d', but maybe my fingers sliped) with a window appearing that appears
+to be a file searcher with fuzzyfinding or something similar, I wish to know
+more about this feature I knew not existed.
+
 # Wallpaper resources:
 
 - https://artvee.com/
