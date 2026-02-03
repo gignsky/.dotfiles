@@ -19,3 +19,9 @@ nixos-rebuild-wsl@ganoslal@ganoslal completed in 22s (success: true, generation:
 [2026-02-02 20:24:19] SYSTEM OPERATION
 [@ganoslal:recruitment/library-computer] Smart clean completed - OpenCode ready for rebuild, caches cleared
 
+[2026-02-02 21:50:37] SYSTEM OPERATION
+[@ganoslal:recruitment/library-computer] Smart clean initiated - preserving OpenCode history, cleaning caches
+
+[2026-02-02 21:50:41] SYSTEM OPERATION
+[@ganoslal:recruitment/library-computer] Smart clean completed - OpenCode ready for rebuild, caches cleared
+
