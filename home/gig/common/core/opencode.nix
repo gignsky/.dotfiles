@@ -98,7 +98,7 @@
         # DeepWiki for repository documentation and history research
         deepwiki = {
           type = "remote";
-          url = "https://mcp.deepwiki.com/sse";
+          url = "https://mcp.deepwiki.com/mcp";
           enabled = true;
           timeout = 20000; # 20 second timeout for repo documentation searches
         };
@@ -290,7 +290,7 @@
             Reference `~/.dotfiles/docs/mcp-tools-reference.md` for complete tool signatures and examples.
 
             - **DeepWiki**: Repository documentation and history research
-              - URL: https://mcp.deepwiki.com/sse
+              - URL: https://mcp.deepwiki.com/mcp
               - Features: Access up-to-date docs for any public repo
               - Tools: [To be documented in mcp-tools-reference.md]
 
