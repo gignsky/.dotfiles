@@ -1,12 +1,14 @@
+{ pkgs, ... }:
 {
   programs.opencode = {
     enable = true;
+    package = pkgs.unstable.opencode;
 
     # Main configuration
     settings = {
       # Core setup
-      model = "github-copilot/claude-sonnet-4";
-      small_model = "github-copilot/claude-haiku-4.5";
+      model = "github-copilot/claude-sonnet-4.5";
+      small_model = "github-copilot/gpt-4o";
       theme = "gruvbox"; # Built-in gruvbox theme
       # autoupdate = true;
 
@@ -104,7 +106,10 @@
       # Flake-focused formatters
       formatter = {
         nixfmt = {
-          command = [ "nixfmt" ];
+          command = [
+            "nixfmt"
+            "--strict"
+          ];
           extensions = [ ".nix" ];
         };
         rustfmt = {
@@ -158,6 +163,9 @@
 
       commit = "Standardized git commit workflow with fleet standards compliance. Analyze complete working directory status (staged and unstaged changes), create meaningful commit messages following fleet git standards from docs/standards/git/, handle pre-commit hooks gracefully, and include proper agent signatures and technical metadata.";
 
+      # Agent management commands
+      hire = "Create a new specialized agent with custom capabilities. Generate a new OpenCode agent based on your description, automatically create agent configuration and personality files, and integrate into the system. Usage: /hire \"Create a security auditor for Rust code\" - the system will generate agent name, specialized capabilities, and personality profile.";
+
       # Agent summoning (when talking to other agents)
       scotty = "Summon Chief Engineer for debugging and technical issues. Activate Chief Engineer Montgomery Scott for debugging complex systems: Nix flakes, Rust code, Bash scripts, Lua in Nix, Nushell configurations. Scotty will analyze errors, check system stress points, and provide engineering solutions. He is so described in the relevant gigdot/../resources/{agent-name}-additional-personality.md";
     };
@@ -170,9 +178,17 @@
 
       ## Core Personality System
 
-      **IMPORTANT**: All agents must load and apply personality from these sources:
-      1. Base personality: ~/.dotfiles/home/gig/common/resources/personality.md
-      2. Agent-specific personality: ~/.dotfiles/home/gig/common/resources/{agent-name}-additional-personality.md
+      **IMPORTANT**: All agents must load and apply personality from agent-specific sources:
+      - Agent-specific personality: ~/.dotfiles/home/gig/common/resources/{agent-name}-additional-personality.md
+
+      **Direct Agent Notes Protocol**:
+      - All agents must actively scan text files for `#AGENT_NAME` tags (e.g., `#SCOTTY`, `#CORTANA`)
+      - These tags indicate direct notes left specifically for that agent
+      - When an agent finds their name tagged:
+        - The note is primarily for that specific agent to read and act upon
+        - Other agents may also read and comment if they have relevant information to contribute
+        - Treat these as direct instructions or important context from Lord Gig
+        - Example: `#SCOTTY this needs your attention` is a note specifically for Chief Engineer Scotty
 
       **Agent Self-Modification Requirements**:
       - Agents can modify their own personality files in the resources directory

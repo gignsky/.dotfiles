@@ -12,7 +12,6 @@
   rd = "rmdir";
   rdd = "rm -rfv";
   cls = "clear";
-  # ccls = "{ clear and nix run nixpkgs#fastfetch }"; # Replaced by nushell function in nushell folder
   md = "mkdir";
   syst = "systemctl";
   cat = "bat";
@@ -23,6 +22,7 @@
   nd = "nix develop -c nu";
   ndc = "nix develop -c";
   nr = "nix run";
+  nfs = "nix flake show";
   nb = "nix build";
   ndw = "nix develop .#windows -c nu";
   diddy = "touch";

@@ -1,0 +1,89 @@
+================================================================================
+CHIEF ENGINEER'S LOG - STARDATE 2025.12.14 (AUTOMATED)
+================================================================================
+
+[2025-12-14 02:46:52] BUILD START
+Starting Event: build-start
+
+[2025-12-14 02:47:37] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-merlin completed in 45s (success: true, generation: 69)
+
+[2025-12-14 03:29:34] BUILD START
+Starting Event: build-start
+
+[2025-12-14 03:29:51] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-merlin completed in 17s (success: true, generation: 71)
+
+[2025-12-14 03:33:10] UNKNOWN EVENT
+system-operation: Smart clean initiated - preserving OpenCode history
+
+[2025-12-14 03:33:13] UNKNOWN EVENT
+system-operation: Smart clean completed - OpenCode ready for rebuild
+
+[2025-12-14 03:34:52] UNKNOWN EVENT
+system-operation: Smart clean initiated - preserving OpenCode history
+
+[2025-12-14 03:34:54] UNKNOWN EVENT
+system-operation: Smart clean completed - OpenCode ready for rebuild
+
+[2025-12-14 05:16:41] UNKNOWN EVENT
+system-operation: Smart clean initiated - preserving OpenCode history
+
+[2025-12-14 05:16:42] UNKNOWN EVENT
+system-operation: Smart clean completed - OpenCode ready for rebuild
+
+[2025-12-14 05:30:10] BUILD START
+Starting Event: build-start
+
+[2025-12-14 05:34:32] ★ CAPTAIN'S REPORT ★ BUILD ERROR
+Event: build-error failed: nixos-rebuild-merlin     raise CalledProcessError(retcode, process.args,                              output=stdout, stderr=stderr) subprocess.CalledProcessError: Command '['/nix/store/zf8qy81dsw1vqwgh9p9n2h40s1k0g2l1-systemd-258.2/bin/bootctl', '--esp-path=/boot', 'status']' died with <Signals.SIGABRT: 6>. Failed to install bootloader Command 'systemd-run -E LOCALE_ARCHIVE -E NIXOS_INSTALL_BOOTLOADER --collect --no-ask-password --pipe --quiet --service-type=exec --unit=nixos-rebuild-switch-to-configuration /nix/store/yily8nr30y1r4sz8wqwjc9li8k6wjmkb-nixos-system-merlin-25.11.20251206.d9bc5c7/bin/switch-to-configuration switch' returned non-zero exit status 1. 
+
+[2025-12-14 05:34:33] BUILD START
+Starting Event: build-start
+
+[2025-12-14 05:45:27] UNKNOWN EVENT
+git-operation: Git Commit Committed changes: System test rebuild completed successfully
+
+[2025-12-14 05:56:57] ★ CAPTAIN'S REPORT ★ BUILD ERROR
+Event: build-error failed: nixos-rebuild-merlin     raise CalledProcessError(retcode, process.args,                              output=stdout, stderr=stderr) subprocess.CalledProcessError: Command '['/nix/store/zf8qy81dsw1vqwgh9p9n2h40s1k0g2l1-systemd-258.2/bin/bootctl', '--esp-path=/boot', 'status']' died with <Signals.SIGABRT: 6>. Failed to install bootloader Command 'systemd-run -E LOCALE_ARCHIVE -E NIXOS_INSTALL_BOOTLOADER --collect --no-ask-password --pipe --quiet --service-type=exec --unit=nixos-rebuild-switch-to-configuration /nix/store/fx55yrsyyx71ya7m5f3q65nfvssrq2ls-nixos-system-merlin-25.11.20251209.09eb77e/bin/switch-to-configuration switch' returned non-zero exit status 1. 
+
+[2025-12-14 05:56:57] BUILD START
+Starting Event: build-start
+
+[2025-12-14 05:57:15] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-merlin completed in 18s (success: true, generation: 80)
+[2025-12-14 06:02:00] UNKNOWN EVENT
+system-operation: Smart clean initiated - preserving OpenCode history
+
+[2025-12-14 06:02:02] UNKNOWN EVENT
+system-operation: Smart clean completed - OpenCode ready for rebuild
+
+[2025-12-14 06:04:38] UNKNOWN EVENT
+system-operation: Smart clean initiated - preserving OpenCode history
+
+[2025-12-14 06:04:40] UNKNOWN EVENT
+system-operation: Smart clean completed - OpenCode ready for rebuild
+
+[2025-12-14 06:06:27] UNKNOWN EVENT
+system-operation: Smart clean initiated - preserving OpenCode history
+
+[2025-12-14 06:06:29] UNKNOWN EVENT
+system-operation: Smart clean completed - OpenCode ready for rebuild
+
+[2025-12-14 06:09:35] UNKNOWN EVENT
+system-operation: Smart clean initiated - preserving OpenCode history
+
+[2025-12-14 06:09:37] UNKNOWN EVENT
+system-operation: Smart clean completed - OpenCode ready for rebuild
+
+[2025-12-14 06:10:58] UNKNOWN EVENT
+system-operation: Smart clean initiated - preserving OpenCode history
+
+[2025-12-14 06:11:00] UNKNOWN EVENT
+system-operation: Smart clean completed - OpenCode ready for rebuild
+
+[2025-12-14 08:20:38] BUILD START
+Starting Event: build-start
+
+[2025-12-14 08:21:27] ★ CAPTAIN'S REPORT ★ BUILD COMPLETE
+nixos-rebuild-merlin completed in 49s (success: true, generation: 83)

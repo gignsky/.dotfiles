@@ -74,7 +74,7 @@ clean:
   @echo "🧹 Starting smart clean process..."
   # First: Failsafe logging checkpoint (in case OpenCode gets broken)
   @echo "📝 Pre-clean failsafe logging checkpoint..."
-  @bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Smart clean initiated - preserving OpenCode history"' 
+  @bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Smart clean initiated" "preserving OpenCode history, cleaning caches"' 
   
   # Clean standard caches (safe)
   rm -rfv ~/.cargo/
@@ -83,6 +83,7 @@ clean:
   rm -rfv ~/.cache/starship/
   rm -rfv ~/.config/zsh/zplug
   rm -rfv result
+  rm -rfv ~/.local/share/nvf/themery/state.json
   
   # Smart OpenCode cleanup - preserve history, clean configuration
   @echo "🔧 Smart OpenCode cleanup (preserving history)..."
@@ -122,7 +123,7 @@ clean:
   
   # Post-clean failsafe logging
   @echo "📝 Post-clean failsafe logging checkpoint..."
-  @bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Smart clean completed - OpenCode ready for rebuild"'
+  @bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Smart clean completed" "OpenCode ready for rebuild, caches cleared"'
   @echo "✅ Smart clean complete - OpenCode history preserved, configuration reset for rebuild"
 
 # Run after every rebuild, some of the time
@@ -166,24 +167,30 @@ rebuild-full args="":
 	just rebuild {{args}}
 	just home {{args}}
 
-# Bare rebuild commands (minimal, no logging, no scripts)
+# Bare rebuild commands (minimal logging, no pre/post scripts)
 rebuild-bare host=`scripts/get-flake-target.sh`:
 	@echo "Bare system rebuild for {{host}}..."
+	@bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Bare system rebuild initiated" "minimal rebuild for host {{host}}, no pre/post hooks"'
 	sudo nixos-rebuild switch --flake .#{{host}}
+	@bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Bare system rebuild completed" "nixos-rebuild switch for {{host}} finished successfully"'
 
 home-bare host=`scripts/get-flake-target.sh`:
 	@echo "Bare home-manager rebuild for gig@{{host}}..."
+	@bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Bare home-manager rebuild initiated" "minimal home-manager rebuild for gig@{{host}}, no pre/post hooks"'
 	home-manager switch --flake .#gig@{{host}}
+	@bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Bare home-manager rebuild completed" "home-manager switch for gig@{{host}} finished successfully"'
 
 rebuild-full-bare host=`scripts/get-flake-target.sh`:
 	@echo "Bare full rebuild for {{host}}..."
+	@bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Bare full rebuild initiated" "minimal system and home-manager rebuild for {{host}}, no pre/post hooks"'
 	sudo nixos-rebuild switch --flake .#{{host}}
 	home-manager switch --flake .#gig@{{host}}
+	@bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Bare full rebuild completed" "both system and home-manager rebuilt for {{host}} successfully"'
 
 # Test rebuild commands (dry-run evaluation without applying)
 test-rebuild host=`scripts/get-flake-target.sh`:
 	@echo "Testing system rebuild for {{host}} (evaluation only)..."
-	nixos-rebuild dry-activate --flake .#{{host}} --verbose
+	sudo nixos-rebuild dry-activate --flake .#{{host}} --verbose --show-trace
 
 test-home host=`scripts/get-flake-target.sh`:
 	@echo "Testing home-manager rebuild for gig@{{host}} (evaluation only)..."
@@ -191,7 +198,7 @@ test-home host=`scripts/get-flake-target.sh`:
 
 test-rebuild-full host=`scripts/get-flake-target.sh`:
 	@echo "Testing full rebuild for {{host}} (evaluation only)..."
-	nixos-rebuild dry-activate --flake .#{{host}} --verbose
+	sudo nixos-rebuild dry-activate --flake .#{{host}} --verbose --show-trace
 	home-manager build --flake .#gig@{{host}} --verbose
 
 single-update:

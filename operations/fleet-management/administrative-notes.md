@@ -63,6 +63,40 @@
 - Network segmentation and security zone planning
 - **Status**: Evaluate expansion priorities when administrative support available
 
+### Network Infrastructure Upgrade - Layer 3 Switch Router Configuration
+**Added**: 2025-12-16 by Chief Engineer Montgomery Scott per Lord Gig directive  
+**Priority**: High  
+**Scope**: Transition primary routing from Archer device to layer 3 switch
+
+**Objective**: Configure layer 3 switch as primary network router to improve performance and management capabilities
+
+**Requirements**:
+- **Router Services Migration**: Transfer DHCP, routing, and firewall services from Archer to layer 3 switch
+- **VLAN Implementation**: Configure network segmentation and traffic management
+- **Security Policies**: Implement appropriate firewall rules and access controls
+- **Performance Optimization**: Leverage enhanced packet processing capabilities
+
+**Technical Considerations**:
+- Layer 3 switch routing capability assessment and licensing requirements
+- IP addressing scheme redesign for optimal VLAN structure
+- Management interface configuration for remote administration
+- Power and cooling infrastructure requirements
+- Migration timeline to minimize network downtime
+
+**Expected Benefits**:
+- **Enhanced Performance**: Superior packet processing compared to consumer router
+- **Advanced VLAN Support**: Professional-grade network segmentation capabilities  
+- **Improved Management**: Granular control over routing policies and traffic flow
+- **Scalability**: Better foundation for future network expansion and fleet growth
+
+**Implementation Dependencies**:
+- Layer 3 switch specification review and capability verification
+- Current Archer configuration documentation and backup
+- Network topology planning and VLAN design
+- Testing environment setup for validation
+
+**Status**: Requirement documented - awaiting implementation planning and resource allocation
+
 ### Agentic Task Management System
 - **Goal**: Enable crew members to work autonomously on assigned features
 - **Process**: Discussion → separate branch work → Merge Request upon completion
@@ -508,3 +542,48 @@ Current agent logging infrastructure operates on local repository basis:
 - Eliminates direct filesystem dependency issues
 
 **Implementation Timeline**: To be scheduled after current rebuild issue resolution
+
+### Polybar Statusbar Configuration for bspwm
+**Added**: 2025-12-08 by Chief Engineer Montgomery Scott per Lord Gig directive
+**Priority**: Medium
+**Scope**: Framework laptop statusbar configuration for dual-monitor support
+
+**Issue**: Framework laptop currently shows no statusbar when running single monitor, but mysterious statusbar appears when second display connected.
+
+**Current Configuration Analysis**:
+- **System**: merlin host with bspwm window manager
+- **Status**: Polybar configuration commented out in `home/gig/common/optional/bspwm.nix` (lines 209-212)
+- **Effect**: No explicit statusbar configured, mysterious display behavior with external monitors
+
+**Required Configuration**:
+1. **Uncomment Polybar**: Enable polybar startup in bspwm xsession configuration
+2. **Polybar Configuration**: Create comprehensive polybar config via home-manager
+3. **Multi-Monitor Support**: Configure polybar for both single and dual-monitor scenarios
+4. **Framework Integration**: Include Framework-specific indicators (battery, power, thermals)
+5. **bspwm Integration**: Desktop switching, window information, system tray
+
+**Implementation Areas**:
+- **Primary Config**: `home/gig/common/optional/bspwm.nix` polybar uncomment and configuration
+- **Host-Specific**: Consider merlin-specific polybar customizations  
+- **Resource Files**: Create polybar configuration in resources directory
+- **Monitor Handling**: Dynamic configuration for single/dual monitor scenarios
+
+**Technical Requirements**:
+- **Home Manager Integration**: Use `services.polybar` for declarative configuration
+- **Dynamic Monitor Detection**: Polybar should adapt to monitor configuration changes
+- **Theme Consistency**: Coordinate with existing bspwm aesthetic and Framework laptop design
+- **System Integration**: System tray, network, audio, battery, temperature monitoring
+
+**Research Phase**:
+1. **Polybar Options**: Investigate home-manager polybar module capabilities
+2. **Multi-Monitor Patterns**: Research polybar multi-monitor configuration best practices  
+3. **Framework Compatibility**: Ensure proper Framework laptop hardware integration
+4. **Performance**: Assess polybar resource usage and optimization
+
+**Benefits**:
+- **Consistent UI**: Reliable statusbar regardless of monitor configuration
+- **System Monitoring**: Battery, network, system status visibility
+- **Workspace Management**: Clear desktop/workspace indication and switching
+- **Professional Appearance**: Complete desktop environment setup
+
+**Status**: Administrative note for future implementation - requires polybar research and configuration design

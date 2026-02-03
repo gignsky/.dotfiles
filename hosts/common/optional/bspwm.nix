@@ -6,13 +6,13 @@
       enable = true;
       settings = {
         # Enable autologin for user gig to bspwm session
-        auto_login_user = "gig";
-        auto_login_session = "none+bspwm";
-        save = true; # Remember session choice
+        # auto_login_user = "gig";
+        # auto_login_session = "none+bspwm";
+        # save = true; # Remember session choice
 
         # Optional: Performance optimizations
-        animation = "none"; # Disable animations for faster boot
-        hide_borders = false;
+        # animation = "none"; # Disable animations for faster boot
+        hide_borders = true;
         hide_key_hints = false;
       };
     };

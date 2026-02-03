@@ -5,6 +5,10 @@
 }:
 
 {
+  imports = [
+    ./polybar.nix
+  ];
+
   # Additional packages for user-level bspwm functionality
   home.packages = with pkgs; [
     dmenu # Lightweight application launcher alternative
@@ -28,49 +32,59 @@
       source = configLib.relativeToRoot "home/gig/common/resources/bspwm/default.conf";
       executable = true;
     };
-    # NixOS logo wallpaper
+    #TODO SCOTTY! REMIND ME to figure out how to make these roatate through the tolkien folder
+    # # SGA wallpaper
+    # ".background-image" = {
+    #   source = configLib.relativeToRoot "home/gig/common/resources/wallpapers/SGA/Stargate_Atlantis_Gate_Fixed_Centered_2560x1440.png";
+    # };
+    # ".background-image" = {
+    #   source = configLib.relativeToRoot "home/gig/common/resources/wallpapers/SGA/Stargate_Atlantis_Gate_Fixed_Centered_5K.png";
+    # };
+    # ".background-image" = {
+    #   source = configLib.relativeToRoot "home/gig/common/resources/wallpapers/SGA/Stargate_Atlantis_Gate_Fixed_Centered_5K Sharper.png";
+    # };
+    # LOTR wallpaper
     ".background-image" = {
-      source = configLib.relativeToRoot "home/gig/common/resources/wallpapers/nixos-logo.png";
+      source = configLib.relativeToRoot "home/gig/common/resources/wallpapers/tolkien/desktop/4k-doors-of-durin-horizontal.webp";
     };
+    # # NixOS logo wallpaper
+    # ".background-image" = {
+    #   source = configLib.relativeToRoot "home/gig/common/resources/wallpapers/nixos-logo.png";
+    # };
   };
 
   # bspwm window manager configuration
   xsession.windowManager.bspwm = {
     enable = true;
     settings = {
-      border_width = 2;
-      window_gap = 12;
+      border_width = 5;
+      window_gap = 13;
       split_ratio = 0.52;
       borderless_monocle = true;
       gapless_monocle = true;
-      focus_follows_pointer = true;
-      pointer_follows_focus = false;
+      focus_follows_pointer = false;
+      pointer_follows_focus = true;
+      top_padding = 30; # Reserve space for polybar (30px height)
     };
     rules = {
       "Discord" = {
-        desktop = "^8";
+        desktop = "^9";
         follow = true;
       };
       "youtube-music" = {
-        desktop = "^1";
+        desktop = "^9";
         follow = true;
       };
       "ytmusicdesktop" = {
-        desktop = "^1";
+        desktop = "^9";
         follow = true;
       };
-      "Firefox" = {
-        desktop = "^2";
-      };
-      "firefox" = {
-        desktop = "^2";
-      };
-      "code" = {
-        desktop = "^3";
-      };
-      "Code" = {
-        desktop = "^3";
-      };
+      # "Firefox" = {
+      #   desktop = "^1";
+      # };
+      # "firefox" = {
+      #   desktop = "^2";
+      # };
     };
     extraConfig = ''
       # Load host-specific monitor configuration
@@ -91,10 +105,6 @@
         bspc monitor -d I II III IV V VI VII VIII IX X
       fi
 
-      # Start compositor for better visuals
-      if command -v picom >/dev/null 2>&1; then
-        picom --backend glx -b &
-      fi
     '';
   };
 
@@ -107,22 +117,27 @@
 
       # Application launcher
       "super + space" = "rofi -show drun";
-      "super + d" = "rofi -show drun"; # Alternative launcher binding
+      "super + d" = "rofi -show run"; # Command launcher (nix run, scripts, executables)
 
-      # Help window - show bspwm keybindings
-      "super + question" = ''
-        rofi -dmenu -p "bspwm help" -i -markup-rows -no-custom -auto-select <<< "
+      # Help window - show bspwm keybindings (fixed parsing)
+      "super + question" = "${pkgs.writeShellScript "bspwm-help" ''
+                ${pkgs.rofi}/bin/rofi -dmenu -p "bspwm help" -i -markup-rows -no-custom -auto-select <<EOF
         <b>Terminal & Applications:</b>
         super + Return                    Terminal (wezterm)
-        super + space / super + d         Application launcher (rofi)
+        super + space                     Desktop applications (rofi drun)
+        super + d                         Command launcher (rofi run - nix run, scripts)
         super + ?                         Show this help window
 
         <b>Window Management:</b>
         super + w                         Close window
         super + shift + q                 Kill window
-        super + f                         Toggle fullscreen
-        super + s                         Toggle floating
+        super + shift + f                 Toggle fullscreen
+        super + f                         Toggle floating
         super + t                         Toggle tiled
+        super + m                         Minimize window
+        super + u                         Restore last minimized window
+        super + shift + u                 Restore all minimized windows
+        super + shift + w                 Refresh wallpaper/background
 
         <b>Navigation:</b>
         super + h/j/k/l                   Focus window (west/south/north/east)
@@ -150,7 +165,14 @@
         XF86AudioRaiseVolume            Volume up
         XF86AudioLowerVolume            Volume down
         XF86AudioMute                   Mute toggle
-        "'';
+
+        <b>Brightness:</b>
+        XF86MonBrightnessUp             Brightness up (Function keys)
+        XF86MonBrightnessDown           Brightness down (Function keys)
+        super + plus / super + minus     Brightness up/down (alternative)
+        super + shift + plus/minus       Large brightness adjustment
+        EOF
+      ''}";
 
       # Close window
       "super + w" = "bspc node -c";
@@ -173,10 +195,10 @@
       "super + shift + {1-9,0,grave}" = "bspc node -d '^{1-9,10,11}'";
 
       # Toggle fullscreen
-      "super + f" = "bspc node -t fullscreen";
+      "super + shift + f" = "bspc node -t fullscreen";
 
       # Toggle floating
-      "super + s" = "bspc node -t floating";
+      "super + f" = "bspc node -t floating";
 
       # Toggle tiled
       "super + t" = "bspc node -t tiled";
@@ -184,6 +206,22 @@
       # Resize windows
       "super + alt + {h,j,k,l}" = "bspc node -z {left -20 0,bottom 0 20,top 0 -20,right 20 0}";
       "super + alt + shift + {h,j,k,l}" = "bspc node -z {right -20 0,top 0 20,bottom 0 -20,left 20 0}";
+
+      # Minimize & Restore windows
+      "super + m" = "bspc node -g hidden";
+      "super + u" = ''
+        # Restore most recently hidden window
+        bspc query -N -n .hidden.window | tail -1 | xargs -I {} bspc node {} -g hidden=off -f
+      '';
+      "super + shift + u" =
+        "bspc query -N -n .window.hidden | xargs -I {} bspc node {} --flag hidden=off";
+
+      # Background/wallpaper refresh
+      "super + shift + w" = ''
+        if [ -f "$HOME/.background-image" ]; then
+          feh --bg-scale "$HOME/.background-image"
+        fi
+      '';
 
       # Screenshots
       "Print" = "maim -s | xclip -selection clipboard -t image/png";
@@ -193,6 +231,16 @@
       "XF86AudioRaiseVolume" = "pactl set-sink-volume @DEFAULT_SINK@ +5%";
       "XF86AudioLowerVolume" = "pactl set-sink-volume @DEFAULT_SINK@ -5%";
       "XF86AudioMute" = "pactl set-sink-mute @DEFAULT_SINK@ toggle";
+
+      # Brightness controls (Framework 16 function keys)
+      "XF86MonBrightnessUp" = "brightnessctl set +10%";
+      "XF86MonBrightnessDown" = "brightnessctl set 10%-";
+
+      # Alternative brightness bindings (in case function keys don't work)
+      "super + plus" = "brightnessctl set +10%";
+      "super + minus" = "brightnessctl set 10%-";
+      "super + shift + plus" = "brightnessctl set +25%";
+      "super + shift + minus" = "brightnessctl set 25%-";
     };
   };
 
@@ -211,11 +259,6 @@
 
       # Start sxhkd hotkey daemon
       sxhkd &
-
-      # Optional: Start polybar if available
-      # if command -v polybar >/dev/null 2>&1; then
-      #   polybar &
-      # fi
     '';
   };
 }

@@ -3,57 +3,29 @@
 
   inputs = {
     #################### Official NixOS and HM Package Sources ####################
-    # FIXME: TEMPORARY UNSTABLE UPGRADE FOR OPENCODE TESTING
-    # Original stable: nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
-    # 25.11 readiness: keep this line commented for quick switch when 25.11 drops
-    # nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # Stable
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
+    # Unstable
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    # Local
     # nixpkgs-local.url = "git+file:///home/gig/local_repos/nixpkgs";
-    # nixos-anywhere.url = "github:nix-community/nixos-anywhere";
-
-    nixos-wsl = {
-      url = "github:nix-community/NixOS-WSL/main";
-      # inputs = {
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-      # flake-utils.follows = "flake-utils"; # unnecessary as of 2/13/25
-      # };
-    };
-
-    # nixos-hardware, to fix hardware issues and firmware for specific machines
-    # found at: https://github.com/NixOS/nixos-hardware
-    nixos-hardware.url = "github:nixos/nixos-hardware";
-
-    #################### Utilities ####################
-    # Nix Sweep, a nix store tool
-    nix-sweep.url = "github:jzbor/nix-sweep";
-
-    # Flake Utils (used internally by some other utilities and locked to this one version for sanities sake)
-    flake-utils.url = "github:numtide/flake-utils";
 
     # Home manager
-    # FIXME: TEMPORARY UPGRADE TO MASTER FOR UNSTABLE COMPATIBILITY
     home-manager = {
-      url = "github:nix-community/home-manager/master";
-      # Original: url = "github:nix-community/home-manager/release-25.05";
-      # 25.11 readiness: keep this line commented for quick switch when 25.11 drops
-      # url = "github:nix-community/home-manager/release-25.11";
+      url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    vscode-server = {
-      url = "github:nix-community/nixos-vscode-server";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        flake-utils.follows = "flake-utils";
-      };
+    # wsl stuff
+    nixos-wsl = {
+      url = "github:nix-community/NixOS-WSL/main";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # flake-iter.url = "github:determinatesystems/flake-iter";
+    # nixos-hardware, to fix hardware issues and firmware for specific machines
+    nixos-hardware.url = "github:nixos/nixos-hardware";
 
-    # Pre-commit hooks for managing Git hooks declaratively
-    pre-commit-hooks.url = "github:cachix/git-hooks.nix";
-
+    #################### Utilities ####################
     # Dev tools
     # treefmt-nix.url = "github:numtide/treefmt-nix";
     treefmt-nix = {
@@ -64,14 +36,14 @@
     # Secrets management
     sops-nix = {
       url = "github:mic92/sops-nix/master";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # optnix.url = "github:water-sucks/optnix";
-
-    git-aliases = {
-      url = "github:KamilKleina/git-aliases.nu";
-      flake = false;
+    # Pre-commit hooks for managing Git hooks declaratively
+    pre-commit-hooks = {
+      # url = "github:cachix/git-hooks.nix/46d55f0aeb1d567a78223e69729734f3dca25a85";
+      url = "github:cachix/git-hooks.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     #################### Personal Repositories ####################
@@ -85,25 +57,62 @@
 
     # private repo with fancy fonts
     fancy-fonts = {
-      url = "git+ssh://git@github.com/gignsky/fancy-fonts";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
+      url = "git+ssh://git@github.com/gignsky/fancy-fonts.git";
     };
 
     # Recursive tarballs
     wrapd = {
       url = "github:gignsky/wrapd";
-      flake = true;
+      inputs = {
+        dotfiles.follows = ""; # Break circular dependency - use current flake
+      };
     };
 
-    # tax-matrix - currently on develop branch
+    # # tax-matrix - currently on develop branch
     # tax-matrix = {
     #   url = "github:gignsky/tax-matrix/develop";
-    #   flake = true;
+    #   inputs = {
+    #     gigdot.follows = ""; # Break circular dependency
+    #   };
     # };
 
-    gigvim.url = "github:gignsky/gigvim";
+    gigvim = {
+      url = "github:gignsky/gigvim";
+      inputs = {
+        gigdot.follows = ""; # Break circular dependency
+      };
+    };
 
     # nufetch.url = "github:gignsky/nufetch";
+
+    #################### Lesser-Used Utilities ####################
+
+    # nixos-anywhere.url = "github:nix-community/nixos-anywhere";
+
+    # Nix Sweep, a nix store tool -- need to package it
+    nix-sweep.url = "github:jzbor/nix-sweep";
+
+    # Flake Utils (used internally by some other utilities and locked to this one version for sanities sake)
+    # flake-utils.url = "github:numtide/flake-utils";
+
+    vscode-server = {
+      url = "github:nix-community/nixos-vscode-server";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        # flake-utils.follows = "flake-utils";
+      };
+    };
+
+    # flake-iter.url = "github:determinatesystems/flake-iter";
+
+    # optnix.url = "github:water-sucks/optnix";
+
+    # Reenable to get aliases working again
+    git-aliases = {
+      url = "github:KamilKleina/git-aliases.nu";
+      flake = false;
+    };
+
   };
 
   outputs =
@@ -522,7 +531,7 @@
             git
             pre-commit # Manual pre-commit setup
             lolcat
-            nixfmt-rfc-style
+            nixfmt
             nil
             age
             ssh-to-age

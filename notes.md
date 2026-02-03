@@ -4,6 +4,7 @@
 
 - https://artvee.com/
 - https://www.nga.gov/artworks?keyword=landscape&sortOrder=DEFAULT&artobj_subject=Subject%20Types-%3A%3A-Landscape&pageSize=30&pageNumber=1&lastFacet=artobj_subject
+- https://wallhaven.cc/
 
 ## Info about usenet found [here](https://www.harley.com/usenet/index.html)
 
@@ -360,6 +361,8 @@ Ti
     - Test font generation and customization capabilities
     - Document process for future font updates and modifications
   - **Benefits**: Enable custom MonoLisa variants for development environments
+- need to configure gigvim to ignore notes files by default when fuzzyfinding
+  files and grepping for things
 - see if I can embed a default font in gigvim.
 - **NETWORK INFRASTRUCTURE UPGRADE**:
   - **Configure layer 3 switch as main router** instead of current Archer device
@@ -379,6 +382,10 @@ Ti
 - add the ability for opencode to properly rename sessions with reasonable names
 - should modify git-dev for gigvim so that it can search a users repos and
   optionally open them since I often find myself wanting to do this
+- at some point I need to work on the tinderr for plex app
+- need to get to work on personal-website ;) ASAP -- generate becky agent
+- get new darr running
+- rewrite tax-matrix in rust
 - need to get to work on personal-website ;) ASAP -- generate becky agent
 - get new darr running
 - rewrite tax-matrix in rust

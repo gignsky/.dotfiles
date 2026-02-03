@@ -32,6 +32,7 @@ in
         serif = [
           "Artifex CF"
           "Times Newer Roman"
+          "GoMono Nerd Font Mono"
         ];
         # Set emoji font if needed
         # emoji = [

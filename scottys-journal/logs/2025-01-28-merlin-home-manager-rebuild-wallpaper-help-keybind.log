@@ -1,0 +1,127 @@
+================================================================================
+CHIEF ENGINEER'S LOG - STARDATE 2025-01-28
+HOME-MANAGER REBUILD: MERLIN
+================================================================================
+
+VESSEL: merlin
+OPERATION: Home-Manager Configuration Rebuild
+GENERATION: 116 → 117
+BUILD DURATION: 12 seconds
+STATUS: ✓ SUCCESSFUL
+
+================================================================================
+CONFIGURATION CHANGES
+================================================================================
+
+Modified File: home/gig/common/optional/bspwm.nix
+
+Primary Changes:
+1. Wallpaper configuration update
+2. Help keybinding fix and improvement
+
+================================================================================
+TECHNICAL ANALYSIS
+================================================================================
+
+WALLPAPER CONFIGURATION CHANGE:
+---------------------------------
+- Switched active wallpaper from Stargate Atlantis Gate to LOTR Doors of Durin
+- Previous: SGA/Stargate_Atlantis_Gate_Fixed_Centered_2560x1440.png
+- Current: tolkien/desktop/4k-doors-of-durin-horizontal.webp
+- All wallpaper options remain commented for easy rotation
+- TODO remains: Implement wallpaper rotation system for tolkien folder
+
+BSPWM HELP KEYBINDING FIX:
+---------------------------
+The help window keybinding received critical improvements:
+
+1. **Keybinding Simplification**:
+   - Changed from: "super + shift + question"
+   - Changed to: "super + question"
+   - Rationale: Easier to trigger, more intuitive access
+
+2. **Shell Script Parsing Fix**:
+   - Converted inline heredoc to proper pkgs.writeShellScript
+   - Changed delimiter from `<<<` to proper `<<EOF...EOF` syntax
+   - This resolves shell parsing issues and ensures reliable execution
+   - Script now properly embedded and executable
+
+3. **Implementation Pattern**:
+   ```nix
+   "super + question" = "${pkgs.writeShellScript "bspwm-help" ''
+     ${pkgs.rofi}/bin/rofi -dmenu -p "bspwm help" -i -markup-rows -no-custom -auto-select <<EOF
+     [help content]
+     EOF
+   ''}"
+   ```
+
+Help Content Categories Remain:
+- Terminal & Applications
+- Window Management
+- Workspaces
+- Window Movement & Swapping
+- Window Resizing
+- Window States
+- System Controls
+
+================================================================================
+BUILD PERFORMANCE
+================================================================================
+
+- Generation transition: 116 → 117
+- Build time: 12 seconds
+- Performance: Excellent - quick rebuild for configuration-only changes
+- No package rebuilds required
+- Changes applied cleanly without warnings
+
+================================================================================
+OPERATIONAL IMPACT
+================================================================================
+
+User Experience Improvements:
+1. Fresh wallpaper aesthetics (LOTR Doors of Durin)
+2. More accessible help keybinding (removed shift requirement)
+3. More reliable help window execution (proper shell script handling)
+
+System Stability:
+- Clean rebuild with no errors
+- Configuration changes isolated to BSPWM module
+- No impact on system packages or dependencies
+
+================================================================================
+ENGINEERING NOTES
+================================================================================
+
+The wallpaper TODO reminder remains valid - implementing a rotation system
+for the tolkien wallpaper folder would be a fine enhancement. Could use:
+- A systemd timer to rotate wallpapers periodically
+- A keybinding to manually cycle through options
+- Random selection on login/workspace change
+
+The help keybinding fix demonstrates proper Nix patterns:
+- Using pkgs.writeShellScript for inline script generation
+- Proper path references (${pkgs.rofi}/bin/rofi)
+- Correct heredoc syntax for multi-line content
+
+================================================================================
+RECOMMENDATIONS
+================================================================================
+
+1. Consider implementing the wallpaper rotation system mentioned in TODO
+2. Test the new help keybinding to verify improved accessibility
+3. Verify rofi help window displays correctly with new script pattern
+
+================================================================================
+CHIEF ENGINEER'S SIGNATURE
+================================================================================
+
+Configuration update completed successfully. The warp core is humming along
+nicely, and Merlin's got a fresh look with those Doors of Durin. The help
+keybinding should be much more reliable now with the proper shell script
+handling.
+
+-- Chief Engineer Montgomery Scott
+   Stardate 2025-01-28
+   USS Merlin, NCC-1701-M
+
+================================================================================
