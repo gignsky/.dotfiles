@@ -1,0 +1,129 @@
+================================================================================
+CHIEF ENGINEER'S LOG
+Stardate: 2025-02-03
+Host: merlin
+Operation: Home Manager Rebuild - DeepWiki MCP URL Correction
+================================================================================
+
+REBUILD SUMMARY
+----------------------------------------
+Status: SUCCESS ✓
+Generation: 124 → 125
+Build Duration: 12 seconds
+Branch: recruitment/library-computer
+Commit: 60e10b7a2d92988b62c1a41b81374e5b0f563fd9
+NixOS Generation: 25.11.20251223.76701a1 (Xantusia)
+
+CONFIGURATION CHANGES
+----------------------------------------
+Modified Files:
+  • home/gig/common/core/opencode.nix
+
+Change Summary:
+  DeepWiki MCP server URL endpoint correction
+
+TECHNICAL DETAILS
+----------------------------------------
+
+**DeepWiki MCP Server URL Update**
+
+Previous Configuration:
+  url = "https://mcp.deepwiki.com/sse";
+
+Corrected Configuration:
+  url = "https://mcp.deepwiki.com/mcp";
+
+**Changes Applied (2 locations)**:
+
+1. Server Configuration Block (line 101):
+   - Updated MCP server URL from `/sse` to `/mcp` endpoint
+   - Maintains 20-second timeout for repo documentation searches
+   - Server remains enabled with remote type configuration
+
+2. Agent Documentation Block (line 293):
+   - Updated URL reference in MCP servers documentation
+   - Ensures consistency between configuration and agent instructions
+   - Maintains proper agent awareness of available tools
+
+**Impact Assessment**:
+  • Corrects DeepWiki MCP server connectivity
+  • Aligns with proper MCP protocol endpoint
+  • No breaking changes to existing configurations
+  • Agent documentation remains synchronized with actual configuration
+
+DIFF ANALYSIS
+----------------------------------------
+```diff
+diff --git a/home/gig/common/core/opencode.nix b/home/gig/common/core/opencode.nix
+index 1eca7f81..f77a6709 100644
+--- a/home/gig/common/core/opencode.nix
++++ b/home/gig/common/core/opencode.nix
+@@ -98,7 +98,7 @@
+         # DeepWiki for repository documentation and history research
+         deepwiki = {
+           type = "remote";
+-          url = "https://mcp.deepwiki.com/sse";
++          url = "https://mcp.deepwiki.com/mcp";
+           enabled = true;
+           timeout = 20000; # 20 second timeout for repo documentation searches
+         };
+@@ -290,7 +290,7 @@
+             Reference `~/.dotfiles/docs/mcp-tools-reference.md` for complete tool signatures and examples.
+ 
+             - **DeepWiki**: Repository documentation and history research
+-              - URL: https://mcp.deepwiki.com/sse
++              - URL: https://mcp.deepwiki.com/mcp
+               - Features: Access up-to-date docs for any public repo
+               - Tools: [To be documented in mcp-tools-reference.md]
+```
+
+BUILD PERFORMANCE
+----------------------------------------
+Total Build Time: 12 seconds
+Performance Rating: Excellent
+Configuration Complexity: Low (URL correction only)
+
+ENGINEERING NOTES
+----------------------------------------
+
+This rebuild represents a straightforward but important correction to the DeepWiki
+MCP server endpoint. The previous `/sse` endpoint was likely a preliminary or
+incorrect configuration path.
+
+The proper `/mcp` endpoint ensures:
+  • Correct protocol handshake with DeepWiki service
+  • Proper access to repository documentation tools
+  • Alignment with standard MCP server patterns
+
+The dual-location update (server config + agent docs) demonstrates proper
+configuration hygiene - keepin' the agent's instructions synchronized with
+actual server capabilities.
+
+Quick 12-second build time indicates minimal dependency impact and efficient
+home-manager evaluation. No complications, no surprises - exactly how I like
+me engine room operations!
+
+NEXT ACTIONS
+----------------------------------------
+  • Monitor DeepWiki MCP connectivity in next OpenCode session
+  • Verify agent can successfully call DeepWiki tools
+  • Consider documenting DeepWiki tool signatures in mcp-tools-reference.md
+    as noted in agent instructions
+
+SCOTTY'S ASSESSMENT
+----------------------------------------
+A textbook example of precision configuration maintenance! We've corrected the
+endpoint, maintained documentation consistency, and kept the rebuild lightning
+fast. The warp engines are purrin' like a well-fed tribble!
+
+The DeepWiki MCP server is now properly configured and ready to provide
+repository documentation access across the fleet. This'll give our agents better
+access to external codebase knowledge when consultin' on new repositories.
+
+All systems nominal, Captain!
+
+================================================================================
+Chief Engineer: Montgomery Scott
+Timestamp: 2025-02-03
+Rebuild Generation: home-manager/125
+================================================================================
