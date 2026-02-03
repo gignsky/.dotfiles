@@ -83,6 +83,7 @@ clean:
   rm -rfv ~/.cache/starship/
   rm -rfv ~/.config/zsh/zplug
   rm -rfv result
+  rm -rfv ~/.local/share/nvf/themery/state.json
   
   # Smart OpenCode cleanup - preserve history, clean configuration
   @echo "🔧 Smart OpenCode cleanup (preserving history)..."

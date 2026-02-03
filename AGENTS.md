@@ -218,4 +218,13 @@ When consulting on repositories outside your primary assignment:
   - Resolved `rumdl` package dependency error that was preventing flake evaluation
   - Updated flake.lock to roll back problematic pre-commit-hooks version from 2025-12-06
 - **Context**: Recent flake.lock update introduced incompatible pre-commit-hooks version causing evaluation failures
+**Stardate 2025-12-08.2 - Universal /commit Command Implementation**
+- **Authority**: A directive of Lord Gig
+- **Changes**: Added standardized `/commit` command to Universal Agent Commands
+  - Comprehensive git working directory analysis (staged and unstaged changes)
+  - Integration with fleet git standards from `docs/standards/git/` documentation
+  - Safety protocols for staging decisions and pre-commit hook handling
+  - Standards compliance with Lord Gig's Conventional Commits overlay
+  - Agent signature requirements and technical metadata inclusion
+- **Context**: Fleet-wide standardization of git commit workflow with proper documentation references
 - **Implementation**: Chief Engineer Montgomery Scott

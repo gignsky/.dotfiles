@@ -129,6 +129,7 @@
     # pre-commit;
     # tree
     puddletag # for audio file tagging
+    pipe-viewer # youtube client in terminal
   ];
 
   # programs.direnv.enable = true;

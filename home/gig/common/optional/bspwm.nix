@@ -58,7 +58,7 @@
     enable = true;
     settings = {
       border_width = 5;
-      window_gap = 15;
+      window_gap = 13;
       split_ratio = 0.52;
       borderless_monocle = true;
       gapless_monocle = true;
