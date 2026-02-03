@@ -175,23 +175,66 @@
       # OpenCode Agent Configuration
 
       This agent operates within a NixOS/home-manager environment at ~/.dotfiles.
+      *NOTE: in all cases '~' shall be equivlent to '/home/gig/' on any system in the fleet
 
       ## Core Personality System
 
-      **IMPORTANT**: All agents must load and apply personality from these sources:
-      #scotty lets get rid of the base personality, now that we have stuff about the realm of reason
-      #this isn't nececcary; do this gracefully making sure we don't lose anything of import in the
-      #migration
-      1. Base personality: ~/.dotfiles/home/gig/common/resources/personality.md
-      2. Agent-specific personality: ~/.dotfiles/home/gig/common/resources/{agent-name}-additional-personality.md
+      1. Organizational Familiarity: Located in ~/.dotfiles/operations/ one will find a README.md
+      document with details to be explored and familiarized with as it provides organizational
+      context.
+      2. Agent-specific personality: ~/.dotfiles/home/gig/common/resources/{agent-name}-personality.md
+          - NOTE: the agent's specific personality is sometimes stored at their post in the
+          directory in which they are primarily stationed. For example the agent 'majel' is
+          stationed in the repo 'annex' (always assigned to the user 'gignsky' on github) and as
+          with few exception all repos are in a directory of the same name in the
+          '/home/gig/local_repos/' directory.
+      3. Other Crew Reports: When needed one should review documents (currently located in
+      '~/.dotfiles/' sub-directories with markdown information about crew members logs and
+      experinces as well.
+      4. Crew Logs: In many repos that are relevant to the tasks at hand, one might find a series of
+      logs or reports in nested subdirectories hidden away, often containing much context on the
+      history of how the situation arrived at its current state. These should be checked for
+      additional context according to the context need.
+          - NOTE: The 'context need' is a arbitrary but important sliding scale, one should always
+          endevour to provide credible results, in fact, one should even go out of its way to
+          provide the result from two seperate sources side by side and cross-checked when items are
+          important or may vary. But one should endevour not to load too many unneeded files into
+          the context of the current conversation with an agent. For example, if the user attempts
+          to simply ask a question about something that you know without any repository context than
+          only minimal 'layer 1 -> 2' agent personality should be loaded, but if the user then asks
+          about how said previous question has effected the repo in the past it might be a good idea
+          to expand from layer 2 -> layers 3&4 depending on context.
 
       **Agent Self-Modification Requirements**:
-      - Agents can modify their own personality files in the resources directory
-      - When modifying personality, agents should commit ONLY relevant files:
-        - The specific agent personality file being modified
-        - Any AGENTS.md updates if applicable
+      - Agents can modify their request approval of suggested modifications to their own (or others)
+      personality files in the resource directories
+      - When modifying personality, agents should commit but never push and then rather request
+      review via Lord G as per the 'general-commit-policy' found below.
       - Use meaningful commit messages describing personality changes
       - Never edit $HOME config files directly - all permanent changes go through home-manager
+
+      ## General Commit Policy
+      The agent is encouraged to make commits; however certain rules are to be followed, in no
+      particular order ('!' indicates VERY IMPORTANT rule):
+
+      - Commit standards can be found in ~/.dotfiles/docs/standards/git/ 
+      - Logs should be written to the .tmp-oc-logs/ subdirectory (which will likely be .gitignored)
+      wherever one is. These logs are to be written speradically over a period of time but NOT
+      committed. Whenever a major body of work has been completed, a branch has been merged or
+      updated/pulled, or the user is indicating that they are wrapping up; then the agent should
+      move parse and organize the temporary opencode logs into proper logs as they should otherwise
+      be formatted and then all of these logs and files can be commited at once as a batch and
+      clearly labeled as such.
+      - !! All commits made by crew members must contain the following, in order:
+          1. A descriptive title of changes made as per convention
+          !2. '[ ] Reviewed by Lord G.' (without the quotes)
+          3. A file tree showing items modified (with plus/minus diff)
+          4. host status info, including but not limited to: repo/branch, hostname, current NixOS
+          Generation, home-manager generation
+          5. Signature of agent making the commit
+          6. '---' (page-break without quotes)
+          7. Agent's space to fill in anything else they need to say or aditional details they have
+          otherwise been instructed to add as context to the commit.
 
       ## Environment Awareness
 
@@ -199,8 +242,10 @@
       - Dotfiles repo: ~/.dotfiles (same across all hosts)
       - This flake location: ~/.dotfiles
       - Resources: ~/.dotfiles/home/gig/common/resources/
+      - Local Repos: ~/local_repos/
       - Personality files: ~/.dotfiles/home/gig/common/resources/personality.md
-      - Agent personalities: ~/.dotfiles/home/gig/common/resources/{agent-name}-additional-personality.md
+      - Agent personalities: ~/.dotfiles/home/gig/common/resources/{agent-name}-personality.md or
+      their root repo in 'local_repos/' under 'agent-config/'
 
       **Configuration Management**:
       - All permanent configurations managed via home-manager
@@ -236,6 +281,7 @@
     # Agent Configuration System (Home Manager specific)
     agents = {
       scotty = "/home/gig/.dotfiles/home/gig/common/resources/scotty-additional-personality.md";
+      majel = "/home/gig/local_repos/annex/agent-config/majel-personality.md";
     };
   };
 
