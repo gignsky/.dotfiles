@@ -1,5 +1,7 @@
 # FIXME: _**GITLAB** Extra Seat_ is being charged to my account, I need to fix this issue immediately
 
+# Scotty, will need to add a commit message to check for 'review-of-agent-work' once implemented
+
 # SCOTTY, excamine my nushell configuration defined within, and figure out if there is a way to
 
 accomplish the following: If I find myself in the root of a directory like this
