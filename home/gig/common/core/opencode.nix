@@ -274,12 +274,21 @@
       - Check for common anti-patterns
 
       ## MCP Servers Available
+
+      **IMPORTANT**: All MCP tools must be called with their server prefix (e.g., `wikipedia_getPage`, NOT `wiki.page`).
+      Reference `~/.dotfiles/docs/mcp-tools-reference.md` for complete tool signatures and examples.
+
       - **DeepWiki**: Repository documentation and history research
         - URL: https://mcp.deepwiki.com/sse
         - Features: Access up-to-date docs for any public repo
+        - Tools: [To be documented in mcp-tools-reference.md]
+
       - **Wikipedia**: General knowledge and research
         - Package: @shelm/wikipedia-mcp-server
         - Features: Search and retrieve Wikipedia articles
+        - Tools: wikipedia_onThisDay, wikipedia_findPage, wikipedia_getPage, wikipedia_getImagesForPage
+        - **Prefix Required**: Always use `wikipedia_` prefix when calling these tools
+        - See: ~/.dotfiles/docs/mcp-tools-reference.md for detailed signatures
     '';
 
     # Agent Configuration System (Home Manager specific)
