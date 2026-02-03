@@ -29,7 +29,7 @@
     (configLib.relativeToRoot "hosts/common/optional/audio.nix") # Enable PipeWire audio system
     (configLib.relativeToRoot "hosts/common/optional/bluetooth.nix") # Enable Bluetooth support
     (configLib.relativeToRoot "hosts/common/optional/brightness-control.nix") # Enable brightness control for Framework laptops
-    # (configLib.relativeToRoot "hosts/common/optional/tailscale.nix")
+    (configLib.relativeToRoot "hosts/common/optional/tailscale.nix")
     # ../common/optional/xrdp.nix
 
     #gig users
@@ -52,7 +52,7 @@
   };
 
   # Tailscale configuration
-  # tailscale.enable = true;
+  tailscale.enable = false;
 
   boot.loader = {
     # Bootloader.

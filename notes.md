@@ -22,6 +22,11 @@ more about this feature I knew not existed.
 - https://www.nga.gov/artworks?keyword=landscape&sortOrder=DEFAULT&artobj_subject=Subject%20Types-%3A%3A-Landscape&pageSize=30&pageNumber=1&lastFacet=artobj_subject
 - https://wallhaven.cc/
 
+## Info about usenet found [here](https://www.harley.com/usenet/index.html)
+
+- Further reading and other sites can be found on
+  [this reddit thread](https://www.reddit.com/r/usenet/comments/i5hjtz/bookswebsites_about_usenet/)
+
 ## Black Friday / Cyber Monday Shopping...
 
 1. Ultrawide Monitor?
@@ -397,3 +402,10 @@ Ti
 - need to get to work on personal-website ;) ASAP -- generate becky agent
 - get new darr running
 - rewrite tax-matrix in rust
+- need to get to work on personal-website ;) ASAP -- generate becky agent
+- get new darr running
+- rewrite tax-matrix in rust
+- Investigate the 'pv' program in nixpkgs that should be a better version of
+  copy or cut
+- look into the program 'recyclarr'
+- add steam user for big picture mode

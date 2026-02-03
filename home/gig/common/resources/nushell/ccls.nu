@@ -4,6 +4,7 @@
 def ccls [
     target?: string      # Optional: specific fetch tool name or 'i'/'interactive' 
     --interactive(-i)    # Interactive mode for tool selection
+    --random(-r) # random tool mode
 ] {
     # Available fetch tools in nixpkgs
     let fetch_tools = [
@@ -33,10 +34,13 @@ def ccls [
             print $"\n🔧 Fallin' back to fastfetch, Captain!"
             "fastfetch"
         }
-    } else {
+    } else if ($random or $target == "r" or $target == "random" or target == "--random") {
         # Random mode - pick a random tool
         $fetch_tools | get (random int 0..($fetch_tools | length))
-    }
+    } else {
+        # fallback to default of fastfetch
+        "fastfetch"
+  }
     
     # Display what we're running
     print $"🚀 Runnin' ($selected_tool)..."
@@ -64,8 +68,9 @@ def "ccls list" [] {
         "macchina"
     ] | each { |tool| print $"   • ($tool)" }
     print "\n📋 Usage examples:"
-    print "   ccls              # Random tool"
+    print "   ccls              # Fastfetch (by-default)"
     print "   ccls fastfetch    # Specific tool"
     print "   ccls -i           # Interactive selection"
+    print "   ccls -r           # Random selection"
     print "   ccls list         # Show this help"
 }

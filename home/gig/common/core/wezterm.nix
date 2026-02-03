@@ -7,6 +7,13 @@
       local config = wezterm.config_builder()
 
       config.font_size = 15.0
+      # old config -- still need TODO FIX lazygit as example of perfect fonts
+      # config.font_size = 12.0
+      # config.font = wezterm.font_with_fallback({
+      #   "MonoLisa Variable",
+      #   "Cartograph CF",
+      #   "GoMono Nerd Font Mono"
+      # })
       config.font = wezterm.font_with_fallback({
         {
           family = "MonoLisa Mono",
