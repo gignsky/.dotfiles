@@ -121,6 +121,10 @@ _check_batch_commit_needed() {
 # Commit all pending batch logs
 _commit_batch_logs() {
   _debug_log "Entering _commit_batch_logs function"
+  
+  # Save the original directory to return to after committing
+  local original_dir=$(pwd)
+  _debug_log "Saving original directory: $original_dir"
 
   local batch_files=($(find "$BATCH_LOG_DIR" -name "*.batch" 2>/dev/null))
   _debug_log "Found ${#batch_files[@]} batch files: ${batch_files[*]}"
@@ -173,6 +177,11 @@ _commit_batch_logs() {
     _debug_log "WSL: logs staged for manual commit in annex"
     echo "✅ Batched logs processed successfully (WSL: staged for manual commit in annex)"
   fi
+  
+  # Return to the original directory
+  _debug_log "Returning to original directory: $original_dir"
+  cd "$original_dir"
+  _debug_log "Current directory after return: $(pwd)"
   _debug_log "Exiting _commit_batch_logs function"
 }
 
