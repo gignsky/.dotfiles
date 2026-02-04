@@ -31,6 +31,7 @@
 
   # Agent calls directly
   scotty = "opencode run --agent scotty";
+  oc = "opencode";
 
   # Test alias for rebuild verification
   rebuild-test-verified = "echo 'Rebuild test successful on develop branch - Scotty'";
