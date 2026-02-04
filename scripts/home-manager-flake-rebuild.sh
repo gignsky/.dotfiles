@@ -62,8 +62,8 @@ if [ "$LOGGING_LIB_FOUND" = false ]; then
     local notes="$5"
     local generation_number="${6:-unknown}"
 
-    local journal_dir="${HOME}/.dotfiles/worktrees/main/scottys-journal"
-    local metrics_dir="${journal_dir}/metrics"
+    local annex_dir="${HOME}/local_repos/annex"
+    local metrics_dir="${annex_dir}/fleet/operations/metrics"
     mkdir -p "$metrics_dir"
 
     local timestamp
