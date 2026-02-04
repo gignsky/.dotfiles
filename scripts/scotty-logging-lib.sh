@@ -145,15 +145,15 @@ _commit_batch_logs() {
   rm -f "${batch_files[@]}"
   _debug_log "Batch files removed"
 
-  # Commit the logs (WSL-compatible)
-  _debug_log "Changing directory to ${HOME}/.dotfiles"
-  cd "${HOME}/.dotfiles"
+  # Commit the logs to the annex repository (WSL-compatible)
+  _debug_log "Changing directory to ${ANNEX_DIR}"
+  cd "${ANNEX_DIR}"
   _debug_log "Current directory: $(pwd)"
 
   if [ "$(hostname)" != "nixos" ]; then
     # Full git commit on non-WSL systems
-    _debug_log "Adding scottys-journal/ to git"
-    git add scottys-journal/ 2>/dev/null
+    _debug_log "Adding crew-logs/scotty/ to git in annex"
+    git add crew-logs/scotty/ 2>/dev/null
     _debug_log "Git add completed, exit code: $?"
 
     _debug_log "Starting git commit with --no-verify to avoid pre-commit hook hang"
@@ -165,13 +165,13 @@ _commit_batch_logs() {
       _debug_log "Git commit failed with exit code: $commit_exit_code"
     fi
     _debug_log "Git commit completed, exit code: $commit_exit_code"
-    echo "✅ Batched logs committed successfully"
+    echo "✅ Batched logs committed successfully to annex"
   else
     # WSL-safe: process logs but don't auto-commit
     _debug_log "WSL detected: processing logs without auto-commit to prevent hangs"
-    git add scottys-journal/ 2>/dev/null || true
-    _debug_log "WSL: logs staged for manual commit"
-    echo "✅ Batched logs processed successfully (WSL: staged for manual commit)"
+    git add crew-logs/scotty/ 2>/dev/null || true
+    _debug_log "WSL: logs staged for manual commit in annex"
+    echo "✅ Batched logs processed successfully (WSL: staged for manual commit in annex)"
   fi
   _debug_log "Exiting _commit_batch_logs function"
 }
@@ -265,23 +265,26 @@ _direct_log_entry() {
   BYPASS_BATCH=1 scotty_log_event "$log_type" "$title" "$content"
 }
 
-# Configuration - determine the correct dotfiles path
-if [ -d "${PWD}/scottys-journal" ]; then
-  # We're in the dotfiles repo root
-  JOURNAL_DIR="${PWD}/scottys-journal"
-elif [ -d "${HOME}/.dotfiles/scottys-journal" ]; then
-  # Use the standard dotfiles location
-  JOURNAL_DIR="${HOME}/.dotfiles/scottys-journal"
-else
-  # Default fallback
-  JOURNAL_DIR="${HOME}/.dotfiles/scottys-journal"
-fi
-LOGS_DIR="${JOURNAL_DIR}/logs"
-METRICS_DIR="${JOURNAL_DIR}/metrics"
+# Configuration - Scotty's engineering logs now live in the annex repository
+# Migrated from dotfiles to annex on 2026-02-03
+ANNEX_DIR="${HOME}/local_repos/annex"
+SCOTTY_LOGS_DIR="${ANNEX_DIR}/crew-logs/scotty/engineering-logs"
+
+# Determine log directory with YYYY-MM organization
+get_current_log_dir() {
+  local year_month=$(date '+%Y-%m')
+  echo "${SCOTTY_LOGS_DIR}/${year_month}"
+}
+
+# Legacy compatibility - these variables are deprecated
+JOURNAL_DIR="${ANNEX_DIR}/crew-logs/scotty"
+LOGS_DIR="$(get_current_log_dir)"
+METRICS_DIR="${ANNEX_DIR}/fleet/operations/metrics"
 
 # Ensure journal directories exist
 ensure_journal_dirs() {
-  mkdir -p "$LOGS_DIR"
+  local current_log_dir=$(get_current_log_dir)
+  mkdir -p "$current_log_dir"
   mkdir -p "$METRICS_DIR"
 }
 
@@ -453,7 +456,8 @@ create_narrative_entry() {
   date=$(date '+%Y-%m-%d')
   local stardate
   stardate=$(date '+%Y.%m.%d')
-  local log_file="${LOGS_DIR}/${date}-automated.log"
+  local current_log_dir=$(get_current_log_dir)
+  local log_file="${current_log_dir}/${date}-automated.log"
   local timestamp
   timestamp=$(date '+%Y-%m-%d %H:%M:%S')
 
@@ -655,8 +659,8 @@ log_status() {
   local current_home_gen=$(get_home_manager_generation)
 
   # Check for recent rebuild activity in logs
-  local log_dir="${HOME}/.dotfiles/scottys-journal/logs"
-  local recent_system_log=$(find "$log_dir" -name "*automated.log" -mtime -1 | head -1)
+  local log_dir=$(get_current_log_dir)
+  local recent_system_log=$(find "$SCOTTY_LOGS_DIR" -name "*automated.log" -mtime -1 2>/dev/null | head -1)
   local recent_rebuild_activity=""
 
   if [ -f "$recent_system_log" ]; then
@@ -664,16 +668,15 @@ log_status() {
   fi
 
   # Analyze metrics for gaps
-  local metrics_dir="${HOME}/.dotfiles/scottys-journal/metrics"
   local last_build_metric=""
   local last_git_metric=""
 
-  if [ -f "$metrics_dir/build-performance.csv" ]; then
-    last_build_metric=$(tail -1 "$metrics_dir/build-performance.csv" 2>/dev/null | cut -d',' -f1)
+  if [ -f "$METRICS_DIR/build-performance.csv" ]; then
+    last_build_metric=$(tail -1 "$METRICS_DIR/build-performance.csv" 2>/dev/null | cut -d',' -f1)
   fi
 
-  if [ -f "$metrics_dir/git-operations.csv" ]; then
-    last_git_metric=$(tail -1 "$metrics_dir/git-operations.csv" 2>/dev/null | cut -d',' -f1)
+  if [ -f "$METRICS_DIR/git-operations.csv" ]; then
+    last_git_metric=$(tail -1 "$METRICS_DIR/git-operations.csv" 2>/dev/null | cut -d',' -f1)
   fi
 
   # Check git status for uncommitted changes

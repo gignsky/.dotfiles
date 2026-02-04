@@ -151,11 +151,7 @@ rebuild-test args="":
 	just rebuild-pre
 	nix run .#system-flake-rebuild-test -- {{args}}
 	@nix-shell -p lolcat --run 'echo "[TEST] Finished." | lolcat 2> /dev/null'
-	@echo "📊 Logging test rebuild to engineering records..."
-	@just log-commit "System test rebuild completed successfully"
-	@echo "🧹 Cleaning up engineering logs..."
-	@git add scottys-journal/ 2>/dev/null || true
-	@git commit -m "📊 Scotty: Auto-update engineering logs" 2>/dev/null || true
+	@echo "📊 Test rebuild completed - logs automatically written to annex"
 
 # Rebuild-full with new shell
 rebuild-full-new args="":
@@ -474,12 +470,11 @@ notes-edit:
 notes-edit-commit: notes-edit 
   just rekey
 
-# commit regular note file
-noted:
-  git add notes.md
-  git commit -m "new notes!!"
-  @nix-shell -p lolcat --run 'echo "It is so Noted!!" | lolcat 2> /dev/null'
-
+# commit regular note file (deprecated - notes moved to annex)
+# noted:
+#   git add notes.md
+#   git commit -m "new notes!!"
+#   @nix-shell -p lolcat --run 'echo "It is so Noted!!" | lolcat 2> /dev/null'
 
 #edit secret notes.mdl only (no rekey)
 sops-secrets:
@@ -590,17 +585,13 @@ batch-status:
 # Manual engineering log entry for commits
 log-commit message="":
 	@if [ -z "{{message}}" ]; then \
-		echo "📝 Logging most recent commit to engineering records..."; \
+		echo "📝 Logging most recent commit to engineering records in annex..."; \
 		bash -c 'cd ~/.dotfiles && source scripts/scotty-logging-lib.sh && scotty_log_event "git-commit" "$$(git log -1 --pretty=%s)"'; \
 	else \
-		echo "📝 Logging custom message to engineering records..."; \
+		echo "📝 Logging custom message to engineering records in annex..."; \
 		bash -c 'cd ~/.dotfiles && source scripts/scotty-logging-lib.sh && scotty_log_event "git-commit" "{{message}}"'; \
 	fi
-	@echo "✅ Engineering log entry created successfully"
-	@echo "🧹 Auto-committing engineering logs..."
-	@git add scottys-journal/ 2>/dev/null || true
-	@git commit -m "📊 Scotty: Auto-commit engineering logs" 2>/dev/null || true
-	@echo "✅ Engineering logs committed to repository"
+	@echo "✅ Engineering log entry created successfully in annex repository"
 
 # Scotty's system state analysis and gap detection
 log-status:
