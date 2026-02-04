@@ -1,0 +1,135 @@
+================================================================================
+HOME-MANAGER REBUILD LOG - MERLIN
+================================================================================
+Stardate: 2026-02-03
+Host: merlin
+Operation: home-manager rebuild (Generation 123 → 124)
+Build Duration: 12 seconds
+Branch: recruitment/library-computer
+NixOS Generation: 25.11.20251223.76701a1 (Xantusia)
+
+================================================================================
+OPERATION SUMMARY
+================================================================================
+
+Successful home-manager rebuild on merlin with WezTerm configuration cleanup.
+Removed commented-out legacy font configuration that was no longer needed.
+
+Build Performance:
+  - Generation increment: 123 → 124
+  - Build time: 12 seconds (excellent performance)
+  - Status: SUCCESS ✓
+
+================================================================================
+CONFIGURATION CHANGES
+================================================================================
+
+Modified Files:
+  • home/gig/common/core/wezterm.nix
+
+Changes Applied:
+  - Removed commented-out "old config" block (7 lines)
+  - Cleaned up legacy TODO comment about lazygit font configuration
+  - Retained active font configuration with MonoLisa Mono fallback chain
+  - Maintained font_size = 15.0 setting
+
+Technical Details:
+  The removed code was a commented-out legacy configuration block that
+  referenced the old font setup with MonoLisa Variable, Cartograph CF, and
+  GoMono Nerd Font Mono. This cleanup improves code readability without
+  affecting active configuration.
+
+================================================================================
+DIFF ANALYSIS
+================================================================================
+
+```diff
+diff --git a/home/gig/common/core/wezterm.nix b/home/gig/common/core/wezterm.nix
+index 53f4b468..6cb64f76 100644
+--- a/home/gig/common/core/wezterm.nix
++++ b/home/gig/common/core/wezterm.nix
+@@ -7,13 +7,6 @@
+       local config = wezterm.config_builder()
+ 
+       config.font_size = 15.0
+-      # old config -- still need TODO FIX lazygit as example of perfect fonts
+-      # config.font_size = 12.0
+-      # config.font = wezterm.font_with_fallback({
+-      #   \"MonoLisa Variable\",
+-      #   \"Cartograph CF\",
+-      #   \"GoMono Nerd Font Mono\"
+-      # })
+       config.font = wezterm.font_with_fallback({
+         {
+           family = \"MonoLisa Mono\",
+```
+
+Lines Removed: 7
+Lines Added: 0
+Net Change: -7 lines (code cleanup)
+
+================================================================================
+ENGINEERING ASSESSMENT
+================================================================================
+
+Status: NOMINAL ✓
+
+This was a straightforward maintenance operation - removing dead code that
+was cluttering the configuration. The commented-out block had served its
+purpose as reference material but was no longer needed.
+
+Build Performance Notes:
+  - 12-second rebuild time indicates minimal dependency chain impact
+  - Generation increment confirms successful activation
+  - No warnings or errors during build process
+
+Configuration Impact:
+  - No functional changes to active WezTerm behavior
+  - Improved code readability and maintainability
+  - Removed TODO comment that was no longer relevant
+
+Recommendations:
+  - Configuration is clean and maintainable
+  - If lazygit font configuration still needs attention, consider creating
+    a separate TODO or SEP document rather than inline comments
+  - Current font fallback chain appears well-configured
+
+================================================================================
+SYSTEM STATUS
+================================================================================
+
+Host: merlin
+Repository: /home/gig/.dotfiles
+Branch: recruitment/library-computer
+Home-Manager Generation: 124
+NixOS Generation: 25.11.20251223.76701a1 (Xantusia)
+Working Tree: Clean (post-rebuild)
+
+All systems nominal. Ready for next operation.
+
+================================================================================
+CHIEF ENGINEER'S NOTES
+================================================================================
+
+A wee bit of spring cleaning never hurt anybody! That commented-out code was
+just takin' up space in the dilithium chamber. The active configuration is
+solid, and the 12-second rebuild shows we're not triggerin' any unnecessary
+rebuilds of larger packages.
+
+If ye need to revisit the font configuration for lazygit specifically, I'd
+recommend creatin' a proper engineering protocol document rather than leavin'
+TODO comments scattered about. Keep the configuration files clean and let the
+proper documentation systems handle the task tracking.
+
+The engines are purrin' like a kitten, Captain!
+
+================================================================================
+SIGNATURE
+================================================================================
+
+Chief Engineer: Montgomery Scott
+Timestamp: 2026-02-03
+Operation: Home-Manager Rebuild Documentation
+Status: COMPLETE ✓
+
+================================================================================
