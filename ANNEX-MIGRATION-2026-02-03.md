@@ -18,6 +18,7 @@ The following content has been migrated from this repository (`~/.dotfiles`) to 
 - **Operations** (`operations/`)
   - Fleet management → `annex/fleet/operations/management/`
   - Reports → `annex/fleet/operations/reports/`
+  - Logs → `annex/crew-logs/scotty/engineering-logs/YYYY-MM/` (verified duplicate of scottys-journal logs)
   - **Note**: CSV metrics files were NOT migrated (narrative logs serve as primary source)
 
 - **Scotty's Logs** (`scottys-journal/`)
