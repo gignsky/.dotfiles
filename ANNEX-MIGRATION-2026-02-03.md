@@ -39,6 +39,7 @@ This repository (`~/.dotfiles`) still contains:
 - Scripts and automation
 - Temporary logs (`.tmp-oc-logs/`)
 - Agent personality files
+- System Enhancement Protocols (`engineering/enhancement-protocols/`)
 - Active operational files (except those migrated)
 
 ## Finding Migrated Content
