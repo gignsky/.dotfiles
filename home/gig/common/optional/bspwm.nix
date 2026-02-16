@@ -32,6 +32,10 @@
       source = configLib.relativeToRoot "home/gig/common/resources/bspwm/default.conf";
       executable = true;
     };
+    ".config/bspwm/resources/enable-monitors.sh" = {
+      source = configLib.relativeToRoot "home/gig/common/resources/bspwm/enable-monitors.sh";
+      executable = true;
+    };
     #TODO SCOTTY! REMIND ME to figure out how to make these roatate through the tolkien folder
     # # SGA wallpaper
     # ".background-image" = {
@@ -248,6 +252,11 @@
   xsession = {
     enable = true;
     initExtra = ''
+      # Enable multi-monitor setup for dual NVIDIA GPUs
+      if [ -f "$HOME/.config/bspwm/resources/enable-monitors.sh" ]; then
+        "$HOME/.config/bspwm/resources/enable-monitors.sh" &
+      fi
+
       # Set wallpaper (if exists)
       if [ -f "$HOME/.background-image" ]; then
         feh --bg-scale "$HOME/.background-image" &

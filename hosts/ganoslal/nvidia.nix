@@ -41,4 +41,24 @@
     # __GL_SHADER_DISK_CACHE_PATH = "/tmp/nvidia-shader-cache";
     # __GL_THREADED_OPTIMIZATIONS = "1";
   };
+
+  # X11 configuration for dual NVIDIA GPUs
+  services.xserver = {
+    # Force NVIDIA driver usage (prevent modesetting fallback)
+    deviceSection = ''
+      Option "AllowEmptyInitialConfiguration" "True"
+    '';
+
+    # Multi-GPU screen configuration
+    screenSection = ''
+      Option "MetaModes" "nvidia-auto-select +0+0"
+      Option "AllowIndirectGLXProtocol" "off"
+      Option "TripleBuffer" "on"
+    '';
+
+    # Enable automatic GPU detection
+    serverFlagsSection = ''
+      Option "AutoAddGPU" "true"
+    '';
+  };
 }
