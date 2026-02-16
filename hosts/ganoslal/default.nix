@@ -65,11 +65,8 @@
       variant = "";
     };
 
-    # Use both NVIDIA and AMD drivers for dual-GPU setup (NVIDIA primary + AMD secondary)
-    videoDrivers = [
-      "nvidia"
-      "amdgpu"
-    ];
+    # Use NVIDIA driver for dual-NVIDIA setup (GTX 970 + RTX 3060 Ti)
+    videoDrivers = [ "nvidia" ];
   };
 
   # Allow unfree packages
