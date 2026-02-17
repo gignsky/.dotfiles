@@ -306,6 +306,7 @@
     agents = {
       scotty = "/home/gig/.dotfiles/home/gig/common/resources/scotty-additional-personality.md";
       majel = "/home/gig/local_repos/annex/agent-config/majel-personality.md";
+      kara = "/home/gig/local_repos/annex/agent-config/kara-personality.md";
     };
   };
 
