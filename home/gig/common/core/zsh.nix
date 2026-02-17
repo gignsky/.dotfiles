@@ -228,11 +228,13 @@
     # python3 # needed for aliases plugin from oh-my-zsh and other alias plugin
     eza # needed for eza plugin
     fzf # needed for fzf plugin
-    gitflow # needed for git-flow plugin
-    git-lfs # needed for git-lfs plugin
     # fortune #needed for hitchhiker plugin
     # strfile #needed for hitchhiker plugin
     zoxide # needed for zoxide plugin
     chroma # needed for colorize plugin from oh-my-zsh
+
+    # Disabled so that they are required in flakes that use them
+    # gitflow # needed for git-flow plugin
+    # git-lfs # needed for git-lfs plugin
   ];
 }

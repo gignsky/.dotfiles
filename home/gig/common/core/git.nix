@@ -52,8 +52,10 @@
   };
 
   home.packages = with pkgs; [
-    git-lfs
-    gitflow
+    # Disabled so that they are required in flakes that use them
+    # git-lfs
+    # gitflow
+
     gnupg
     # pinentry
     pinentry-curses

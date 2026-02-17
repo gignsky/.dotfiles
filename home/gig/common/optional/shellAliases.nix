@@ -5,6 +5,7 @@
   files = "nix run nixpkgs#kdePackages.filelight";
   dot = "cd ~/.dotfiles";
   work = "cd ~/workingFile/";
+  annex = "cd ~/local_repos/annex/";
   # ll = "ls -lh";
   lla = "eza -gla";
   # cp = "cp -rv";

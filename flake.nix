@@ -83,6 +83,13 @@
       };
     };
 
+    # ccc = {
+    #   url = "github:gignsky/credit-card-convenience";
+    #   inputs = {
+    #     gigdot.follows = ""; # Break circular dependency
+    #   };
+    # };
+
     # nufetch.url = "github:gignsky/nufetch";
 
     #################### Lesser-Used Utilities ####################

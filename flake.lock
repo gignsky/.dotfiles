@@ -250,11 +250,11 @@
         "snacks-nvim": "snacks-nvim"
       },
       "locked": {
-        "lastModified": 1770152348,
-        "narHash": "sha256-moLg4wCfE6Z8yhWOlhZPAK7gFmceAN/TWI+DzDCCvl4=",
+        "lastModified": 1770280573,
+        "narHash": "sha256-rvbaiNHHdNQRa9FwjuyjRKfIOgR4czL2XKe7k/KsWEw=",
         "owner": "gignsky",
         "repo": "gigvim",
-        "rev": "81bed2ae1dc1bb0d82cdfecb1d25e2c63757e14d",
+        "rev": "db33f13984398e088ff56b90c2f7befcffb3b0a5",
         "type": "github"
       },
       "original": {
@@ -393,10 +393,10 @@
     "nix-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1770870972,
-        "narHash": "sha256-duGgp2TfPHell0t0K1ql6D2nDDsfdKo5ICo6VVldw64=",
+        "lastModified": 1771210236,
+        "narHash": "sha256-z52vW9OuJtpLc1GMmszjrO77Ho/0pz7ffAOER9uyBJg=",
         "ref": "main",
-        "rev": "c518c948d815bca95931411d4b6ccfe216a70d79",
+        "rev": "4087984d1f7bb88208cd0dc63c7f7a9fb8f88484",
         "shallow": true,
         "type": "git",
         "url": "ssh://git@github.com/gignsky/nix-secrets.git"
