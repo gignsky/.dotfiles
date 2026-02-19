@@ -21,6 +21,9 @@
     };
     config = {
       "bar/main" = {
+        # Monitor configuration
+        monitor = "\${env:MONITOR:}";
+
         # Bar positioning and appearance
         width = "100%";
         height = 30;
@@ -236,6 +239,17 @@
         margin-bottom = 0;
       };
     };
-    script = "polybar main &";
+    script = ''
+      # Kill any existing polybar instances
+      ${pkgs.killall}/bin/killall -q polybar || true
+
+      # Wait for processes to shut down
+      while ${pkgs.procps}/bin/pgrep -x polybar >/dev/null; do sleep 0.1; done
+
+      # Launch polybar on each monitor
+      for monitor in $(${pkgs.xorg.xrandr}/bin/xrandr --query | ${pkgs.gnugrep}/bin/grep " connected" | ${pkgs.coreutils}/bin/cut -d" " -f1); do
+        MONITOR=$monitor polybar main &
+      done
+    '';
   };
 }
