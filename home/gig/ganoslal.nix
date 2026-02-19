@@ -20,6 +20,7 @@
     # ytmdesktop
     youtube-music
     plex-desktop
+    steam
     remmina
     # bitwarden-cli
     bitwarden-desktop
