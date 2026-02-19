@@ -37,10 +37,10 @@
       executable = true;
     };
     #TODO SCOTTY! REMIND ME to figure out how to make these roatate through the tolkien folder
-    # # SGA wallpaper
-    # ".background-image" = {
-    #   source = configLib.relativeToRoot "home/gig/common/resources/wallpapers/SGA/Stargate_Atlantis_Gate_Fixed_Centered_2560x1440.png";
-    # };
+    # SGA wallpaper
+    ".background-image" = {
+      source = configLib.relativeToRoot "home/gig/common/resources/wallpapers/SGA/Stargate_Atlantis_Gate_Fixed_Centered_2560x1440.png";
+    };
     # ".background-image" = {
     #   source = configLib.relativeToRoot "home/gig/common/resources/wallpapers/SGA/Stargate_Atlantis_Gate_Fixed_Centered_5K.png";
     # };
@@ -48,9 +48,9 @@
     #   source = configLib.relativeToRoot "home/gig/common/resources/wallpapers/SGA/Stargate_Atlantis_Gate_Fixed_Centered_5K Sharper.png";
     # };
     # LOTR wallpaper
-    ".background-image" = {
-      source = configLib.relativeToRoot "home/gig/common/resources/wallpapers/tolkien/desktop/4k-doors-of-durin-horizontal.webp";
-    };
+    # ".background-image" = {
+    #   source = configLib.relativeToRoot "home/gig/common/resources/wallpapers/tolkien/desktop/doors-of-durin-horizontal.webp";
+    # };
     # # NixOS logo wallpaper
     # ".background-image" = {
     #   source = configLib.relativeToRoot "home/gig/common/resources/wallpapers/nixos-logo.png";

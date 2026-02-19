@@ -20,15 +20,19 @@
   alsmod = "nano $env.HOME/.dotfiles/home/gig/common/optional/shellAliases.nix";
   als = "help aliases";
   cd = "z";
+  diddy = "touch";
+  podman = "sudo podman";
+  docker = "sudo podman";
+
+  # nix shortcuts
   nd = "nix develop -c nu";
   ndc = "nix develop -c";
   nr = "nix run";
   nfs = "nix flake show";
   nb = "nix build";
   ndw = "nix develop .#windows -c nu";
-  diddy = "touch";
-  podman = "sudo podman";
-  docker = "sudo podman";
+  nfc = "nix flake check --print-build-logs";
+  ns = "nix shell";
 
   # Agent calls directly
   scotty = "opencode run --agent scotty";
