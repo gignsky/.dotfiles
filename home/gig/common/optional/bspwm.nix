@@ -252,9 +252,9 @@
   xsession = {
     enable = true;
     initExtra = ''
-      # Enable multi-monitor setup for dual NVIDIA GPUs
+      # Enable multi-monitor setup for dual NVIDIA GPUs (run synchronously before bspwm)
       if [ -f "$HOME/.config/bspwm/resources/enable-monitors.sh" ]; then
-        "$HOME/.config/bspwm/resources/enable-monitors.sh" &
+        "$HOME/.config/bspwm/resources/enable-monitors.sh"
       fi
 
       # Set wallpaper (if exists)
