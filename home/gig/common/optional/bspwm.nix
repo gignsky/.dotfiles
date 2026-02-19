@@ -12,6 +12,7 @@
   # Additional packages for user-level bspwm functionality
   home.packages = with pkgs; [
     dmenu # Lightweight application launcher alternative
+    arandr
     xclip # Clipboard management (if not already installed system-wide)
     maim # Screenshots (if not already installed system-wide)
     xdotool # Window manipulation (if not already installed system-wide)
