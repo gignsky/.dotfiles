@@ -54,9 +54,42 @@ pull-rebuild-full:
 pull-nix-secrets:
   cd ~/nix-secrets && git fetch && git pull && cd ~/.dotfiles
 
+# Pull annex repository with automatic stash/unstash for safe updates
+pull-annex:
+  @nix-shell -p lolcat --run "echo '📚 Syncing annex repository...' | lolcat 2> /dev/null"
+  @cd ~/local_repos/annex && \
+    (git diff --quiet && git diff --cached --quiet || git stash push -m "pre-pull-annex-$(date '+%Y%m%d-%H%M%S')") && \
+    git fetch && \
+    git pull --rebase && \
+    (git stash list | grep -q "pre-pull-annex" && git stash pop || true)
+  @nix-shell -p lolcat --run "echo '✅ Annex synchronized' | lolcat 2> /dev/null"
+
+# Push annex logs to remote
+push-annex:
+  @nix-shell -p lolcat --run "echo '📤 Pushing annex logs to remote...' | lolcat 2> /dev/null"
+  @cd ~/local_repos/annex && git push
+  @nix-shell -p lolcat --run "echo '✅ Annex logs pushed' | lolcat 2> /dev/null"
+
+# Synchronize annex (pull + commit staged + push)
+sync-annex:
+  just pull-annex
+  @nix-shell -p lolcat --run "echo '💾 Committing any staged annex logs...' | lolcat 2> /dev/null"
+  @cd ~/local_repos/annex && \
+    (git diff --cached --quiet || git commit -m "📊 Scotty: Manual sync of engineering logs ($(date '+%Y-%m-%d %H:%M'))") || true
+  just push-annex
+
+# Check annex repository status
+annex-status:
+  @echo "📊 Annex Repository Status:"
+  @cd ~/local_repos/annex && git status
+  @echo ""
+  @echo "📈 Recent log activity:"
+  @cd ~/local_repos/annex && git log --oneline -5
+
 # Run before every rebuild, every time
 rebuild-pre:
   @nix-shell -p lolcat --run 'echo "[PRE] Rebuilding NixOS..." | lolcat 2> /dev/null'
+  just pull-annex
   just dont-fuck-my-build
   @nix-shell -p lolcat --run 'echo "Updating Nix-Secrets Repo..." | lolcat 2> /dev/null'
 
@@ -166,18 +199,21 @@ rebuild-full args="":
 # Bare rebuild commands (minimal logging, no pre/post scripts)
 rebuild-bare host=`scripts/get-flake-target.sh`:
 	@echo "Bare system rebuild for {{host}}..."
+	@just pull-annex
 	@bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Bare system rebuild initiated" "minimal rebuild for host {{host}}, no pre/post hooks"'
 	sudo nixos-rebuild switch --flake .#{{host}}
 	@bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Bare system rebuild completed" "nixos-rebuild switch for {{host}} finished successfully"'
 
 home-bare host=`scripts/get-flake-target.sh`:
 	@echo "Bare home-manager rebuild for gig@{{host}}..."
+	@just pull-annex
 	@bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Bare home-manager rebuild initiated" "minimal home-manager rebuild for gig@{{host}}, no pre/post hooks"'
 	home-manager switch --flake .#gig@{{host}}
 	@bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Bare home-manager rebuild completed" "home-manager switch for gig@{{host}} finished successfully"'
 
 rebuild-full-bare host=`scripts/get-flake-target.sh`:
 	@echo "Bare full rebuild for {{host}}..."
+	@just pull-annex
 	@bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Bare full rebuild initiated" "minimal system and home-manager rebuild for {{host}}, no pre/post hooks"'
 	sudo nixos-rebuild switch --flake .#{{host}}
 	home-manager switch --flake .#gig@{{host}}
@@ -254,6 +290,7 @@ om *ARGS:
 
 # Run before every home rebuild, on non-quick build
 pre-home:
+	just pull-annex
 	just dont-fuck-my-build
 	@nix-shell -p lolcat --run 'echo "[PRE-HOME] Finished." | lolcat 2> /dev/null'
 
@@ -576,7 +613,9 @@ check-hardware:
 # Batched logging commands for reduced commit noise
 batch-commit-logs:
 	@echo "📊 Committing batched engineering logs..."
+	just pull-annex
 	@bash -c 'cd ~/.dotfiles && source scripts/scotty-logging-lib.sh && _commit_batch_logs'
+	@echo "💡 Tip: Use 'just push-annex' to push logs to remote"
 
 batch-status:
 	@echo "📊 Batch logging status:"
@@ -584,6 +623,7 @@ batch-status:
 
 # Manual engineering log entry for commits
 log-commit message="":
+	just pull-annex
 	@if [ -z "{{message}}" ]; then \
 		echo "📝 Logging most recent commit to engineering records in annex..."; \
 		bash -c 'cd ~/.dotfiles && source scripts/scotty-logging-lib.sh && scotty_log_event "git-commit" "$$(git log -1 --pretty=%s)"'; \
@@ -592,6 +632,7 @@ log-commit message="":
 		bash -c 'cd ~/.dotfiles && source scripts/scotty-logging-lib.sh && scotty_log_event "git-commit" "{{message}}"'; \
 	fi
 	@echo "✅ Engineering log entry created successfully in annex repository"
+	@echo "💡 Tip: Use 'just push-annex' to push logs to remote"
 
 # Scotty's system state analysis and gap detection
 log-status:
