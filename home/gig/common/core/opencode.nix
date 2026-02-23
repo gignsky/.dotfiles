@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, hostname, ... }:
 {
   programs.opencode = {
     enable = true;
@@ -185,7 +185,7 @@
             context.
             2. Agent-specific personality: ~/.dotfiles/home/gig/common/resources/{agent-name}-personality.md
                 - NOTE: the agent's specific personality is sometimes stored at their post in the
-                directory in which they are primarily stationed. For example the agent 'majel' is
+                directory in which they are primarily stationed. For example the 'library-computer' agent is
                 stationed in the repo 'annex' (always assigned to the user 'gignsky' on github) and as
                 with few exception all repos are in a directory of the same name in the
                 '/home/gig/local_repos/' directory.
@@ -305,13 +305,13 @@
     # Agent Configuration System (Home Manager specific)
     agents = {
       scotty = "/home/gig/.dotfiles/home/gig/common/resources/scotty-additional-personality.md";
-      majel = "/home/gig/local_repos/annex/agent-config/majel-personality.md";
+      library-computer = "/home/gig/local_repos/annex/agent-config/library-computer-personality.md";
       kara = "/home/gig/local_repos/annex/agent-config/kara-personality.md";
     };
   };
 
   # Keep your existing SOPS secret configuration
-  sops.secrets."opencode-auth-json" = {
+  sops.secrets."opencode-auth/${hostname}" = {
     mode = "600";
     path = "/home/gig/.local/share/opencode/auth.json";
   };
