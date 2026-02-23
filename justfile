@@ -12,11 +12,11 @@ lock:
   git log -2
 
 pre-pull-stash:
-	@nix-shell -p lolcat --run "echo 'Running pre-pull stash on all files in dotfiles and nix-secrets' | lolcat 2> /dev/null"
-	git stash push -m "pre-pull"
-	cd ~/nix-secrets
-	git stash push -m "pre-pull"
-	cd ~/.dotfiles
+  @nix-shell -p lolcat --run "echo 'Running pre-pull stash on all files in dotfiles and nix-secrets' | lolcat 2> /dev/null"
+  git stash push -m "pre-pull"
+  cd ~/nix-secrets
+  git stash push -m "pre-pull"
+  cd ~/.dotfiles
 	
 post-pull-stash:
   @nix-shell -p lolcat --run "echo 'Running post-pull stash to unstash files stashed before the pre-pull' | lolcat 2> /dev/null"
@@ -27,17 +27,17 @@ post-pull-stash:
   @nix-shell -p lolcat --run "echo 'Post-Pull Unstash Complete' | lolcat 2> /dev/null"
 
 pull:
-	@nix-shell -p lolcat --run "echo 'Running git pull on all files in dotfiles and nix-secrets' | lolcat 2> /dev/null"
-	just pre-pull-stash
-	git pull
-	just pull-nix-secrets
-	just post-pull-stash
+  @nix-shell -p lolcat --run "echo 'Running git pull on all files in dotfiles and nix-secrets' | lolcat 2> /dev/null"
+  just pre-pull-stash
+  git pull
+  just pull-nix-secrets
+  just post-pull-stash
 
 pull-rebuild:
-	just pull
-	@nix-shell -p lolcat --run "echo 'Rebuilding...' | lolcat 2> /dev/null"
-	just rebuild
-	@nix-shell -p lolcat --run "echo 'Rebuilt.' | lolcat 2> /dev/null"
+  just pull
+  @nix-shell -p lolcat --run "echo 'Rebuilding...' | lolcat 2> /dev/null"
+  just rebuild
+  @nix-shell -p lolcat --run "echo 'Rebuilt.' | lolcat 2> /dev/null"
 
 pull-home:
   @nix-shell -p lolcat --run "echo 'Rebuilding Home-Manager...' | lolcat 2> /dev/null"
