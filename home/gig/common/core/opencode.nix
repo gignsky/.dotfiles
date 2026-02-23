@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, hostname, ... }:
 {
   programs.opencode = {
     enable = true;
@@ -311,7 +311,7 @@
   };
 
   # Keep your existing SOPS secret configuration
-  sops.secrets."opencode-auth-json" = {
+  sops.secrets."opencode-auth/${hostname}" = {
     mode = "600";
     path = "/home/gig/.local/share/opencode/auth.json";
   };
