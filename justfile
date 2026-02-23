@@ -509,7 +509,7 @@ sops-fix:
   just update-nix-secrets
   systemctl --user reset-failed
   home-manager switch --refresh --flake ~/.dotfiles/.
-  just home
+  just home-bare
 
 update-nix-secrets:
 	just rekey
