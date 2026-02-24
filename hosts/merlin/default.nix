@@ -55,8 +55,16 @@
   tailscale.enable = true;
 
   boot.loader = {
-    # Bootloader.
-    systemd-boot.enable = true;
+    # Use GRUB bootloader with EFI support and OS detection for dual-boot
+    systemd-boot.enable = false;
+    grub = {
+      enable = true;
+      device = "nodev"; # Use "nodev" for UEFI systems
+      efiSupport = true;
+      efiInstallAsRemovable = false;
+      useOSProber = true; # Automatically detect Windows and other OSes
+      configurationLimit = 20; # Limit boot menu entries to last 20 generations
+    };
     efi.canTouchEfiVariables = true;
   };
 
