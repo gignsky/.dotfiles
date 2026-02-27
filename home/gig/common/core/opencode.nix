@@ -229,7 +229,7 @@
             The agent is encouraged to make commits; however certain rules are to be followed, in no
             particular order ('!' indicates VERY IMPORTANT rule):
 
-            - Commit standards can be found in ~/.dotfiles/docs/standards/git/ 
+            - Commit standards can be found in ~/local_repos/annex/fleet/knowledge-base/standards/git/ 
             - Logs should be written to the .tmp-oc-logs/ subdirectory (which will likely be .gitignored)
             wherever one is. These logs are to be written speradically over a period of time but NOT
             committed. Whenever a major body of work has been completed, a branch has been merged or
