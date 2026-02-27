@@ -14,6 +14,7 @@ in
         fancy-fonts.packages.${system}.artifex
         fancy-fonts.packages.${system}.monolisa
         nerd-fonts.go-mono
+        nerd-fonts.jetbrains-mono
         times-newer-roman
       ];
     fontconfig = {
