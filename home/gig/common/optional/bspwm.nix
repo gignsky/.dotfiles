@@ -7,6 +7,7 @@
 {
   imports = [
     ./polybar.nix
+    ./picom.nix
   ];
 
   # Additional packages for user-level bspwm functionality

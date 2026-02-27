@@ -2,14 +2,6 @@
 {
   # Polybar status bar configuration
 
-  ## bspwm specific
-  xsession.windowManager.bspwm.extraConfig = ''
-    # Start compositor for better visuals
-    if command -v picom >/dev/null 2>&1; then
-      picom --backend glx -b &
-    fi
-  '';
-
   ## the service
   services.polybar = {
     enable = true;
