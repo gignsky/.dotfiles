@@ -4,40 +4,40 @@ let
 in
 {
   fonts = {
-    enableDefaultPackages = false; # defaults to false
+    enableDefaultPackages = false;
     fontDir.enable = true;
     packages =
       with inputs;
       with pkgs;
       [
-        # fancy-fonts.packages.${system}.cartograph
-        # fancy-fonts.packages.${system}.artifex
-        # fancy-fonts.packages.${system}.monolisa
+        fancy-fonts.packages.${system}.cartograph
+        fancy-fonts.packages.${system}.artifex
+        fancy-fonts.packages.${system}.monolisa
         nerd-fonts.go-mono
-        # times-newer-roman
+        times-newer-roman
       ];
     fontconfig = {
       enable = true;
       defaultFonts = {
+        # System-wide monospace: Cartograph primary, with GoMono for Nerd Font glyphs
         monospace = [
-          # "MonoLisa Variable"
+          "Cartograph CF"
           "GoMono Nerd Font Mono"
-          # "Cartograph CF"
-          # "Artifex CF"
-          # "Times Newer Roman"
+          "MonoLisa Variable"
+          "Artifex CF"
+          "Times Newer Roman"
         ];
-        # sansSerif = [
-        #   "MonoLisa Variable"
-        # ];
+        # System-wide sans-serif: Cartograph
+        sansSerif = [
+          "Cartograph CF"
+          "MonoLisa Variable"
+        ];
+        # Serif: Artifex primary
         serif = [
-          # "Artifex CF"
-          # "Times Newer Roman"
+          "Artifex CF"
+          "Times Newer Roman"
           "GoMono Nerd Font Mono"
         ];
-        # Set emoji font if needed
-        # emoji = [
-        #   "TEST"
-        # ]
       };
     };
   };

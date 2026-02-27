@@ -7,20 +7,19 @@
       local config = wezterm.config_builder()
 
       config.font_size = 15.0
-      -- Clean baseline: GoMono Nerd Font Mono only for maximum glyph support
-      config.font = wezterm.font("GoMono Nerd Font Mono")
 
-      -- Previous fallback configuration (commented out for clean baseline)
-      -- config.font = wezterm.font_with_fallback({
-      --   {
-      --     family = "MonoLisa Variable",
-      --     harfbuzz_features = {"calt=1", "liga=1", "dlig=1", "ss01=1", "ss02=1", "ss03=1", "ss04=1", "ss05=1"},
-      --   },
-      --   {
-      --     family = "GoMono Nerd Font Mono",
-      --     harfbuzz_features = {"calt=1", "liga=1"},
-      --   },
-      -- })
+      -- Font fallback: GoMono FIRST to claim Nerd Font glyphs, then MonoLisa for regular text
+      -- This works around MonoLisa's false glyph claims that break fallback
+      config.font = wezterm.font_with_fallback({
+        {
+          family = "GoMono Nerd Font Mono",
+          harfbuzz_features = {"calt=1", "liga=1"},
+        },
+        {
+          family = "MonoLisa Variable",
+          harfbuzz_features = {"calt=1", "liga=1", "dlig=1", "ss01=1", "ss02=1", "ss03=1", "ss04=1", "ss05=1"},
+        },
+      })
 
       -- Enable font ligatures and better rendering
       config.harfbuzz_features = {"calt=1", "liga=1", "dlig=1"}
