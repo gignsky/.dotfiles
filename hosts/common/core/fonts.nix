@@ -20,13 +20,14 @@ in
       enable = true;
       defaultFonts = {
         monospace = [
+          "MonoLisa Variable"
+          "GoMono Nerd Font Mono"
           "Cartograph CF"
           "Artifex CF"
-          "GoMono Nerd Font Mono"
           "Times Newer Roman"
         ];
         sansSerif = [
-          "Monolisa Variable"
+          "MonoLisa Variable"
         ];
         serif = [
           "Artifex CF"
