@@ -20,7 +20,6 @@ in
       enable = true;
       defaultFonts = {
         monospace = [
-          "Monolisa Variable"
           "Cartograph CF"
           "Artifex CF"
           "GoMono Nerd Font Mono"

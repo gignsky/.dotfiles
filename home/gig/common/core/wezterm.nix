@@ -9,12 +9,8 @@
       config.font_size = 15.0
       config.font = wezterm.font_with_fallback({
         {
-          family = "MonoLisa Mono",
+          family = "MonoLisa Variable",
           harfbuzz_features = {"calt=1", "liga=1", "dlig=1", "ss01=1", "ss02=1", "ss03=1", "ss04=1", "ss05=1"},
-        },
-        {
-          family = "Cartograph CF",
-          harfbuzz_features = {"calt=1", "liga=1", "dlig=1", "ss01=1", "ss02=1", "ss03=1", "ss04=1", "ss05=1", "ss06=1"},
         },
         {
           family = "GoMono Nerd Font Mono",
