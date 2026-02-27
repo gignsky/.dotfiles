@@ -22,9 +22,9 @@ in
         # System-wide monospace: Cartograph primary, with GoMono for Nerd Font glyphs
         monospace = [
           "Cartograph CF"
-          "GoMono Nerd Font Mono"
           "MonoLisa Variable"
           "Artifex CF"
+          "GoMono Nerd Font Mono"
           "Times Newer Roman"
         ];
         # System-wide sans-serif: Cartograph
