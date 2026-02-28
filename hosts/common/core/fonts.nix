@@ -22,8 +22,8 @@ in
       defaultFonts = {
         # System-wide monospace: Cartograph primary, with GoMono for Nerd Font glyphs
         monospace = [
-          "Cartograph CF"
           "MonoLisa Variable"
+          "Cartograph CF"
           "Artifex CF"
           "GoMono Nerd Font Mono"
           "Times Newer Roman"
