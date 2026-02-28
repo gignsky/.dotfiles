@@ -9,13 +9,13 @@ _: {
     # Values range from 0.0 (fully transparent) to 1.0 (fully opaque)
     settings = {
       # Active window opacity (focused window) - 83% opaque
-      active-opacity = 0.83;
+      active-opacity = 0.90;
 
       # Inactive window opacity (unfocused windows) - 75% opaque
       inactive-opacity = 0.75;
 
       # Frame opacity (window borders/decorations) - 79% opaque
-      frame-opacity = 0.79;
+      frame-opacity = 0.50;
 
       # Opacity rules for specific window types or applications
       # opacity-rule = [
