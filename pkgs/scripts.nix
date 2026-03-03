@@ -65,7 +65,7 @@ let
       dependencies = with pkgs; [
         bash
         nix
-        nixos-rebuild
+        # nixos-rebuild is available from system, not needed here (would cause recursion)
         hostname
       ];
       description = "Rebuilds NixOS system configuration from flake";
