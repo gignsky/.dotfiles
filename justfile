@@ -197,9 +197,6 @@ test-rebuild-full host=`scripts/get-flake-target.sh`:
 	sudo nixos-rebuild dry-activate --flake .#{{host}} --verbose --show-trace
 	home-manager build --flake .#gig@{{host}} --verbose
 
-single-update:
-	nix run github:gignsky/nix-update-input
-
 # Update the flake
 update:
 	just dont-fuck-my-build
