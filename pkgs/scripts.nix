@@ -84,19 +84,19 @@ let
       description = "Rebuilds Home Manager configuration from flake";
     };
 
-    # Bootstrap script
-    bootstrap-nixos = makeScriptPackage {
-      name = "bootstrap-nixos";
-      scriptPath = ../scripts/bootstrap-nixos.sh;
-      dependencies = with pkgs; [
-        bash
-        git
-        nix
-        gnugrep
-        coreutils
-      ];
-      description = "Bootstraps a new NixOS installation with dotfiles";
-    };
+    # # Bootstrap script
+    # bootstrap-nixos = makeScriptPackage {
+    #   name = "bootstrap-nixos";
+    #   scriptPath = ../scripts/bootstrap-nixos.sh;
+    #   dependencies = with pkgs; [
+    #     bash
+    #     git
+    #     nix
+    #     gnugrep
+    #     coreutils
+    #   ];
+    #   description = "Bootstraps a new NixOS installation with dotfiles";
+    # };
 
     # Flake build script
     flake-build = makeScriptPackage {

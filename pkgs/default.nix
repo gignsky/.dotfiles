@@ -680,7 +680,6 @@ rec {
   # Import all packaged scripts from scripts.nix
   inherit (scripts)
     check-hardware-config
-    bootstrap-nixos
     nixos-rebuild
     home-switch
     flake-build
