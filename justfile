@@ -42,7 +42,7 @@ pull-rebuild:
 pull-home:
   @nix-shell -p lolcat --run "echo 'Rebuilding Home-Manager...' | lolcat 2> /dev/null"
   just pull
-  just home
+  just home 
   @nix-shell -p lolcat --run "echo 'Home-Manager Rebuilt.' | lolcat 2> /dev/null"
 
 pull-rebuild-full:
@@ -101,7 +101,7 @@ dont-fuck-my-build:
 
 switch args="":
 	just rebuild {{args}}
-	just home
+	just home {{args}}
 
 clean:
   @echo "🧹 Starting smart clean process..."
@@ -270,13 +270,13 @@ home *ARGS:
 # home-core:
 
 #nu'er home
-nu home:
-  just new home
+nu home *ARGS:
+  @just new home {{ARGS}}
 
 # Runs just home and then zsh
-new home:
+new home *ARGS:
   just clean
-  just home
+  just home {{ARGS}}
   exec nu
 
 home-trace:

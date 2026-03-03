@@ -1,5 +1,29 @@
 #!/usr/bin/env bash
 
+# Parse command-line arguments
+VERBOSE=false
+TEST_MODE=false
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -v|--verbose)
+            VERBOSE=true
+            shift
+            ;;
+        -t|--test)
+            TEST_MODE=true
+            shift
+            ;;
+        *)
+            echo "Unknown option: $1"
+            echo "Usage: $0 [-v|--verbose] [-t|--test]"
+            echo "  -v, --verbose    Show full output with --show-trace"
+            echo "  -t, --test       Use 'build' instead of 'switch' to test without activating"
+            exit 1
+            ;;
+    esac
+done
+
 # Source host detection library for intelligent WSL handling
 HOST_DETECTION_LIB_PATHS=(
     "${HOME}/.dotfiles/scripts/host-detection-lib.sh"
@@ -187,13 +211,46 @@ else
 fi
 
 git diff -U0 ./*glob*.nix
-echo "Home-Manager Rebuilding ${HOST_IDENTIFIER}..."
+
+# Determine operation and build command
+if [ "$TEST_MODE" = true ]; then
+  OPERATION="build"
+  echo "Home-Manager Test Building ${HOST_IDENTIFIER}..."
+else
+  OPERATION="switch"
+  echo "Home-Manager Rebuilding ${HOST_IDENTIFIER}..."
+fi
+
+# Build the command with optional verbose flags
+HM_CMD="home-manager $OPERATION"
+if [ "$OPERATION" = "switch" ]; then
+  HM_CMD="$HM_CMD -b backup"
+fi
+HM_CMD="$HM_CMD --flake .#gig@$HOST"
+if [ "$VERBOSE" = true ]; then
+  HM_CMD="$HM_CMD --show-trace"
+fi
 
 # Capture build success/failure
-if home-manager switch -b backup --flake .#gig@"$HOST"; then
+if [ "$VERBOSE" = true ]; then
+  # Verbose mode: show all output
+  eval "$HM_CMD"
+  BUILD_SUCCESS=$?
+else
+  # Normal mode: suppress verbose output
+  eval "$HM_CMD" > /dev/null 2>&1
+  BUILD_SUCCESS=$?
+fi
+
+if [ $BUILD_SUCCESS -eq 0 ]; then
   # Get the generation number after successful build
-  gen=$(home-manager generations 2>/dev/null | head -n 1)
-  generation_number=$(echo "$gen" | grep -o 'id [0-9]*' | grep -o '[0-9]*' || echo "unknown")
+  if [ "$TEST_MODE" = true ]; then
+    generation_number="test-build"
+    gen="test build (no generation created)"
+  else
+    gen=$(home-manager generations 2>/dev/null | head -n 1)
+    generation_number=$(echo "$gen" | grep -o 'id [0-9]*' | grep -o '[0-9]*' || echo "unknown")
+  fi
 
   # Calculate build duration
   end_time=$(date +%s)
