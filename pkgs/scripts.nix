@@ -14,30 +14,15 @@ let
       dependencies ? [ ], # List of packages this script depends on
       description ? "A packaged shell script",
     }:
-    let
-      scottyLoggingLib = builtins.readFile ../scripts/scotty-logging-lib.sh;
-    in
     pkgs.writeShellScriptBin name ''
-            # Auto-generated wrapper for ${scriptPath}
-            # Dependencies: ${
-              builtins.concatStringsSep ", " (map (pkg: pkg.name or "unknown") dependencies)
-            }
+      # Auto-generated wrapper for ${scriptPath}
+      Dependencies: ${builtins.concatStringsSep ", " (map (pkg: pkg.name or "unknown") dependencies)}
 
-            # Make dependencies available in PATH
-            export PATH="${pkgs.lib.makeBinPath dependencies}:$PATH"
+      # Make dependencies available in PATH
+      export PATH="${pkgs.lib.makeBinPath dependencies}:$PATH"
 
-            # Create a temporary copy of the scotty logging library for scripts that need it
-            if [[ "${scriptPath}" == *"system-flake-rebuild.sh"* ]] || [[ "${scriptPath}" == *"home-manager-flake-rebuild.sh"* ]]; then
-              TEMP_LIB_FILE="/tmp/scotty-logging-lib-$$.sh"
-              cat > "$TEMP_LIB_FILE" << 'SCOTTY_LIB_EOF'
-      ${scottyLoggingLib}
-      SCOTTY_LIB_EOF
-              export SCOTTY_LOGGING_LIB_PATH="$TEMP_LIB_FILE"
-              trap 'rm -f "$TEMP_LIB_FILE"' EXIT
-            fi
-
-            # Execute the original script with all arguments
-            exec ${pkgs.bash}/bin/bash "${scriptPath}" "$@"
+      # Execute the original script with all arguments
+      exec ${pkgs.bash}/bin/bash "${scriptPath}" "$@"
     ''
     // {
       meta = {
