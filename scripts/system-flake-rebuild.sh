@@ -204,13 +204,13 @@ if [ "$nixos_rebuild_exit_code" -eq 0 ]; then
       scotty_log_event "build-complete" "nixos-rebuild-${HOST_IDENTIFIER}" "$duration" "$build_success" "$generation_number"
   fi
   
-  # Call Scotty to create detailed engineering log
-  echo "=== CALLING SCOTTY FOR DETAILED ENGINEERING LOG ==="
-  if command -v opencode >/dev/null 2>&1; then
-    opencode run --agent scotty "Scotty, document this successful nixos-rebuild for ${HOST_IDENTIFIER}: Generation ${previous_gen} → ${generation_number}, build duration ${duration} seconds. Configuration changes since last rebuild: ${config_files_changed}. Files changed: ${detailed_diff}" || echo "Scotty logging failed, continuing..."
-  else
-    echo "OpenCode not available - skipping detailed Scotty log"
-  fi
+  # Automatic Scotty logging disabled - use 'just log-commit' or invoke Scotty manually if needed
+  # echo "=== CALLING SCOTTY FOR DETAILED ENGINEERING LOG ==="
+  # if command -v opencode >/dev/null 2>&1; then
+  #   opencode run --agent scotty "Scotty, document this successful nixos-rebuild for ${HOST_IDENTIFIER}: Generation ${previous_gen} → ${generation_number}, build duration ${duration} seconds. Configuration changes since last rebuild: ${config_files_changed}. Files changed: ${detailed_diff}" || echo "Scotty logging failed, continuing..."
+  # else
+  #   echo "OpenCode not available - skipping detailed Scotty log"
+  # fi
   
   # Commit with enhanced generation info (skip pre-commit hooks to avoid conflicts)
   export AUTOMATED_COMMIT=true
@@ -242,13 +242,13 @@ else
       log_build_performance "nixos-rebuild-${HOST_IDENTIFIER}" "$duration" "false" "nixos-rebuild-switch-failed" "Build failed during switch operation" "unknown"
   fi
   
-  # Call Scotty to document the failure
-  echo "=== CALLING SCOTTY FOR FAILURE ANALYSIS ==="
-  if command -v opencode >/dev/null 2>&1; then
-    opencode run --agent scotty "Scotty, document this FAILED nixos-rebuild for ${HOST_IDENTIFIER}: Build duration ${duration} seconds, previous generation ${previous_gen}. Configuration changes attempted: ${config_files_changed}. Error: ${error_info}. Analyze what went wrong and provide troubleshooting recommendations." || echo "Scotty logging failed"
-  else
-    echo "OpenCode not available - skipping detailed Scotty failure log"
-  fi
+  # Automatic Scotty logging disabled - use 'just log-commit' or invoke Scotty manually if needed
+  # echo "=== CALLING SCOTTY FOR FAILURE ANALYSIS ==="
+  # if command -v opencode >/dev/null 2>&1; then
+  #   opencode run --agent scotty "Scotty, document this FAILED nixos-rebuild for ${HOST_IDENTIFIER}: Build duration ${duration} seconds, previous generation ${previous_gen}. Configuration changes attempted: ${config_files_changed}. Error: ${error_info}. Analyze what went wrong and provide troubleshooting recommendations." || echo "Scotty logging failed"
+  # else
+  #   echo "OpenCode not available - skipping detailed Scotty failure log"
+  # fi
   
   echo "nixos-rebuild switch failed. Output:"
   cat "$output_file"

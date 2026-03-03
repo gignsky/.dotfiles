@@ -151,13 +151,13 @@ if home-manager switch -b backup --flake .#gig@"$HOST"; then
   # Log successful build to CSV  
   log_build_performance "home-manager-rebuild-${HOST_IDENTIFIER}" "$duration" "true" "" "Automated home-manager rebuild with Scotty engineering logs" "$generation_number"
 
-  # Call Scotty to create detailed engineering log
-  echo "=== CALLING SCOTTY FOR DETAILED ENGINEERING LOG ==="
-  if command -v opencode >/dev/null 2>&1; then
-    opencode run --agent scotty "Scotty, document this successful home-manager rebuild for ${HOST_IDENTIFIER}: Generation ${previous_gen} → ${generation_number}, build duration ${duration} seconds. Configuration changes since last rebuild: ${config_files_changed}. Files changed: ${detailed_diff}" || echo "Scotty logging failed, continuing..."
-  else
-    echo "OpenCode not available - skipping detailed Scotty log"
-  fi
+  # Automatic Scotty logging disabled - use 'just log-commit' or invoke Scotty manually if needed
+  # echo "=== CALLING SCOTTY FOR DETAILED ENGINEERING LOG ==="
+  # if command -v opencode >/dev/null 2>&1; then
+  #   opencode run --agent scotty "Scotty, document this successful home-manager rebuild for ${HOST_IDENTIFIER}: Generation ${previous_gen} → ${generation_number}, build duration ${duration} seconds. Configuration changes since last rebuild: ${config_files_changed}. Files changed: ${detailed_diff}" || echo "Scotty logging failed, continuing..."
+  # else
+  #   echo "OpenCode not available - skipping detailed Scotty log"
+  # fi
 
   # Commit with generation info
   # Create enhanced commit message using Scotty's enhancement system (skip pre-commit hooks)
@@ -180,13 +180,13 @@ else
   # Log failed build to CSV
   log_build_performance "home-manager-rebuild-${HOST_IDENTIFIER}" "$duration" "false" "home-manager-switch-failed" "Build failed during switch operation" "unknown"
 
-  # Call Scotty to document the failure
-  echo "=== CALLING SCOTTY FOR FAILURE ANALYSIS ==="
-  if command -v opencode >/dev/null 2>&1; then
-    opencode run --agent scotty "Scotty, document this FAILED home-manager rebuild for ${HOST_IDENTIFIER}: Build duration ${duration} seconds, previous generation ${previous_gen}. Configuration changes attempted: ${config_files_changed}. Analyze what went wrong and provide troubleshooting recommendations." || echo "Scotty logging failed"
-  else
-    echo "OpenCode not available - skipping detailed Scotty failure log"
-  fi
+  # Automatic Scotty logging disabled - use 'just log-commit' or invoke Scotty manually if needed
+  # echo "=== CALLING SCOTTY FOR FAILURE ANALYSIS ==="
+  # if command -v opencode >/dev/null 2>&1; then
+  #   opencode run --agent scotty "Scotty, document this FAILED home-manager rebuild for ${HOST_IDENTIFIER}: Build duration ${duration} seconds, previous generation ${previous_gen}. Configuration changes attempted: ${config_files_changed}. Analyze what went wrong and provide troubleshooting recommendations." || echo "Scotty logging failed"
+  # else
+  #   echo "OpenCode not available - skipping detailed Scotty failure log"
+  # fi
 
   echo "❌ Home Manager rebuild failed for ${HOST_IDENTIFIER}!"
   exit 1
