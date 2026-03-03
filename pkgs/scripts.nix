@@ -72,9 +72,9 @@ let
     };
 
     # Home Manager rebuild script
-    home-manager-flake-rebuild = makeScriptPackage {
-      name = "home-manager-flake-rebuild";
-      scriptPath = ../scripts/home-manager-flake-rebuild.sh;
+    home-switch = makeScriptPackage {
+      name = "home-switch";
+      scriptPath = ../scripts/home-switch.sh;
       dependencies = with pkgs; [
         bash
         nix

@@ -263,20 +263,10 @@ post-home:
 	@nix-shell -p lolcat --run 'echo "[POST-HOME] Finished." | lolcat 2> /dev/null'
 	@echo "✅ Home-manager rebuild completed - engineering logs handled by rebuild script"
 
-simple-home *ARGS:
-	nix run .#home-manager-flake-rebuild -- {{ ARGS }}
-
 home *ARGS:
   just pre-home
   @nix-shell -p lolcat --run 'echo "[HOME] Attempting Home Rebuild..." | lolcat 2> /dev/null'
-  just simple-home {{ ARGS }}
-  just post-home
-
-# Rebuild home-manager verbosely (with SCOTTY_DEBUG)
-home-v *ARGS:
-  just pre-home
-  @nix-shell -p lolcat --run 'echo "[HOME-V] Attempting Verbose Home Rebuild..." | lolcat 2> /dev/null'
-  env SCOTTY_DEBUG=true just simple-home {{ ARGS }}
+  nix run .#home-switch -- {{ ARGS }}
   just post-home
 
 # Runs just home

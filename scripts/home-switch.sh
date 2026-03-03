@@ -99,10 +99,61 @@ if [ "$LOGGING_LIB_FOUND" = false ]; then
   }
 fi
 
-failable-pre-commit() {
-  nix develop -c echo '*The Pre-Commit has been given a chance to Update!*'
-  nix shell nixpkgs#pre-commit -c pre-commit run --all-files
-}
+# Pre-commit checks with auto-fix and validation
+echo "🔍 Running pre-commit checks..."
+USE_NO_VERIFY=false
+
+# Run pre-commit checks (first pass - may auto-fix)
+if ! nix develop -c pre-commit run --all-files 2>&1; then
+  echo "⚠️  Pre-commit checks failed, attempting auto-fixes..."
+  
+  # Run second time to catch auto-fixes
+  if ! nix develop -c pre-commit run --all-files 2>&1; then
+    echo "❌ Pre-commit checks have unfixable errors"
+    echo ""
+    echo "🔧 Running flake validation to check Nix syntax..."
+    
+    # Capture flake check output, show only errors
+    flake_check_output=$(mktemp)
+    if nix flake check --keep-going 2>&1 | tee "$flake_check_output" | grep -i "error" || grep -i "error" "$flake_check_output"; then
+      echo ""
+      echo "❌ Flake validation FAILED"
+      echo "Please fix the Nix syntax errors above before rebuilding"
+      rm "$flake_check_output"
+      exit 1
+    else
+      echo "✅ Flake validation PASSED"
+      rm "$flake_check_output"
+      echo ""
+      echo "Pre-commit checks failed but flake validation passed."
+      echo "This suggests non-Nix formatting/linting issues."
+      echo ""
+      
+      # Interactive prompt for non-interactive-safe execution
+      if [ -t 0 ] && [ -t 1 ]; then
+        read -p "Continue with rebuild and commit with --no-verify? [y/N] " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+          echo "Rebuild cancelled. Please fix pre-commit issues first."
+          exit 1
+        fi
+        USE_NO_VERIFY=true
+        echo "⚠️  Proceeding with --no-verify flag..."
+      else
+        echo "❌ Non-interactive terminal - cannot prompt for override"
+        echo "Please fix pre-commit issues or run interactively"
+        exit 1
+      fi
+    fi
+  else
+    echo "✅ Pre-commit auto-fixes applied successfully"
+  fi
+else
+  echo "✅ Pre-commit checks passed"
+fi
+
+# Stage any auto-fixed files
+git add -u 2>/dev/null || true
 
 set -e
 pushd . || exit
@@ -160,15 +211,23 @@ if home-manager switch -b backup --flake .#gig@"$HOST"; then
   # fi
 
   # Commit with generation info
-  # Create enhanced commit message using Scotty's enhancement system (skip pre-commit hooks)
+  # Create enhanced commit message using Scotty's enhancement system
   export AUTOMATED_COMMIT=true
   if [ -f "$(dirname "$0")/commit-enhance-lib.sh" ]; then
     source "$(dirname "$0")/commit-enhance-lib.sh"
     enhanced_msg=$(enhance_commit_message "auto(home): rebuild $HOST_IDENTIFIER generation $gen" "home-manager-flake-rebuild.sh")
-    git commit -a --allow-empty --no-verify -m "$enhanced_msg" || true
+    if [ "$USE_NO_VERIFY" = true ]; then
+      git commit -a --allow-empty --no-verify -m "$enhanced_msg" || true
+    else
+      git commit -a --allow-empty -m "$enhanced_msg" || true
+    fi
   else
     # Fallback to basic message if enhancement library not available
-    git commit -a --allow-empty --no-verify -m "gig@$HOST_IDENTIFIER: $gen" || true
+    if [ "$USE_NO_VERIFY" = true ]; then
+      git commit -a --allow-empty --no-verify -m "gig@$HOST_IDENTIFIER: $gen" || true
+    else
+      git commit -a --allow-empty -m "gig@$HOST_IDENTIFIER: $gen" || true
+    fi
   fi
 
   echo "✅ Home Manager rebuild successful! Generation: $generation_number (${duration}s) for ${HOST_IDENTIFIER}"

@@ -682,6 +682,7 @@ rec {
     check-hardware-config
     bootstrap-nixos
     nixos-rebuild
+    home-switch
     flake-build
     pre-commit-flake-check
     run-iso-vm
