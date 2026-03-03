@@ -680,9 +680,6 @@ rec {
   # Import all packaged scripts from scripts.nix
   inherit (scripts)
     check-hardware-config
-    home-manager-flake-rebuild
-    system-flake-rebuild-test
-    system-flake-rebuild-verbose
     bootstrap-nixos
     nixos-rebuild
     flake-build

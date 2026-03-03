@@ -172,20 +172,6 @@ rebuild args="":
 	nix run .#nixos-rebuild -- {{args}}
 	just rebuild-post
 
-# Rebuild the system verbosely (with SCOTTY_DEBUG)
-rebuild-v args="":
-	just rebuild-pre
-	@nix-shell -p lolcat --run 'echo "[REBUILD-V] Attempting Verbose Rebuild..." | lolcat' 2> /dev/null 
-	env SCOTTY_DEBUG=true nix run .#system-flake-rebuild -- {{args}}
-	just rebuild-post
-
-# Test rebuilds the system
-rebuild-test args="":
-	just rebuild-pre
-	nix run .#system-flake-rebuild-test -- {{args}}
-	@nix-shell -p lolcat --run 'echo "[TEST] Finished." | lolcat 2> /dev/null'
-	@echo "📊 Test rebuild completed - logs automatically written to annex"
-
 # Rebuild-full with new shell
 rebuild-full-new args="":
         just rebuild-full {{args}}

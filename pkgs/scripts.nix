@@ -84,32 +84,6 @@ let
       description = "Rebuilds Home Manager configuration from flake";
     };
 
-    # Test rebuild script
-    system-flake-rebuild-test = makeScriptPackage {
-      name = "system-flake-rebuild-test";
-      scriptPath = ../scripts/system-flake-rebuild-test.sh;
-      dependencies = with pkgs; [
-        bash
-        nix
-        nixos-rebuild
-        hostname
-      ];
-      description = "Test builds NixOS system configuration without activation";
-    };
-
-    # Verbose rebuild script
-    system-flake-rebuild-verbose = makeScriptPackage {
-      name = "system-flake-rebuild-verbose";
-      scriptPath = ../scripts/system-flake-rebuild-verbose.sh;
-      dependencies = with pkgs; [
-        bash
-        nix
-        nixos-rebuild
-        hostname
-      ];
-      description = "Rebuilds NixOS system with verbose output for debugging";
-    };
-
     # Bootstrap script
     bootstrap-nixos = makeScriptPackage {
       name = "bootstrap-nixos";
