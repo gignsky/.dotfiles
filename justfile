@@ -54,42 +54,9 @@ pull-rebuild-full:
 pull-nix-secrets:
   cd ~/nix-secrets && git fetch && git pull && cd ~/.dotfiles
 
-# Pull annex repository with automatic stash/unstash for safe updates
-pull-annex:
-  @nix-shell -p lolcat --run "echo '📚 Syncing annex repository...' | lolcat 2> /dev/null"
-  @cd ~/local_repos/annex && \
-    (git diff --quiet && git diff --cached --quiet || git stash push -m "pre-pull-annex-$(date '+%Y%m%d-%H%M%S')") && \
-    git fetch && \
-    git pull --rebase && \
-    (git stash list | grep -q "pre-pull-annex" && git stash pop || true)
-  @nix-shell -p lolcat --run "echo '✅ Annex synchronized' | lolcat 2> /dev/null"
-
-# Push annex logs to remote
-push-annex:
-  @nix-shell -p lolcat --run "echo '📤 Pushing annex logs to remote...' | lolcat 2> /dev/null"
-  @cd ~/local_repos/annex && git push
-  @nix-shell -p lolcat --run "echo '✅ Annex logs pushed' | lolcat 2> /dev/null"
-
-# Synchronize annex (pull + commit staged + push)
-sync-annex:
-  just pull-annex
-  @nix-shell -p lolcat --run "echo '💾 Committing any staged annex logs...' | lolcat 2> /dev/null"
-  @cd ~/local_repos/annex && \
-    (git diff --cached --quiet || git commit -m "📊 Scotty: Manual sync of engineering logs ($(date '+%Y-%m-%d %H:%M'))") || true
-  just push-annex
-
-# Check annex repository status
-annex-status:
-  @echo "📊 Annex Repository Status:"
-  @cd ~/local_repos/annex && git status
-  @echo ""
-  @echo "📈 Recent log activity:"
-  @cd ~/local_repos/annex && git log --oneline -5
-
 # Run before every rebuild, every time
 rebuild-pre:
   @nix-shell -p lolcat --run 'echo "[PRE] Rebuilding NixOS..." | lolcat 2> /dev/null'
-  just pull-annex
   just dont-fuck-my-build
   @nix-shell -p lolcat --run 'echo "Updating Nix-Secrets Repo..." | lolcat 2> /dev/null'
 
@@ -251,7 +218,6 @@ om *ARGS:
 
 # Run before every home rebuild, on non-quick build
 pre-home:
-	just pull-annex
 	just dont-fuck-my-build
 	@nix-shell -p lolcat --run 'echo "[PRE-HOME] Finished." | lolcat 2> /dev/null'
 
@@ -560,32 +526,3 @@ package-script:
 # Check hardware configuration synchronization
 check-hardware:
 	nix run .#check-hardware-config
-
-# Batched logging commands for reduced commit noise
-batch-commit-logs:
-	@echo "📊 Committing batched engineering logs..."
-	just pull-annex
-	@bash -c 'cd ~/.dotfiles && source scripts/scotty-logging-lib.sh && _commit_batch_logs'
-	@echo "💡 Tip: Use 'just push-annex' to push logs to remote"
-
-batch-status:
-	@echo "📊 Batch logging status:"
-	@bash -c 'cd ~/.dotfiles && if [ -d ".batch-logs" ]; then find .batch-logs -name "*.batch" -exec echo "  📄 {}" \; -exec grep -c "^---BATCH-ENTRY-START---" {} \; 2>/dev/null | paste - - | sed "s/\t/ entries: /"; else echo "  No pending batch logs"; fi'
-
-# Manual engineering log entry for commits
-log-commit message="":
-	just pull-annex
-	@if [ -z "{{message}}" ]; then \
-		echo "📝 Logging most recent commit to engineering records in annex..."; \
-		bash -c 'cd ~/.dotfiles && source scripts/scotty-logging-lib.sh && scotty_log_event "git-commit" "$$(git log -1 --pretty=%s)"'; \
-	else \
-		echo "📝 Logging custom message to engineering records in annex..."; \
-		bash -c 'cd ~/.dotfiles && source scripts/scotty-logging-lib.sh && scotty_log_event "git-commit" "{{message}}"'; \
-	fi
-	@echo "✅ Engineering log entry created successfully in annex repository"
-	@echo "💡 Tip: Use 'just push-annex' to push logs to remote"
-
-# Scotty's system state analysis and gap detection
-log-status:
-	@echo "🔍 Running Chief Engineer's system state analysis..."
-	@bash -c 'cd ~/.dotfiles && source scripts/scotty-logging-lib.sh && log_status'
