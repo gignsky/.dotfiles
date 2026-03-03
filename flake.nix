@@ -161,17 +161,6 @@
           };
         }
         // customPkgs;
-      assertAllHostsHaveVmTest =
-        configs:
-        let
-          missing = nixpkgs.lib.filterAttrs (
-            _: config: (config.config.system.build.vmTest or null) == null
-          ) configs;
-        in
-        if missing != { } then
-          throw "\\nSome nixosConfigurations are missing a vmTest!\\nOffending hosts: ${builtins.concatStringsSep ", " (builtins.attrNames missing)}\\nEach host must define config.system.build.vmTest."
-        else
-          true;
     in
     {
       # NixOS configuration entrypoint
@@ -414,39 +403,13 @@
       # # Alternative naming that's more standard for Home Manager flakes
       # homeManagerModules = self.homeModules;
 
-      checks = {
-        ${system} =
-          let
-            homeManagerChecks = nixpkgs.lib.mapAttrs' (name: cfg: {
-              name = "homeManager-${name}";
-              value = cfg.activationPackage;
-            }) self.homeConfigurations;
-          in
-          homeManagerChecks;
+      checks.${system} = import ./checks {
+        inherit
+          self
+          pkgs
+          lib
+          ;
       };
-      # seperating out package-builds to manual
-      packageBuilds =
-        let
-          packageBuilds = nixpkgs.lib.mapAttrs' (name: pkg: {
-            name = "build-${name}";
-            value = pkg;
-          }) (import ./pkgs { inherit pkgs; });
-        in
-        packageBuilds;
-
-      # seperating out nixosTests to manual
-      nixosTests =
-        let
-          nixosTests =
-            assert assertAllHostsHaveVmTest self.nixosConfigurations;
-            nixpkgs.lib.filterAttrs (_: v: v != null) (
-              nixpkgs.lib.mapAttrs' (name: config: {
-                name = "nixosTest-${name}";
-                value = config.config.system.build.vmTest or null;
-              }) self.nixosConfigurations
-            );
-        in
-        nixosTests;
 
       # Pre-commit check configuration - manual execution, not part of flake check
       pre-commit-check = inputs.pre-commit-hooks.lib.${system}.run {
