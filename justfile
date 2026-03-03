@@ -169,7 +169,7 @@ rebuild-post:
 rebuild args="":
 	just rebuild-pre
 	@nix-shell -p lolcat --run 'echo "[REBUILD] Attempting Rebuild..." | lolcat' 2> /dev/null 
-	nix run .#system-flake-rebuild -- {{args}}
+	nix run .#nixos-rebuild -- {{args}}
 	just rebuild-post
 
 # Rebuild the system verbosely (with SCOTTY_DEBUG)

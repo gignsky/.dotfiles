@@ -59,9 +59,9 @@ let
     };
 
     # System rebuild script
-    system-flake-rebuild = makeScriptPackage {
-      name = "system-flake-rebuild";
-      scriptPath = ../scripts/system-flake-rebuild.sh;
+    nixos-rebuild = makeScriptPackage {
+      name = "nixos-rebuild";
+      scriptPath = ../scripts/nixos-rebuild.sh;
       dependencies = with pkgs; [
         bash
         nix
