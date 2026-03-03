@@ -1,5 +1,46 @@
 #!/usr/bin/env bash
 
+# Parse command-line arguments
+VERBOSE=false
+REBUILD_SUBCOMMAND="switch"
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -v|--verbose)
+            VERBOSE=true
+            shift
+            ;;
+        -t|--test)
+            REBUILD_SUBCOMMAND="test"
+            shift
+            ;;
+        -b|--boot)
+            REBUILD_SUBCOMMAND="boot"
+            shift
+            ;;
+        --dry-build)
+            REBUILD_SUBCOMMAND="dry-build"
+            shift
+            ;;
+        --dry-activate)
+            REBUILD_SUBCOMMAND="dry-activate"
+            shift
+            ;;
+        *)
+            echo "Unknown option: $1"
+            echo "Usage: $0 [-v|--verbose] [-t|--test] [-b|--boot] [--dry-build] [--dry-activate]"
+            echo "  -v, --verbose       Show full output with --show-trace"
+            echo "  -t, --test          Build and activate, but don't add to bootloader"
+            echo "  -b, --boot          Build and add to bootloader, activate on next boot"
+            echo "  --dry-build         Show what would be built without building"
+            echo "  --dry-activate      Build but show what would be activated without activating"
+            echo ""
+            echo "Default: switch (build, activate, and add to bootloader)"
+            exit 1
+            ;;
+    esac
+done
+
 # Source host detection library for intelligent WSL handling
 HOST_DETECTION_LIB_PATHS=(
     "${HOME}/.dotfiles/scripts/host-detection-lib.sh"
@@ -59,12 +100,6 @@ fi
 # Use auto-detected hostname, don't treat arguments as hostname
 export HOST=$(detect_flake_target)
 export HOST_IDENTIFIER=$(get_host_identifier "$HOST")
-
-# Store all arguments for passing to nixos-rebuild
-NIXOS_REBUILD_ARGS="$*"
-if [ -z "$NIXOS_REBUILD_ARGS" ]; then
-    NIXOS_REBUILD_ARGS="switch"
-fi
 
 authenticate_sudo() {
     echo "🔐 NixOS rebuild requires sudo access for ${HOST_IDENTIFIER}..."
@@ -219,7 +254,13 @@ else
 fi
 
 git diff -U0 ./*glob*.nix
-echo "NixOS Rebuilding ${HOST_IDENTIFIER}..."
+echo "NixOS Rebuilding ${HOST_IDENTIFIER} (subcommand: ${REBUILD_SUBCOMMAND})..."
+
+# Build the nixos-rebuild command with optional verbose flags
+NIXOS_CMD="sudo nixos-rebuild ${REBUILD_SUBCOMMAND} --flake .#${HOST}"
+if [ "$VERBOSE" = true ]; then
+  NIXOS_CMD="$NIXOS_CMD --show-trace"
+fi
 
 # Capture build output and success/failure with robust exit code handling
 output_file=$(mktemp)
@@ -228,11 +269,21 @@ output_file=$(mktemp)
 set -o pipefail
 
 # Run nixos-rebuild and capture both output and exit code properly
-echo "Starting nixos-rebuild switch for ${HOST_IDENTIFIER}..."
-if sudo nixos-rebuild switch --flake .#"$HOST" 2>&1 | tee "$output_file"; then
-  nixos_rebuild_exit_code=${PIPESTATUS[0]}
+echo "Starting nixos-rebuild ${REBUILD_SUBCOMMAND} for ${HOST_IDENTIFIER}..."
+if [ "$VERBOSE" = true ]; then
+  # Verbose mode: show all output
+  if eval "$NIXOS_CMD" 2>&1 | tee "$output_file"; then
+    nixos_rebuild_exit_code=${PIPESTATUS[0]}
+  else
+    nixos_rebuild_exit_code=${PIPESTATUS[0]}
+  fi
 else
-  nixos_rebuild_exit_code=${PIPESTATUS[0]}
+  # Normal mode: capture output but don't show unless there's an error
+  if eval "$NIXOS_CMD" > "$output_file" 2>&1; then
+    nixos_rebuild_exit_code=$?
+  else
+    nixos_rebuild_exit_code=$?
+  fi
 fi
 
 # Double-check the actual exit code from nixos-rebuild (not tee)
@@ -264,23 +315,28 @@ if [ "$nixos_rebuild_exit_code" -eq 0 ]; then
   #   echo "OpenCode not available - skipping detailed Scotty log"
   # fi
   
-  # Commit with enhanced generation info
-  export AUTOMATED_COMMIT=true
-  if [ -f "$(dirname "$0")/commit-enhance-lib.sh" ]; then
-    source "$(dirname "$0")/commit-enhance-lib.sh"
-    enhanced_msg=$(enhance_commit_message "auto(system): rebuild $HOST_IDENTIFIER generation $gen" "system-flake-rebuild.sh")
-    if [ "$USE_NO_VERIFY" = true ]; then
-      git commit -a --allow-empty --no-verify -m "$enhanced_msg" || true
+  # Only commit if this was a switch or boot operation (not test/dry-run)
+  if [[ "$REBUILD_SUBCOMMAND" == "switch" || "$REBUILD_SUBCOMMAND" == "boot" ]]; then
+    # Commit with enhanced generation info
+    export AUTOMATED_COMMIT=true
+    if [ -f "$(dirname "$0")/commit-enhance-lib.sh" ]; then
+      source "$(dirname "$0")/commit-enhance-lib.sh"
+      enhanced_msg=$(enhance_commit_message "auto(system): rebuild $HOST_IDENTIFIER generation $gen (${REBUILD_SUBCOMMAND})" "system-flake-rebuild.sh")
+      if [ "$USE_NO_VERIFY" = true ]; then
+        git commit -a --allow-empty --no-verify -m "$enhanced_msg" || true
+      else
+        git commit -a --allow-empty -m "$enhanced_msg" || true
+      fi
     else
-      git commit -a --allow-empty -m "$enhanced_msg" || true
+      # Fallback to basic message if enhancement library not available
+      if [ "$USE_NO_VERIFY" = true ]; then
+        git commit -a --allow-empty --no-verify -m "$HOST_IDENTIFIER: $gen (${REBUILD_SUBCOMMAND})" || true
+      else
+        git commit -a --allow-empty -m "$HOST_IDENTIFIER: $gen (${REBUILD_SUBCOMMAND})" || true
+      fi
     fi
   else
-    # Fallback to basic message if enhancement library not available
-    if [ "$USE_NO_VERIFY" = true ]; then
-      git commit -a --allow-empty --no-verify -m "$HOST_IDENTIFIER: $gen" || true
-    else
-      git commit -a --allow-empty -m "$HOST_IDENTIFIER: $gen" || true
-    fi
+    echo "ℹ️  Skipping git commit for ${REBUILD_SUBCOMMAND} operation"
   fi
 else
   echo "nixos-rebuild failed with exit code: $nixos_rebuild_exit_code"
@@ -310,11 +366,25 @@ else
   #   echo "OpenCode not available - skipping detailed Scotty failure log"
   # fi
   
-  echo "nixos-rebuild switch failed. Output:"
+  echo "nixos-rebuild ${REBUILD_SUBCOMMAND} failed. Output:"
   cat "$output_file"
   rm "$output_file"
   exit 1
 fi
 
 rm "$output_file"
+
+# Print success message with operation details
+if [[ "$REBUILD_SUBCOMMAND" == "dry-build" || "$REBUILD_SUBCOMMAND" == "dry-activate" ]]; then
+  echo "✅ NixOS ${REBUILD_SUBCOMMAND} completed successfully for ${HOST_IDENTIFIER}! (${duration}s)"
+elif [ "$REBUILD_SUBCOMMAND" == "test" ]; then
+  echo "✅ NixOS test rebuild successful for ${HOST_IDENTIFIER}! Generation: $generation_number (${duration}s)"
+  echo "ℹ️  Configuration activated but not added to bootloader"
+elif [ "$REBUILD_SUBCOMMAND" == "boot" ]; then
+  echo "✅ NixOS boot configuration built for ${HOST_IDENTIFIER}! Generation: $generation_number (${duration}s)"
+  echo "ℹ️  Will activate on next reboot"
+else
+  echo "✅ NixOS rebuild successful for ${HOST_IDENTIFIER}! Generation: $generation_number (${duration}s)"
+fi
+
 popd || exit
