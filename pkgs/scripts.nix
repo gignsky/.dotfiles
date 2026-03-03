@@ -27,7 +27,7 @@ let
     // {
       meta = {
         inherit description;
-        license = pkgs.lib.licenses.mit;
+        # license = pkgs.lib.licenses.mit;
         maintainers = [ ];
       };
       passthru = {
