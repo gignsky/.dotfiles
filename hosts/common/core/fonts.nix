@@ -18,7 +18,7 @@ in
         times-newer-roman
       ];
     fontconfig = {
-      enable = true;
+      enable = false;
       defaultFonts = {
         # System-wide monospace: Cartograph primary, with GoMono for Nerd Font glyphs
         monospace = [
