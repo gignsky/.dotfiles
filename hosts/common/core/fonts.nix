@@ -4,7 +4,7 @@ let
 in
 {
   fonts = {
-    enableDefaultPackages = false;
+    enableDefaultPackages = true;
     enableGhostscriptFonts = true;
     fontDir = {
       enable = true;
