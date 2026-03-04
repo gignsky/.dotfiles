@@ -128,11 +128,11 @@ echo "🔍 Running pre-commit checks..."
 USE_NO_VERIFY=false
 
 # Run pre-commit checks (first pass - may auto-fix)
-if ! nix develop -c pre-commit run --all-files 2>&1; then
+if ! nix develop -c pre-commit run --all-files >/dev/null 2>&1; then
   echo "⚠️  Pre-commit checks failed, attempting auto-fixes..."
   
   # Run second time to catch auto-fixes
-  if ! nix develop -c pre-commit run --all-files 2>&1; then
+  if ! nix develop -c pre-commit run --all-files >/dev/null 2>&1; then
     echo "❌ Pre-commit checks have unfixable errors"
     echo ""
     echo "🔧 Running flake validation to check Nix syntax..."

@@ -138,11 +138,11 @@ echo "🔍 Running pre-commit checks..."
 USE_NO_VERIFY=false
 
 # Run pre-commit checks (first pass - may auto-fix)
-if ! nix develop -c pre-commit run --all-files 2>&1; then
+if ! nix develop -c pre-commit run --all-files >/dev/null 2>&1; then
   echo "⚠️  Pre-commit checks failed, attempting auto-fixes..."
   
   # Run second time to catch auto-fixes
-  if ! nix develop -c pre-commit run --all-files 2>&1; then
+  if ! nix develop -c pre-commit run --all-files >/dev/null 2>&1; then
     echo "❌ Pre-commit checks have unfixable errors"
     echo ""
     echo "🔧 Running flake validation to check Nix syntax..."
@@ -291,8 +291,16 @@ if [ "$nixos_rebuild_exit_code" -eq 0 ]; then
   build_success="true"
   
   # Extract generation number from nixos-rebuild output or list-generations
-  gen=$(nixos-rebuild list-generations 2>/dev/null | grep current || echo "unknown generation")
-  generation_number=$(echo "$gen" | grep -o '[0-9]*' | head -n 1 || echo "unknown")
+  gen=$(nixos-rebuild list-generations 2>/dev/null | grep -i "True" | awk '{print $1}' || echo "unknown")
+  generation_number="$gen"
+  
+  # If we got a valid number, format it nicely, otherwise keep as "unknown"
+  if [[ "$generation_number" =~ ^[0-9]+$ ]]; then
+    gen="generation ${generation_number}"
+  else
+    gen="unknown generation"
+    generation_number="unknown"
+  fi
   
   # Calculate build duration
   end_time=$(date +%s)
