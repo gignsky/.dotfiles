@@ -5,7 +5,11 @@ in
 {
   fonts = {
     enableDefaultPackages = true;
-    fontDir.enable = true;
+    enableGhostscriptFonts = true;
+    fontDir = {
+      enable = true;
+      decompressFonts = true;
+    };
     packages =
       with inputs;
       with pkgs;
@@ -19,6 +23,12 @@ in
       ];
     fontconfig = {
       enable = true;
+      allowBitmaps = true;
+      allowType1 = true;
+      antialias = true;
+      cache32Bit = true;
+      includeUserConf = true;
+      useEmbeddedBitmaps = true;
       defaultFonts = {
         # System-wide monospace: Cartograph primary, with GoMono for Nerd Font glyphs
         monospace = [
