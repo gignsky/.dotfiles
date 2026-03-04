@@ -18,12 +18,12 @@ in
         times-newer-roman
       ];
     fontconfig = {
-      enable = false;
+      enable = true;
       defaultFonts = {
         # System-wide monospace: Cartograph primary, with GoMono for Nerd Font glyphs
         monospace = [
-          "MonoLisa Variable"
           "Cartograph CF"
+          "MonoLisa Variable"
           "Artifex CF"
           "GoMono Nerd Font Mono"
           "Times Newer Roman"
