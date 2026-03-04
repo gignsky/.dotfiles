@@ -72,10 +72,6 @@ switch args="":
 
 clean:
   @echo "🧹 Starting smart clean process..."
-  # First: Failsafe logging checkpoint (in case OpenCode gets broken)
-  @echo "📝 Pre-clean failsafe logging checkpoint..."
-  @bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Smart clean initiated" "preserving OpenCode history, cleaning caches"' 
-  
   # Clean standard caches (safe)
   rm -rfv ~/.cargo/
   rm -rfv ~/.cache/pre-commit/
@@ -122,8 +118,6 @@ clean:
   nix run .#quick-results
   
   # Post-clean failsafe logging
-  @echo "📝 Post-clean failsafe logging checkpoint..."
-  @bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Smart clean completed" "OpenCode ready for rebuild, caches cleared"'
   @echo "✅ Smart clean complete - OpenCode history preserved, configuration reset for rebuild"
 
 # Run after every rebuild, some of the time
