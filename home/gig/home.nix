@@ -71,6 +71,9 @@
     pdfarranger
     pdf4qt
 
+    #file manager
+    spaceFM
+
     # direnv # direnv is enabled by default
     dua
     # TRYING THESE OUT FROM https://blog.dalanmiller.com/my-favorite-command-line-tools/
