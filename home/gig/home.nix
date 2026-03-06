@@ -74,6 +74,8 @@
     #file manager
     spaceFM
 
+    vlc
+
     # direnv # direnv is enabled by default
     dua
     # TRYING THESE OUT FROM https://blog.dalanmiller.com/my-favorite-command-line-tools/
