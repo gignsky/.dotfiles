@@ -25,6 +25,7 @@
     ytmdesktop
     # ytmdl # YT Music downloader
     discord
+    makemkv
     # anydesk
     bambu-studio
   ];
