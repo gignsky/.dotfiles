@@ -28,11 +28,11 @@ _: {
       #   "100:class_g = 'vlc'" # VLC fully opaque
       # ];
 
-      # Fade settings
+      # Fade settings - slowed down for more apparent animations
       fading = true;
-      fade-in-step = 0.03;
-      fade-out-step = 0.03;
-      fade-delta = 5;
+      fade-in-step = 0.015; # Slower fade-in (was 0.03)
+      fade-out-step = 0.015; # Slower fade-out (was 0.03)
+      fade-delta = 8; # Increased time between steps for smoother effect
 
       # Shadow settings
       shadow = true;
@@ -56,20 +56,28 @@ _: {
       detect-transient = true;
       use-damage = true;
 
-      # Blur settings - subtle blur for active windows to improve readability
-      blur-method = "dual_kawase";
-      blur-strength = 2;
+      # Blur settings - Gaussian blur for all windows
+      blur-method = "gaussian";
+      blur-size = 10; # Size of blur kernel
+      blur-deviation = 5.0; # Standard deviation for Gaussian blur
+      blur-strength = 5; # Strength of the blur effect
       blur-background = true;
       blur-background-frame = false;
       blur-background-fixed = false;
 
-      # Only blur active windows for better readability
+      # Exclude blur for fullscreen windows and specific applications
       blur-background-exclude = [
         "window_type = 'dock'"
         "window_type = 'desktop'"
         "_GTK_FRAME_EXTENTS@:c"
         "class_g = 'slop'" # Exclude screenshot selection
-        "!focused" # Don't blur inactive windows
+        "fullscreen" # Don't blur fullscreen windows
+        "class_g = 'vlc'" # Exclude VLC
+        "class_g = 'Vlc'" # VLC alternate capitalization
+        "class_g = 'mpv'" # Exclude mpv
+        "class_g = 'Plex'" # Exclude Plex
+        "class_g = 'plexmediaplayer'" # Exclude Plex Media Player
+        "class_g = 'Plexamp'" # Exclude Plexamp
       ];
     };
   };
