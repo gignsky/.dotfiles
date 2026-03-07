@@ -56,21 +56,23 @@ _: {
       detect-transient = true;
       use-damage = true;
 
-      # Blur settings - Gaussian blur for all windows
+      # Blur settings - Gaussian blur for inactive windows only
+      # Active windows remain clear for readability
       blur-method = "gaussian";
-      blur-size = 10; # Size of blur kernel
-      blur-deviation = 5.0; # Standard deviation for Gaussian blur
-      blur-strength = 5; # Strength of the blur effect
+      blur-size = 15; # Increased blur kernel size for stronger effect
+      blur-deviation = 8.0; # Increased standard deviation for more blur
+      blur-strength = 8; # Stronger blur strength
       blur-background = true;
       blur-background-frame = false;
       blur-background-fixed = false;
 
-      # Exclude blur for fullscreen windows and specific applications
+      # Exclude blur for active/focused windows and specific applications
       blur-background-exclude = [
         "window_type = 'dock'"
         "window_type = 'desktop'"
         "_GTK_FRAME_EXTENTS@:c"
         "class_g = 'slop'" # Exclude screenshot selection
+        "focused" # Don't blur the active/focused window (keeps it readable)
         "fullscreen" # Don't blur fullscreen windows
         "class_g = 'vlc'" # Exclude VLC
         "class_g = 'Vlc'" # VLC alternate capitalization
