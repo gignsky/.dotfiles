@@ -102,10 +102,10 @@ When consulting on repositories outside your primary assignment:
     1. Run `git status` to assess current working tree and index state
     2. Run `git diff` for unstaged changes analysis
     3. Run `git diff --staged` for staged changes analysis  
-    4. Reference fleet git standards from `docs/standards/git/`:
-       - Follow `GIT-CONVENTIONS.md` for commit philosophy and message format
-       - Apply `commit-language-guide.md` for descriptive language (avoid "final", "update")
-       - Use `gigis-commitus.md` for proper type classification and agent signatures
+     4. Reference fleet git standards from `~/local_repos/annex/fleet/knowledge-base/standards/git/`:
+        - Follow `GIT-CONVENTIONS.md` for commit philosophy and message format
+        - Apply `commit-language-guide.md` for descriptive language (avoid "final", "update")
+        - Use `gigis-commitus.md` for proper type classification and agent signatures
     5. Analyze changes and group by logical functionality per Conventional Commits overlay
     6. Create commit messages following Lord Gig's Standards of Commitence
     7. Include proper agent signatures and technical metadata when available
@@ -222,7 +222,7 @@ When consulting on repositories outside your primary assignment:
 - **Authority**: A directive of Lord Gig
 - **Changes**: Added standardized `/commit` command to Universal Agent Commands
   - Comprehensive git working directory analysis (staged and unstaged changes)
-  - Integration with fleet git standards from `docs/standards/git/` documentation
+  - Integration with fleet git standards from `~/local_repos/annex/fleet/knowledge-base/standards/git/` documentation
   - Safety protocols for staging decisions and pre-commit hook handling
   - Standards compliance with Lord Gig's Conventional Commits overlay
   - Agent signature requirements and technical metadata inclusion

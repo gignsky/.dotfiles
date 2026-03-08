@@ -14,35 +14,20 @@ let
       dependencies ? [ ], # List of packages this script depends on
       description ? "A packaged shell script",
     }:
-    let
-      scottyLoggingLib = builtins.readFile ../scripts/scotty-logging-lib.sh;
-    in
     pkgs.writeShellScriptBin name ''
-            # Auto-generated wrapper for ${scriptPath}
-            # Dependencies: ${
-              builtins.concatStringsSep ", " (map (pkg: pkg.name or "unknown") dependencies)
-            }
+      # Auto-generated wrapper for ${scriptPath}
+      Dependencies: ${builtins.concatStringsSep ", " (map (pkg: pkg.name or "unknown") dependencies)}
 
-            # Make dependencies available in PATH
-            export PATH="${pkgs.lib.makeBinPath dependencies}:$PATH"
+      # Make dependencies available in PATH
+      export PATH="${pkgs.lib.makeBinPath dependencies}:$PATH"
 
-            # Create a temporary copy of the scotty logging library for scripts that need it
-            if [[ "${scriptPath}" == *"system-flake-rebuild.sh"* ]] || [[ "${scriptPath}" == *"home-manager-flake-rebuild.sh"* ]]; then
-              TEMP_LIB_FILE="/tmp/scotty-logging-lib-$$.sh"
-              cat > "$TEMP_LIB_FILE" << 'SCOTTY_LIB_EOF'
-      ${scottyLoggingLib}
-      SCOTTY_LIB_EOF
-              export SCOTTY_LOGGING_LIB_PATH="$TEMP_LIB_FILE"
-              trap 'rm -f "$TEMP_LIB_FILE"' EXIT
-            fi
-
-            # Execute the original script with all arguments
-            exec ${pkgs.bash}/bin/bash "${scriptPath}" "$@"
+      # Execute the original script with all arguments
+      exec ${pkgs.bash}/bin/bash "${scriptPath}" "$@"
     ''
     // {
       meta = {
         inherit description;
-        license = pkgs.lib.licenses.mit;
+        # license = pkgs.lib.licenses.mit;
         maintainers = [ ];
       };
       passthru = {
@@ -74,22 +59,22 @@ let
     };
 
     # System rebuild script
-    system-flake-rebuild = makeScriptPackage {
-      name = "system-flake-rebuild";
-      scriptPath = ../scripts/system-flake-rebuild.sh;
+    nixos-rebuild = makeScriptPackage {
+      name = "nixos-rebuild";
+      scriptPath = ../scripts/nixos-rebuild.sh;
       dependencies = with pkgs; [
         bash
         nix
-        nixos-rebuild
+        # nixos-rebuild is available from system, not needed here (would cause recursion)
         hostname
       ];
       description = "Rebuilds NixOS system configuration from flake";
     };
 
     # Home Manager rebuild script
-    home-manager-flake-rebuild = makeScriptPackage {
-      name = "home-manager-flake-rebuild";
-      scriptPath = ../scripts/home-manager-flake-rebuild.sh;
+    home-switch = makeScriptPackage {
+      name = "home-switch";
+      scriptPath = ../scripts/home-switch.sh;
       dependencies = with pkgs; [
         bash
         nix
@@ -99,45 +84,19 @@ let
       description = "Rebuilds Home Manager configuration from flake";
     };
 
-    # Test rebuild script
-    system-flake-rebuild-test = makeScriptPackage {
-      name = "system-flake-rebuild-test";
-      scriptPath = ../scripts/system-flake-rebuild-test.sh;
-      dependencies = with pkgs; [
-        bash
-        nix
-        nixos-rebuild
-        hostname
-      ];
-      description = "Test builds NixOS system configuration without activation";
-    };
-
-    # Verbose rebuild script
-    system-flake-rebuild-verbose = makeScriptPackage {
-      name = "system-flake-rebuild-verbose";
-      scriptPath = ../scripts/system-flake-rebuild-verbose.sh;
-      dependencies = with pkgs; [
-        bash
-        nix
-        nixos-rebuild
-        hostname
-      ];
-      description = "Rebuilds NixOS system with verbose output for debugging";
-    };
-
-    # Bootstrap script
-    bootstrap-nixos = makeScriptPackage {
-      name = "bootstrap-nixos";
-      scriptPath = ../scripts/bootstrap-nixos.sh;
-      dependencies = with pkgs; [
-        bash
-        git
-        nix
-        gnugrep
-        coreutils
-      ];
-      description = "Bootstraps a new NixOS installation with dotfiles";
-    };
+    # # Bootstrap script
+    # bootstrap-nixos = makeScriptPackage {
+    #   name = "bootstrap-nixos";
+    #   scriptPath = ../scripts/bootstrap-nixos.sh;
+    #   dependencies = with pkgs; [
+    #     bash
+    #     git
+    #     nix
+    #     gnugrep
+    #     coreutils
+    #   ];
+    #   description = "Bootstraps a new NixOS installation with dotfiles";
+    # };
 
     # Flake build script
     flake-build = makeScriptPackage {

@@ -19,12 +19,12 @@
 
   home.packages = with pkgs; [
     plex-desktop
-    # remmina
+    remmina
+    youtube-music
     # bitwarden-cli
     # bitwarden-desktop
-    ytmdesktop
-    # ytmdl # YT Music downloader
     discord
+    makemkv
     # anydesk
     bambu-studio
   ];

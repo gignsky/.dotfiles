@@ -42,7 +42,7 @@ pull-rebuild:
 pull-home:
   @nix-shell -p lolcat --run "echo 'Rebuilding Home-Manager...' | lolcat 2> /dev/null"
   just pull
-  just home
+  just home 
   @nix-shell -p lolcat --run "echo 'Home-Manager Rebuilt.' | lolcat 2> /dev/null"
 
 pull-rebuild-full:
@@ -54,42 +54,9 @@ pull-rebuild-full:
 pull-nix-secrets:
   cd ~/nix-secrets && git fetch && git pull && cd ~/.dotfiles
 
-# Pull annex repository with automatic stash/unstash for safe updates
-pull-annex:
-  @nix-shell -p lolcat --run "echo '📚 Syncing annex repository...' | lolcat 2> /dev/null"
-  @cd ~/local_repos/annex && \
-    (git diff --quiet && git diff --cached --quiet || git stash push -m "pre-pull-annex-$(date '+%Y%m%d-%H%M%S')") && \
-    git fetch && \
-    git pull --rebase && \
-    (git stash list | grep -q "pre-pull-annex" && git stash pop || true)
-  @nix-shell -p lolcat --run "echo '✅ Annex synchronized' | lolcat 2> /dev/null"
-
-# Push annex logs to remote
-push-annex:
-  @nix-shell -p lolcat --run "echo '📤 Pushing annex logs to remote...' | lolcat 2> /dev/null"
-  @cd ~/local_repos/annex && git push
-  @nix-shell -p lolcat --run "echo '✅ Annex logs pushed' | lolcat 2> /dev/null"
-
-# Synchronize annex (pull + commit staged + push)
-sync-annex:
-  just pull-annex
-  @nix-shell -p lolcat --run "echo '💾 Committing any staged annex logs...' | lolcat 2> /dev/null"
-  @cd ~/local_repos/annex && \
-    (git diff --cached --quiet || git commit -m "📊 Scotty: Manual sync of engineering logs ($(date '+%Y-%m-%d %H:%M'))") || true
-  just push-annex
-
-# Check annex repository status
-annex-status:
-  @echo "📊 Annex Repository Status:"
-  @cd ~/local_repos/annex && git status
-  @echo ""
-  @echo "📈 Recent log activity:"
-  @cd ~/local_repos/annex && git log --oneline -5
-
 # Run before every rebuild, every time
 rebuild-pre:
   @nix-shell -p lolcat --run 'echo "[PRE] Rebuilding NixOS..." | lolcat 2> /dev/null'
-  just pull-annex
   just dont-fuck-my-build
   @nix-shell -p lolcat --run 'echo "Updating Nix-Secrets Repo..." | lolcat 2> /dev/null'
 
@@ -101,14 +68,10 @@ dont-fuck-my-build:
 
 switch args="":
 	just rebuild {{args}}
-	just home
+	just home {{args}}
 
 clean:
   @echo "🧹 Starting smart clean process..."
-  # First: Failsafe logging checkpoint (in case OpenCode gets broken)
-  @echo "📝 Pre-clean failsafe logging checkpoint..."
-  @bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Smart clean initiated" "preserving OpenCode history, cleaning caches"' 
-  
   # Clean standard caches (safe)
   rm -rfv ~/.cargo/
   rm -rfv ~/.cache/pre-commit/
@@ -155,8 +118,6 @@ clean:
   nix run .#quick-results
   
   # Post-clean failsafe logging
-  @echo "📝 Post-clean failsafe logging checkpoint..."
-  @bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Smart clean completed" "OpenCode ready for rebuild, caches cleared"'
   @echo "✅ Smart clean complete - OpenCode history preserved, configuration reset for rebuild"
 
 # Run after every rebuild, some of the time
@@ -169,22 +130,8 @@ rebuild-post:
 rebuild args="":
 	just rebuild-pre
 	@nix-shell -p lolcat --run 'echo "[REBUILD] Attempting Rebuild..." | lolcat' 2> /dev/null 
-	nix run .#system-flake-rebuild -- {{args}}
+	nix run .#nixos-rebuild -- {{args}}
 	just rebuild-post
-
-# Rebuild the system verbosely (with SCOTTY_DEBUG)
-rebuild-v args="":
-	just rebuild-pre
-	@nix-shell -p lolcat --run 'echo "[REBUILD-V] Attempting Verbose Rebuild..." | lolcat' 2> /dev/null 
-	env SCOTTY_DEBUG=true nix run .#system-flake-rebuild -- {{args}}
-	just rebuild-post
-
-# Test rebuilds the system
-rebuild-test args="":
-	just rebuild-pre
-	nix run .#system-flake-rebuild-test -- {{args}}
-	@nix-shell -p lolcat --run 'echo "[TEST] Finished." | lolcat 2> /dev/null'
-	@echo "📊 Test rebuild completed - logs automatically written to annex"
 
 # Rebuild-full with new shell
 rebuild-full-new args="":
@@ -196,28 +143,6 @@ rebuild-full args="":
 	just rebuild {{args}}
 	just home {{args}}
 
-# Bare rebuild commands (minimal logging, no pre/post scripts)
-rebuild-bare host=`scripts/get-flake-target.sh`:
-	@echo "Bare system rebuild for {{host}}..."
-	@just pull-annex
-	@bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Bare system rebuild initiated" "minimal rebuild for host {{host}}, no pre/post hooks"'
-	sudo nixos-rebuild switch --flake .#{{host}}
-	@bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Bare system rebuild completed" "nixos-rebuild switch for {{host}} finished successfully"'
-
-home-bare host=`scripts/get-flake-target.sh`:
-	@echo "Bare home-manager rebuild for gig@{{host}}..."
-	@just pull-annex
-	@bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Bare home-manager rebuild initiated" "minimal home-manager rebuild for gig@{{host}}, no pre/post hooks"'
-	home-manager switch --flake .#gig@{{host}}
-	@bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Bare home-manager rebuild completed" "home-manager switch for gig@{{host}} finished successfully"'
-
-rebuild-full-bare host=`scripts/get-flake-target.sh`:
-	@echo "Bare full rebuild for {{host}}..."
-	@just pull-annex
-	@bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Bare full rebuild initiated" "minimal system and home-manager rebuild for {{host}}, no pre/post hooks"'
-	sudo nixos-rebuild switch --flake .#{{host}}
-	home-manager switch --flake .#gig@{{host}}
-	@bash -c 'source scripts/scotty-logging-lib.sh && failsafe_log "Bare full rebuild completed" "both system and home-manager rebuilt for {{host}} successfully"'
 
 # Test rebuild commands (dry-run evaluation without applying)
 test-rebuild host=`scripts/get-flake-target.sh`:
@@ -232,9 +157,6 @@ test-rebuild-full host=`scripts/get-flake-target.sh`:
 	@echo "Testing full rebuild for {{host}} (evaluation only)..."
 	sudo nixos-rebuild dry-activate --flake .#{{host}} --verbose --show-trace
 	home-manager build --flake .#gig@{{host}} --verbose
-
-single-update:
-	nix run github:gignsky/nix-update-input
 
 # Update the flake
 update:
@@ -290,7 +212,6 @@ om *ARGS:
 
 # Run before every home rebuild, on non-quick build
 pre-home:
-	just pull-annex
 	just dont-fuck-my-build
 	@nix-shell -p lolcat --run 'echo "[PRE-HOME] Finished." | lolcat 2> /dev/null'
 
@@ -299,33 +220,23 @@ post-home:
 	@nix-shell -p lolcat --run 'echo "[POST-HOME] Finished." | lolcat 2> /dev/null'
 	@echo "✅ Home-manager rebuild completed - engineering logs handled by rebuild script"
 
-simple-home *ARGS:
-	nix run .#home-manager-flake-rebuild -- {{ ARGS }}
-
 home *ARGS:
   just pre-home
   @nix-shell -p lolcat --run 'echo "[HOME] Attempting Home Rebuild..." | lolcat 2> /dev/null'
-  just simple-home {{ ARGS }}
-  just post-home
-
-# Rebuild home-manager verbosely (with SCOTTY_DEBUG)
-home-v *ARGS:
-  just pre-home
-  @nix-shell -p lolcat --run 'echo "[HOME-V] Attempting Verbose Home Rebuild..." | lolcat 2> /dev/null'
-  env SCOTTY_DEBUG=true just simple-home {{ ARGS }}
+  nix run .#home-switch -- {{ ARGS }}
   just post-home
 
 # Runs just home
 # home-core:
 
 #nu'er home
-nu home:
-  just new home
+nu home *ARGS:
+  @just new home {{ARGS}}
 
 # Runs just home and then zsh
-new home:
+new home *ARGS:
   just clean
-  just home
+  just home {{ARGS}}
   exec nu
 
 home-trace:
@@ -546,7 +457,7 @@ sops-fix:
   just update-nix-secrets
   systemctl --user reset-failed
   home-manager switch --refresh --flake ~/.dotfiles/.
-  just home-bare
+  just home
 
 update-nix-secrets:
 	just rekey
@@ -609,32 +520,3 @@ package-script:
 # Check hardware configuration synchronization
 check-hardware:
 	nix run .#check-hardware-config
-
-# Batched logging commands for reduced commit noise
-batch-commit-logs:
-	@echo "📊 Committing batched engineering logs..."
-	just pull-annex
-	@bash -c 'cd ~/.dotfiles && source scripts/scotty-logging-lib.sh && _commit_batch_logs'
-	@echo "💡 Tip: Use 'just push-annex' to push logs to remote"
-
-batch-status:
-	@echo "📊 Batch logging status:"
-	@bash -c 'cd ~/.dotfiles && if [ -d ".batch-logs" ]; then find .batch-logs -name "*.batch" -exec echo "  📄 {}" \; -exec grep -c "^---BATCH-ENTRY-START---" {} \; 2>/dev/null | paste - - | sed "s/\t/ entries: /"; else echo "  No pending batch logs"; fi'
-
-# Manual engineering log entry for commits
-log-commit message="":
-	just pull-annex
-	@if [ -z "{{message}}" ]; then \
-		echo "📝 Logging most recent commit to engineering records in annex..."; \
-		bash -c 'cd ~/.dotfiles && source scripts/scotty-logging-lib.sh && scotty_log_event "git-commit" "$$(git log -1 --pretty=%s)"'; \
-	else \
-		echo "📝 Logging custom message to engineering records in annex..."; \
-		bash -c 'cd ~/.dotfiles && source scripts/scotty-logging-lib.sh && scotty_log_event "git-commit" "{{message}}"'; \
-	fi
-	@echo "✅ Engineering log entry created successfully in annex repository"
-	@echo "💡 Tip: Use 'just push-annex' to push logs to remote"
-
-# Scotty's system state analysis and gap detection
-log-status:
-	@echo "🔍 Running Chief Engineer's system state analysis..."
-	@bash -c 'cd ~/.dotfiles && source scripts/scotty-logging-lib.sh && log_status'
