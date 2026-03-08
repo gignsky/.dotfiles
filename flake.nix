@@ -52,6 +52,7 @@
     # Authenticate via ssh and use shallow clone
     nix-secrets = {
       url = "git+ssh://git@github.com/gignsky/nix-secrets.git?ref=main&shallow=1";
+      # url = "git+file:///home/gig/nix-secrets/";
       flake = false;
     };
 
@@ -270,6 +271,7 @@
               system
               ;
             overlays = import ./overlays { inherit inputs; };
+            hostname = "wsl";
             # flakeRoot = self;
           };
           # > Our main home-manager configuration file <
@@ -290,6 +292,7 @@
               system
               ;
             overlays = import ./overlays { inherit inputs; };
+            hostname = "spacedock";
             # flakeRoot = self;
           };
           # > Our main home-manager configuration file <
@@ -307,6 +310,7 @@
               system
               ;
             overlays = import ./overlays { inherit inputs; };
+            hostname = "merlin";
           };
           # > Our main home-manager configuration file <
           modules = [ ./home/gig/merlin.nix ];
@@ -323,6 +327,7 @@
               system
               ;
             overlays = import ./overlays { inherit inputs; };
+            hostname = "ganoslal";
           };
           # > Our main home-manager configuration file <
           modules = [ ./home/gig/ganoslal.nix ];
