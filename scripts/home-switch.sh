@@ -1,5 +1,29 @@
 #!/usr/bin/env bash
 
+# Parse command-line arguments
+VERBOSE=false
+TEST_MODE=false
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -v|--verbose)
+            VERBOSE=true
+            shift
+            ;;
+        -t|--test)
+            TEST_MODE=true
+            shift
+            ;;
+        *)
+            echo "Unknown option: $1"
+            echo "Usage: $0 [-v|--verbose] [-t|--test]"
+            echo "  -v, --verbose    Show full output with --show-trace"
+            echo "  -t, --test       Use 'build' instead of 'switch' to test without activating"
+            exit 1
+            ;;
+    esac
+done
+
 # Source host detection library for intelligent WSL handling
 HOST_DETECTION_LIB_PATHS=(
     "${HOME}/.dotfiles/scripts/host-detection-lib.sh"
@@ -99,10 +123,61 @@ if [ "$LOGGING_LIB_FOUND" = false ]; then
   }
 fi
 
-failable-pre-commit() {
-  nix develop -c echo '*The Pre-Commit has been given a chance to Update!*'
-  nix shell nixpkgs#pre-commit -c pre-commit run --all-files
-}
+# Pre-commit checks with auto-fix and validation
+echo "🔍 Running pre-commit checks..."
+USE_NO_VERIFY=false
+
+# Run pre-commit checks (first pass - may auto-fix)
+if ! nix develop -c pre-commit run --all-files >/dev/null 2>&1; then
+  echo "⚠️  Pre-commit checks failed, attempting auto-fixes..."
+  
+  # Run second time to catch auto-fixes
+  if ! nix develop -c pre-commit run --all-files >/dev/null 2>&1; then
+    echo "❌ Pre-commit checks have unfixable errors"
+    echo ""
+    echo "🔧 Running flake validation to check Nix syntax..."
+    
+    # Capture flake check output, show only errors
+    flake_check_output=$(mktemp)
+    if nix flake check --keep-going 2>&1 | tee "$flake_check_output" | grep -i "error" || grep -i "error" "$flake_check_output"; then
+      echo ""
+      echo "❌ Flake validation FAILED"
+      echo "Please fix the Nix syntax errors above before rebuilding"
+      rm "$flake_check_output"
+      exit 1
+    else
+      echo "✅ Flake validation PASSED"
+      rm "$flake_check_output"
+      echo ""
+      echo "Pre-commit checks failed but flake validation passed."
+      echo "This suggests non-Nix formatting/linting issues."
+      echo ""
+      
+      # Interactive prompt for non-interactive-safe execution
+      if [ -t 0 ] && [ -t 1 ]; then
+        read -p "Continue with rebuild and commit with --no-verify? [y/N] " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+          echo "Rebuild cancelled. Please fix pre-commit issues first."
+          exit 1
+        fi
+        USE_NO_VERIFY=true
+        echo "⚠️  Proceeding with --no-verify flag..."
+      else
+        echo "❌ Non-interactive terminal - cannot prompt for override"
+        echo "Please fix pre-commit issues or run interactively"
+        exit 1
+      fi
+    fi
+  else
+    echo "✅ Pre-commit auto-fixes applied successfully"
+  fi
+else
+  echo "✅ Pre-commit checks passed"
+fi
+
+# Stage any auto-fixed files
+git add -u 2>/dev/null || true
 
 set -e
 pushd . || exit
@@ -136,13 +211,46 @@ else
 fi
 
 git diff -U0 ./*glob*.nix
-echo "Home-Manager Rebuilding ${HOST_IDENTIFIER}..."
+
+# Determine operation and build command
+if [ "$TEST_MODE" = true ]; then
+  OPERATION="build"
+  echo "Home-Manager Test Building ${HOST_IDENTIFIER}..."
+else
+  OPERATION="switch"
+  echo "Home-Manager Rebuilding ${HOST_IDENTIFIER}..."
+fi
+
+# Build the command with optional verbose flags
+HM_CMD="home-manager $OPERATION"
+if [ "$OPERATION" = "switch" ]; then
+  HM_CMD="$HM_CMD -b backup"
+fi
+HM_CMD="$HM_CMD --flake .#gig@$HOST"
+if [ "$VERBOSE" = true ]; then
+  HM_CMD="$HM_CMD --show-trace"
+fi
 
 # Capture build success/failure
-if home-manager switch -b backup --flake .#gig@"$HOST"; then
+if [ "$VERBOSE" = true ]; then
+  # Verbose mode: show all output
+  eval "$HM_CMD"
+  BUILD_SUCCESS=$?
+else
+  # Normal mode: suppress verbose output
+  eval "$HM_CMD" > /dev/null 2>&1
+  BUILD_SUCCESS=$?
+fi
+
+if [ $BUILD_SUCCESS -eq 0 ]; then
   # Get the generation number after successful build
-  gen=$(home-manager generations 2>/dev/null | head -n 1)
-  generation_number=$(echo "$gen" | grep -o 'id [0-9]*' | grep -o '[0-9]*' || echo "unknown")
+  if [ "$TEST_MODE" = true ]; then
+    generation_number="test-build"
+    gen="test build (no generation created)"
+  else
+    gen=$(home-manager generations 2>/dev/null | head -n 1)
+    generation_number=$(echo "$gen" | grep -o 'id [0-9]*' | grep -o '[0-9]*' || echo "unknown")
+  fi
 
   # Calculate build duration
   end_time=$(date +%s)
@@ -151,24 +259,32 @@ if home-manager switch -b backup --flake .#gig@"$HOST"; then
   # Log successful build to CSV  
   log_build_performance "home-manager-rebuild-${HOST_IDENTIFIER}" "$duration" "true" "" "Automated home-manager rebuild with Scotty engineering logs" "$generation_number"
 
-  # Call Scotty to create detailed engineering log
-  echo "=== CALLING SCOTTY FOR DETAILED ENGINEERING LOG ==="
-  if command -v opencode >/dev/null 2>&1; then
-    opencode run --agent scotty "Scotty, document this successful home-manager rebuild for ${HOST_IDENTIFIER}: Generation ${previous_gen} → ${generation_number}, build duration ${duration} seconds. Configuration changes since last rebuild: ${config_files_changed}. Files changed: ${detailed_diff}" || echo "Scotty logging failed, continuing..."
-  else
-    echo "OpenCode not available - skipping detailed Scotty log"
-  fi
+  # Automatic Scotty logging disabled - use 'just log-commit' or invoke Scotty manually if needed
+  # echo "=== CALLING SCOTTY FOR DETAILED ENGINEERING LOG ==="
+  # if command -v opencode >/dev/null 2>&1; then
+  #   opencode run --agent scotty "Scotty, document this successful home-manager rebuild for ${HOST_IDENTIFIER}: Generation ${previous_gen} → ${generation_number}, build duration ${duration} seconds. Configuration changes since last rebuild: ${config_files_changed}. Files changed: ${detailed_diff}" || echo "Scotty logging failed, continuing..."
+  # else
+  #   echo "OpenCode not available - skipping detailed Scotty log"
+  # fi
 
   # Commit with generation info
-  # Create enhanced commit message using Scotty's enhancement system (skip pre-commit hooks)
+  # Create enhanced commit message using Scotty's enhancement system
   export AUTOMATED_COMMIT=true
   if [ -f "$(dirname "$0")/commit-enhance-lib.sh" ]; then
     source "$(dirname "$0")/commit-enhance-lib.sh"
     enhanced_msg=$(enhance_commit_message "auto(home): rebuild $HOST_IDENTIFIER generation $gen" "home-manager-flake-rebuild.sh")
-    git commit -a --allow-empty --no-verify -m "$enhanced_msg" || true
+    if [ "$USE_NO_VERIFY" = true ]; then
+      git commit -a --allow-empty --no-verify -m "$enhanced_msg" || true
+    else
+      git commit -a --allow-empty -m "$enhanced_msg" || true
+    fi
   else
     # Fallback to basic message if enhancement library not available
-    git commit -a --allow-empty --no-verify -m "gig@$HOST_IDENTIFIER: $gen" || true
+    if [ "$USE_NO_VERIFY" = true ]; then
+      git commit -a --allow-empty --no-verify -m "gig@$HOST_IDENTIFIER: $gen" || true
+    else
+      git commit -a --allow-empty -m "gig@$HOST_IDENTIFIER: $gen" || true
+    fi
   fi
 
   echo "✅ Home Manager rebuild successful! Generation: $generation_number (${duration}s) for ${HOST_IDENTIFIER}"
@@ -180,13 +296,13 @@ else
   # Log failed build to CSV
   log_build_performance "home-manager-rebuild-${HOST_IDENTIFIER}" "$duration" "false" "home-manager-switch-failed" "Build failed during switch operation" "unknown"
 
-  # Call Scotty to document the failure
-  echo "=== CALLING SCOTTY FOR FAILURE ANALYSIS ==="
-  if command -v opencode >/dev/null 2>&1; then
-    opencode run --agent scotty "Scotty, document this FAILED home-manager rebuild for ${HOST_IDENTIFIER}: Build duration ${duration} seconds, previous generation ${previous_gen}. Configuration changes attempted: ${config_files_changed}. Analyze what went wrong and provide troubleshooting recommendations." || echo "Scotty logging failed"
-  else
-    echo "OpenCode not available - skipping detailed Scotty failure log"
-  fi
+  # Automatic Scotty logging disabled - use 'just log-commit' or invoke Scotty manually if needed
+  # echo "=== CALLING SCOTTY FOR FAILURE ANALYSIS ==="
+  # if command -v opencode >/dev/null 2>&1; then
+  #   opencode run --agent scotty "Scotty, document this FAILED home-manager rebuild for ${HOST_IDENTIFIER}: Build duration ${duration} seconds, previous generation ${previous_gen}. Configuration changes attempted: ${config_files_changed}. Analyze what went wrong and provide troubleshooting recommendations." || echo "Scotty logging failed"
+  # else
+  #   echo "OpenCode not available - skipping detailed Scotty failure log"
+  # fi
 
   echo "❌ Home Manager rebuild failed for ${HOST_IDENTIFIER}!"
   exit 1
