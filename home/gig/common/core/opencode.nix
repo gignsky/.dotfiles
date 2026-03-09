@@ -308,6 +308,7 @@
       library-computer = "/home/gig/local_repos/annex/agent-config/library-computer-personality.md";
       kara = "/home/gig/local_repos/annex/agent-config/kara-personality.md";
       una = "/home/gig/local_repos/annex/agent-config/una-personality.md";
+      daniel-jackson = "/home/gig/local_repos/annex/agent-config/daniel-jackson-personality.md";
     };
   };
 
