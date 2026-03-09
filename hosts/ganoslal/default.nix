@@ -52,7 +52,15 @@
 
   boot.loader = {
     # Bootloader.
-    systemd-boot.enable = true;
+    systemd-boot.enable = false;
+    grub = {
+      enable = true;
+      device = "nodev";
+      efiSupport = true;
+      efiInstallAsRemovable = false;
+      useOSProber = true; # Automatically detect Windows and other OSes
+      configurationLimit = 20; # Limit boot menu entries to last 20 generations
+    };
     efi.canTouchEfiVariables = true;
   };
 
