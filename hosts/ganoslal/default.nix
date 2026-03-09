@@ -68,7 +68,6 @@
     # Use both NVIDIA and AMD drivers for dual-GPU setup (NVIDIA primary + AMD secondary)
     videoDrivers = [
       "nvidia"
-      "amdgpu"
     ];
   };
 
