@@ -30,7 +30,7 @@
 
     #gig users
     (configLib.relativeToRoot "hosts/common/users/gig")
-    (configLib.relativeToRoot "hosts/common/users/nixos")
+    # (configLib.relativeToRoot "hosts/common/users/nixos")
 
     # wifi
     # (configLib.relativeToRoot "hosts/common/optional/wifi.nix")
