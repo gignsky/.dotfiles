@@ -93,7 +93,49 @@
       # 10. Test that zsh is available
       machine.succeed("zsh --version")
 
-      print("All VM tests passed successfully!")
+      # 11. Optional: Test OpenCode if available (home-manager user package)
+      print("Checking for OpenCode installation...")
+      opencode_available = machine.succeed(
+          "su - gig -c 'which opencode' 2>/dev/null || echo 'not-found'"
+      ).strip()
+
+      if "not-found" not in opencode_available:
+          print("OpenCode detected! Running integration tests...")
+          
+          # 11a. Verify OpenCode can show version
+          machine.succeed("su - gig -c 'opencode --version'")
+          print("  ✓ OpenCode version check passed")
+          
+          # 11b. Check that OpenCode config exists
+          machine.succeed("su - gig -c 'test -f ~/.config/opencode/config.json'")
+          print("  ✓ OpenCode config.json exists")
+          
+          # 11c. Validate JSON structure of config
+          machine.succeed("su - gig -c 'jq . ~/.config/opencode/config.json > /dev/null'")
+          print("  ✓ OpenCode config.json is valid JSON")
+          
+          # 11d. Check for MCP configuration section
+          mcp_configured = machine.succeed(
+              "su - gig -c 'jq \".mcp | length\" ~/.config/opencode/config.json'"
+          ).strip()
+          if int(mcp_configured) > 0:
+              print(f"  ✓ Found {mcp_configured} MCP server(s) configured")
+              
+              # 11e. List configured MCP servers
+              mcp_servers = machine.succeed(
+                  "su - gig -c 'jq -r \".mcp | keys[]\" ~/.config/opencode/config.json'"
+              ).strip().split("\n")
+              print("  ✓ Configured MCP servers:")
+              for server in mcp_servers:
+                  print(f"    - {server}")
+          else:
+              print("  ⚠ No MCP servers configured (this may be intentional)")
+          
+          print("  ✓ All OpenCode integration tests passed!")
+      else:
+          print("  ℹ OpenCode not installed on this host (skipping tests)")
+
+      print("\n===== All VM tests passed successfully! =====")
     '';
   };
 }
