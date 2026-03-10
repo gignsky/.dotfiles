@@ -221,25 +221,33 @@ else
   echo "Home-Manager Rebuilding ${HOST_IDENTIFIER}..."
 fi
 
-# Build the command with optional verbose flags
-HM_CMD="home-manager $OPERATION"
+# Capture build success/failure and output
+output_file=$(mktemp)
+error_log_file=$(mktemp)
+
+# Build the command arguments as array for proper execution
+HM_ARGS=("$OPERATION")
 if [ "$OPERATION" = "switch" ]; then
-  HM_CMD="$HM_CMD -b backup"
+  HM_ARGS+=("-b" "backup")
 fi
-HM_CMD="$HM_CMD --flake .#gig@$HOST"
+HM_ARGS+=("--flake" ".#gig@$HOST")
 if [ "$VERBOSE" = true ]; then
-  HM_CMD="$HM_CMD --show-trace"
+  HM_ARGS+=("--show-trace")
 fi
 
-# Capture build success/failure
+# Execute home-manager with proper output capture
+set -o pipefail
 if [ "$VERBOSE" = true ]; then
   # Verbose mode: show all output
-  eval "$HM_CMD"
-  BUILD_SUCCESS=$?
+  home-manager "${HM_ARGS[@]}" 2>&1 | tee "$output_file"
+  BUILD_SUCCESS=${PIPESTATUS[0]}
 else
-  # Normal mode: suppress verbose output
-  eval "$HM_CMD" > /dev/null 2>&1
-  BUILD_SUCCESS=$?
+  # Normal mode: capture output but show errors if build fails
+  if home-manager "${HM_ARGS[@]}" > "$output_file" 2>&1; then
+    BUILD_SUCCESS=0
+  else
+    BUILD_SUCCESS=$?
+  fi
 fi
 
 if [ $BUILD_SUCCESS -eq 0 ]; then
@@ -289,9 +297,69 @@ if [ $BUILD_SUCCESS -eq 0 ]; then
 
   echo "✅ Home Manager rebuild successful! Generation: $generation_number (${duration}s) for ${HOST_IDENTIFIER}"
   echo "📝 Detailed engineering log created by Scotty"
+  
+  # Clean up temp files on success
+  rm -f "$output_file" "$error_log_file"
 else
   end_time=$(date +%s)
   duration=$((end_time - start_time))
+
+  echo ""
+  echo "❌ Home Manager rebuild failed for ${HOST_IDENTIFIER}!"
+  echo ""
+  echo "=== 🔍 EXTRACTING ERROR MESSAGES FROM BUILD LOG ==="
+  echo ""
+  
+  # Extract lines containing 'error:' (Nix evaluation errors)
+  grep -i "error:" "$output_file" > "$error_log_file" 2>/dev/null || true
+  
+  # Also look for 'attribute.*missing' patterns (common Nix error)
+  grep -i "attribute.*missing" "$output_file" >> "$error_log_file" 2>/dev/null || true
+  
+  # Look for 'undefined variable' errors
+  grep -i "undefined variable" "$output_file" >> "$error_log_file" 2>/dev/null || true
+  
+  # Look for 'syntax error' patterns
+  grep -i "syntax error" "$output_file" >> "$error_log_file" 2>/dev/null || true
+  
+  # Look for 'builder for.*failed' (build-time errors)
+  grep -i "builder for.*failed" "$output_file" >> "$error_log_file" 2>/dev/null || true
+  
+  # Look for home-manager specific errors
+  grep -i "collision between" "$output_file" >> "$error_log_file" 2>/dev/null || true
+  
+  # If we found error lines, show them prominently
+  if [ -s "$error_log_file" ]; then
+    echo "🚨 KEY ERROR MESSAGES:"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    cat "$error_log_file" | sed 's/^/  /'
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    
+    # Show detailed context around the LAST error (usually most specific)
+    # Get the line number of the last error occurrence
+    last_error_line=$(grep -n "error:" "$output_file" | tail -1 | cut -d: -f1)
+    if [ -n "$last_error_line" ]; then
+      echo "📍 DETAILED ERROR CONTEXT (most specific error with 20 lines of context):"
+      echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+      # Show 2 lines before and 20 lines after the last error
+      tail -n +"$((last_error_line - 2))" "$output_file" | head -n 23 | sed 's/^/  /'
+      echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+      echo ""
+    fi
+    
+    error_info=$(cat "$error_log_file" | head -n 3 | tr '\n' ' ')
+  else
+    echo "⚠️  No obvious error patterns found. Showing last 15 lines of output:"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    tail -n 15 "$output_file" | sed 's/^/  /'
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    error_info="Home-manager rebuild failed - see output above"
+  fi
+  
+  echo ""
+  echo "💡 To see full build output, run with --verbose flag or check: $output_file"
+  echo ""
 
   # Log failed build to CSV
   log_build_performance "home-manager-rebuild-${HOST_IDENTIFIER}" "$duration" "false" "home-manager-switch-failed" "Build failed during switch operation" "unknown"
@@ -304,7 +372,10 @@ else
   #   echo "OpenCode not available - skipping detailed Scotty failure log"
   # fi
 
-  echo "❌ Home Manager rebuild failed for ${HOST_IDENTIFIER}!"
+  # Clean up error log but keep full output for debugging
+  rm "$error_log_file"
+  echo "📋 Full build log saved to: $output_file"
+  echo "   (This file will be cleaned up on next successful build)"
   exit 1
 fi
 

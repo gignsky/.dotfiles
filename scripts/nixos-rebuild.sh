@@ -264,6 +264,7 @@ fi
 
 # Capture build output and success/failure with robust exit code handling
 output_file=$(mktemp)
+error_log_file=$(mktemp)
 
 # Use pipefail to ensure we capture the exit code of nixos-rebuild, not tee
 set -o pipefail
@@ -347,13 +348,64 @@ if [ "$nixos_rebuild_exit_code" -eq 0 ]; then
     echo "ℹ️  Skipping git commit for ${REBUILD_SUBCOMMAND} operation"
   fi
 else
-  echo "nixos-rebuild failed with exit code: $nixos_rebuild_exit_code"
+  echo "❌ nixos-rebuild failed with exit code: $nixos_rebuild_exit_code"
   build_success="false"
   end_time=$(date +%s)
   duration=$((end_time - start_time))
   
-  # Extract error information from output
-  error_info=$(tail -n 5 "$output_file" | tr '\n' ' ' || echo "Unknown nixos-rebuild error")
+  # Extract error information from output - look for the actual error lines
+  # Nix errors are often buried in the middle of the output, not at the end
+  echo ""
+  echo "=== 🔍 EXTRACTING ERROR MESSAGES FROM BUILD LOG ==="
+  echo ""
+  
+  # Extract lines containing 'error:' (Nix evaluation errors)
+  grep -i "error:" "$output_file" > "$error_log_file" 2>/dev/null || true
+  
+  # Also look for 'attribute.*missing' patterns (common Nix error)
+  grep -i "attribute.*missing" "$output_file" >> "$error_log_file" 2>/dev/null || true
+  
+  # Look for 'undefined variable' errors
+  grep -i "undefined variable" "$output_file" >> "$error_log_file" 2>/dev/null || true
+  
+  # Look for 'syntax error' patterns
+  grep -i "syntax error" "$output_file" >> "$error_log_file" 2>/dev/null || true
+  
+  # Look for 'builder for.*failed' (build-time errors)
+  grep -i "builder for.*failed" "$output_file" >> "$error_log_file" 2>/dev/null || true
+  
+  # If we found error lines, show them prominently
+  if [ -s "$error_log_file" ]; then
+    echo "🚨 KEY ERROR MESSAGES:"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    cat "$error_log_file" | sed 's/^/  /'
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    
+    # Show detailed context around the LAST error (usually most specific)
+    # Get the line number of the last error occurrence
+    last_error_line=$(grep -n "error:" "$output_file" | tail -1 | cut -d: -f1)
+    if [ -n "$last_error_line" ]; then
+      echo "📍 DETAILED ERROR CONTEXT (most specific error with 20 lines of context):"
+      echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+      # Show 2 lines before and 20 lines after the last error
+      tail -n +"$((last_error_line - 2))" "$output_file" | head -n 23 | sed 's/^/  /'
+      echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+      echo ""
+    fi
+    
+    error_info=$(cat "$error_log_file" | head -n 3 | tr '\n' ' ')
+  else
+    echo "⚠️  No obvious error patterns found. Showing last 15 lines of output:"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    tail -n 15 "$output_file" | sed 's/^/  /'
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    error_info=$(tail -n 5 "$output_file" | tr '\n' ' ' || echo "Unknown nixos-rebuild error")
+  fi
+  
+  echo ""
+  echo "💡 To see full build output, run with --verbose flag or check: $output_file"
+  echo ""
   
   # Log failed build with enhanced host information (WSL uses direct logging)
   if [ "$(hostname)" = "nixos" ]; then
@@ -374,13 +426,14 @@ else
   #   echo "OpenCode not available - skipping detailed Scotty failure log"
   # fi
   
-  echo "nixos-rebuild ${REBUILD_SUBCOMMAND} failed. Output:"
-  cat "$output_file"
-  rm "$output_file"
+  # Clean up error log but keep full output for debugging
+  rm "$error_log_file"
+  echo "📋 Full build log saved to: $output_file"
+  echo "   (This file will be cleaned up on next successful build)"
   exit 1
 fi
 
-rm "$output_file"
+rm -f "$output_file" "$error_log_file"
 
 # Print success message with operation details
 if [[ "$REBUILD_SUBCOMMAND" == "dry-build" || "$REBUILD_SUBCOMMAND" == "dry-activate" ]]; then
