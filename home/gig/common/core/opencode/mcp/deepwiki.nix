@@ -1,6 +1,6 @@
 _: {
   # DeepWiki for repository documentation and history research
-  packages.opencode.settings.mcp = {
+  programs.opencode.settings.mcp = {
     deepwiki = {
       type = "remote";
       url = "https://mcp.deepwiki.com/mcp";
