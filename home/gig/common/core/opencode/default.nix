@@ -27,7 +27,7 @@ in
             baseURL = "192.168.51.3:30068/v1";
           };
         };
-        models.llama2.name = "Llama 2";
+        models.llava.name = "llava";
       };
 
       # Core setup
