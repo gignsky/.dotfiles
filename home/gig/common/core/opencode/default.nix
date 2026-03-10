@@ -18,6 +18,16 @@ in
 
     # Main configuration
     settings = {
+      #ollama support
+      provider.ollama = {
+        npm = "@ai-sdk/openai-compatible";
+        name = "Ollama (local)";
+        options = {
+          baseURL = "192.168.51.3:30068/v1";
+        };
+      };
+      models.llama2.name = "Llama 2";
+
       # Core setup
       model = "github-copilot/claude-sonnet-4.5";
       small_model = "github-copilot/gpt-4o";
