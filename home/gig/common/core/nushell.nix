@@ -52,9 +52,6 @@ in
       extraConfig = ''
         overlay use ${inputs.git-aliases}/git-aliases.nu
 
-        # This is a common Nushell idiom to pull in external environment variables
-        load-env (dirnames | get OLLAMA_URL | default "http://192.168.51.3:30068")
-
         # Direnv integration
         $env.config = ($env.config? | default {})
         $env.config.hooks = ($env.config.hooks? | default {})
