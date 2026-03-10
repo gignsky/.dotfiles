@@ -1,5 +1,5 @@
 _: {
-  packages.opencode.settings.mcp = {
+  programs.opencode.settings.mcp = {
     # Filesystem operations with permission-bounded directory access
     filesystem = {
       type = "local";

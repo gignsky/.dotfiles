@@ -1,5 +1,5 @@
 _: {
-  packages.opencode.settings.mcp = {
+  programs.opencode.settings.mcp = {
     # Wikipedia access for research
     wikipedia = {
       type = "local";

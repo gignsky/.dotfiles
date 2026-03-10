@@ -1,5 +1,5 @@
 _: {
-  packages.opencode.settings.mcp = {
+  programs.opencode.settings.mcp = {
     # Knowledge graph persistence for long-term memory across sessions
     memory = {
       type = "local";
