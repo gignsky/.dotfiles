@@ -29,8 +29,8 @@ in
       models.llama2.name = "Llama 2";
 
       # Core setup
-      model = "github-copilot/claude-sonnet-4.5";
-      small_model = "github-copilot/gpt-4o";
+      # model = "github-copilot/claude-sonnet-4.5";
+      # small_model = "github-copilot/gpt-4o";
       theme = "gruvbox"; # Built-in gruvbox theme
       # autoupdate = true;
 
