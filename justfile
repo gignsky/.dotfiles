@@ -187,7 +187,7 @@ update-rebuild-full:
 
 check:
 	just dont-fuck-my-build
-	nix flake check --keep-going --allow-import-from-derivation
+	nix flake check --show-trace --keep-going --print-build-logs --verbose --allow-import-from-derivation
 	@nix-shell -p lolcat --run 'echo "[CHECK] Finished." | lolcat 2> /dev/null'
 
 check-iso:
