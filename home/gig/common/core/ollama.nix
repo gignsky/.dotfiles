@@ -3,7 +3,7 @@
 {
   home = {
     packages = with pkgs; [
-      oterm
+      # oterm
       ollama
     ];
     # Set environment variables for bat

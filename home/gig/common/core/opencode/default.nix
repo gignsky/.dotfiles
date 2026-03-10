@@ -24,13 +24,17 @@ in
           npm = "@ai-sdk/openai-compatible";
           name = "Ollama (local)";
           options = {
-            baseURL = "192.168.51.3:30068/v1";
+            baseURL = "http://192.168.51.3:30068/v1";
           };
-          models.llama2.name = "Llama 2";
+          models = {
+            llava.name = "Llava";
+            llama2.name = "Llama 2";
+          };
         };
       };
 
       # Core setup
+      model = "ollama/llama2";
       # model = "github-copilot/claude-sonnet-4.5";
       # small_model = "github-copilot/gpt-4o";
       theme = "gruvbox"; # Built-in gruvbox theme
