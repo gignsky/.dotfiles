@@ -46,12 +46,13 @@ def ccls [
     print $"🚀 Runnin' ($selected_tool)..."
     print ""
     
-    # Execute the selected fetch tool
+    # Execute the selected fetch tool via nix run
+    # This keeps packages on-demand (no bloat) - they're only fetched when called
     try {
         nix run $"nixpkgs#($selected_tool)"
     } catch {
         print $"❌ Engine trouble with ($selected_tool), Captain!"
-        print "🔧 Fallin' back to fastfetch..."
+        print "🔧 Falling back to fastfetch..."
         nix run nixpkgs#fastfetch
     }
 }
