@@ -429,6 +429,7 @@
             excludes = [
               "home/gig/common/optional/starship.nix"
               "hosts/common/users/gig/default.nix"
+              "checks/opencode-tests.nix"
             ];
           };
           shellcheck = {
