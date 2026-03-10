@@ -2,7 +2,10 @@
 
 {
   home = {
-    packages = [ pkgs.oterm ];
+    packages = with pkgs; [
+      oterm
+      ollama
+    ];
     # Set environment variables for bat
     sessionVariables = {
       OLLAMA_URL = "http://192.168.51.3:30068";
