@@ -1,6 +1,7 @@
 {
   self,
   pkgs,
+  lib,
 }:
 let
   # Create a test derivation that validates OpenCode MCP configuration
