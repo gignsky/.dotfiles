@@ -1,5 +1,17 @@
-{ pkgs, hostname, ... }:
 {
+  pkgs,
+  configLib,
+  hostname,
+  ...
+}:
+let
+  mcp-module = import ./mcp { inherit pkgs configLib; };
+in
+{
+  imports = [
+    mcp-module
+  ];
+
   programs.opencode = {
     enable = true;
     package = pkgs.unstable.opencode;
@@ -51,58 +63,6 @@
       # just a dream :(
 
       share = "manual";
-
-      # MCP servers for extended functionality
-      mcp = {
-        # Wikipedia access for research
-        wikipedia = {
-          type = "local";
-          command = [
-            "npx"
-            "-y"
-            "@shelm/wikipedia-mcp-server"
-          ];
-          enabled = true;
-          timeout = 10000; # 10 second timeout for searches
-        };
-        #
-        # # ArXiv access for academic research
-        # arxiv = {
-        #   type = "local";
-        #   command = [
-        #     "uvx"
-        #     "arxiv-mcp-server"
-        #   ];
-        #   enabled = true;
-        #   timeout = 15000; # 15 second timeout for paper searches
-        # };
-        #
-        # # Context7 for documentation search
-        # context7 = {
-        #   type = "remote";
-        #   url = "https://mcp.context7.com/mcp";
-        #   enabled = true;
-        #   # Uncomment and set if you have an API key for higher rate limits
-        #   # headers = {
-        #   #   "CONTEXT7_API_KEY" = "{env:CONTEXT7_API_KEY}";
-        #   # };
-        # };
-        #
-        # # GitHub code search via Grep.app
-        # gh_grep = {
-        #   type = "remote";
-        #   url = "https://mcp.grep.app";
-        #   enabled = true;
-        # };
-
-        # DeepWiki for repository documentation and history research
-        deepwiki = {
-          type = "remote";
-          url = "https://mcp.deepwiki.com/mcp";
-          enabled = true;
-          timeout = 20000; # 20 second timeout for repo documentation searches
-        };
-      };
 
       # Flake-focused formatters
       formatter = {
