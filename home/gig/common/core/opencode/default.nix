@@ -19,14 +19,16 @@ in
     # Main configuration
     settings = {
       #ollama support
-      provider.ollama = {
-        npm = "@ai-sdk/openai-compatible";
-        name = "Ollama (local)";
-        options = {
-          baseURL = "192.168.51.3:30068/v1";
+      provider = {
+        ollama = {
+          npm = "@ai-sdk/openai-compatible";
+          name = "Ollama (local)";
+          options = {
+            baseURL = "192.168.51.3:30068/v1";
+          };
         };
+        models.llama2.name = "Llama 2";
       };
-      models.llama2.name = "Llama 2";
 
       # Core setup
       # model = "github-copilot/claude-sonnet-4.5";
@@ -116,29 +118,29 @@ in
       # Fleet operation commands
       sitrep = "Comprehensive fleet status and engineering situation report. Provide detailed status report covering: fleet systems, current operations, system health, performance metrics, recent issues, and engineering recommendations";
 
-      fix-log = "Analyze current state and fix missing log documentation. Assess current host/domain operational state, identify gaps in existing logs, and document missing information in proper engineering log format";
+      # fix-log = "Analyze current state and fix missing log documentation. Assess current host/domain operational state, identify gaps in existing logs, and document missing information in proper engineering log format";
 
-      log-status = "Detect and document undocumented system changes (aliases: log-status). Analyze current system state, compare with logged rebuild activity, detect 'bare' rebuilds or home-manager switches, and identify documentation gaps requiring attention.";
+      # log-status = "Detect and document undocumented system changes (aliases: log-status). Analyze current system state, compare with logged rebuild activity, detect 'bare' rebuilds or home-manager switches, and identify documentation gaps requiring attention.";
 
       check-logs = "Comprehensive log analysis and attention area identification (aliases: check-log). Search through all existing engineering logs and journal entries to identify areas requiring attention, maintenance, follow-up actions, or resolution. Present findings to user, create documentation log entry, and run /sitrep if significant issues discovered.";
 
       unstuck = "Reset focus and continue with current task. Acknowledge being stuck, reset mental state with appropriate personality response, and continue from the last clear objective. Get back on track with the task at hand.";
 
       # Away mission commands
-      consult = "Enhanced cross-repository consultation with mission staging. ENHANCED CONSULTATION PROTOCOL: Preserve original user request, create mission archive in realm/fleet/mission-archives/[agent]-missions/, perform expert analysis while maintaining detailed progressive notes. Work in target repository with full access while documenting back to home base.";
+      # consult = "Enhanced cross-repository consultation with mission staging. ENHANCED CONSULTATION PROTOCOL: Preserve original user request, create mission archive in realm/fleet/mission-archives/[agent]-missions/, perform expert analysis while maintaining detailed progressive notes. Work in target repository with full access while documenting back to home base.";
 
-      beam-out = "Compile final away mission report and clean up archives (aliases: mission-complete). MISSION COMPLETION PROTOCOL: Review all mission notes from current active mission archive, compile comprehensive final away report, move to permanent fleet documentation, clean up temporary staging, commit all documentation with proper attribution.";
+      # beam-out = "Compile final away mission report and clean up archives (aliases: mission-complete). MISSION COMPLETION PROTOCOL: Review all mission notes from current active mission archive, compile comprehensive final away report, move to permanent fleet documentation, clean up temporary staging, commit all documentation with proper attribution.";
 
       # Quality assurance commands
-      enhance-commit = "Analyze and improve commit message quality (aliases: enhance). Use the commit enhancement system to analyze a commit message for quality issues, provide suggestions, and optionally guide through interactive improvement. Integrates with scripts/commit-enhance-lib.sh";
+      # enhance-commit = "Analyze and improve commit message quality (aliases: enhance). Use the commit enhancement system to analyze a commit message for quality issues, provide suggestions, and optionally guide through interactive improvement. Integrates with scripts/commit-enhance-lib.sh";
 
-      commit = "Standardized git commit workflow with fleet standards compliance. Analyze complete working directory status (staged and unstaged changes), create meaningful commit messages following fleet git standards from docs/standards/git/, handle pre-commit hooks gracefully, and include proper agent signatures and technical metadata.";
+      # commit = "Standardized git commit workflow with fleet standards compliance. Analyze complete working directory status (staged and unstaged changes), create meaningful commit messages following fleet git standards from docs/standards/git/, handle pre-commit hooks gracefully, and include proper agent signatures and technical metadata.";
 
       # Agent management commands
-      hire = "Create a new specialized agent with custom capabilities. Generate a new OpenCode agent based on your description, automatically create agent configuration and personality files, and integrate into the system. Usage: /hire \"Create a security auditor for Rust code\" - the system will generate agent name, specialized capabilities, and personality profile.";
+      # hire = "Create a new specialized agent with custom capabilities. Generate a new OpenCode agent based on your description, automatically create agent configuration and personality files, and integrate into the system. Usage: /hire \"Create a security auditor for Rust code\" - the system will generate agent name, specialized capabilities, and personality profile.";
 
       # Agent summoning (when talking to other agents)
-      scotty = "Summon Chief Engineer for debugging and technical issues. Activate Chief Engineer Montgomery Scott for debugging complex systems: Nix flakes, Rust code, Bash scripts, Lua in Nix, Nushell configurations. Scotty will analyze errors, check system stress points, and provide engineering solutions. He is so described in the relevant gigdot/../resources/{agent-name}-additional-personality.md";
+      # scotty = "Summon Chief Engineer for debugging and technical issues. Activate Chief Engineer Montgomery Scott for debugging complex systems: Nix flakes, Rust code, Bash scripts, Lua in Nix, Nushell configurations. Scotty will analyze errors, check system stress points, and provide engineering solutions. He is so described in the relevant gigdot/../resources/{agent-name}-additional-personality.md";
     };
 
     # Enhanced rules with personality system
