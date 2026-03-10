@@ -1,5 +1,5 @@
 _: {
-  programs.opencode.settings.mcp = {
+  packages.opencode.settings.mcp = {
     # Sequential thinking framework for structured problem-solving
     sequential-thinking = {
       type = "local";
