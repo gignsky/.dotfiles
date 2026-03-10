@@ -27,14 +27,16 @@ in
             baseURL = "http://192.168.51.3:30068/v1";
           };
           models = {
-            llava.name = "Llava";
-            llama2.name = "Llama 2";
+            qwen3.name = "qwen3";
+            llama3-2.name = "Llama 3.2";
+            llama3-2-1b.name = "Llama 3.2 1b";
           };
         };
       };
 
       # Core setup
-      model = "ollama/llama2";
+      model = "ollama/llama3-2";
+      small_model = "ollama/llama3-2-1b";
       # model = "github-copilot/claude-sonnet-4.5";
       # small_model = "github-copilot/gpt-4o";
       theme = "gruvbox"; # Built-in gruvbox theme
