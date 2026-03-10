@@ -28,8 +28,8 @@ in
           };
           models = {
             qwen3.name = "qwen3";
-            llama3-2.name = "Llama 3.2";
-            llama3-2-1b.name = "Llama 3.2 1b";
+            "llama3.2".name = "Llama 3.2";
+            "llama3.2:1b".name = "Llama 3.2 1b";
           };
         };
       };
