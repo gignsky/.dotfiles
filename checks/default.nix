@@ -10,5 +10,4 @@ let
   homeManagerTests = import ./home-manager-tests.nix { inherit lib self; };
 in
 # Merge all test attributes into a single flat set
-# nixosTests // packageTests // openCodeTests // homeManagerTests
-openCodeTests
+nixosTests // packageTests // openCodeTests // homeManagerTests
