@@ -26,6 +26,7 @@
 
   # System-level packages required for bspwm
   environment.systemPackages = with pkgs; [
+    #TODO Look into removing some of these system packages
     bspwm # Binary space partitioning window manager
     sxhkd # Simple X hotkey daemon
     rofi # Application launcher and window switcher
