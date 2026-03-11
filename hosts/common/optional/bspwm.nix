@@ -15,6 +15,7 @@
         hide_borders = true;
         hide_key_hints = false;
       };
+      x11Support = true; # defaults true
     };
     xserver = {
       enable = true;
