@@ -12,8 +12,8 @@
 
         # Optional: Performance optimizations
         # animation = "none"; # Disable animations for faster boot
-        hide_borders = true;
-        hide_key_hints = false;
+        # hide_borders = true;
+        # hide_key_hints = false;
       };
       x11Support = true; # defaults true
     };
