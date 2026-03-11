@@ -35,9 +35,9 @@
     };
     #TODO SCOTTY! REMIND ME to figure out how to make these roatate through the tolkien folder
     # SGA wallpaper
-    ".background-image" = {
-      source = configLib.relativeToRoot "home/gig/common/resources/wallpapers/SGA/Stargate_Atlantis_Gate_Fixed_Centered_2560x1440.png";
-    };
+    # ".background-image" = {
+    #   source = configLib.relativeToRoot "home/gig/common/resources/wallpapers/SGA/Stargate_Atlantis_Gate_Fixed_Centered_2560x1440.png";
+    # };
     # ".background-image" = {
     #   source = configLib.relativeToRoot "home/gig/common/resources/wallpapers/SGA/Stargate_Atlantis_Gate_Fixed_Centered_5K.png";
     # };
@@ -250,13 +250,13 @@
     enable = true;
     initExtra = ''
       # Set wallpaper (if exists)
-      if [ -f "$HOME/.background-image" ]; then
-        feh --bg-scale "$HOME/.background-image" &
-      elif [ -f "$HOME/wallpaper.jpg" ]; then
-        feh --bg-scale "$HOME/wallpaper.jpg" &
-      elif [ -f "$HOME/wallpaper.png" ]; then
-        feh --bg-scale "$HOME/wallpaper.png" &
-      fi
+      # if [ -f "$HOME/.background-image" ]; then
+      #   feh --bg-scale "$HOME/.background-image" &
+      # elif [ -f "$HOME/wallpaper.jpg" ]; then
+      #   feh --bg-scale "$HOME/wallpaper.jpg" &
+      # elif [ -f "$HOME/wallpaper.png" ]; then
+      #   feh --bg-scale "$HOME/wallpaper.png" &
+      # fi
 
       # Start sxhkd hotkey daemon
       sxhkd &
