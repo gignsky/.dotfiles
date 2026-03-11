@@ -5,6 +5,8 @@
 # Ref: https://nixos.wiki/wiki/Nvidia
 {
   nixpkgs.config.allowUnfree = lib.mkForce true;
+  nixpkgs.config.nvidia.acceptLicense = true;
+  boot.kernelParams = [ "nvidia-drm.fbdev=1" ];
 
   hardware = {
     nvidia = {
