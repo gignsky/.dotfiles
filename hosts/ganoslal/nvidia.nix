@@ -31,11 +31,11 @@
       };
     };
 
-    # # Graphics subsystem configuration
-    # graphics = {
-    #   enable = true;
-    #   enable32Bit = true; # Support for 32-bit applications/games
-    # };
+    # Graphics subsystem configuration
+    graphics = {
+      enable = true;
+      enable32Bit = true; # Support for 32-bit applications/games
+    };
   };
 
   # Configure X11 to recognize both NVIDIA GPUs
