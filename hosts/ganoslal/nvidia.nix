@@ -16,7 +16,7 @@
 
       # Use proprietary kernel modules (GTX 970 doesn't support open modules)
       # RTX 3060 Ti could use open=true with driver 560+, but GTX 970 requires proprietary
-      open = true;
+      open = false;
 
       # Enable NVIDIA Control Panel
       nvidiaSettings = true;
