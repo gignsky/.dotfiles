@@ -16,7 +16,7 @@
     xclip # Clipboard management (if not already installed system-wide)
     maim # Screenshots (if not already installed system-wide)
     xdotool # Window manipulation (if not already installed system-wide)
-    nitrogen # Alternative wallpaper setter
+    # nitrogen # Alternative wallpaper setter
   ];
 
   # Copy bspwm resource files to home directory
