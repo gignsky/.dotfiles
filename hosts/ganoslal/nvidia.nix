@@ -33,8 +33,8 @@
 
     # Graphics subsystem configuration
     graphics = {
-      enable = true;
-      enable32Bit = true; # Support for 32-bit applications/games
+      enable = false;
+      enable32Bit = false; # Support for 32-bit applications/games
     };
   };
 
