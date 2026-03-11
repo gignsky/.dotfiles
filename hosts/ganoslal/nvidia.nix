@@ -7,7 +7,6 @@
   nixpkgs.config.allowUnfree = lib.mkForce true;
 
   hardware = {
-    opengl.enable = true;
     nvidia = {
       # Use latest stable drivers (535+ with modern features)
       package = config.boot.kernelPackages.nvidiaPackages.stable;
