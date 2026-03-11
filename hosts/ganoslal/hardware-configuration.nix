@@ -14,6 +14,7 @@
     ./nvidia.nix
   ];
   boot = {
+
     initrd.availableKernelModules = [
       "nvme"
       "ahci"
@@ -25,7 +26,6 @@
     initrd.kernelModules = [ "nvidia" ];
     kernelModules = [ "kvm-amd" ];
     extraModulePackages = [ config.boot.kernelPackages.nvidia_x11 ];
-    blacklistedKernelModules = [ "nouveau" ];
   };
 
   fileSystems."/" = {
