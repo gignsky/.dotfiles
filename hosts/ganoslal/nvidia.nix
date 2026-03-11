@@ -38,21 +38,21 @@
     };
   };
 
-  # Configure X11 to recognize both NVIDIA GPUs
-  services.xserver = {
-    # The nvidia driver will automatically detect both cards
-    # and expose all outputs through a single unified X screen
-    screenSection = ''
-      Option         "metamodes" "nvidia-auto-select +0+0"
-      Option         "AllowEmptyInitialConfiguration" "True"
-      Option         "ConnectedMonitor" "DFP"
-    '';
-
-    # Enable RandR for dynamic multi-monitor configuration
-    deviceSection = ''
-      Option "AllowExternalGpus" "True"
-    '';
-  };
+  # # Configure X11 to recognize both NVIDIA GPUs
+  # services.xserver = {
+  #   # The nvidia driver will automatically detect both cards
+  #   # and expose all outputs through a single unified X screen
+  #   screenSection = ''
+  #     Option         "metamodes" "nvidia-auto-select +0+0"
+  #     Option         "AllowEmptyInitialConfiguration" "True"
+  #     Option         "ConnectedMonitor" "DFP"
+  #   '';
+  #
+  #   # Enable RandR for dynamic multi-monitor configuration
+  #   deviceSection = ''
+  #     Option "AllowExternalGpus" "True"
+  #   '';
+  # };
 
   # Optional: Environment variables for debugging/optimization
   environment.variables = {
