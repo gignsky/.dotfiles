@@ -57,6 +57,6 @@
   # Optional: Environment variables for debugging/optimization
   environment.variables = {
     # Force applications to use NVIDIA GPU
-    __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+    # __GLX_VENDOR_LIBRARY_NAME = "nvidia";
   };
 }
