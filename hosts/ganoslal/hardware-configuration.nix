@@ -23,9 +23,9 @@
       "usbhid"
       "sd_mod"
     ];
-    initrd.kernelModules = [ "nvidia" ];
+    initrd.kernelModules = [ ];
     kernelModules = [ "kvm-amd" ];
-    extraModulePackages = [ config.boot.kernelPackages.nvidia_x11 ];
+    extraModulePackages = [ ];
   };
 
   fileSystems."/" = {
