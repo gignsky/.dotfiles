@@ -50,6 +50,7 @@
   # Tailscale configuration
   tailscale.enable = false;
 
+  # Grub installation
   boot.loader = {
     # Bootloader.
     systemd-boot.enable = false;
