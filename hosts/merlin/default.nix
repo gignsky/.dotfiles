@@ -29,7 +29,6 @@
     (configLib.relativeToRoot "hosts/common/optional/audio.nix") # Enable PipeWire audio system
     (configLib.relativeToRoot "hosts/common/optional/bluetooth.nix") # Enable Bluetooth support
     (configLib.relativeToRoot "hosts/common/optional/brightness-control.nix") # Enable brightness control for Framework laptops
-    (configLib.relativeToRoot "hosts/common/optional/tailscale.nix")
     # ../common/optional/xrdp.nix
 
     #gig users
@@ -64,6 +63,12 @@
       efiInstallAsRemovable = false;
       useOSProber = true; # Automatically detect Windows and other OSes
       configurationLimit = 20; # Limit boot menu entries to last 20 generations
+
+      # default config
+      default = "saved";
+      extraConfig = ''
+        GRUB_SAVEDEFAULT=true
+      '';
     };
     efi.canTouchEfiVariables = true;
   };

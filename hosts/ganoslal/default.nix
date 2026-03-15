@@ -23,10 +23,9 @@
     (configLib.relativeToRoot "hosts/common/core")
 
     # optional
-    # (configLib.relativeToRoot "hosts/common/optional/xfce.nix")
+    (configLib.relativeToRoot "hosts/common/optional/xfce.nix")
     (configLib.relativeToRoot "hosts/common/optional/bspwm.nix") # Enable bspwm window manager
     (configLib.relativeToRoot "hosts/common/optional/firefox.nix")
-    (configLib.relativeToRoot "hosts/common/optional/tailscale.nix")
     # ../common/optional/xrdp.nix
 
     #gig users
@@ -49,11 +48,26 @@
   };
 
   # Tailscale configuration
-  tailscale.enable = true;
+  tailscale.enable = false;
 
+  # Grub installation
   boot.loader = {
     # Bootloader.
-    systemd-boot.enable = true;
+    systemd-boot.enable = false;
+    grub = {
+      enable = true;
+      device = "nodev";
+      efiSupport = true;
+      efiInstallAsRemovable = false;
+      useOSProber = true; # Automatically detect Windows and other OSes
+      configurationLimit = 20; # Limit boot menu entries to last 20 generations
+
+      # default config
+      default = "saved";
+      extraConfig = ''
+        GRUB_SAVEDEFAULT=true
+      '';
+    };
     efi.canTouchEfiVariables = true;
   };
 

@@ -8,13 +8,14 @@
         # Enable autologin for user gig to bspwm session
         # auto_login_user = "gig";
         # auto_login_session = "none+bspwm";
-        # save = true; # Remember session choice
+        save = true; # Remember session choice
 
         # Optional: Performance optimizations
         # animation = "none"; # Disable animations for faster boot
-        hide_borders = true;
-        hide_key_hints = false;
+        # hide_borders = true;
+        # hide_key_hints = false;
       };
+      x11Support = true; # defaults true
     };
     xserver = {
       enable = true;
@@ -26,6 +27,7 @@
 
   # System-level packages required for bspwm
   environment.systemPackages = with pkgs; [
+    #TODO Look into removing some of these system packages
     bspwm # Binary space partitioning window manager
     sxhkd # Simple X hotkey daemon
     rofi # Application launcher and window switcher

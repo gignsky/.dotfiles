@@ -19,6 +19,7 @@
   home.packages = with pkgs; [
     # ytmdesktop
     youtube-music
+    steam
     plex-desktop
     remmina
     # bitwarden-cli
