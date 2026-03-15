@@ -62,7 +62,6 @@
     # Screen configuration - allow empty initial config so nvidia can set it up
     screenSection = ''
       Option "AllowEmptyInitialConfiguration" "True"
-      Option "UseDisplayDevice" "None"
     '';
 
     # Device configuration - critical for multi-GPU
