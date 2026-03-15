@@ -20,16 +20,16 @@
       # Enable NVIDIA Control Panel
       nvidiaSettings = true;
 
-      # Prime configuration - NVIDIA as primary, AMD as secondary
-      prime = {
-        # Sync mode: NVIDIA always on, handles all rendering and outputs
-        sync.enable = false;
-
-        # Bus IDs - verify these match your hardware with 'lspci'
-        nvidiaBusId = "PCI:2d:0:0"; # NVIDIA GPU bus ID
-        # # second nvidiaBusId
-        # nvidiaBusId = "PCI:23:0:0"; # AMD GPU bus ID
-      };
+      # # Prime configuration - NVIDIA as primary, AMD as secondary
+      # prime = {
+      #   # Sync mode: NVIDIA always on, handles all rendering and outputs
+      #   sync.enable = false;
+      #
+      #   # Bus IDs - verify these match your hardware with 'lspci'
+      #   nvidiaBusId = "PCI:2d:0:0"; # NVIDIA GPU bus ID
+      #   # # second nvidiaBusId
+      #   # nvidiaBusId = "PCI:23:0:0"; # AMD GPU bus ID
+      # };
 
       # Enable power management for better stability
       powerManagement = {
