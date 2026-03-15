@@ -1,7 +1,12 @@
-{ config, lib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 # Dual-NVIDIA GPU configuration for multi-monitor setup
 # Primary: NVIDIA RTX 3060 Ti (PCI:2d:0:0) - DP-1, DP-2, HDMI-0
-# Secondary: NVIDIA GTX 970 (PCI:23:0:0) - HDMI-A-1 (top center display)
+# Secondary: NVIDIA GTX 970 (PCI:23:0:0) - DP-1-1 (top center display)
 # Ref: https://nixos.wiki/wiki/Nvidia
 {
   nixpkgs.config.allowUnfree = lib.mkForce true;
@@ -72,6 +77,34 @@
       Option "ProbeAllGpus" "True"
       # Use all available outputs from all GPUs
       Option "AllowMultipleGPUs" "True"
+    '';
+
+    # X11 display initialization script (runs before display manager and window manager)
+    displayManager.sessionCommands = ''
+      # Dual-NVIDIA GPU setup: Link GTX 970 outputs to RTX 3060 Ti X screen
+      # This ensures outputs from both GPUs are available in a unified screen
+      ${pkgs.xorg.xrandr}/bin/xrandr --setprovideroutputsource NVIDIA-G0 NVIDIA-0 || true
+
+      # CRITICAL: Enable GTX 970 output (DP-1-1) which requires manual initialization
+      # Without this, the GTX 970's monitor won't have any modes available
+      if ${pkgs.xorg.xrandr}/bin/xrandr | grep -q "DP-1-1 connected"; then
+          ${pkgs.xorg.xrandr}/bin/xrandr --output DP-1-1 --auto
+      fi
+
+      # Configure 4-monitor layout for ganoslal
+      # Physical layout:
+      #   [HDMI-0] [DP-1-1] [DP-1]     ← Top row (1920x1080 @ 60Hz each)
+      #            [DP-2]               ← Bottom center (5120x1440 @ 144Hz - PRIMARY)
+
+      ${pkgs.xorg.xrandr}/bin/xrandr \
+        --output DP-2 --primary --mode 5120x1440 --rate 144 --pos 0x1080 \
+        --output HDMI-0 --mode 1920x1080 --rate 60 --pos 0x0 \
+        --output DP-1-1 --mode 1920x1080 --rate 60 --pos 1920x0 \
+        --output DP-1 --mode 1920x1080 --rate 60 --pos 3840x0
+
+      # Log monitor setup for debugging
+      echo "ganoslal: X11 monitor initialization complete ($(date))" >> /tmp/xrandr-init.log
+      ${pkgs.xorg.xrandr}/bin/xrandr --listmonitors >> /tmp/xrandr-init.log 2>&1
     '';
   };
 

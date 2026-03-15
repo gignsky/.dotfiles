@@ -249,6 +249,9 @@
   xsession = {
     enable = true;
     initExtra = ''
+      # Monitor initialization is handled by displayManager.sessionCommands in nvidia.nix
+      # This ensures all monitors are configured before display manager and BSPWM start
+
       # Set wallpaper (if exists)
       # if [ -f "$HOME/.background-image" ]; then
       #   feh --bg-scale "$HOME/.background-image" &
