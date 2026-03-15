@@ -4,6 +4,7 @@
   inputs,
   lib,
   config,
+  pkgs,
   configLib,
   ...
 }:
@@ -82,6 +83,11 @@
     # Use both NVIDIA and AMD drivers for dual-GPU setup (NVIDIA primary + AMD secondary)
     videoDrivers = [ "nvidia" ];
   };
+
+  # Add autorandr for monitor profile management
+  environment.systemPackages = with pkgs; [
+    autorandr
+  ];
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
