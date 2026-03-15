@@ -52,17 +52,27 @@
 
   # Configure X11 to recognize both NVIDIA GPUs
   services.xserver = {
-    # The nvidia driver will automatically detect both cards
-    # and expose all outputs through a single unified X screen
-    screenSection = ''
-      Option         "metamodes" "nvidia-auto-select +0+0"
-      Option         "AllowEmptyInitialConfiguration" "True"
-      Option         "ConnectedMonitor" "DFP"
+    # Configure X11 to expose outputs from BOTH GPUs on a single unified screen
+    # This is critical for multi-GPU setups - without this, X11 only sees one GPU
+    serverFlagsSection = ''
+      Option "AllowMouseOpenFail" "True"
+      Option "AutoAddGPU" "True"
     '';
 
-    # Enable RandR for dynamic multi-monitor configuration
+    # Screen configuration - allow empty initial config so nvidia can set it up
+    screenSection = ''
+      Option "AllowEmptyInitialConfiguration" "True"
+      Option "UseDisplayDevice" "None"
+    '';
+
+    # Device configuration - critical for multi-GPU
     deviceSection = ''
+      # Allow X11 to use multiple NVIDIA GPUs simultaneously
       Option "AllowExternalGpus" "True"
+      # Probe and enable all connected outputs across all GPUs
+      Option "ProbeAllGpus" "True"
+      # Use all available outputs from all GPUs
+      Option "AllowMultipleGPUs" "True"
     '';
   };
 
