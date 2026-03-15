@@ -26,8 +26,9 @@
         sync.enable = true;
 
         # Bus IDs - verify these match your hardware with 'lspci'
-        nvidiaBusId = "PCI:45:0:0"; # NVIDIA GPU bus ID
-        amdgpuBusId = "PCI:23:0:0"; # AMD GPU bus ID
+        nvidiaBusId = "PCI:2d:0:0"; # NVIDIA GPU bus ID
+        # # second nvidiaBusId
+        # nvidiaBusId = "PCI:23:0:0"; # AMD GPU bus ID
       };
 
       # Enable power management for better stability
