@@ -1,6 +1,9 @@
 { pkgs, ... }:
 
 {
+  imports = [
+    ./autorandr.nix
+  ];
   services = {
     displayManager.ly = {
       enable = true;
