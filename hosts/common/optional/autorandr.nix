@@ -1,6 +1,6 @@
 { pkgs, ... }:
 {
-  programs.autorandr = {
+  services.autorandr = {
     enable = true;
 
     #host specific profiles are loaded from the similarlly named home-manager file
