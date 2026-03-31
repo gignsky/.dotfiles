@@ -15,7 +15,7 @@
 
   environment.systemPackages = with pkgs; [
     nix
-    dig
+    # dig
   ];
 
   hardware.enableRedistributableFirmware = true;

@@ -16,7 +16,6 @@ let
     }:
     pkgs.writeShellScriptBin name ''
       # Auto-generated wrapper for ${scriptPath}
-      Dependencies: ${builtins.concatStringsSep ", " (map (pkg: pkg.name or "unknown") dependencies)}
 
       # Make dependencies available in PATH
       export PATH="${pkgs.lib.makeBinPath dependencies}:$PATH"
