@@ -237,6 +237,18 @@
             ./hosts/ganoslal
           ];
         };
+
+        spacedock = nixpkgs.lib.nixosSystem {
+          inherit system specialArgs;
+          # > Our main nixos configuration file <
+          modules = [
+            # home-manager.nixosModules.home-manager
+            # {
+            #   home-manager.extraSpecialArgs = specialArgs;
+            # }
+            ./hosts/spacedock
+          ];
+        };
       };
 
       # Standalone home-manager configuration entrypoint
