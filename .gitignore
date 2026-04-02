@@ -7,3 +7,4 @@ worktrees
 ganoslal.qcow2
 vm-runtime
 spacedock/dot-spacedock
+*.qcow2
