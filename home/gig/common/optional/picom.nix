@@ -9,7 +9,8 @@ _: {
     # Values range from 0.0 (fully transparent) to 1.0 (fully opaque)
     settings = {
       # Active window opacity (focused window) - 83% opaque
-      active-opacity = 0.98;
+      # active-opacity = 0.98;
+      active-opacity = 1;
 
       # Inactive window opacity (unfocused windows) - 75% opaque
       inactive-opacity = 0.80;
@@ -18,15 +19,16 @@ _: {
       frame-opacity = 0.50;
 
       # Opacity rules for specific window types or applications
-      # opacity-rule = [
-      #   "100:class_g = 'Firefox'" # Keep Firefox fully opaque
-      #   "100:class_g = 'Chromium'" # Keep Chromium fully opaque
-      #   "83:class_g = 'WezTerm'" # Terminal transparency matches active windows
-      #   "75:class_g = 'Rofi'" # Application launcher matches inactive windows
-      #   "83:class_g = 'Code'" # VS Code/editors matches active windows
-      #   "100:class_g = 'mpv'" # Video player fully opaque
-      #   "100:class_g = 'vlc'" # VLC fully opaque
-      # ];
+      opacity-rule = [
+        "100:class_g = 'Firefox'" # Keep Firefox fully opaque
+        "100:class_g = 'Chromium'" # Keep Chromium fully opaque
+        "83:class_g = 'WezTerm'" # Terminal transparency matches active windows
+        "75:class_g = 'Rofi'" # Application launcher matches inactive windows
+        "83:class_g = 'Code'" # VS Code/editors matches active windows
+        "100:class_g = 'mpv'" # Video player fully opaque
+        "100:class_g = 'vlc'" # VLC fully opaque
+        "100:class_g = 'plex'" # VLC fully opaque
+      ];
 
       # Fade settings - slowed down for more apparent animations
       fading = true;
