@@ -1,8 +1,5 @@
-{ inputs, configLib, ... }:
+{ inputs, ... }:
 
-let
-  secretspath = builtins.toString inputs.nix-secrets;
-in
 {
   imports = [
     inputs.sops-nix.nixosModules.sops
