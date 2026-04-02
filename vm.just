@@ -1,8 +1,8 @@
 # NixOS VM Testing - Direct nixos-rebuild build-vm workflow
 # Simple commands for iterative configuration testing without ISO intermediaries
 
-# Default host for VM operations (change as needed)
-default_vm_host := "spacedock"
+# Auto-detect current host for VM testing
+default_vm_host := `scripts/get-flake-target.sh`
 
 # Build and run a NixOS VM for testing configurations
 # Usage: just vm [host]
