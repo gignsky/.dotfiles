@@ -15,7 +15,7 @@
 
       # Use proprietary kernel modules (recommended for multi-GPU setups)
       # Set to true for RTX/GTX 16xx series with driver 560+ if you want open-source
-      open = false;
+      open = true;
 
       # Enable NVIDIA Control Panel
       nvidiaSettings = true;

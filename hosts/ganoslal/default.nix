@@ -23,10 +23,9 @@
     (configLib.relativeToRoot "hosts/common/core")
 
     # optional
-    # (configLib.relativeToRoot "hosts/common/optional/xfce.nix")
+    (configLib.relativeToRoot "hosts/common/optional/xfce.nix")
     (configLib.relativeToRoot "hosts/common/optional/bspwm.nix") # Enable bspwm window manager
     (configLib.relativeToRoot "hosts/common/optional/firefox.nix")
-    (configLib.relativeToRoot "hosts/common/optional/tailscale.nix")
     # ../common/optional/xrdp.nix
 
     #gig users
@@ -49,7 +48,7 @@
   };
 
   # Tailscale configuration
-  tailscale.enable = true;
+  tailscale.enable = false;
 
   boot.loader = {
     # Bootloader.
@@ -68,7 +67,6 @@
     # Use both NVIDIA and AMD drivers for dual-GPU setup (NVIDIA primary + AMD secondary)
     videoDrivers = [
       "nvidia"
-      "amdgpu"
     ];
   };
 

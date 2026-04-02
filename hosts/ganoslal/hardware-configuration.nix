@@ -14,48 +14,36 @@
     ./nvidia.nix
   ];
   boot = {
-    initrd = {
-      availableKernelModules = [
-        "nvme"
-        "ahci"
-        "xhci_pci"
-        "usbhid"
-        "usb_storage"
-        "sd_mod"
-      ];
-      kernelModules = [ "amdgpu" ];
-    };
-    kernelModules = [ "kvm-amd" ];
 
-    # AMD GPU page on nixos wiki:
-    # https://nixos.wiki/wiki/AMD_GPU
-
-    kernelParams = [
-      # needed for GCN1 (Southern Island) cards i.e. my shitty second AMD card
-      "radeon.si_support=0"
-      "amdgpu.si_support=1"
+    initrd.availableKernelModules = [
+      "nvme"
+      "ahci"
+      "xhci_pci"
+      "usb_storage"
+      "usbhid"
+      "sd_mod"
     ];
+    initrd.kernelModules = [ ];
+    kernelModules = [ "kvm-amd" ];
     extraModulePackages = [ ];
   };
-  fileSystems = {
 
-    "/" = {
-      device = "/dev/disk/by-uuid/14e6d54a-d136-4e87-a04a-6f0585960aad";
-      fsType = "ext4";
-    };
+  fileSystems."/" = {
+    device = "/dev/disk/by-uuid/95231172-5cf8-4f09-9c36-2d09b7b95f91";
+    fsType = "ext4";
+  };
 
-    "/boot" = {
-      device = "/dev/disk/by-uuid/D47B-8DEC";
-      fsType = "vfat";
-      options = [
-        "fmask=0077"
-        "dmask=0077"
-      ];
-    };
+  fileSystems."/boot" = {
+    device = "/dev/disk/by-uuid/61C2-F2D7";
+    fsType = "vfat";
+    options = [
+      "fmask=0077"
+      "dmask=0077"
+    ];
   };
 
   swapDevices = [
-    { device = "/dev/disk/by-uuid/18dd5063-c9bc-4db5-bf9e-1bbec5435e25"; }
+    { device = "/dev/disk/by-uuid/5f554ba2-876d-4169-8b90-8ca1e4312c40"; }
   ];
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
@@ -64,6 +52,7 @@
   # with explicit per-interface declarations with `networking.interfaces.<interface>.useDHCP`.
   networking.useDHCP = lib.mkDefault true;
   # networking.interfaces.enp39s0.useDHCP = lib.mkDefault true;
+  # networking.interfaces.enp47s0f3u3u2.useDHCP = lib.mkDefault true;
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
   hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;

@@ -1,1 +1,0 @@
-../ganoslal/default.nix
