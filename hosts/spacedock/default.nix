@@ -48,6 +48,8 @@
     kernelPackages = pkgs.linuxPackages_6_12;
   };
 
+  tailscale.enable = false;
+
   nix =
     let
       flakeInputs = lib.filterAttrs (_: lib.isType "flake") inputs;
