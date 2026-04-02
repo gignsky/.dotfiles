@@ -7,7 +7,7 @@
 
   users.mutableUsers = false; # required for passwords to be set via sops during system activation
   sops = {
-    defaultSopsFile = configLib.relativeToRoot "sops/secrets.yaml";
+    defaultSopsFile = configLib.relativeToRoot "secrets.yaml";
     validateSopsFiles = true;
 
     age = {
