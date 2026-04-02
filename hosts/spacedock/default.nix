@@ -37,15 +37,16 @@
     (configLib.relativeToRoot "hosts/common/users/gig")
     # (configLib.relativeToRoot "hosts/common/users/dotunwrap")
   ];
+  boot = {
+    # Bootloader.
+    loader.grub = {
+      enable = true;
+      device = "/dev/sda"; # Install GRUB on the primary disk (adjust if your disk is different)
+      # efiSupport = false; # Disabled for legacy BIOS (this is the default)
+    };
 
-  # Bootloader.
-  boot.loader.grub = {
-    enable = true;
-    device = "/dev/sda"; # Install GRUB on the primary disk (adjust if your disk is different)
-    # efiSupport = false; # Disabled for legacy BIOS (this is the default)
+    kernelPackages = pkgs.linuxPackages_6_12;
   };
-
-  boot.kernelPackages = pkgs.linuxPackages_6_12;
 
   nix =
     let
