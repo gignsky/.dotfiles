@@ -13,6 +13,7 @@
         gigdot.follows = "";
       };
     };
+    optnix.follows = "dot-spacedock/optnix";
     # Unstable
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     # Local
