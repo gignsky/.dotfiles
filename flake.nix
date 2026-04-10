@@ -193,8 +193,16 @@
         };
 
         # Merlin configuration entrypoint
-        merlin = nixpkgs.lib.nixosSystem {
-          inherit system specialArgs;
+        # Using unstable to access virtualisation.credentials for VM secrets testing
+        # Will move to 26.05 stable when released (~May 2026)
+        merlin = inputs.nixpkgs-unstable.lib.nixosSystem {
+          inherit system;
+          specialArgs = specialArgs // {
+            # Override inputs for Merlin to use unstable as primary nixpkgs
+            inputs = inputs // {
+              nixpkgs = inputs.nixpkgs-unstable;
+            };
+          };
           modules = [
             # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
             # home-manager.nixosModules.home-manager {
