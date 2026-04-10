@@ -230,7 +230,7 @@
             ./hosts/merlin
             inputs.nixos-cli.nixosModules.nixos-cli
 
-            # https://github.com/NixOS/nixos-hardware/tree/master/framework/16-inch/7040-amd
+            # https://github.com/NixOS/nixos-hardware/tree/master/framework/16-7040-amd
             inputs.nixos-hardware.nixosModules.framework-16-7040-amd
           ];
         };
