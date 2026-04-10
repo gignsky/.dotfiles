@@ -2,7 +2,11 @@
 
 {
   i18n.defaultLocale = lib.mkDefault "en_US.UTF-8";
-  time.timeZone = lib.mkDefault "America/New_York";
+  time = {
+    timeZone = lib.mkDefault "America/New_York";
+    hardwareClockInLocalTime = true;
+  };
+  services.ntp.enable = true;
   i18n.extraLocaleSettings = {
     LC_ADDRESS = "en_US.UTF-8";
     LC_IDENTIFICATION = "en_US.UTF-8";
