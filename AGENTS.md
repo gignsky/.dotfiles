@@ -121,6 +121,29 @@ When consulting on repositories outside your primary assignment:
     - Add technical metadata when available (build times, generation numbers, scope impact)
     - Maintain clean history principles from GIT-CONVENTIONS.md
 
+- **Log Archival**: All agents must implement end-of-branch archival protocol for `.tmp-oc-logs/`
+  - **Purpose**: Preserve research, engineering logs, and analysis before branch completion
+  - **When**: Before merging, deleting, or significantly modifying feature branches
+  - **Destination**: `~/local_repos/annex/` (appropriate crew-logs/ or fleet/ subdirectory)
+  - **Archival Process**:
+    1. Review all files in `.tmp-oc-logs/` for archival-worthy content
+    2. Add YAML frontmatter with Obsidian-compatible metadata:
+       - `mission:` and `mission-id:` for grouping related files
+       - `tags:` array for categorization
+       - `related-files:` with `[[wiki-links]]` to other mission files
+       - `status:`, `outcome:`, and other contextual metadata
+    3. Move to annex with descriptive naming: `YYYY-MM-DD-description.md`
+    4. Commit to annex with context about branch/investigation
+    5. Create `ARCHIVED-YYYY-MM-DD.txt` in `.tmp-oc-logs/` documenting what was moved
+    6. Commit cleanup to dotfiles repo with reference to annex commit
+  - **Archival Locations**:
+    - Engineering logs → `annex/crew-logs/scotty/engineering-logs/YYYY-MM/`
+    - Research reports → `annex/crew-logs/library-computer/research-logs/YYYY-MM/`
+    - Command analysis → `annex/fleet/operations/reports/`
+    - System logs → `annex/computer-logs/`
+  - **Obsidian Integration**: Use consistent metadata tags and [[wiki-links]] for cross-referencing
+  - **Critical**: Research and engineering logs are NOT temporary - preserve all significant work
+
 ## Build Commands
 - **System rebuild**: `just rebuild` or `scripts/system-flake-rebuild.sh [HOST]`
 - **Home Manager**: `just home` or `scripts/home-manager-flake-rebuild.sh [HOST]`
