@@ -30,6 +30,7 @@
     (configLib.relativeToRoot "hosts/common/optional/bluetooth.nix") # Enable Bluetooth support
     (configLib.relativeToRoot "hosts/common/optional/brightness-control.nix") # Enable brightness control for Framework laptops
     # ../common/optional/xrdp.nix
+    (configLib.relativeToRoot "hosts/common/optional/optnix.nix") # Enable brightness control for Framework laptops
 
     #gig users
     (configLib.relativeToRoot "hosts/common/users/gig")

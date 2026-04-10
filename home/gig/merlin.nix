@@ -13,6 +13,7 @@
 
     ./home.nix
     ./common/optional/bspwm.nix # Enable bspwm window manager configuration
+    ./common/optional/optnix.nix # Enable bspwm window manager configuration
     # ./common/optional/vscode
     # ./cams-countertop.nix
   ];
