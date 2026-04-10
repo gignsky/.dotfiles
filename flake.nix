@@ -46,6 +46,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    nixos-cli.url = "github:nix-community/nixos-cli";
+
     #################### Personal Repositories ####################
 
     # Private secrets repo.  See ./docs/secretsmgmt.md
@@ -59,14 +61,14 @@
     # private repo with fancy fonts
     fancy-fonts = {
       url = "git+ssh://git@github.com/gignsky/fancy-fonts.git";
+      inputs.gigdot.follows = ""; # Break circular dependency - use current flake
     };
 
     # Recursive tarballs
     wrapd = {
       url = "github:gignsky/wrapd";
-      inputs = {
-        dotfiles.follows = ""; # Break circular dependency - use current flake
-      };
+      inputs.dotfiles.follows = ""; # Break circular dependency - use current flake
+
     };
 
     # # tax-matrix - currently on develop branch
@@ -112,8 +114,6 @@
     };
 
     # flake-iter.url = "github:determinatesystems/flake-iter";
-
-    # optnix.url = "github:water-sucks/optnix";
 
     # Reenable to get aliases working again
     git-aliases = {
@@ -212,6 +212,7 @@
             #   home-manager.extraSpecialArgs = specialArgs;
             # }
             ./hosts/merlin
+            inputs.nixos-cli.nixosModules.nixos-cli
 
             # https://github.com/NixOS/nixos-hardware/tree/master/framework/16-inch/7040-amd
             inputs.nixos-hardware.nixosModules.framework-16-7040-amd
