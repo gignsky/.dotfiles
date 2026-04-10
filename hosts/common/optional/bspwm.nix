@@ -3,7 +3,7 @@
 {
   services = {
     displayManager.ly = {
-      enable = true;
+      enable = false;
       settings = {
         # Enable autologin for user gig to bspwm session
         # auto_login_user = "gig";
