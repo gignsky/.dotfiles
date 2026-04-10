@@ -38,6 +38,10 @@
       url = "github:mic92/sops-nix/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    unstable-sops = {
+      url = "github:mic92/sops-nix/master";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
 
     # Pre-commit hooks for managing Git hooks declaratively
     pre-commit-hooks = {
@@ -201,6 +205,7 @@
             # Override inputs for Merlin to use unstable as primary nixpkgs
             inputs = inputs // {
               nixpkgs = inputs.nixpkgs-unstable;
+              sops-nix = inputs.unstable-sops;
             };
           };
           modules = [
