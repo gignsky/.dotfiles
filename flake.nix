@@ -113,8 +113,6 @@
 
     # flake-iter.url = "github:determinatesystems/flake-iter";
 
-    # optnix.url = "github:water-sucks/optnix";
-
     # Reenable to get aliases working again
     git-aliases = {
       url = "github:KamilKleina/git-aliases.nu";
