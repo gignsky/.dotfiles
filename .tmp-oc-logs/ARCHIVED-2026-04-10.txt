@@ -1,0 +1,40 @@
+Files from this directory archived to ~/local_repos/annex/ on 2026-04-10
+Archived by: Commander Una Chin-Riley
+
+Annex Commit: 6e2e574 "docs: archive VM secrets investigation logs (Mission VM-SECRETS-2026-04)"
+Mission ID: VM-SECRETS-2026-04
+
+Files Archived:
+===============
+
+scotty-vm-sops-engineering-log.md →
+  annex/crew-logs/scotty/engineering-logs/2026-04/2026-04-02-vm-sops-implementation.md
+
+vm-secrets-research-report.md →
+  annex/crew-logs/library-computer/research-logs/2026-04/2026-04-02-vm-secrets-research.md
+
+vm-sops-implementation-plan.md →
+  annex/crew-logs/library-computer/research-logs/2026-04/2026-04-02-vm-sops-implementation-plan.md
+
+una-nixpkgs-patch-proposal-analysis.md →
+  annex/fleet/operations/reports/2026-04-10-nixpkgs-vm-secrets-proposal.md
+
+Obsidian Linking:
+=================
+All files include YAML frontmatter with:
+- mission: vm-secrets-investigation
+- mission-id: VM-SECRETS-2026-04
+- tags: [relevant-tags]
+- related-files: [[wiki-links]] to other mission files
+
+Context:
+========
+VM secrets investigation (2026-04-02 through 2026-04-10) documenting
+attempt to implement per-host VM age keys for sops-nix. Approach
+abandoned after security analysis revealed /nix/store exposure issue.
+
+Strategic pivot to systemd credentials approach recommended by
+Commander Una.
+
+Branch: vm/1-attempt-vm-secrets-import (preserved)
+New Branch: vm/2-systemd-credentials-approach (active)
