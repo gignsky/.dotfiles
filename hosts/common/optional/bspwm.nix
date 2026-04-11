@@ -2,25 +2,32 @@
 
 {
   services = {
-    displayManager.ly = {
-      enable = false;
-      settings = {
-        # Enable autologin for user gig to bspwm session
-        # auto_login_user = "gig";
-        # auto_login_session = "none+bspwm";
-        # save = true; # Remember session choice
+    displayManager = {
+      # Using LightDM instead of ly
+      ly.enable = false;
 
-        # Optional: Performance optimizations
-        # animation = "none"; # Disable animations for faster boot
-        hide_borders = true;
-        hide_key_hints = false;
+      # Auto-login configuration for LightDM
+      autoLogin = {
+        enable = true;
+        user = "gig";
       };
+
+      # Default session (user can still select others at logout)
+      defaultSession = "none+bspwm";
     };
+
     xserver = {
       enable = true;
       windowManager.bspwm.enable = true;
-      # Note: ly display manager is configured with autologin above
-      # This provides bspwm as an additional session option
+
+      # LightDM configuration
+      displayManager.lightdm = {
+        enable = true;
+        greeter.enable = true;
+
+        # LightDM auto-login allows logout to switch users/sessions
+        # The greeter will show when you explicitly log out
+      };
     };
   };
 
@@ -35,4 +42,22 @@
     xdotool # X11 automation tool
     picom # Compositor for transparency and effects
   ];
+
+  # Create a terminal-only session option
+  services.xserver.displayManager.sessionPackages =
+    let
+      terminalSession = pkgs.writeTextFile {
+        name = "xterm-session";
+        destination = "/share/xsessions/xterm-session.desktop";
+        text = ''
+          [Desktop Entry]
+          Name=Terminal Session
+          Comment=Start with a terminal (no window manager)
+          Exec=${pkgs.xterm}/bin/xterm -maximized -e ${pkgs.nushell}/bin/nu
+          Type=Application
+        '';
+        passthru.providedSessions = [ "xterm-session" ];
+      };
+    in
+    [ terminalSession ];
 }
