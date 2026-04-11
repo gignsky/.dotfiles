@@ -10,6 +10,11 @@
     # Local
     # nixpkgs-local.url = "git+file:///home/gig/local_repos/nixpkgs";
 
+    unstable-home-manager = {
+      url = "github:nix-community/home-manager/master";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+
     # Home manager
     home-manager = {
       url = "github:nix-community/home-manager/release-25.11";
@@ -206,6 +211,7 @@
             inputs = inputs // {
               nixpkgs = inputs.nixpkgs-unstable;
               sops-nix = inputs.unstable-sops;
+              home-manager = inputs.unstable-home-manager;
             };
           };
           modules = [
