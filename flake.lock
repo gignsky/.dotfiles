@@ -783,6 +783,8 @@
         "pre-commit-hooks": "pre-commit-hooks",
         "sops-nix": "sops-nix",
         "treefmt-nix": "treefmt-nix",
+        "unstable-home-manager": "unstable-home-manager",
+        "unstable-sops": "unstable-sops",
         "vscode-server": "vscode-server",
         "wrapd": "wrapd"
       }
@@ -952,6 +954,48 @@
       "original": {
         "owner": "numtide",
         "repo": "treefmt-nix",
+        "type": "github"
+      }
+    },
+    "unstable-home-manager": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs-unstable"
+        ]
+      },
+      "locked": {
+        "lastModified": 1775781825,
+        "narHash": "sha256-L5yKTpR+alrZU2XYYvIxCeCP4LBHU5jhwSj7H1VAavg=",
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "rev": "e35c39fca04fee829cecdf839a50eb9b54d8a701",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "ref": "master",
+        "repo": "home-manager",
+        "type": "github"
+      }
+    },
+    "unstable-sops": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs-unstable"
+        ]
+      },
+      "locked": {
+        "lastModified": 1775682595,
+        "narHash": "sha256-0E9PohY/VuESLq0LR4doaH7hTag513sDDW5n5qmHd1Q=",
+        "owner": "mic92",
+        "repo": "sops-nix",
+        "rev": "d2e8438d5886e92bc5e7c40c035ab6cae0c41f76",
+        "type": "github"
+      },
+      "original": {
+        "owner": "mic92",
+        "ref": "master",
+        "repo": "sops-nix",
         "type": "github"
       }
     },
