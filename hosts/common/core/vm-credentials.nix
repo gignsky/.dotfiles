@@ -9,6 +9,15 @@
   # This configuration only applies when building VMs with nixos-rebuild build-vm
 
   virtualisation.vmVariant = {
+    # Enable SSH access to VM for easier debugging
+    virtualisation.forwardPorts = [
+      {
+        from = "host";
+        host.port = 2222;
+        guest.port = 22;
+      }
+    ];
+
     # Pass all sops secrets as VM credentials
     virtualisation.credentials = lib.mapAttrs' (
       name: secret:
