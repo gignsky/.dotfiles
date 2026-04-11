@@ -25,6 +25,7 @@
     # bitwarden-desktop
     discord
     makemkv
+    steam
     # anydesk
     bambu-studio
   ];
