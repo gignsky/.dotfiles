@@ -10,7 +10,7 @@ vm host=default_vm_host:
     @echo "🔧 Building VM for {{host}}..."
     nixos-rebuild build-vm --flake .#{{host}} --print-build-logs
     @echo "🚀 Starting VM for {{host}}..."
-    ./result/bin/run-{{host}}-vm
+    sudo ./result/bin/run-{{host}}-vm
 
 # Build VM without running (useful for CI or pre-building)
 # Usage: just vm-build [host]
@@ -24,7 +24,7 @@ vm-build host=default_vm_host:
 vm-run host=default_vm_host:
     @test -f ./result/bin/run-{{host}}-vm || (echo "❌ No VM found for {{host}}. Build first with: just vm-build {{host}}" && exit 1)
     @echo "🚀 Starting VM for {{host}}..."
-    ./result/bin/run-{{host}}-vm
+    sudo ./result/bin/run-{{host}}-vm
 
 # Clean up VM build artifacts
 vm-clean:
