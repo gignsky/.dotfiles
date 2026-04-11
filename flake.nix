@@ -19,6 +19,11 @@
     # Local
     # nixpkgs-local.url = "git+file:///home/gig/local_repos/nixpkgs";
 
+    unstable-home-manager = {
+      url = "github:nix-community/home-manager/master";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
+
     # Home manager
     home-manager = {
       url = "github:nix-community/home-manager/release-25.11";
@@ -47,6 +52,10 @@
       url = "github:mic92/sops-nix/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    unstable-sops = {
+      url = "github:mic92/sops-nix/master";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
 
     # Pre-commit hooks for managing Git hooks declaratively
     pre-commit-hooks = {
@@ -54,6 +63,8 @@
       url = "github:cachix/git-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    nixos-cli.url = "github:nix-community/nixos-cli";
 
     #################### Personal Repositories ####################
 
@@ -68,14 +79,14 @@
     # private repo with fancy fonts
     fancy-fonts = {
       url = "git+ssh://git@github.com/gignsky/fancy-fonts.git";
+      inputs.gigdot.follows = ""; # Break circular dependency - use current flake
     };
 
     # Recursive tarballs
     wrapd = {
       url = "github:gignsky/wrapd";
-      inputs = {
-        dotfiles.follows = ""; # Break circular dependency - use current flake
-      };
+      inputs.dotfiles.follows = ""; # Break circular dependency - use current flake
+
     };
 
     # # tax-matrix - currently on develop branch
@@ -121,8 +132,6 @@
     };
 
     # flake-iter.url = "github:determinatesystems/flake-iter";
-
-    # optnix.url = "github:water-sucks/optnix";
 
     # Reenable to get aliases working again
     git-aliases = {
@@ -201,26 +210,26 @@
           ];
         };
 
-        # #wsl based vm
-        # full-vm = nixpkgs.lib.nixosSystem {
-        #   inherit system specialArgs;
-        #   modules = [
-        #     { system.stateVersion = "25.05"; }
-        #     "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
-        #     "${nixpkgs}/nixos/modules/installer/cd-dvd/channel.nix"
-        #     ./hosts/full-vm
-        #   ];
-        # };
-
-        # # Merlin configuration entrypoint - unused as merlin has a wsl instance
-        merlin = nixpkgs.lib.nixosSystem {
-          inherit system specialArgs;
+        # Merlin configuration entrypoint
+        # Using unstable to access virtualisation.credentials for VM secrets testing
+        # Will move to 26.05 stable when released (~May 2026)
+        merlin = inputs.nixpkgs-unstable.lib.nixosSystem {
+          inherit system;
+          specialArgs = specialArgs // {
+            # Override inputs for Merlin to use unstable as primary nixpkgs
+            inputs = inputs // {
+              nixpkgs = inputs.nixpkgs-unstable;
+              sops-nix = inputs.unstable-sops;
+              home-manager = inputs.unstable-home-manager;
+            };
+          };
           modules = [
             # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
             # home-manager.nixosModules.home-manager {
             #   home-manager.extraSpecialArgs = specialArgs;
             # }
             ./hosts/merlin
+            inputs.nixos-cli.nixosModules.nixos-cli
 
             # https://github.com/NixOS/nixos-hardware/tree/master/framework/16-inch/7040-amd
             inputs.nixos-hardware.nixosModules.framework-16-7040-amd
