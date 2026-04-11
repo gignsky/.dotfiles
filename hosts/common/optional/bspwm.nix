@@ -6,13 +6,15 @@
       # Using LightDM instead of ly
       ly.enable = false;
 
-      # Auto-login configuration for LightDM
+      # Enable auto-login for user gig
+      # Note: This will auto-login every time, even after logout
+      # To change sessions, you'll need to select a different session before logging out
       autoLogin = {
         enable = true;
         user = "gig";
       };
 
-      # Default session (user can still select others at logout)
+      # Default session for auto-login
       defaultSession = "none+bspwm";
     };
 
@@ -25,8 +27,31 @@
         enable = true;
         greeter.enable = true;
 
-        # LightDM auto-login allows logout to switch users/sessions
-        # The greeter will show when you explicitly log out
+        # Configure LightDM behavior
+        extraConfig = ''
+          [Seat:*]
+          greeter-hide-users = false
+          greeter-show-manual-login = false
+          allow-guest = false
+          # Timeout before autologin (0 = immediate)
+          autologin-user-timeout = 5
+        '';
+
+        # GTK Greeter configuration
+        greeters.gtk = {
+          enable = true;
+          extraConfig = ''
+            [greeter]
+            # Pre-populate user 'gig' in the greeter
+            default-user-image = /home/gig/.face
+            hide-user-image = false
+            # Show session selector and power menu
+            show-indicators = ~session;~power
+            show-clock = true
+            # Set active monitor for multi-monitor setups
+            active-monitor = 0
+          '';
+        };
       };
     };
   };
@@ -44,6 +69,7 @@
   ];
 
   # Create a terminal-only session option
+  # Access this by logging out and selecting "Terminal Session" from LightDM's session menu
   services.xserver.displayManager.sessionPackages =
     let
       terminalSession = pkgs.writeTextFile {
