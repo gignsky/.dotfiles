@@ -4,8 +4,7 @@
   inputs = {
     #################### Official NixOS and HM Package Sources ####################
     # Stable
-    # nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
-    nixpkgs.follows = "nixpkgs-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.11";
     # Unstable
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     # Local
