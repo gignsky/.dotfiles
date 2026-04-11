@@ -42,7 +42,7 @@ in
       };
       plugins = with pkgs.unstable.nushellPlugins; [
         # net - currently marked as broken
-        highlight
+        # highlight - temp disabled to be brought back in 26.05
         # units - currently marked as broken
         formats
         query
