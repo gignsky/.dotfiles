@@ -42,22 +42,4 @@
     xdotool # X11 automation tool
     picom # Compositor for transparency and effects
   ];
-
-  # Create a terminal-only session option
-  services.xserver.displayManager.sessionPackages =
-    let
-      terminalSession = pkgs.writeTextFile {
-        name = "xterm-session";
-        destination = "/share/xsessions/xterm-session.desktop";
-        text = ''
-          [Desktop Entry]
-          Name=Terminal Session
-          Comment=Start with a terminal (no window manager)
-          Exec=${pkgs.xterm}/bin/xterm -maximized -e ${pkgs.nushell}/bin/nu
-          Type=Application
-        '';
-        passthru.providedSessions = [ "xterm-session" ];
-      };
-    in
-    [ terminalSession ];
 }
