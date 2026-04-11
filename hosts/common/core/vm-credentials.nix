@@ -1,16 +1,9 @@
 { config, lib, ... }:
 {
-  options.virtualisation.credentials = lib.mkOption {
-    type = lib.types.attrsOf (
-      lib.types.submodule {
-        options = {
-          source = lib.mkOption { type = lib.types.path; };
-        };
-      }
-    );
-  };
+  # Configure credentials for VMs using virtualisation.vmVariant
+  # This configuration only applies when building VMs with nixos-rebuild build-vm
 
-  config = lib.mkIf (config.virtualisation ? qemu) {
+  virtualisation.vmVariant = {
     # Pass all sops secrets as VM credentials
     virtualisation.credentials = lib.mapAttrs' (
       name: secret:
@@ -20,15 +13,14 @@
       }
     ) config.sops.secrets;
 
-    # # Override user password configuration for VMs
-    # # We need to read password from systemd credentials instead of sops
-    # users.users.gig = {
-    #   # In VMs, we'll handle password differently - see Step 3
-    #   hashedPasswordFile = lib.mkForce null;
-    # };
-    #
-    # users.users.root = {
-    #   hashedPasswordFile = lib.mkForce null;
-    # };
+    # Override user password configuration for VMs
+    # We need to read password from systemd credentials instead of sops
+    users.users.gig = {
+      hashedPasswordFile = lib.mkForce null;
+    };
+
+    users.users.root = {
+      hashedPasswordFile = lib.mkForce null;
+    };
   };
 }
