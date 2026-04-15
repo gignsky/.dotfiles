@@ -18,6 +18,8 @@
   # WSL-specific user ID override (group stays at 1701)
   users.users.${configVars.username}.uid = lib.mkForce 1000;
 
+  tailscale.enable = false;
+
   networking.hostName = "nixos";
 
   # Tailscale configuration (currently disabled)
