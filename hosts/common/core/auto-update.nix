@@ -1,5 +1,4 @@
 {
-  inputs,
   config,
   ...
 }:
@@ -21,7 +20,7 @@ in
 
     # how often to update
     # dates = "daily";
-    dates = "19:38";
+    dates = "19:46";
 
     # flake = "github:gignsky/.dotfiles";
     # flake = inputs.self.outPath;
