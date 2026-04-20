@@ -1,4 +1,9 @@
-{ inputs, ... }:
+{
+  inputs,
+  flakePath,
+  config,
+  ...
+}:
 {
   system.autoUpgrade = {
     enable = true;
@@ -14,10 +19,11 @@
 
     # how often to update
     # dates = "daily";
-    dates = "19:30";
+    dates = "19:35";
 
     # flake = "github:gignsky/.dotfiles";
-    flake = inputs.self.outPath;
+    # flake = inputs.self.outPath;
+    flake = "${flakePath}#${config.networking.hostName}";
     flags = [
       # "--update-input"
       "--upgrade-all"
