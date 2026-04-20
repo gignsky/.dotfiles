@@ -1,12 +1,11 @@
 {
   inputs,
-  flakePath,
   config,
   ...
 }:
 let
-  flakePath = "/home/gig/.dotfiles"
-in 
+  flakePath = "/home/gig/.dotfiles";
+in
 {
   system.autoUpgrade = {
     enable = true;
