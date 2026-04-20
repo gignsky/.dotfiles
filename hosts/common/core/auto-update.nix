@@ -4,6 +4,9 @@
   config,
   ...
 }:
+let
+  flakePath = "/home/gig/.dotfiles"
+in 
 {
   system.autoUpgrade = {
     enable = true;
