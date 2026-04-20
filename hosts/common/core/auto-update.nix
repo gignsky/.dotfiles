@@ -14,7 +14,7 @@
 
     # how often to update
     # dates = "daily";
-    dates = "19:25";
+    dates = "19:30";
 
     # flake = "github:gignsky/.dotfiles";
     flake = inputs.self.outPath;
