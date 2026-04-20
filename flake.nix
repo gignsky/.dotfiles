@@ -236,17 +236,7 @@
         };
 
         ganoslal = nixpkgs.lib.nixosSystem {
-          # inherit system specialArgs;
-          inherit system;
-          specialArgs = specialArgs // {
-            # remove me when updateing to 26.05
-            # Override inputs for Merlin to use unstable as primary nixpkgs
-            inputs = inputs // {
-              nixpkgs = inputs.nixpkgs-unstable;
-              sops-nix = inputs.unstable-sops;
-              home-manager = inputs.unstable-home-manager;
-            };
-          };
+          inherit system specialArgs;
           # > Our main nixos configuration file <
           modules = [
             # home-manager.nixosModules.home-manager
