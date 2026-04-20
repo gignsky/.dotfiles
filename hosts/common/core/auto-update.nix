@@ -1,10 +1,11 @@
 {
-  config,
+  inputs,
+  # config,
   ...
 }:
-let
-  flakePath = "/home/gig/.dotfiles";
-in
+# let
+#   flakePath = "/home/gig/.dotfiles";
+# in
 {
   system.autoUpgrade = {
     enable = true;
@@ -20,11 +21,11 @@ in
 
     # how often to update
     # dates = "daily";
-    dates = "19:46";
+    dates = "19:52";
 
     # flake = "github:gignsky/.dotfiles";
-    # flake = inputs.self.outPath;
-    flake = "${flakePath}#${config.networking.hostName}";
+    flake = inputs.self.outPath;
+    # flake = "${flakePath}#${config.networking.hostName}";
     flags = [
       # "--update-input"
       "--upgrade-all"
