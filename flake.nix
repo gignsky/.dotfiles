@@ -208,6 +208,7 @@
         merlin = inputs.nixpkgs-unstable.lib.nixosSystem {
           inherit system;
           specialArgs = specialArgs // {
+            # remove me when updateing to 26.05
             # Override inputs for Merlin to use unstable as primary nixpkgs
             inputs = inputs // {
               nixpkgs = inputs.nixpkgs-unstable;
