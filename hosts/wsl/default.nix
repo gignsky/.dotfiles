@@ -13,10 +13,15 @@
     # (configLib.relativeToRoot "hosts/common/optional/neofetch.nix")
     # inputs.nixos-wsl.modules
     # inputs.home-manager.nixosModules.home-manager
+
+    # MAGEC Multi-Agent Platform Services (PostgreSQL + Redis)
+    (configLib.relativeToRoot "hosts/common/optional/services/magec.nix")
   ];
 
   # WSL-specific user ID override (group stays at 1701)
   users.users.${configVars.username}.uid = lib.mkForce 1000;
+
+  tailscale.enable = false;
 
   networking.hostName = "nixos";
 
