@@ -73,17 +73,11 @@
     };
     efi.canTouchEfiVariables = true;
   };
-  services.xserver = {
-    # Configuration for displaylink usb-c dock
-    videoDrivers = [
-      "displaylink"
-      "modesetting"
-    ];
-    # Configure keymap in X11
-    xkb = {
-      layout = "us";
-      variant = "";
-    };
+
+  # Configure keymap in X11
+  services.xserver.xkb = {
+    layout = "us";
+    variant = "";
   };
 
   # Enable libinput for touchpad support with palm rejection
