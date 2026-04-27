@@ -4,6 +4,9 @@
   system.build.vmTest = pkgs.testers.nixosTest {
     name = "system-test";
 
+    # Skip Python type checking to avoid mypy duplicate name issues
+    skipTypeCheck = true;
+
     nodes.machine =
       { pkgs, ... }:
       {
