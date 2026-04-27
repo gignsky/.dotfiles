@@ -29,6 +29,7 @@
     (configLib.relativeToRoot "hosts/common/optional/audio.nix") # Enable PipeWire audio system
     (configLib.relativeToRoot "hosts/common/optional/bluetooth.nix") # Enable Bluetooth support
     (configLib.relativeToRoot "hosts/common/optional/brightness-control.nix") # Enable brightness control for Framework laptops
+    (configLib.relativeToRoot "hosts/common/optional/displaylink.nix") # Enable DisplayLink USB graphics support
     # ../common/optional/xrdp.nix
 
     #gig users
