@@ -52,32 +52,27 @@
 
   # Tailscale configuration
   tailscale.enable = true;
-  boot = {
-    extraModulePackages = [ config.boot.kernelPackages.evdi ];
-    # Grub installation
-    loader = {
-      # Bootloader.
-      systemd-boot.enable = false;
-      grub = {
-        enable = true;
-        device = "nodev";
-        efiSupport = true;
-        efiInstallAsRemovable = false;
-        useOSProber = true; # Automatically detect Windows and other OSes
-        configurationLimit = 20; # Limit boot menu entries to last 20 generations
 
-        # default config
-        default = "saved";
-        extraConfig = ''
-          GRUB_SAVEDEFAULT=true
-        '';
-      };
-      efi.canTouchEfiVariables = true;
+  # Grub installation
+  boot.loader = {
+    # Bootloader.
+    systemd-boot.enable = false;
+    grub = {
+      enable = true;
+      device = "nodev";
+      efiSupport = true;
+      efiInstallAsRemovable = false;
+      useOSProber = true; # Automatically detect Windows and other OSes
+      configurationLimit = 20; # Limit boot menu entries to last 20 generations
+
+      # default config
+      default = "saved";
+      extraConfig = ''
+        GRUB_SAVEDEFAULT=true
+      '';
     };
+    efi.canTouchEfiVariables = true;
   };
-
-  environment.systemPackages = [ pkgs.displaylink ];
-
   services.xserver = {
     # Configuration for displaylink usb-c dock
     videoDrivers = [

@@ -227,10 +227,6 @@
             # home-manager.nixosModules.home-manager {
             #   home-manager.extraSpecialArgs = specialArgs;
             # }
-            {
-              nixpkgs.config.allowUnfree = true;
-              nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [ "displaylink" ];
-            }
             ./hosts/merlin
             inputs.nixos-cli.nixosModules.nixos-cli
 
