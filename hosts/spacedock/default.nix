@@ -26,7 +26,7 @@
     (configLib.relativeToRoot "hosts/common/spacedock")
 
     # optional
-    # (configLib.relativeToRoot "hosts/common/optional/docker.nix")
+    (configLib.relativeToRoot "hosts/common/optional/docker.nix")
     # # (configLib.relativeToRoot "hosts/common/optional/gitlab.nix")
     # (configLib.relativeToRoot "hosts/common/optional/minecraft.nix")
 
