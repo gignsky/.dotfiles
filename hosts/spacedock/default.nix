@@ -28,7 +28,6 @@
     # (configLib.relativeToRoot "hosts/common/optional/docker.nix")
     # # (configLib.relativeToRoot "hosts/common/optional/gitlab.nix")
     # (configLib.relativeToRoot "hosts/common/optional/minecraft.nix")
-    # (configLib.relativeToRoot "hosts/common/optional/samba.nix")
 
     # containers
     # (configLib.relativeToRoot "containers/services")
@@ -39,12 +38,7 @@
   ];
   boot = {
     # Bootloader.
-    loader.grub = {
-      enable = true;
-      device = "/dev/sda"; # Install GRUB on the primary disk (adjust if your disk is different)
-      # efiSupport = false; # Disabled for legacy BIOS (this is the default)
-    };
-
+    loader.grub.device = "/dev/sda"; # Install GRUB on the primary disk (adjust if your disk is different)
     kernelPackages = pkgs.linuxPackages_6_12;
   };
 

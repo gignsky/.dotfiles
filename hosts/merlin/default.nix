@@ -55,25 +55,7 @@
   tailscale.enable = true;
 
   # Grub installation
-  boot.loader = {
-    # Bootloader.
-    systemd-boot.enable = false;
-    grub = {
-      enable = true;
-      device = "nodev";
-      efiSupport = true;
-      efiInstallAsRemovable = false;
-      useOSProber = true; # Automatically detect Windows and other OSes
-      configurationLimit = 20; # Limit boot menu entries to last 20 generations
-
-      # default config
-      default = "saved";
-      extraConfig = ''
-        GRUB_SAVEDEFAULT=true
-      '';
-    };
-    efi.canTouchEfiVariables = true;
-  };
+  boot.loader.grub.device = "nodev";
 
   # Configure keymap in X11
   services.xserver.xkb = {

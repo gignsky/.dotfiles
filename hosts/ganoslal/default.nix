@@ -50,11 +50,7 @@
   # Tailscale configuration
   tailscale.enable = false;
 
-  boot.loader = {
-    # Bootloader.
-    systemd-boot.enable = true;
-    efi.canTouchEfiVariables = true;
-  };
+  boot.loader.systemd-boot.enable = true;
 
   services.xserver = {
 
