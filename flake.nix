@@ -188,6 +188,12 @@
         wsl = nixpkgs.lib.nixosSystem {
           inherit system;
           specialArgs = specialArgs // {
+            # remove me when updateing to 26.05
+            inputs = inputs // {
+              nixpkgs = inputs.nixpkgs-unstable;
+              sops-nix = inputs.unstable-sops;
+              home-manager = inputs.unstable-home-manager;
+            };
             configVars = configVars // {
               uid = 1000; # WSL compatibility
               guid = 1000; # Keep gig group as 1000, not 100
@@ -207,6 +213,7 @@
             #   home-manager.extraSpecialArgs = specialArgs;
             # }
             ./hosts/wsl
+            inputs.nixos-cli.nixosModules.nixos-cli
           ];
         };
 
@@ -216,6 +223,7 @@
         merlin = inputs.nixpkgs-unstable.lib.nixosSystem {
           inherit system;
           specialArgs = specialArgs // {
+            # remove me when updateing to 26.05
             # Override inputs for Merlin to use unstable as primary nixpkgs
             inputs = inputs // {
               nixpkgs = inputs.nixpkgs-unstable;
@@ -245,6 +253,7 @@
             #   home-manager.extraSpecialArgs = specialArgs;
             # }
             ./hosts/ganoslal
+            inputs.nixos-cli.nixosModules.nixos-cli
           ];
         };
 
