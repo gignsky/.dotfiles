@@ -266,6 +266,7 @@
             #   home-manager.extraSpecialArgs = specialArgs;
             # }
             ./hosts/spacedock
+            inputs.nixos-cli.nixosModules.nixos-cli
           ];
         };
       };
