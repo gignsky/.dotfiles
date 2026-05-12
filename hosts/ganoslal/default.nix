@@ -21,6 +21,7 @@
     ./hardware-configuration.nix
     # core utils
     (configLib.relativeToRoot "hosts/common/core")
+    (configLib.relativeToRoot "hosts/common/optional/grub.nix") # Enable brightness control for Framework laptops
 
     # optional
     # (configLib.relativeToRoot "hosts/common/optional/xfce.nix")
@@ -50,8 +51,6 @@
   # Tailscale configuration
   tailscale.enable = false;
 
-  boot.loader.systemd-boot.enable = true;
-
   services.xserver = {
 
     # Configure keymap in X11
@@ -65,6 +64,9 @@
       "nvidia"
     ];
   };
+
+  # Grub installation
+  boot.loader.grub.device = "nodev";
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;

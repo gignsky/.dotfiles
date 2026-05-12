@@ -22,6 +22,7 @@
     ./hardware-configuration.nix
     # core utils
     (configLib.relativeToRoot "hosts/common/core")
+    (configLib.relativeToRoot "hosts/common/optional/grub.nix") # Enable brightness control for Framework laptops
     (configLib.relativeToRoot "hosts/common/spacedock")
 
     # optional
