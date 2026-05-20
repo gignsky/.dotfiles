@@ -74,6 +74,8 @@
     #file manager
     spaceFM
 
+    claude-code
+
     vlc
 
     # direnv # direnv is enabled by default
