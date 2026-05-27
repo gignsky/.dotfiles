@@ -38,6 +38,11 @@
       url = "github:mic92/sops-nix/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    # Unneeded after moving to stable 26.05
+    # unstable-sops = {
+    #   url = "github:mic92/sops-nix/master";
+    #   inputs.nixpkgs.follows = "nixpkgs-unstable";
+    # };
 
     # Pre-commit hooks for managing Git hooks declaratively
     pre-commit-hooks = {
