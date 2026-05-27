@@ -193,20 +193,20 @@
           ];
         };
 
-        # #wsl based vm
-        # full-vm = nixpkgs.lib.nixosSystem {
-        #   inherit system specialArgs;
-        #   modules = [
-        #     { system.stateVersion = "25.05"; }
-        #     "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
-        #     "${nixpkgs}/nixos/modules/installer/cd-dvd/channel.nix"
-        #     ./hosts/full-vm
-        #   ];
-        # };
-
-        # # Merlin configuration entrypoint - unused as merlin has a wsl instance
-        merlin = nixpkgs.lib.nixosSystem {
-          inherit system specialArgs;
+        # Merlin configuration entrypoint
+        # Using unstable to access virtualisation.credentials for VM secrets testing
+        # Will move to 26.05 stable when released (~May 2026)
+        merlin = inputs.nixpkgs-unstable.lib.nixosSystem {
+          inherit system;
+          specialArgs = specialArgs // {
+            # remove me when updateing to 26.05
+            # Override inputs for Merlin to use unstable as primary nixpkgs
+            inputs = inputs // {
+              nixpkgs = inputs.nixpkgs-unstable;
+              sops-nix = inputs.unstable-sops;
+              home-manager = inputs.unstable-home-manager;
+            };
+          };
           modules = [
             # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
             # home-manager.nixosModules.home-manager {
