@@ -1,0 +1,37 @@
+Files from this directory archived to ~/local_repos/annex/ on 2026-04-10
+Archived by: Chief Engineer Montgomery Scott
+
+Annex Commit: 1bbcd70 "eng(scotty): complete VM secrets implementation engineering log"
+Mission ID: VM-SECRETS-2026-04
+Branch: vm/2-systemd-credentials-approach
+
+Files Archived:
+===============
+
+vm-credentials-debug.md + vm-credentials-test-commands.md + vm-secrets-final-solution.md →
+  annex/crew-logs/scotty/engineering-logs/2026-04/2026-04-10-vm-secrets-final-implementation.md
+  (Combined into comprehensive engineering log)
+
+Obsidian Linking:
+=================
+Engineering log includes YAML frontmatter with:
+- mission: vm-secrets-implementation
+- mission-id: VM-SECRETS-2026-04
+- tags: [nixos, virtualization, sops-nix, secrets-management, systemd, debugging]
+- related-files: [[wiki-links]] to related mission documents
+
+Context:
+========
+VM secrets implementation completed successfully (2026-04-10).
+Final solution uses static "nixos" passwords for VM users and
+9p shared directories for service secrets (CIFS, etc.).
+
+Key discoveries:
+- sops-nix dual-directory architecture (/run/secrets-for-users/ vs /run/secrets/)
+- Race condition between stage-2-init and systemd
+- virtualisation.credentials incompatible with sops-nix (build-time vs runtime)
+
+All tests passing. Ready for merge to main.
+
+Branch: vm/2-systemd-credentials-approach (ready for merge)
+Previous Branch: vm/1-attempt-vm-secrets-import (archived)
