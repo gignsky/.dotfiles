@@ -175,13 +175,13 @@
         wsl = nixpkgs.lib.nixosSystem {
           inherit system;
           specialArgs = specialArgs // {
-            inherit inputs;
+            # inherit inputs;
             # remove me when updateing to 26.05
-            # inputs = inputs // {
-            #   nixpkgs = inputs.nixpkgs-unstable;
-            #   sops-nix = inputs.unstable-sops;
-            #   home-manager = inputs.unstable-home-manager;
-            # };
+            inputs = inputs // {
+              nixpkgs = inputs.nixpkgs-unstable;
+              # sops-nix = inputs.unstable-sops;
+              # home-manager = inputs.unstable-home-manager;
+            };
             configVars = configVars // {
               uid = 1000; # WSL compatibility
               guid = 1000; # Keep gig group as 1000, not 100
