@@ -503,7 +503,7 @@
       "inputs": {
         "flake-compat": "flake-compat_3",
         "nixpkgs": [
-          "nixpkgs"
+          "nixpkgs-unstable"
         ]
       },
       "locked": {
