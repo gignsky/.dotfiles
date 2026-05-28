@@ -184,6 +184,7 @@
               wsl.enable = true;
               # wsl.nativeSystemd = true;
             }
+            inputs.nixos-cli.nixosModules.nixos-cli
             # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
             # home-manager.nixosModules.home-manager {
             #   home-manager.extraSpecialArgs = specialArgs;
@@ -243,6 +244,7 @@
             #   home-manager.extraSpecialArgs = specialArgs;
             # }
             ./hosts/ganoslal
+            inputs.nixos-cli.nixosModules.nixos-cli
           ];
         };
       };
