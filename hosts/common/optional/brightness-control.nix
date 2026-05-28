@@ -3,9 +3,10 @@
 {
   # Enable brightness control utilities and proper permissions
   environment.systemPackages = with pkgs; [
-    brightnessctl # Modern brightness control utility
-    light # Alternative brightness control (backup)
-    acpilight # ACPI-based brightness control
+    brightnessctl # Modern brightness control utility (recommended)
+    acpilight # ACPI-based brightness control (alternative)
+    # Note: 'light' was removed in nixpkgs 26.05 (unmaintained)
+    # Using brightnessctl and acpilight as replacements
   ];
 
   # Backlight udev rules and permissions
