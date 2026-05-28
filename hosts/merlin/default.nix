@@ -52,7 +52,7 @@
   };
 
   # Tailscale configuration
-  tailscale.enable = false;
+  tailscale.enable = true;
 
   # Grub installation
   boot.loader = {

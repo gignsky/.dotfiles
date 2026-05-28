@@ -27,7 +27,7 @@ in
   programs = {
     nushell = {
       enable = true;
-      package = pkgs.nushell;
+      package = pkgs.unstable.nushell;
       shellAliases = import ../optional/shellAliases.nix;
       settings = {
         show_banner = false;
@@ -40,7 +40,7 @@ in
       environmentVariables = {
         EDITOR = "${inputs.gigvim.packages.${system}.gigvim}/bin/nvim";
       };
-      plugins = with pkgs.nushellPlugins; [
+      plugins = with pkgs.unstable.nushellPlugins; [
         # net - currently marked as broken
         # highlight - temp disabled to be brought back in 26.05
         # units - currently marked as broken
@@ -80,7 +80,7 @@ in
 
     carapace = {
       enable = true;
-      package = pkgs.carapace;
+      package = pkgs.unstable.carapace;
       enableNushellIntegration = true;
     };
   };
