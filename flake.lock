@@ -1000,6 +1000,7 @@
       },
       "original": {
         "owner": "mic92",
+        "ref": "master",
         "repo": "sops-nix",
         "type": "github"
       }
