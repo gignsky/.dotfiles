@@ -54,7 +54,7 @@ in
     (defaultMount "virtualization-boot-files" "mnt/virtualization-boot-files" "192.168.51.3")
     (defaultMount "vulcan" "mnt/vulcan" "192.168.51.3")
     (defaultMount "media" "mnt/media" "192.168.51.3")
-    (defaultMount "appraisals" "mnt/appraisals" "192.168.51.21")
+    (defaultMount "new-appraisals" "mnt/appraisals" "192.168.51.3")
     (defaultMount "proxmox-backup-share" "mnt/proxmox_backups" "192.168.51.3")
     (defaultMount "important-app-data" "mnt/important-app-data" "192.168.51.3")
     (defaultMount "nzbget" "mnt/nzbget" "192.168.51.3")

@@ -74,6 +74,8 @@
     #file manager
     # spaceFM # - Likely removed from nixpkgs
 
+    claude-code
+
     vlc
 
     # direnv # direnv is enabled by default
