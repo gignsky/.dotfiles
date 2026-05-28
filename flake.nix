@@ -15,6 +15,10 @@
       url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    unstable-home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
 
     # wsl stuff
     nixos-wsl = {
@@ -38,6 +42,10 @@
       url = "github:mic92/sops-nix/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    unstable-sops = {
+      url = "github:mic92/sops-nix/master";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
 
     # Pre-commit hooks for managing Git hooks declaratively
     pre-commit-hooks = {
@@ -46,7 +54,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nixos-cli.url = "github:nix-community/nixos-cli";
+    nixos-cli = {
+      url = "github:nix-community/nixos-cli";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
 
     #################### Personal Repositories ####################
 
@@ -184,29 +195,29 @@
               wsl.enable = true;
               # wsl.nativeSystemd = true;
             }
-            inputs.nixos-cli.nixosModules.nixos-cli
             # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
             # home-manager.nixosModules.home-manager {
             #   home-manager.extraSpecialArgs = specialArgs;
             # }
             ./hosts/wsl
+            inputs.nixos-cli.nixosModules.nixos-cli
           ];
         };
 
-        # #wsl based vm
-        # full-vm = nixpkgs.lib.nixosSystem {
-        #   inherit system specialArgs;
-        #   modules = [
-        #     { system.stateVersion = "25.05"; }
-        #     "${nixpkgs}/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix"
-        #     "${nixpkgs}/nixos/modules/installer/cd-dvd/channel.nix"
-        #     ./hosts/full-vm
-        #   ];
-        # };
-
-        # # Merlin configuration entrypoint - unused as merlin has a wsl instance
-        merlin = nixpkgs.lib.nixosSystem {
-          inherit system specialArgs;
+        # Merlin configuration entrypoint
+        # Using unstable to access virtualisation.credentials for VM secrets testing
+        # Will move to 26.05 stable when released (~May 2026)
+        merlin = inputs.nixpkgs-unstable.lib.nixosSystem {
+          inherit system;
+          specialArgs = specialArgs // {
+            # remove me when updateing to 26.05
+            # Override inputs for Merlin to use unstable as primary nixpkgs
+            inputs = inputs // {
+              nixpkgs = inputs.nixpkgs-unstable;
+              sops-nix = inputs.unstable-sops;
+              home-manager = inputs.unstable-home-manager;
+            };
+          };
           modules = [
             # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
             # home-manager.nixosModules.home-manager {
@@ -219,21 +230,6 @@
             inputs.nixos-hardware.nixosModules.framework-16-7040-amd
           ];
         };
-
-        # # GanosLal configuration entrypoint - but to build on merlin's hardware
-        # mganos = nixpkgs.lib.nixosSystem {
-        #   inherit system specialArgs;
-        #   modules = [
-        #     # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
-        #     # home-manager.nixosModules.home-manager {
-        #     #   home-manager.extraSpecialArgs = specialArgs;
-        #     # }
-        #     ./hosts/mganos
-        #
-        #     # https://github.com/NixOS/nixos-hardware/tree/master/framework/16-inch/7040-amd
-        #     inputs.nixos-hardware.nixosModules.framework-16-7040-amd
-        #   ];
-        # };
 
         ganoslal = nixpkgs.lib.nixosSystem {
           inherit system specialArgs;
@@ -324,22 +320,6 @@
           # > Our main home-manager configuration file <
           modules = [ ./home/gig/ganoslal.nix ];
         };
-
-        # # mganos - unused with mganos having a wsl instance
-        # "gig@mganos" = home-manager.lib.homeManagerConfiguration {
-        #   inherit pkgs; # Home-manager requires 'pkgs' instance
-        #   extraSpecialArgs = {
-        #     inherit
-        #       inputs
-        #       outputs
-        #       configLib
-        #       system
-        #       ;
-        #     overlays = import ./overlays { inherit inputs; };
-        #   };
-        #   # > Our main home-manager configuration file <
-        #   modules = [ ./home/gig/mganos.nix ];
-        # };
       };
 
       # Custom packages to be shared or upstreamed.
