@@ -54,13 +54,13 @@
 
       # MCP servers for extended functionality
       mcp = {
-        # Wikipedia access for research
+        # Wikipedia access for research (uses REST API, no auth required)
         wikipedia = {
           type = "local";
           command = [
             "npx"
             "-y"
-            "@shelm/wikipedia-mcp-server"
+            "pipeworx-mcp-wikipedia"
           ];
           enabled = true;
           timeout = 10000; # 10 second timeout for searches
@@ -109,7 +109,7 @@
           command = [
             "npx"
             "-y"
-            "@modelcontextprotocol/server-duckduckgo"
+            "mcp-duckduckgo"
           ];
           enabled = true;
           timeout = 15000; # 15 second timeout for web searches
@@ -316,11 +316,16 @@
               - Tools: [To be documented in mcp-tools-reference.md]
 
             - **Wikipedia**: General knowledge and research
-              - Package: @shelm/wikipedia-mcp-server
-              - Features: Search and retrieve Wikipedia articles
+              - Package: pipeworx-mcp-wikipedia
+              - Features: Search and retrieve Wikipedia articles via REST API (free, no auth)
               - Tools: wikipedia_onThisDay, wikipedia_findPage, wikipedia_getPage, wikipedia_getImagesForPage
               - **Prefix Required**: Always use `wikipedia_` prefix when calling these tools
               - See: ~/.dotfiles/docs/mcp-tools-reference.md for detailed signatures
+
+            - **DuckDuckGo**: Web search for real-time information
+              - Package: mcp-duckduckgo
+              - Features: Free web search with crawl and research capabilities
+              - Tools: [To be documented in mcp-tools-reference.md]
     '';
 
     # Agent Configuration System (Home Manager specific)
