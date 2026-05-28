@@ -102,33 +102,6 @@
           enabled = true;
           timeout = 20000; # 20 second timeout for repo documentation searches
         };
-
-        # DuckDuckGo Search for real-time web information (no API key required)
-        duckduckgo = {
-          type = "local";
-          command = [
-            "npx"
-            "-y"
-            "@modelcontextprotocol/server-duckduckgo"
-          ];
-          enabled = true;
-          timeout = 15000; # 15 second timeout for web searches
-        };
-
-        # GitHub for repository and issue management
-        github = {
-          type = "local";
-          command = [
-            "npx"
-            "-y"
-            "@modelcontextprotocol/server-github"
-          ];
-          enabled = true;
-          timeout = 15000;
-          env = {
-            GITHUB_PERSONAL_ACCESS_TOKEN = "{env:GITHUB_TOKEN}";
-          };
-        };
       };
 
       # Flake-focused formatters
