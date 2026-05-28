@@ -40,6 +40,9 @@
       MANPAGER = "${pkgs.bat-extras.batman}/bin/batman";
       TERM = "wezterm";
       TERMINAL = "wezterm";
+      # GitHub token for MCP servers (GitHub, DeepWiki, etc.)
+      # Set this in your shell environment or use `gh auth token` from GitHub CLI
+      # GITHUB_TOKEN = ""; # Uncomment and add your token, or set via shell profile
     };
   };
 
@@ -72,7 +75,7 @@
     pdf4qt
 
     #file manager
-    spaceFM
+    # spaceFM # - Likely removed from nixpkgs
 
     claude-code
 
@@ -102,7 +105,8 @@
     # Bluetooth and Audio Management
     bluetuith # TUI Bluetooth manager - excellent for pairing/connecting devices
     pwvucontrol # Modern PipeWire volume control GUI
-    helvum # PipeWire patchbay for advanced audio routing
+    # helvum # PipeWire patchbay for advanced audio routing
+    crosspipe # suggested to replace the removed helvum above
     # blueman        # Alternative GUI Bluetooth manager (uncomment if preferred over TUI)
 
     # Advanced Audio Features for OnePlus Buds 3

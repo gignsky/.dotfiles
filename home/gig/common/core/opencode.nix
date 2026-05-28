@@ -4,21 +4,25 @@
     enable = true;
     package = pkgs.unstable.opencode;
 
+    tui = {
+      scroll_speed = 3;
+      scroll_acceleration = {
+        enabled = true;
+      };
+      theme = "gruvbox"; # Built-in gruvbox theme
+
+      # Fix Ctrl+Enter for newlines
+      keybinds = {
+        input_newline = "shift+enter,ctrl+enter,ctrl+j";
+      };
+    };
+
     # Main configuration
     settings = {
       # Core setup
       model = "github-copilot/claude-sonnet-4.5";
       small_model = "github-copilot/gpt-4o";
-      theme = "gruvbox"; # Built-in gruvbox theme
       # autoupdate = true;
-
-      # TUI optimizations
-      tui = {
-        scroll_speed = 3;
-        scroll_acceleration = {
-          enabled = true;
-        };
-      };
 
       # Tools configuration
       tools = {
@@ -41,11 +45,6 @@
         external_directory = "allow";
       };
 
-      # Fix Ctrl+Enter for newlines
-      keybinds = {
-        input_newline = "shift+enter,ctrl+enter,ctrl+j";
-      };
-
       # Cursor configuration - set to line cursor
       # cursor_style = "line";
       # just a dream :(
@@ -54,13 +53,13 @@
 
       # MCP servers for extended functionality
       mcp = {
-        # Wikipedia access for research
+        # Wikipedia access for research (uses REST API, no auth required)
         wikipedia = {
           type = "local";
           command = [
             "npx"
             "-y"
-            "@shelm/wikipedia-mcp-server"
+            "wikipedia-mcp"
           ];
           enabled = true;
           timeout = 10000; # 10 second timeout for searches
@@ -103,13 +102,13 @@
           timeout = 20000; # 20 second timeout for repo documentation searches
         };
 
-        # DuckDuckGo Search for real-time web information (no API key required)
-        duckduckgo = {
+        # Web Search (DuckDuckGo, Brave, RSS, YouTube transcripts) - no API key required
+        internetsearch = {
           type = "local";
           command = [
             "npx"
             "-y"
-            "@modelcontextprotocol/server-duckduckgo"
+            "@nachoretro/internetsearch"
           ];
           enabled = true;
           timeout = 15000; # 15 second timeout for web searches
@@ -193,7 +192,7 @@
     };
 
     # Enhanced rules with personality system
-    rules = ''
+    context = ''
             # OpenCode Agent Configuration
 
             This agent operates within a NixOS/home-manager environment at ~/.dotfiles.
@@ -316,11 +315,16 @@
               - Tools: [To be documented in mcp-tools-reference.md]
 
             - **Wikipedia**: General knowledge and research
-              - Package: @shelm/wikipedia-mcp-server
-              - Features: Search and retrieve Wikipedia articles
+              - Package: pipeworx-mcp-wikipedia
+              - Features: Search and retrieve Wikipedia articles via REST API (free, no auth)
               - Tools: wikipedia_onThisDay, wikipedia_findPage, wikipedia_getPage, wikipedia_getImagesForPage
               - **Prefix Required**: Always use `wikipedia_` prefix when calling these tools
               - See: ~/.dotfiles/docs/mcp-tools-reference.md for detailed signatures
+
+            - **DuckDuckGo**: Web search for real-time information
+              - Package: mcp-duckduckgo
+              - Features: Free web search with crawl and research capabilities
+              - Tools: [To be documented in mcp-tools-reference.md]
     '';
 
     # Agent Configuration System (Home Manager specific)
