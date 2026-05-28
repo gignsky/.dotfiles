@@ -182,7 +182,6 @@
               uid = 1000; # WSL compatibility
               guid = 1000; # Keep gig group as 1000, not 100
             };
-            nixpkgs = inputs.nixpkgs-unstable;
           };
           modules = [
             inputs.vscode-server.nixosModules.default
@@ -198,7 +197,7 @@
             #   home-manager.extraSpecialArgs = specialArgs;
             # }
             ./hosts/wsl
-            inputs.nixos-cli.nixosModules.nixos-cli
+            # inputs.nixos-cli.nixosModules.nixos-cli
           ];
         };
 
