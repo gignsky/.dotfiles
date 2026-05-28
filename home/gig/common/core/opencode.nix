@@ -60,7 +60,7 @@
           command = [
             "npx"
             "-y"
-            "pipeworx-mcp-wikipedia"
+            "wikipedia-mcp"
           ];
           enabled = true;
           timeout = 10000; # 10 second timeout for searches
@@ -103,13 +103,13 @@
           timeout = 20000; # 20 second timeout for repo documentation searches
         };
 
-        # DuckDuckGo Search for real-time web information (no API key required)
-        duckduckgo = {
+        # Web Search (DuckDuckGo, Brave, RSS, YouTube transcripts) - no API key required
+        internetsearch = {
           type = "local";
           command = [
             "npx"
             "-y"
-            "mcp-duckduckgo"
+            "@nachoretro/internetsearch"
           ];
           enabled = true;
           timeout = 15000; # 15 second timeout for web searches

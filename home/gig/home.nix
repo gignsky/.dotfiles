@@ -40,6 +40,9 @@
       MANPAGER = "${pkgs.bat-extras.batman}/bin/batman";
       TERM = "wezterm";
       TERMINAL = "wezterm";
+      # GitHub token for MCP servers (GitHub, DeepWiki, etc.)
+      # Set this in your shell environment or use `gh auth token` from GitHub CLI
+      # GITHUB_TOKEN = ""; # Uncomment and add your token, or set via shell profile
     };
   };
 
