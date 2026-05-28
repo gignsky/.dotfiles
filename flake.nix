@@ -244,6 +244,7 @@
             #   home-manager.extraSpecialArgs = specialArgs;
             # }
             ./hosts/ganoslal
+            inputs.nixos-cli.nixosModules.nixos-cli
           ];
         };
       };
