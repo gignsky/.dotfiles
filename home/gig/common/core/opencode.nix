@@ -146,12 +146,6 @@
       # Fleet operation commands
       sitrep = "Comprehensive fleet status and engineering situation report. Provide detailed status report covering: fleet systems, current operations, system health, performance metrics, recent issues, and engineering recommendations";
 
-      fix-log = "Analyze current state and fix missing log documentation. Assess current host/domain operational state, identify gaps in existing logs, and document missing information in proper engineering log format";
-
-      log-status = "Detect and document undocumented system changes (aliases: log-status). Analyze current system state, compare with logged rebuild activity, detect 'bare' rebuilds or home-manager switches, and identify documentation gaps requiring attention.";
-
-      check-logs = "Comprehensive log analysis and attention area identification (aliases: check-log). Search through all existing engineering logs and journal entries to identify areas requiring attention, maintenance, follow-up actions, or resolution. Present findings to user, create documentation log entry, and run /sitrep if significant issues discovered.";
-
       unstuck = "Reset focus and continue with current task. Acknowledge being stuck, reset mental state with appropriate personality response, and continue from the last clear objective. Get back on track with the task at hand.";
 
       # Away mission commands
@@ -168,7 +162,7 @@
       hire = "Create a new specialized agent with custom capabilities. Generate a new OpenCode agent based on your description, automatically create agent configuration and personality files, and integrate into the system. Usage: /hire \"Create a security auditor for Rust code\" - the system will generate agent name, specialized capabilities, and personality profile.";
 
       # Agent summoning (when talking to other agents)
-      scotty = "Summon Chief Engineer for debugging and technical issues. Activate Chief Engineer Montgomery Scott for debugging complex systems: Nix flakes, Rust code, Bash scripts, Lua in Nix, Nushell configurations. Scotty will analyze errors, check system stress points, and provide engineering solutions. He is so described in the relevant gigdot/../resources/{agent-name}-additional-personality.md";
+      data = "Summon Lt. Commander Data for multidisciplinary analysis and assistance. Activate Lt. Commander Data, Second Officer with combined expertise in technical engineering, information systems, executive coordination, scholarly consultation, and adaptive learning. Data provides precise analysis, strategic recommendations, and comprehensive problem-solving across all fleet operations.";
     };
 
     # Enhanced rules with personality system
@@ -304,11 +298,8 @@
 
     # Agent Configuration System (Home Manager specific)
     agents = {
-      scotty = "/home/gig/.dotfiles/home/gig/common/resources/scotty-additional-personality.md";
-      library-computer = "/home/gig/local_repos/annex/agent-config/library-computer-personality.md";
+      data = "/home/gig/local_repos/annex/agent-config/data-personality.md";
       kara = "/home/gig/local_repos/annex/agent-config/kara-personality.md";
-      una = "/home/gig/local_repos/annex/agent-config/una-personality.md";
-      daniel-jackson = "/home/gig/local_repos/annex/agent-config/daniel-jackson-personality.md";
     };
   };
 
