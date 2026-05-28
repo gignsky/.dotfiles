@@ -197,7 +197,7 @@
             #   home-manager.extraSpecialArgs = specialArgs;
             # }
             ./hosts/wsl
-            # inputs.nixos-cli.nixosModules.nixos-cli
+            inputs.nixos-cli.nixosModules.nixos-cli
           ];
         };
 
