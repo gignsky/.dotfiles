@@ -23,7 +23,7 @@
     # wsl stuff
     nixos-wsl = {
       url = "github:nix-community/NixOS-WSL/main";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # nixos-hardware, to fix hardware issues and firmware for specific machines
@@ -195,6 +195,7 @@
               wsl.enable = true;
               # wsl.nativeSystemd = true;
             }
+            inputs.nixos-cli.nixosModules.nixos-cli
             # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
             # home-manager.nixosModules.home-manager {
             #   home-manager.extraSpecialArgs = specialArgs;
