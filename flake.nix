@@ -54,7 +54,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nixos-cli.url = "github:nix-community/nixos-cli";
+    nixos-cli = {
+      url = "github:nix-community/nixos-cli";
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
+    };
 
     #################### Personal Repositories ####################
 
