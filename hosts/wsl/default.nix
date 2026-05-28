@@ -23,7 +23,10 @@
 
   tailscale.enable = false;
 
-  networking.hostName = "nixos";
+  networking = {
+    hostName = "nixos";
+    resolvconf.enable = false;
+  };
 
   # Tailscale configuration (currently disabled)
   # To enable Tailscale on WSL:
