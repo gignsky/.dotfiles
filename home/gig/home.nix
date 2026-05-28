@@ -75,7 +75,7 @@
     pdf4qt
 
     #file manager
-    spaceFM
+    # spaceFM # - Likely removed from nixpkgs
 
     claude-code
 
@@ -105,7 +105,8 @@
     # Bluetooth and Audio Management
     bluetuith # TUI Bluetooth manager - excellent for pairing/connecting devices
     pwvucontrol # Modern PipeWire volume control GUI
-    helvum # PipeWire patchbay for advanced audio routing
+    # helvum # PipeWire patchbay for advanced audio routing
+    crosspipe # suggested to replace the removed helvum above
     # blueman        # Alternative GUI Bluetooth manager (uncomment if preferred over TUI)
 
     # Advanced Audio Features for OnePlus Buds 3
