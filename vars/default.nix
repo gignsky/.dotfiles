@@ -14,6 +14,7 @@
   #workEmail = inputs.nix-secrets.work-email;
   persistFolder = "/persist";
   isMinimal = false; # Used to indicate nixos-installer build
+  dotfiles_dir = "/home/gig/.dotfiles";
 
   # wiatt_username = "wiatt";
 }
