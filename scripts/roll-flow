@@ -217,7 +217,7 @@ def "main graduate" [] {
         }
         
         print $"✓ Graduated (ansi green)($current_roll)(ansi reset) to ($config.rolling_branch)"
-        print $"  Roll branch kept for reference (safe to delete later)"
+        print "  Roll branch kept for reference (safe to delete later)"
     } else {
         print $"✗ Graduation failed. Check for conflicts."
     }
