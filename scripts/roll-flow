@@ -32,7 +32,7 @@ def "main init" [] {
     
     let config = {
         repo_root: (git rev-parse --show-toplevel | str trim),
-        rolling_branch: "rolling",
+        rolling_branch: "rolling-transitional-phase",
         stable_branch: "main",
         roll_prefix: "roll/",
         hosts: ["ganoslal", "merlin", "wsl"]
