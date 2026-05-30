@@ -234,6 +234,108 @@ def "main promote" [] {
     print $"Promoting (ansi cyan)($config.rolling_branch)(ansi reset) to (ansi cyan)($config.stable_branch)(ansi reset)"
     print ""
     print "WARNING: This marks the rolling branch as stable for ALL hosts."
+    print "Verifying all hosts have been tested with actual rebuilds..."
+    print ""
+    
+    # Get the latest roll merge commit in rolling
+    let latest_roll_merge = (git log $config.rolling_branch --oneline --grep="Merge branch 'roll/" -1 | str trim | split row ' ' | get 0)
+    
+    if ($latest_roll_merge | is-empty) {
+        print $"⚠️  Warning: No roll merges found in ($config.rolling_branch)"
+        print "Proceeding with manual verification..."
+    } else {
+        print $"Latest roll merge: (ansi yellow)($latest_roll_merge)(ansi reset)"
+        print ""
+        print "Checking for rebuild commits after this merge..."
+        print ""
+        
+        # Check each host for NixOS and home-manager rebuilds
+        mut all_verified = true
+        
+        for host in $config.hosts {
+            print $"Checking (ansi cyan)($host)(ansi reset)..."
+            
+            # Check for NixOS rebuild (format: "hostname: generation N")
+            let nixos_rebuild = (git log $config.rolling_branch --oneline --grep=$"^($host): generation" $"($latest_roll_merge)..HEAD" -1 | str trim)
+            
+            # Check for home-manager rebuild (format: "gig@hostname: YYYY-MM-DD HH:MM : id N")
+            let home_rebuild = (git log $config.rolling_branch --oneline --grep=$"^($config.username)@($host):" $"($latest_roll_merge)..HEAD" -1 | str trim)
+            
+            # Also check for WSL instances on physical hosts (wsl@hostname format)
+            let wsl_nixos = if ($host != "wsl") {
+                (git log $config.rolling_branch --oneline --grep=$"^wsl@($host): generation" $"($latest_roll_merge)..HEAD" -1 | str trim)
+            } else {
+                ""
+            }
+            
+            let wsl_home = if ($host != "wsl") {
+                (git log $config.rolling_branch --oneline --grep=$"^($config.username)@wsl@($host):" $"($latest_roll_merge)..HEAD" -1 | str trim)
+            } else {
+                ""
+            }
+            
+            # Verify both NixOS and home-manager rebuilds exist
+            let has_nixos = not ($nixos_rebuild | is-empty)
+            let has_home = not ($home_rebuild | is-empty)
+            let has_wsl_nixos = if ($host != "wsl") { not ($wsl_nixos | is-empty) } else { true }
+            let has_wsl_home = if ($host != "wsl") { not ($wsl_home | is-empty) } else { true }
+            
+            if $has_nixos and $has_home {
+                print $"  ✓ NixOS: (ansi green)($nixos_rebuild)(ansi reset)"
+                print $"  ✓ Home:  (ansi green)($home_rebuild)(ansi reset)"
+            } else {
+                if not $has_nixos {
+                    print $"  ✗ (ansi red)Missing NixOS rebuild for ($host)(ansi reset)"
+                    $all_verified = false
+                }
+                if not $has_home {
+                    print $"  ✗ (ansi red)Missing home-manager rebuild for ($host)(ansi reset)"
+                    $all_verified = false
+                }
+            }
+            
+            # Check WSL instances if not the standalone wsl host
+            if ($host != "wsl") {
+                if $has_wsl_nixos and $has_wsl_home {
+                    print $"  ✓ WSL@($host) NixOS: (ansi green)($wsl_nixos)(ansi reset)"
+                    print $"  ✓ WSL@($host) Home:  (ansi green)($wsl_home)(ansi reset)"
+                } else if (not ($wsl_nixos | is-empty)) or (not ($wsl_home | is-empty)) {
+                    # Only warn if there's SOME WSL activity (meaning WSL instance exists)
+                    if not $has_wsl_nixos {
+                        print $"  ⚠️  (ansi yellow)WSL instance exists but missing NixOS rebuild for wsl@($host)(ansi reset)"
+                    }
+                    if not $has_wsl_home {
+                        print $"  ⚠️  (ansi yellow)WSL instance exists but missing home-manager rebuild for wsl@($host)(ansi reset)"
+                    }
+                }
+            }
+            
+            print ""
+        }
+        
+        if not $all_verified {
+            print $"(ansi red)✗ Verification failed!(ansi reset)"
+            print ""
+            print "Some hosts are missing rebuild commits after the latest roll merge."
+            print "This means they haven't been tested with the changes in rolling."
+            print ""
+            print "To fix this:"
+            print $"  1. SSH to each host: ssh <host>"
+            print $"  2. Checkout rolling: cd ~/.dotfiles && git checkout ($config.rolling_branch) && git pull"
+            print "  3. Rebuild NixOS: just rebuild (or sudo nixos-rebuild switch)"
+            print "  4. Rebuild home-manager: just home"
+            print "  5. Come back here and try promote again"
+            print ""
+            print "Or use --force to skip verification (not recommended):"
+            print "  just roll-promote --force"
+            return
+        }
+        
+        print $"(ansi green)✓ All hosts verified!(ansi reset)"
+        print "All configured hosts have rebuild commits after the latest roll."
+        print ""
+    }
+    
     print "Make sure you've tested on:"
     
     for host in $config.hosts {
@@ -241,10 +343,10 @@ def "main promote" [] {
     }
     
     print ""
-    let confirm = (input "Have you tested on all hosts? (yes/no): ")
+    let confirm = (input "Proceed with promotion to main? (yes/no): ")
     
     if $confirm != "yes" {
-        print "Aborted. Test on all hosts first!"
+        print "Aborted."
         return
     }
     
@@ -255,7 +357,7 @@ def "main promote" [] {
     if $env.LAST_EXIT_CODE == 0 {
         # Create dated tag
         let tag = $"stable-(date now | format date '%Y%m%d')"
-        let tag_msg = $"Verified on: (config.hosts | str join ', ')"
+        let tag_msg = $"Verified on: ($config.hosts | str join ', ')"
         
         git tag -a $tag -m $tag_msg
         git push --tags
