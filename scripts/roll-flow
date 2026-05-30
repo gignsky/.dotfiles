@@ -22,12 +22,13 @@ def main [] {
     print "  -r, --rolling-branch <name>   Name of rolling branch (default: rolling)"
     print "  -s, --stable-branch <name>    Name of stable branch (default: main)"
     print "  -p, --roll-prefix <prefix>    Prefix for roll branches (default: roll/)"
+    print "  -u, --username <name>         Username for homeConfigurations (default: gig)"
     print "  -h, --hosts <list>            Comma-separated list of hosts"
     print ""
     print "Examples:"
     print "  roll-flow init"
     print "  roll-flow init --rolling-branch rolling-transitional-phase"
-    print "  roll-flow init -r rolling -s main -h ganoslal,merlin,wsl"
+    print "  roll-flow init -r rolling -s main -u gig -h ganoslal,merlin,wsl"
     print "  roll-flow start shell-improvements"
     print "  roll-flow integrate feature/zellij-config"
     print "  roll-flow graduate"
@@ -39,6 +40,7 @@ def "main init" [
     --rolling-branch(-r): string = "rolling"  # Name of the rolling integration branch
     --stable-branch(-s): string = "main"      # Name of the stable branch
     --roll-prefix(-p): string = "roll/"       # Prefix for roll branches
+    --username(-u): string = "gig"            # Username for homeConfigurations
     --hosts(-h): list<string> = ["ganoslal", "merlin", "wsl"]  # List of hosts to test
 ] {
     let config_dir = $"($env.HOME)/.config/roll-flow"
@@ -49,6 +51,7 @@ def "main init" [
         rolling_branch: $rolling_branch,
         stable_branch: $stable_branch,
         roll_prefix: $roll_prefix,
+        username: $username,
         hosts: $hosts
     }
     
@@ -59,6 +62,7 @@ def "main init" [
     print $"  Rolling branch: (ansi cyan)($rolling_branch)(ansi reset)"
     print $"  Stable branch:  (ansi cyan)($stable_branch)(ansi reset)"
     print $"  Roll prefix:    (ansi cyan)($roll_prefix)(ansi reset)"
+    print $"  Username:       (ansi cyan)($username)(ansi reset)"
     print $"  Hosts:          (ansi cyan)($hosts | str join ', ')(ansi reset)"
 }
 
@@ -321,7 +325,7 @@ def "main test-all" [] {
         print $"Building for (ansi cyan)($host)(ansi reset)..."
         
         try {
-            nix build $".#homeConfigurations.($host).activationPackage" --show-trace
+            nix build $".#homeConfigurations.\"($config.username)@($host)\".activationPackage" --show-trace
             print $"  ✓ (ansi green)($host) build succeeded(ansi reset)"
         } catch {
             print $"  ✗ (ansi red)($host) build failed(ansi reset)"
