@@ -81,6 +81,9 @@
 
     vlc
 
+    # Fonts for polybar icons
+    font-awesome
+
     # direnv # direnv is enabled by default
     dua
     # TRYING THESE OUT FROM https://blog.dalanmiller.com/my-favorite-command-line-tools/
