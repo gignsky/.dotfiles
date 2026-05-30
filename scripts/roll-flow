@@ -1,0 +1,573 @@
+#!/usr/bin/env nu
+
+# roll-flow: A git-flow-like workflow manager for NixOS dotfiles
+# Manages roll/N-* branches, rolling integration, and main promotion
+
+def main [] {
+    print "roll-flow: NixOS dotfiles workflow manager"
+    print ""
+    print "Usage: roll-flow <command> [args]"
+    print ""
+    print "Commands:"
+    print "  init [OPTIONS]          Initialize roll-flow in this repo"
+    print "  start <theme>           Start a new roll branch"
+    print "  integrate <branch>      Merge a feature branch into current roll"
+    print "  graduate                Graduate current roll to rolling branch"
+    print "  promote                 Promote rolling to main (with verification)"
+    print "  status                  Show current roll status"
+    print "  test-all                Test build on all configured hosts"
+    print "  list                    List all rolls and their states"
+    print ""
+    print "Init Options:"
+    print "  -r, --rolling-branch <name>   Name of rolling branch (default: rolling)"
+    print "  -s, --stable-branch <name>    Name of stable branch (default: main)"
+    print "  -p, --roll-prefix <prefix>    Prefix for roll branches (default: roll/)"
+    print "  -u, --username <name>         Username for homeConfigurations (default: gig)"
+    print "  -h, --hosts <list>            Comma-separated list of hosts"
+    print ""
+    print "Examples:"
+    print "  roll-flow init"
+    print "  roll-flow init --rolling-branch rolling-transitional-phase"
+    print "  roll-flow init -r rolling -s main -u gig -h ganoslal,merlin,wsl"
+    print "  roll-flow start shell-improvements"
+    print "  roll-flow integrate feature/zellij-config"
+    print "  roll-flow graduate"
+    print "  roll-flow promote"
+}
+
+# Initialize roll-flow configuration
+def "main init" [
+    --rolling-branch(-r): string = "rolling"  # Name of the rolling integration branch
+    --stable-branch(-s): string = "main"      # Name of the stable branch
+    --roll-prefix(-p): string = "roll/"       # Prefix for roll branches
+    --username(-u): string = "gig"            # Username for homeConfigurations
+    --hosts(-h): list<string> = ["ganoslal", "merlin", "wsl"]  # List of hosts to test
+] {
+    let config_dir = $"($env.HOME)/.config/roll-flow"
+    mkdir $config_dir
+    
+    let config = {
+        repo_root: (git rev-parse --show-toplevel | str trim),
+        rolling_branch: $rolling_branch,
+        stable_branch: $stable_branch,
+        roll_prefix: $roll_prefix,
+        username: $username,
+        hosts: $hosts
+    }
+    
+    $config | save -f $"($config_dir)/config.nuon"
+    print $"✓ Initialized roll-flow in (ansi green)($config.repo_root)(ansi reset)"
+    print ""
+    print "Configuration:"
+    print $"  Rolling branch: (ansi cyan)($rolling_branch)(ansi reset)"
+    print $"  Stable branch:  (ansi cyan)($stable_branch)(ansi reset)"
+    print $"  Roll prefix:    (ansi cyan)($roll_prefix)(ansi reset)"
+    print $"  Username:       (ansi cyan)($username)(ansi reset)"
+    print $"  Hosts:          (ansi cyan)($hosts | str join ', ')(ansi reset)"
+}
+
+# Get current configuration
+def get-config [] {
+    let config_file = $"($env.HOME)/.config/roll-flow/config.nuon"
+    if not ($config_file | path exists) {
+        error make {msg: "roll-flow not initialized. Run 'roll-flow init' first."}
+    }
+    open $config_file
+}
+
+# Get the next roll number
+def get-next-roll-number [] {
+    let config = get-config
+    
+    let rolls = (git branch --list $"($config.roll_prefix)*" 
+        | lines 
+        | each { |line| $line | str trim | str replace '* ' '' }
+        | where { |branch| $branch =~ $"^($config.roll_prefix)" }
+        | each { |branch| 
+            $branch 
+            | str replace $config.roll_prefix '' 
+            | split row '-' 
+            | get 0 
+            | into int
+        }
+    )
+    
+    if ($rolls | is-empty) {
+        1
+    } else {
+        ($rolls | math max) + 1
+    }
+}
+
+# Get current active roll
+def get-current-roll [] {
+    let current_branch = (git branch --show-current | str trim)
+    let config = get-config
+    
+    if ($current_branch | str starts-with $config.roll_prefix) {
+        $current_branch
+    } else {
+        null
+    }
+}
+
+# Check which hosts have verified a given roll with rebuilds
+# Returns a record with host verification status
+def check-roll-verification [
+    roll_branch: string  # Roll branch name (e.g., "roll/5-roll-flow-init")
+] {
+    let config = get-config
+    
+    # Find when this roll was merged to rolling
+    let roll_merge = try {
+        git log $config.rolling_branch --oneline --grep=$"Merge branch '($roll_branch)'" -1 
+        | str trim 
+        | split row ' ' 
+        | get 0?
+    } catch {
+        ""
+    }
+    
+    # Determine the search strategy based on merge status
+    if ($roll_merge | is-empty) {
+        # Roll not merged yet - check from branch point to rolling HEAD
+        # Find where this roll branched from rolling
+        let branch_point = try {
+            git merge-base $config.rolling_branch $roll_branch | str trim
+        } catch {
+            # If we can't find merge base, just check last 20 commits in rolling
+            git rev-parse HEAD~20 | str trim
+        }
+        
+        mut host_status = {}
+        
+        for host in $config.hosts {
+            # Check in rolling branch for rebuilds after the branch point
+            let nixos_rebuild = try {
+                git log $config.rolling_branch --oneline --grep=$"^($host): generation" $"($branch_point)..($config.rolling_branch)" -1 
+                | str trim
+            } catch {
+                ""
+            }
+            
+            let home_rebuild = try {
+                git log $config.rolling_branch --oneline --grep=$"^($config.username)@($host):" $"($branch_point)..($config.rolling_branch)" -1 
+                | str trim
+            } catch {
+                ""
+            }
+            
+            let verified = (not ($nixos_rebuild | is-empty)) and (not ($home_rebuild | is-empty))
+            $host_status = ($host_status | insert $host $verified)
+        }
+        
+        $host_status
+    } else {
+        # Roll has been merged - check for rebuilds after the merge
+        mut host_status = {}
+        
+        for host in $config.hosts {
+            let nixos_rebuild = try {
+                git log $config.rolling_branch --oneline --grep=$"^($host): generation" $"($roll_merge)..HEAD" -1 
+                | str trim
+            } catch {
+                ""
+            }
+            
+            let home_rebuild = try {
+                git log $config.rolling_branch --oneline --grep=$"^($config.username)@($host):" $"($roll_merge)..HEAD" -1 
+                | str trim
+            } catch {
+                ""
+            }
+            
+            let verified = (not ($nixos_rebuild | is-empty)) and (not ($home_rebuild | is-empty))
+            $host_status = ($host_status | insert $host $verified)
+        }
+        
+        $host_status
+    }
+}
+
+# Start a new roll
+def "main start" [
+    theme: string  # Theme/description for this roll
+] {
+    let config = get-config
+    let next_num = get-next-roll-number
+    let date_str = (date now | format date "%m%d")
+    let roll_name = $"($config.roll_prefix)($next_num)-($date_str)-($theme)"
+    
+    print $"Creating new roll: (ansi cyan)($roll_name)(ansi reset)"
+    
+    # Create roll from rolling branch
+    git checkout $config.rolling_branch
+    git pull
+    git checkout -b $roll_name
+    
+    # Save roll metadata
+    let rolls_dir = $"($env.HOME)/.config/roll-flow/rolls"
+    mkdir $rolls_dir
+    
+    let metadata = {
+        roll: $roll_name,
+        number: $next_num,
+        theme: $theme,
+        started: (date now | format date "%Y-%m-%d %H:%M:%S"),
+        status: "active",
+        merged_features: []
+    }
+    
+    $metadata | save -f $"($rolls_dir)/($next_num).nuon"
+    
+    print $"✓ Started roll (ansi green)($roll_name)(ansi reset)"
+    print $"  Branch from: ($config.rolling_branch)"
+    print $"  Now on: ($roll_name)"
+}
+
+# Integrate a feature branch into current roll
+def "main integrate" [
+    feature_branch: string  # Feature branch to integrate
+] {
+    let current_roll = get-current-roll
+    
+    if ($current_roll == null) {
+        error make {msg: "Not currently on a roll branch. Run 'roll-flow start' first."}
+    }
+    
+    print $"Integrating (ansi cyan)($feature_branch)(ansi reset) into (ansi cyan)($current_roll)(ansi reset)"
+    
+    # Merge with no-ff to preserve history
+    git merge --no-ff $feature_branch
+    
+    if $env.LAST_EXIT_CODE == 0 {
+        # Update metadata
+        let roll_num = ($current_roll | str replace 'roll/' '' | split row '-' | get 0)
+        let metadata_file = $"($env.HOME)/.config/roll-flow/rolls/($roll_num).nuon"
+        
+        if ($metadata_file | path exists) {
+            mut metadata = (open $metadata_file)
+            $metadata.merged_features = ($metadata.merged_features | append $feature_branch)
+            $metadata | save -f $metadata_file
+        }
+        
+        print $"✓ Integrated (ansi green)($feature_branch)(ansi reset)"
+        print $"  You can now test with: just rebuild"
+    } else {
+        print $"✗ Merge failed. Resolve conflicts and commit manually."
+    }
+}
+
+# Graduate current roll to rolling branch
+def "main graduate" [] {
+    let current_roll = get-current-roll
+    let config = get-config
+    
+    if ($current_roll == null) {
+        error make {msg: "Not currently on a roll branch."}
+    }
+    
+    print $"Graduating (ansi cyan)($current_roll)(ansi reset) to (ansi cyan)($config.rolling_branch)(ansi reset)"
+    print ""
+    print "This will merge the current roll into rolling branch."
+    print "Make sure you've tested this roll on at least one host!"
+    print ""
+    
+    let confirm = (input "Continue? (yes/no): ")
+    
+    if $confirm != "yes" {
+        print "Aborted."
+        return
+    }
+    
+    git checkout $config.rolling_branch
+    git pull
+    git merge --no-ff $current_roll
+    
+    if $env.LAST_EXIT_CODE == 0 {
+        git push
+        
+        # Update metadata
+        let roll_num = ($current_roll | str replace 'roll/' '' | split row '-' | get 0)
+        let metadata_file = $"($env.HOME)/.config/roll-flow/rolls/($roll_num).nuon"
+        
+        if ($metadata_file | path exists) {
+            mut metadata = (open $metadata_file)
+            $metadata.status = "graduated"
+            $metadata.graduated = (date now | format date "%Y-%m-%d %H:%M:%S")
+            $metadata | save -f $metadata_file
+        }
+        
+        print $"✓ Graduated (ansi green)($current_roll)(ansi reset) to ($config.rolling_branch)"
+        print "  Roll branch kept for reference (safe to delete later)"
+    } else {
+        print $"✗ Graduation failed. Check for conflicts."
+    }
+}
+
+# Promote rolling to main
+def "main promote" [] {
+    let config = get-config
+    
+    print $"Promoting (ansi cyan)($config.rolling_branch)(ansi reset) to (ansi cyan)($config.stable_branch)(ansi reset)"
+    print ""
+    print "WARNING: This marks the rolling branch as stable for ALL hosts."
+    print "Verifying all hosts have been tested with actual rebuilds..."
+    print ""
+    
+    # Get the latest roll merge commit in rolling
+    let latest_roll_merge = (git log $config.rolling_branch --oneline --grep="Merge branch 'roll/" -1 | str trim | split row ' ' | get 0)
+    
+    if ($latest_roll_merge | is-empty) {
+        print $"⚠️  Warning: No roll merges found in ($config.rolling_branch)"
+        print "Proceeding with manual verification..."
+    } else {
+        print $"Latest roll merge: (ansi yellow)($latest_roll_merge)(ansi reset)"
+        print ""
+        print "Checking for rebuild commits after this merge..."
+        print ""
+        
+        # Check each host for NixOS and home-manager rebuilds
+        mut all_verified = true
+        
+        for host in $config.hosts {
+            print $"Checking (ansi cyan)($host)(ansi reset)..."
+            
+            # Check for NixOS rebuild (format: "hostname: generation N")
+            let nixos_rebuild = (git log $config.rolling_branch --oneline --grep=$"^($host): generation" $"($latest_roll_merge)..HEAD" -1 | str trim)
+            
+            # Check for home-manager rebuild (format: "gig@hostname: YYYY-MM-DD HH:MM : id N")
+            let home_rebuild = (git log $config.rolling_branch --oneline --grep=$"^($config.username)@($host):" $"($latest_roll_merge)..HEAD" -1 | str trim)
+            
+            # Also check for WSL instances on physical hosts (wsl@hostname format)
+            let wsl_nixos = if ($host != "wsl") {
+                (git log $config.rolling_branch --oneline --grep=$"^wsl@($host): generation" $"($latest_roll_merge)..HEAD" -1 | str trim)
+            } else {
+                ""
+            }
+            
+            let wsl_home = if ($host != "wsl") {
+                (git log $config.rolling_branch --oneline --grep=$"^($config.username)@wsl@($host):" $"($latest_roll_merge)..HEAD" -1 | str trim)
+            } else {
+                ""
+            }
+            
+            # Verify both NixOS and home-manager rebuilds exist
+            let has_nixos = not ($nixos_rebuild | is-empty)
+            let has_home = not ($home_rebuild | is-empty)
+            let has_wsl_nixos = if ($host != "wsl") { not ($wsl_nixos | is-empty) } else { true }
+            let has_wsl_home = if ($host != "wsl") { not ($wsl_home | is-empty) } else { true }
+            
+            if $has_nixos and $has_home {
+                print $"  ✓ NixOS: (ansi green)($nixos_rebuild)(ansi reset)"
+                print $"  ✓ Home:  (ansi green)($home_rebuild)(ansi reset)"
+            } else {
+                if not $has_nixos {
+                    print $"  ✗ (ansi red)Missing NixOS rebuild for ($host)(ansi reset)"
+                    $all_verified = false
+                }
+                if not $has_home {
+                    print $"  ✗ (ansi red)Missing home-manager rebuild for ($host)(ansi reset)"
+                    $all_verified = false
+                }
+            }
+            
+            # Check WSL instances if not the standalone wsl host
+            if ($host != "wsl") {
+                if $has_wsl_nixos and $has_wsl_home {
+                    print $"  ✓ WSL@($host) NixOS: (ansi green)($wsl_nixos)(ansi reset)"
+                    print $"  ✓ WSL@($host) Home:  (ansi green)($wsl_home)(ansi reset)"
+                } else if (not ($wsl_nixos | is-empty)) or (not ($wsl_home | is-empty)) {
+                    # Only warn if there's SOME WSL activity (meaning WSL instance exists)
+                    if not $has_wsl_nixos {
+                        print $"  ⚠️  (ansi yellow)WSL instance exists but missing NixOS rebuild for wsl@($host)(ansi reset)"
+                    }
+                    if not $has_wsl_home {
+                        print $"  ⚠️  (ansi yellow)WSL instance exists but missing home-manager rebuild for wsl@($host)(ansi reset)"
+                    }
+                }
+            }
+            
+            print ""
+        }
+        
+        if not $all_verified {
+            print $"(ansi red)✗ Verification failed!(ansi reset)"
+            print ""
+            print "Some hosts are missing rebuild commits after the latest roll merge."
+            print "This means they haven't been tested with the changes in rolling."
+            print ""
+            print "To fix this:"
+            print $"  1. SSH to each host: ssh <host>"
+            print $"  2. Checkout rolling: cd ~/.dotfiles && git checkout ($config.rolling_branch) && git pull"
+            print "  3. Rebuild NixOS: just rebuild (or sudo nixos-rebuild switch)"
+            print "  4. Rebuild home-manager: just home"
+            print "  5. Come back here and try promote again"
+            print ""
+            print "Or use --force to skip verification (not recommended):"
+            print "  just roll-promote --force"
+            return
+        }
+        
+        print $"(ansi green)✓ All hosts verified!(ansi reset)"
+        print "All configured hosts have rebuild commits after the latest roll."
+        print ""
+    }
+    
+    print "Make sure you've tested on:"
+    
+    for host in $config.hosts {
+        print $"  - ($host)"
+    }
+    
+    print ""
+    let confirm = (input "Proceed with promotion to main? (yes/no): ")
+    
+    if $confirm != "yes" {
+        print "Aborted."
+        return
+    }
+    
+    git checkout $config.stable_branch
+    git pull
+    git merge --no-ff $config.rolling_branch
+    
+    if $env.LAST_EXIT_CODE == 0 {
+        # Create dated tag
+        let tag = $"stable-(date now | format date '%Y%m%d')"
+        let tag_msg = $"Verified on: ($config.hosts | str join ', ')"
+        
+        git tag -a $tag -m $tag_msg
+        git push --tags
+        git push
+        
+        print $"✓ Promoted to (ansi green)($config.stable_branch)(ansi reset)"
+        print $"  Tagged as: ($tag)"
+    } else {
+        print $"✗ Promotion failed. Check for conflicts."
+    }
+}
+
+# Show current status
+def "main status" [] {
+    let config = get-config
+    let current_branch = (git branch --show-current | str trim)
+    let current_roll = get-current-roll
+    
+    print "=== Roll Flow Status ==="
+    print ""
+    print $"Current branch: (ansi cyan)($current_branch)(ansi reset)"
+    print $"Rolling branch: ($config.rolling_branch)"
+    print $"Stable branch:  ($config.stable_branch)"
+    print ""
+    
+    if ($current_roll != null) {
+        print $"✓ On active roll: (ansi green)($current_roll)(ansi reset)"
+        
+        # Show roll details if available
+        let roll_num = ($current_roll | str replace 'roll/' '' | split row '-' | get 0)
+        let metadata_file = $"($env.HOME)/.config/roll-flow/rolls/($roll_num).nuon"
+        
+        if ($metadata_file | path exists) {
+            let metadata = (open $metadata_file)
+            print $"  Theme: ($metadata.theme)"
+            print $"  Started: ($metadata.started)"
+            print $"  Features integrated: ($metadata.merged_features | length)"
+        }
+        
+        # Show verification status for current roll
+        print ""
+        print "  Host Verification Status:"
+        let verification = (check-roll-verification $current_roll)
+        for host in $config.hosts {
+            let status = ($verification | get $host)
+            if $status {
+                print $"    ✅ (ansi green)($host)(ansi reset) - verified"
+            } else {
+                print $"    ⏳ (ansi yellow)($host)(ansi reset) - not verified"
+            }
+        }
+    } else {
+        print "ℹ Not on a roll branch"
+    }
+    
+    print ""
+    print "=== Recent Rolls ==="
+    
+    let rolls_dir = $"($env.HOME)/.config/roll-flow/rolls"
+    if ($rolls_dir | path exists) {
+        ls $rolls_dir 
+        | where type == file 
+        | get name 
+        | each { |file| 
+            let metadata = (open $file)
+            let status_color = if $metadata.status == "active" { "green" } else { "yellow" }
+            let roll_name = $metadata.roll
+            
+            # Get verification status
+            let verification = (check-roll-verification $roll_name)
+            let verified_count = ($verification | values | where {|v| $v == true} | length)
+            let total_hosts = ($config.hosts | length)
+            
+            print $"  roll/($metadata.number) - ($metadata.theme) [(ansi ($status_color))($metadata.status)(ansi reset)]"
+            print $"    Verified: ($verified_count)/($total_hosts) hosts"
+        }
+    }
+}
+
+# Test build on all hosts
+def "main test-all" [] {
+    let config = get-config
+    
+    print "Testing builds on all configured hosts..."
+    print ""
+    
+    for host in $config.hosts {
+        print $"Building for (ansi cyan)($host)(ansi reset)..."
+        
+        try {
+            nix build $".#homeConfigurations.\"($config.username)@($host)\".activationPackage" --show-trace
+            print $"  ✓ (ansi green)($host) build succeeded(ansi reset)"
+        } catch {
+            print $"  ✗ (ansi red)($host) build failed(ansi reset)"
+        }
+        
+        print ""
+    }
+}
+
+# List all rolls
+def "main list" [] {
+    let config = get-config
+    
+    print "=== All Rolls ==="
+    print ""
+    
+    git branch --list $"($config.roll_prefix)*"
+    | lines
+    | each { |line| 
+        let branch = ($line | str trim | str replace '* ' '')
+        let is_current = ($line | str starts-with '*')
+        
+        # Get verification status
+        let verification = (check-roll-verification $branch)
+        let verified_hosts = ($verification | items {|key, val| if $val { $key } else { null }} | where {|v| $v != null})
+        let unverified_hosts = ($verification | items {|key, val| if not $val { $key } else { null }} | where {|v| $v != null})
+        
+        if $is_current {
+            print $"  → (ansi green)($branch)(ansi reset) \(current\)"
+        } else {
+            print $"    ($branch)"
+        }
+        
+        # Show host verification with symbols
+        if ($verified_hosts | length) > 0 {
+            let hosts_str = ($verified_hosts | str join ", ")
+            print $"      ✅ ($hosts_str)"
+        }
+        if ($unverified_hosts | length) > 0 {
+            let hosts_str = ($unverified_hosts | str join ", ")
+            print $"      ⏳ ($hosts_str)"
+        }
+    } | ignore
+}
