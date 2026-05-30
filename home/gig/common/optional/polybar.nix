@@ -209,11 +209,11 @@
         format-full = "<label-full>";
         label-full = "%percentage%%";
 
-        ramp-capacity-0 = "!"; # Empty battery
-        ramp-capacity-1 = "▁"; # Quarter full
-        ramp-capacity-2 = "▃"; # Half full
-        ramp-capacity-3 = "▅"; # Three quarters
-        ramp-capacity-4 = "▇"; # Full battery
+        ramp-capacity-0 = "!"; # Critical - below 10%
+        ramp-capacity-1 = "▂"; # Low - 10-25%
+        ramp-capacity-2 = "▄"; # Medium - 25-50%
+        ramp-capacity-3 = "▆"; # Good - 50-75%
+        ramp-capacity-4 = "█"; # Full - 75-100%
         ramp-capacity-foreground = "#D8DEE9";
 
         animation-charging-0 = "⚡"; # Charging bolt
@@ -223,14 +223,6 @@
         animation-charging-4 = "⚡"; # Charging bolt
         animation-charging-foreground = "#A3BE8C";
         animation-charging-framerate = 750;
-
-        animation-discharging-0 = "▇";
-        animation-discharging-1 = "▅";
-        animation-discharging-2 = "▃";
-        animation-discharging-3 = "▁";
-        animation-discharging-4 = "!";
-        animation-discharging-foreground = "#BF616A";
-        animation-discharging-framerate = 750;
       };
 
       # Global WM settings
