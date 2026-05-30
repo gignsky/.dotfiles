@@ -160,6 +160,8 @@
         interval = 3;
 
         format-connected = "<ramp-signal> <label-connected>";
+        format-connected-prefix = "WiFi: ";
+        format-connected-prefix-foreground = "#88C0D0";
         label-connected = "%essid%";
 
         format-disconnected = "";
@@ -169,7 +171,7 @@
         ramp-signal-2 = "";
         ramp-signal-3 = "";
         ramp-signal-4 = "";
-        ramp-signal-foreground = "#88C0D0";
+        ramp-signal-foreground = "#D8DEE9";
       };
 
       # Ethernet module
@@ -193,12 +195,16 @@
         full-at = 98;
 
         format-charging = "<animation-charging> <label-charging>";
+        format-charging-prefix = "BAT: ";
+        format-charging-prefix-foreground = "#88C0D0";
         label-charging = "%percentage%%";
 
         format-discharging = "<ramp-capacity> <label-discharging>";
+        format-discharging-prefix = "BAT: ";
+        format-discharging-prefix-foreground = "#88C0D0";
         label-discharging = "%percentage%%";
 
-        format-full-prefix = " ";
+        format-full-prefix = "BAT: ";
         format-full-prefix-foreground = "#A3BE8C";
         format-full = "<label-full>";
         label-full = "%percentage%%";
@@ -208,7 +214,7 @@
         ramp-capacity-2 = "";
         ramp-capacity-3 = "";
         ramp-capacity-4 = "";
-        ramp-capacity-foreground = "#88C0D0";
+        ramp-capacity-foreground = "#D8DEE9";
 
         animation-charging-0 = "";
         animation-charging-1 = "";
