@@ -451,7 +451,7 @@ def "main list" [] {
         let is_current = ($line | str starts-with '*')
         
         if $is_current {
-            print $"  → (ansi green)($branch)(ansi reset) (current)"
+            print $"  → (ansi green)($branch)(ansi reset) \(current\)"
         } else {
             print $"    ($branch)"
         }
