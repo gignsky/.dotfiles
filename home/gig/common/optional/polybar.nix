@@ -35,8 +35,8 @@
 
         # Font configuration
         font-0 = "DejaVu Sans:size=11;2";
-        font-1 = "Font Awesome 6 Free:style=Solid:size=11;2";
-        font-2 = "Font Awesome 6 Brands:size=11;2";
+        font-1 = "Font Awesome 7 Free:style=Solid:size=11;2";
+        font-2 = "Font Awesome 7 Brands:size=11;2";
 
         # Module layout
         modules-left = "bspwm";
