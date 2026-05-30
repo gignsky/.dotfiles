@@ -188,15 +188,20 @@
       # Battery module (for laptops)
       "module/battery" = {
         type = "internal/battery";
-        battery = "BAT0";
-        adapter = "ADP1";
+        battery = "BAT1";
+        adapter = "ACAD";
         full-at = 98;
 
         format-charging = "<animation-charging> <label-charging>";
-        format-discharging = "<animation-discharging> <label-discharging>";
-        format-full-prefix = "BAT: ";
+        label-charging = "%percentage%%";
+
+        format-discharging = "<ramp-capacity> <label-discharging>";
+        label-discharging = "%percentage%%";
+
+        format-full-prefix = " ";
         format-full-prefix-foreground = "#A3BE8C";
         format-full = "<label-full>";
+        label-full = "%percentage%%";
 
         ramp-capacity-0 = "";
         ramp-capacity-1 = "";
