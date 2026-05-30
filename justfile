@@ -450,8 +450,8 @@ check-hardware:
 # === Roll Flow Commands ===
 
 # Initialize roll-flow workflow system
-roll-init:
-	nix run .#roll-flow -- init
+roll-init *args:
+	nix run .#roll-flow -- init {{args}}
 
 # Start a new roll branch with a theme
 roll-start theme:

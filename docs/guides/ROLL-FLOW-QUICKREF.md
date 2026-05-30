@@ -6,6 +6,7 @@
 
 ```bash
 just roll-init              # One-time setup
+just roll-init --rolling-branch <name>  # Custom branch name
 just roll-start <theme>     # Begin new work batch
 just roll-integrate <branch> # Add feature to current roll
 just roll-graduate          # Move roll → rolling

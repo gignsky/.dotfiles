@@ -32,11 +32,34 @@ dev/wayland ───────────┘                                
 ### Installation
 
 ```bash
-# Initialize roll-flow in your repository
+# Initialize roll-flow with default settings
 just roll-init
+
+# Or customize branch names and hosts
+just roll-init --rolling-branch rolling-transitional-phase
+just roll-init -r rolling -s main -h ganoslal,merlin,wsl
 ```
 
 This creates `~/.config/roll-flow/config.nuon` with your repository settings.
+
+**Configuration Options:**
+- `-r, --rolling-branch` - Name of the integration branch (default: `rolling`)
+- `-s, --stable-branch` - Name of the stable branch (default: `main`)
+- `-p, --roll-prefix` - Prefix for roll branches (default: `roll/`)
+- `-h, --hosts` - Comma-separated list of hosts to test (default: `ganoslal,merlin,wsl`)
+
+**Example configurations:**
+
+```bash
+# For existing repos with custom branch names
+just roll-init --rolling-branch rolling-transitional-phase
+
+# For repos with different stable branch
+just roll-init --rolling-branch develop --stable-branch production
+
+# For single-host testing
+just roll-init --hosts ganoslal
+```
 
 ### Starting a New Roll
 

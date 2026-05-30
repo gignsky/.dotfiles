@@ -9,7 +9,7 @@ def main [] {
     print "Usage: roll-flow <command> [args]"
     print ""
     print "Commands:"
-    print "  init                    Initialize roll-flow in this repo"
+    print "  init [OPTIONS]          Initialize roll-flow in this repo"
     print "  start <theme>           Start a new roll branch"
     print "  integrate <branch>      Merge a feature branch into current roll"
     print "  graduate                Graduate current roll to rolling branch"
@@ -18,7 +18,16 @@ def main [] {
     print "  test-all                Test build on all configured hosts"
     print "  list                    List all rolls and their states"
     print ""
+    print "Init Options:"
+    print "  -r, --rolling-branch <name>   Name of rolling branch (default: rolling)"
+    print "  -s, --stable-branch <name>    Name of stable branch (default: main)"
+    print "  -p, --roll-prefix <prefix>    Prefix for roll branches (default: roll/)"
+    print "  -h, --hosts <list>            Comma-separated list of hosts"
+    print ""
     print "Examples:"
+    print "  roll-flow init"
+    print "  roll-flow init --rolling-branch rolling-transitional-phase"
+    print "  roll-flow init -r rolling -s main -h ganoslal,merlin,wsl"
     print "  roll-flow start shell-improvements"
     print "  roll-flow integrate feature/zellij-config"
     print "  roll-flow graduate"
@@ -26,20 +35,31 @@ def main [] {
 }
 
 # Initialize roll-flow configuration
-def "main init" [] {
+def "main init" [
+    --rolling-branch(-r): string = "rolling"  # Name of the rolling integration branch
+    --stable-branch(-s): string = "main"      # Name of the stable branch
+    --roll-prefix(-p): string = "roll/"       # Prefix for roll branches
+    --hosts(-h): list<string> = ["ganoslal", "merlin", "wsl"]  # List of hosts to test
+] {
     let config_dir = $"($env.HOME)/.config/roll-flow"
     mkdir $config_dir
     
     let config = {
         repo_root: (git rev-parse --show-toplevel | str trim),
-        rolling_branch: "rolling-transitional-phase",
-        stable_branch: "main",
-        roll_prefix: "roll/",
-        hosts: ["ganoslal", "merlin", "wsl"]
+        rolling_branch: $rolling_branch,
+        stable_branch: $stable_branch,
+        roll_prefix: $roll_prefix,
+        hosts: $hosts
     }
     
     $config | save -f $"($config_dir)/config.nuon"
     print $"✓ Initialized roll-flow in (ansi green)($config.repo_root)(ansi reset)"
+    print ""
+    print "Configuration:"
+    print $"  Rolling branch: (ansi cyan)($rolling_branch)(ansi reset)"
+    print $"  Stable branch:  (ansi cyan)($stable_branch)(ansi reset)"
+    print $"  Roll prefix:    (ansi cyan)($roll_prefix)(ansi reset)"
+    print $"  Hosts:          (ansi cyan)($hosts | str join ', ')(ansi reset)"
 }
 
 # Get current configuration
