@@ -209,26 +209,26 @@
         format-full = "<label-full>";
         label-full = "%percentage%%";
 
-        ramp-capacity-0 = "";
-        ramp-capacity-1 = "";
-        ramp-capacity-2 = "";
-        ramp-capacity-3 = "";
-        ramp-capacity-4 = "";
+        ramp-capacity-0 = "!"; # Empty battery
+        ramp-capacity-1 = "▁"; # Quarter full
+        ramp-capacity-2 = "▃"; # Half full
+        ramp-capacity-3 = "▅"; # Three quarters
+        ramp-capacity-4 = "▇"; # Full battery
         ramp-capacity-foreground = "#D8DEE9";
 
-        animation-charging-0 = "";
-        animation-charging-1 = "";
-        animation-charging-2 = "";
-        animation-charging-3 = "";
-        animation-charging-4 = "";
+        animation-charging-0 = "⚡"; # Charging bolt
+        animation-charging-1 = "⚡"; # Charging bolt
+        animation-charging-2 = "⚡"; # Charging bolt
+        animation-charging-3 = "⚡"; # Charging bolt
+        animation-charging-4 = "⚡"; # Charging bolt
         animation-charging-foreground = "#A3BE8C";
         animation-charging-framerate = 750;
 
-        animation-discharging-0 = "";
-        animation-discharging-1 = "";
-        animation-discharging-2 = "";
-        animation-discharging-3 = "";
-        animation-discharging-4 = "";
+        animation-discharging-0 = "▇";
+        animation-discharging-1 = "▅";
+        animation-discharging-2 = "▃";
+        animation-discharging-3 = "▁";
+        animation-discharging-4 = "!";
         animation-discharging-foreground = "#BF616A";
         animation-discharging-framerate = 750;
       };
