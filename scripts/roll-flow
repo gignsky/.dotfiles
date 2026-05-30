@@ -111,6 +111,84 @@ def get-current-roll [] {
     }
 }
 
+# Check which hosts have verified a given roll with rebuilds
+# Returns a record with host verification status
+def check-roll-verification [
+    roll_branch: string  # Roll branch name (e.g., "roll/5-roll-flow-init")
+] {
+    let config = get-config
+    
+    # Find when this roll was merged to rolling
+    let roll_merge = try {
+        git log $config.rolling_branch --oneline --grep=$"Merge branch '($roll_branch)'" -1 
+        | str trim 
+        | split row ' ' 
+        | get 0?
+    } catch {
+        ""
+    }
+    
+    # Determine the search strategy based on merge status
+    if ($roll_merge | is-empty) {
+        # Roll not merged yet - check from branch point to rolling HEAD
+        # Find where this roll branched from rolling
+        let branch_point = try {
+            git merge-base $config.rolling_branch $roll_branch | str trim
+        } catch {
+            # If we can't find merge base, just check last 20 commits in rolling
+            git rev-parse HEAD~20 | str trim
+        }
+        
+        mut host_status = {}
+        
+        for host in $config.hosts {
+            # Check in rolling branch for rebuilds after the branch point
+            let nixos_rebuild = try {
+                git log $config.rolling_branch --oneline --grep=$"^($host): generation" $"($branch_point)..($config.rolling_branch)" -1 
+                | str trim
+            } catch {
+                ""
+            }
+            
+            let home_rebuild = try {
+                git log $config.rolling_branch --oneline --grep=$"^($config.username)@($host):" $"($branch_point)..($config.rolling_branch)" -1 
+                | str trim
+            } catch {
+                ""
+            }
+            
+            let verified = (not ($nixos_rebuild | is-empty)) and (not ($home_rebuild | is-empty))
+            $host_status = ($host_status | insert $host $verified)
+        }
+        
+        $host_status
+    } else {
+        # Roll has been merged - check for rebuilds after the merge
+        mut host_status = {}
+        
+        for host in $config.hosts {
+            let nixos_rebuild = try {
+                git log $config.rolling_branch --oneline --grep=$"^($host): generation" $"($roll_merge)..HEAD" -1 
+                | str trim
+            } catch {
+                ""
+            }
+            
+            let home_rebuild = try {
+                git log $config.rolling_branch --oneline --grep=$"^($config.username)@($host):" $"($roll_merge)..HEAD" -1 
+                | str trim
+            } catch {
+                ""
+            }
+            
+            let verified = (not ($nixos_rebuild | is-empty)) and (not ($home_rebuild | is-empty))
+            $host_status = ($host_status | insert $host $verified)
+        }
+        
+        $host_status
+    }
+}
+
 # Start a new roll
 def "main start" [
     theme: string  # Theme/description for this roll
@@ -396,6 +474,19 @@ def "main status" [] {
             print $"  Started: ($metadata.started)"
             print $"  Features integrated: ($metadata.merged_features | length)"
         }
+        
+        # Show verification status for current roll
+        print ""
+        print "  Host Verification Status:"
+        let verification = (check-roll-verification $current_roll)
+        for host in $config.hosts {
+            let status = ($verification | get $host)
+            if $status {
+                print $"    ✅ (ansi green)($host)(ansi reset) - verified"
+            } else {
+                print $"    ⏳ (ansi yellow)($host)(ansi reset) - not verified"
+            }
+        }
     } else {
         print "ℹ Not on a roll branch"
     }
@@ -411,7 +502,15 @@ def "main status" [] {
         | each { |file| 
             let metadata = (open $file)
             let status_color = if $metadata.status == "active" { "green" } else { "yellow" }
+            let roll_name = $metadata.roll
+            
+            # Get verification status
+            let verification = (check-roll-verification $roll_name)
+            let verified_count = ($verification | values | where {|v| $v == true} | length)
+            let total_hosts = ($config.hosts | length)
+            
             print $"  roll/($metadata.number) - ($metadata.theme) [(ansi ($status_color))($metadata.status)(ansi reset)]"
+            print $"    Verified: ($verified_count)/($total_hosts) hosts"
         }
     }
 }
@@ -450,10 +549,25 @@ def "main list" [] {
         let branch = ($line | str trim | str replace '* ' '')
         let is_current = ($line | str starts-with '*')
         
+        # Get verification status
+        let verification = (check-roll-verification $branch)
+        let verified_hosts = ($verification | items {|key, val| if $val { $key } else { null }} | where {|v| $v != null})
+        let unverified_hosts = ($verification | items {|key, val| if not $val { $key } else { null }} | where {|v| $v != null})
+        
         if $is_current {
             print $"  → (ansi green)($branch)(ansi reset) \(current\)"
         } else {
             print $"    ($branch)"
         }
-    }
+        
+        # Show host verification with symbols
+        if ($verified_hosts | length) > 0 {
+            let hosts_str = ($verified_hosts | str join ", ")
+            print $"      ✅ ($hosts_str)"
+        }
+        if ($unverified_hosts | length) > 0 {
+            let hosts_str = ($unverified_hosts | str join ", ")
+            print $"      ⏳ ($hosts_str)"
+        }
+    } | ignore
 }
