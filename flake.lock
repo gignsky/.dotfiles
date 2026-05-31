@@ -290,16 +290,15 @@
         "pre-commit-hooks": "pre-commit-hooks"
       },
       "locked": {
-        "lastModified": 1780197151,
-        "narHash": "sha256-Kacyns/kIGugRfnibNPlHcu5MFM+Ya+5UM9uuKeeIgA=",
+        "lastModified": 1780197406,
+        "narHash": "sha256-VX1SzAKt83diCYZhgc5dxA3DYK1/dMFMPJ+P6o9azaA=",
         "owner": "gignsky",
         "repo": "gigpkgs",
-        "rev": "6be83f072325d26dac442b5eba52234168ecda78",
+        "rev": "5f1ff7251b88bb814597e6038c09a751f4d3e7f3",
         "type": "github"
       },
       "original": {
         "owner": "gignsky",
-        "ref": "develop",
         "repo": "gigpkgs",
         "type": "github"
       }
