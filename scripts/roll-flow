@@ -137,13 +137,13 @@ def auto-generate-config [] {
         
         if ($all_hosts | is-empty) {
             # Fallback to default host list
-            ["ganoslal", "merlin", "wsl@merlins-windows", "wsl@ganoslals-windows"]
+            ["ganoslal", "merlin", "wsl@merlins-windows", "wsl@ganoslal"]
         } else {
             $all_hosts
         }
     } catch {
         # Fallback to default host list if evaluation fails
-        ["ganoslal", "merlin", "wsl@merlins-windows", "wsl@ganoslals-windows"]
+        ["ganoslal", "merlin", "wsl@merlins-windows", "wsl@ganoslal"]
     }
     
     # Get username from environment or flake
