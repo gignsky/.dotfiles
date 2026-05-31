@@ -13,7 +13,7 @@
     # nixpkgs-local.url = "git+file:///home/gig/local_repos/nixpkgs";
 
     # Home manager
-    home-manager.follows = "nixpkgs/home-manager";
+    home-manager.follows = "gigpkgs/home-manager";
 
     unstable-home-manager = {
       url = "github:nix-community/home-manager";
