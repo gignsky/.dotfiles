@@ -1156,7 +1156,7 @@ def "main status" [] {
         }
         
         if ($requirements | is-empty) {
-            print $"    (ansi green)No rebuild verification required (docs-only changes)(ansi reset)"
+            print "    (ansi green)No rebuild verification required - docs-only changes(ansi reset)"
         } else {
             print $"    Required: ($requirements | str join ', ')"
         }
