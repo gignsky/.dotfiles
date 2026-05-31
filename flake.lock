@@ -702,11 +702,11 @@
         "pre-commit-hooks": "pre-commit-hooks"
       },
       "locked": {
-        "lastModified": 1780197660,
-        "narHash": "sha256-6W0e5hV+rZcUHppfaAZOmStU/b9+zflDD54Q9z1dM4w=",
+        "lastModified": 1780198384,
+        "narHash": "sha256-m62F6R07fGskgJkqb4oaoQkuYdLmQWJx6d95ukNcqS0=",
         "owner": "gignsky",
         "repo": "gigpkgs",
-        "rev": "cfae72ba708b1e2f9d184adb97762f83aef20c11",
+        "rev": "ba09208e9406f14f22b472cea0a57235c909ecfe",
         "type": "github"
       },
       "original": {
