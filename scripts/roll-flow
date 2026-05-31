@@ -81,7 +81,7 @@ def "main init" [
 
 # Auto-generate config from repository metadata
 def auto-generate-config [] {
-    print "🔧 Auto-generating roll-flow config from repository..."
+    print "Auto-generating roll-flow config from repository..."
     
     # Get repository root
     let repo_root = (git rev-parse --show-toplevel | str trim)
@@ -475,9 +475,9 @@ def detect-roll-scope [
         }
     }
     
-    # Determine changed files: compare against rolling branch (the correct base)
+    # Determine changed files: compare against stable branch (main) as the base
     # For graduated rolls, use the merge commit to see what the roll brought
-    # For unmerged rolls, show what's still pending
+    # For unmerged rolls, show what's unique compared to main
     let changed_files = if (check-roll-graduated $roll_branch) {
         # Roll has been merged into rolling - get scope from merge commit
         let merge_commit = try {
@@ -496,7 +496,7 @@ def detect-roll-scope [
                 git diff --name-only $"($merge_commit)^1" $"($merge_commit)^2"
                 | lines
             } catch {
-                # Fallback: if roll has been modified since merge, show new changes vs rolling
+                # Fallback: compare against rolling (the branch it was merged into)
                 try {
                     git diff --name-only $config.rolling_branch...$resolved
                     | lines
@@ -514,9 +514,9 @@ def detect-roll-scope [
             }
         }
     } else {
-        # Unmerged roll - compare directly against rolling to see what's unique
+        # Unmerged roll - compare directly against main to see what's unique to this roll
         try {
-            git diff --name-only $config.rolling_branch...$resolved
+            git diff --name-only $config.stable_branch...$resolved
             | lines
         } catch {
             []
@@ -953,8 +953,8 @@ def "main start" [
     
     print $"Creating new roll: (ansi cyan)($roll_name)(ansi reset)"
     
-    # Create roll from rolling branch
-    git checkout $config.rolling_branch
+    # Create roll from stable branch (main)
+    git checkout $config.stable_branch
     git pull
     git checkout -b $roll_name
     
@@ -968,6 +968,7 @@ def "main start" [
         theme: $theme,
         started: (date now | format date "%Y-%m-%d %H:%M:%S"),
         status: "active",
+        base: $config.stable_branch,
         merged_features: [],
         depends_on: []  # Can be manually edited to add dependencies
     }
@@ -975,9 +976,10 @@ def "main start" [
     $metadata | save -f $"($rolls_dir)/($next_num).nuon"
     
     print $"✓ Started roll (ansi green)($roll_name)(ansi reset)"
-    print $"  Branch from: ($config.rolling_branch)"
+    print $"  Branch from: ($config.stable_branch)"
     print $"  Now on: ($roll_name)"
     print ""
+    print $"(ansi yellow)Tip:(ansi reset) To merge in latest rolling changes, run: git merge ($config.rolling_branch)"
     print $"(ansi yellow)Tip:(ansi reset) Edit ($rolls_dir)/($next_num).nuon to add explicit dependencies if needed"
 }
 
@@ -1220,10 +1222,10 @@ def "main promote" [
     for roll in $sorted_queue {
         let scope = (detect-roll-scope $roll)
         mut scope_icons = []
-        if $scope.nixos { $scope_icons = ($scope_icons | append "🖥️") }
-        if $scope.home { $scope_icons = ($scope_icons | append "🏠") }
-        if $scope.flake { $scope_icons = ($scope_icons | append "📦") }
-        if $scope.docs { $scope_icons = ($scope_icons | append "📝") }
+        if $scope.nixos { $scope_icons = ($scope_icons | append "N") }
+        if $scope.home { $scope_icons = ($scope_icons | append "H") }
+        if $scope.flake { $scope_icons = ($scope_icons | append "F") }
+        if $scope.docs { $scope_icons = ($scope_icons | append "D") }
         
         print $"  ($roll) ($scope_icons | str join ' ')"
     }
@@ -1249,7 +1251,7 @@ def "main promote" [
                     if $host_info.required.home and (not $host_info.home) {
                         $missing_types = ($missing_types | append "Home rebuild")
                     }
-                    print $"      (ansi yellow)⏳ ($host): ($missing_types | str join ', ') missing(ansi reset)"
+                    print $"      (ansi yellow).. ($host): ($missing_types | str join ', ') missing(ansi reset)"
                 }
                 $all_verified = false
             } else {
@@ -1410,97 +1412,55 @@ def "main status" [] {
         return
     }
     
-    # Build compact table data (immutable records so closures can capture)
-    let table_data = ($all_roll_branches | each {|roll_branch|
+    # Build and render compact summary table as structured Nushell data
+    # Each row is a record with: roll, cur (> if current), scope, and per-host columns
+    let table_records = ($all_roll_branches | each {|roll_branch|
         let is_current = ($roll_branch == $current_roll)
         let scope = (detect-roll-scope $roll_branch)
         let verification = (check-roll-verification $roll_branch)
         
-        # Build scope icon string
+        # Build scope text code (N= NixOS, H= Home, F= Flake, D= Docs)
         mut s = ""
-        if $scope.nixos { $s = ($s + "🖥️") }
-        if $scope.home { $s = ($s + "🏠") }
-        if $scope.flake { $s = ($s + "📦") }
-        if $scope.docs { $s = ($s + "📝") }
-        if ($s | is-empty) { $s = "·" }
+        if $scope.nixos { $s = ($s + "N") }
+        if $scope.home { $s = ($s + "H") }
+        if $scope.flake { $s = ($s + "F") }
+        if $scope.docs { $s = ($s + "D") }
+        if ($s | is-empty) { $s = "-" }
         
-        # Build per-host verification string
-        mut host_strs = []
+        # Start with common columns
+        mut record = {
+            roll: $roll_branch
+            cur: (if $is_current { ">" } else { "" })
+            scope: $s
+        }
+        
+        # Add per-host columns dynamically
         for host in $config.hosts {
             let info = ($verification | get $host)
-            if $info.verified {
+            let mark = if $info.verified {
                 mut v = ""
-                if $info.required.nixos { $v = ($v + "✓") }
-                if $info.required.home { $v = ($v + "✓") }
-                if not ($info.required.nixos) and not ($info.required.home) {
-                    $v = "auto"
-                }
-                $host_strs = ($host_strs | append $v)
+                if $info.required.nixos { $v = ($v + "ok") }
+                if $info.required.home { $v = ($v + "ok") }
+                if not ($info.required.nixos) and not ($info.required.home) { $v = "--" }
+                $v
             } else {
                 mut v = ""
-                if $info.required.nixos and (not $info.nixos) { $v = ($v + "⏳") }
-                if $info.required.home and (not $info.home) { $v = ($v + "⏳") }
-                if ($v | is-empty) { $v = "⏳" }
-                $host_strs = ($host_strs | append $v)
+                if $info.required.nixos and (not $info.nixos) { $v = ($v + "N..") }
+                if $info.required.home and (not $info.home) { $v = ($v + "H..") }
+                if ($v | is-empty) { $v = ".." }
+                $v
             }
+            $record = ($record | insert $host $mark)
         }
         
-        {
-            branch: $roll_branch,
-            current: $is_current,
-            scope_str: $s,
-            host_marks: $host_strs
-        }
+        $record
     })
     
-    # Print compact table - build header and separator with immutable operations
-    let max_name_len = ($table_data | each {|r| $r.branch | str length } | math max)
-    let name_pad = (if $max_name_len < 30 { $max_name_len + 2 } else { 32 })
-    
-    let roll_header = ("  Roll" | fill -c ' ' -w $name_pad -a 'l')
-    let host_headers = ($config.hosts | each {|h| "  " + $h } | str join "")
-    let header = $roll_header + $host_headers
-    
-    let sep_roll = ("  ────" | fill -c '─' -w $name_pad -a 'l')
-    let sep_hosts = ($config.hosts | each {|h| "  " + ("" | fill -c '─' -w ($h | str length) -a 'l') } | str join "")
-    let sep = $sep_roll + $sep_hosts
-    
-    print $"  (ansi default_dimmed)($header)(ansi reset)"
-    print $"  (ansi default_dimmed)($sep)(ansi reset)"
-    
-    for row in $table_data {
-        let prefix = (if $row.current { "→" } else { " " })
-        let name_raw = ($row.branch | str substring 0..(($name_pad - 3) | into int))
-        let name_padded = ($name_raw | fill -c ' ' -w ($name_pad - 2) -a 'l')
-        let scope_col = ($row.scope_str | fill -c ' ' -w 2 -a 'r')
-        
-        # Build the row string piece by piece
-        let row_start = if $row.current {
-            $"  (ansi green)($prefix)(ansi reset) ($name_padded) ($scope_col) "
-        } else {
-            $"  ($prefix) ($name_padded) ($scope_col) "
-        }
-        
-        print -n $row_start
-        
-        # Per-host verification marks
-        for i in 0..(($config.hosts | length) - 1) {
-            let mark = ($row.host_marks | get $i)
-            let host_name = ($config.hosts | get $i)
-            let host_width = ($host_name | str length)
-            
-            if ($mark == "auto") or (not ($mark | str contains "⏳")) {
-                print -n $"(ansi green)($mark)(ansi reset)"
-            } else {
-                print -n $"(ansi yellow)($mark)(ansi reset)"
-            }
-            
-            let mark_len = ($mark | str length)
-            let gap = (if $host_width > $mark_len { $host_width - $mark_len + 1 } else { 2 })
-            if $gap > 0 { print -n ("" | fill -c ' ' -w $gap -a 'l') }
-        }
-        print ""
-    }
+    # Let Nushell's native table formatter handle the rendering
+    # Truncate roll names to keep table readable; Note: `| to text | print` required for script context
+    $table_records | each {|row|
+        $row | merge {$"roll": ($row.roll | str substring 0..36)}
+    } | table --width 150 | to text | print
     print ""
     
     # ── Detail Prompt ───────────────────────────────────────────────
@@ -1517,256 +1477,109 @@ def "main status" [] {
     }
     
     # ── Full Detailed View ──────────────────────────────────────────
+    # ── Current Roll Details ────────────────────────────────────────
     if ($current_roll != null) {
-        print $"✓ On active roll: (ansi green)($current_roll)(ansi reset)"
-        
-        # Show scope analysis
+        print $"=== Current Roll: (ansi green)($current_roll)(ansi reset) ==="
         let scope = (detect-roll-scope $current_roll)
-        print ""
-        print "  Scope Analysis:"
-        if $scope.nixos {
-            print $"    🖥️  (ansi cyan)NixOS(ansi reset) - System configuration changes detected"
-            for file in $scope.nixos_files {
-                print $"        ├─ ($file)"
-            }
-        }
-        if $scope.home {
-            print $"    🏠 (ansi cyan)Home(ansi reset) - Home-manager changes detected"
-            for file in $scope.home_files {
-                print $"        ├─ ($file)"
-            }
-        }
-        if $scope.flake {
-            print $"    📦 (ansi cyan)Flake(ansi reset) - Build system changes detected"
-            for file in $scope.flake_files {
-                print $"        ├─ ($file)"
-            }
-        }
-        if $scope.docs {
-            print $"    📝 (ansi cyan)Docs(ansi reset) - Documentation changes detected"
-            for file in $scope.docs_files {
-                print $"        ├─ ($file)"
-            }
-        }
-        if not ($scope.other_files | is-empty) {
-            print $"    ❓ (ansi yellow)Other(ansi reset) - Uncategorized files"
-            for file in $scope.other_files {
-                print $"        ├─ ($file)"
-            }
-        }
-        if not ($scope.nixos or $scope.home or $scope.flake or $scope.docs) {
-            print $"    ℹ️  (ansi yellow)No changes detected(ansi reset)"
-        }
-        print $"    Total files changed: ($scope.files_count)"
         
-        # Show roll details if available
+        # Scope summary line
+        mut scope_codes = []
+        if $scope.nixos { $scope_codes = ($scope_codes | append "N") }
+        if $scope.home { $scope_codes = ($scope_codes | append "H") }
+        if $scope.flake { $scope_codes = ($scope_codes | append "F") }
+        if $scope.docs { $scope_codes = ($scope_codes | append "D") }
+        if ($scope_codes | is-empty) { $scope_codes = ["-"] }
+        
+        let scope_str = ($scope_codes | str join "")
+        print $"  Scope: (ansi cyan)($scope_str)(ansi reset)  Files: ($scope.files_count)  " + 
+            (if ($scope.files_count) > 0 { $"(ansi default_dimmed)($scope.files | first 5 | str join ', ')(ansi reset)" } else { "" })
+        
+        # Roll metadata
         let roll_num = ($current_roll | str replace 'roll/' '' | split row '-' | get 0)
         let metadata_file = $"($env.HOME)/.config/roll-flow/rolls/($roll_num).nuon"
-        
         if ($metadata_file | path exists) {
             let metadata = (open $metadata_file)
-            print ""
-            print $"  Theme: ($metadata.theme)"
-            print $"  Started: ($metadata.started)"
-            print $"  Features integrated: ($metadata.merged_features | length)"
+            print $"  Theme: (ansi cyan)($metadata.theme)(ansi reset)  Started: ($metadata.started)"
         }
         
-        # Show dependency information
+        # Verification summary
+        print ""
+        print "  Verification:"
+        let verification = (check-roll-verification $current_roll)
+        let verif_records = ($config.hosts | each {|host|
+            let info = ($verification | get $host)
+            if $info.verified {
+                mut marks = []
+                if $info.required.nixos { $marks = ($marks | append "N:ok") }
+                if $info.required.home { $marks = ($marks | append "H:ok") }
+                if not ($info.required.nixos) and not ($info.required.home) { $marks = ["auto"] }
+                { host: $host, status: "ok", detail: ($marks | str join " ") }
+            } else {
+                mut marks = []
+                if $info.required.nixos and (not $info.nixos) { $marks = ($marks | append "N:..") }
+                if $info.required.home and (not $info.home) { $marks = ($marks | append "H:..") }
+                if ($marks | is-empty) { $marks = ["pending"] }
+                { host: $host, status: "..", detail: ($marks | str join " ") }
+            }
+        })
+        $verif_records | table -e | lines | each {|line| print $"  ($line)" }
+        
+        # Dependencies
         let deps = (detect-roll-dependencies $current_roll)
         if not ($deps | is-empty) {
             print ""
-            print "  Dependencies:"
-            for dep in $deps {
-                print $"    → (ansi yellow)($dep)(ansi reset)"
-            }
+            print $"  Depends on: (ansi yellow)($deps | str join ', ')(ansi reset)"
         }
-        
-        # Show verification status for current roll
         print ""
-        print "  Host Verification Status:"
-        
-        mut requirements = []
-        if $scope.nixos {
-            $requirements = ($requirements | append "NixOS rebuild")
-        }
-        if $scope.home {
-            $requirements = ($requirements | append "Home rebuild")
-        }
-        if $scope.flake and (not $scope.nixos) and (not $scope.home) {
-            $requirements = ($requirements | append "Flake check")
-        }
-        
-        if ($requirements | is-empty) {
-            print "    (ansi green)No rebuild verification required - docs-only changes(ansi reset)"
-        } else {
-            print $"    Required: ($requirements | str join ', ')"
-        }
-        
-        let verification = (check-roll-verification $current_roll)
-        for host in $config.hosts {
-            let info = ($verification | get $host)
-            if $info.verified {
-                mut type_marks = []
-                if $info.required.nixos { $type_marks = ($type_marks | append "NixOS✅") }
-                if $info.required.home { $type_marks = ($type_marks | append "Home✅") }
-                if not ($info.required.nixos) and not ($info.required.home) {
-                    $type_marks = ($type_marks | append "auto✅")
-                }
-                print $"    ✅ (ansi green)($host)(ansi reset) - ($type_marks | str join ' ')"
-            } else {
-                mut missing = []
-                if $info.required.nixos and (not $info.nixos) {
-                    $missing = ($missing | append "NixOS⏳")
-                }
-                if $info.required.home and (not $info.home) {
-                    $missing = ($missing | append "Home⏳")
-                }
-                if ($missing | is-empty) {
-                    print $"    ⏳ (ansi yellow)($host)(ansi reset) - pending"
-                } else {
-                    print $"    ⏳ (ansi yellow)($host)(ansi reset) - needs ($missing | str join ' ')"
-                }
-            }
-        }
-    } else {
-        print "ℹ Not on a roll branch"
     }
     
-    print ""
+    # ── All Rolls Summary ───────────────────────────────────────────
     print "=== All Rolls ==="
     
     if ($all_roll_branches | is-empty) {
-        print "  No rolls found"
+        print "  (none)"
     } else {
-        for roll_branch in $all_roll_branches {
+        # Build structured records for each roll
+        let all_records = ($all_roll_branches | each {|roll_branch|
             let is_current = ($roll_branch == $current_roll)
-            
-            let roll_num = try {
-                $roll_branch | str replace $config.roll_prefix '' | split row '-' | get 0
-            } catch { null }
-            
-            let metadata_file = if ($roll_num != null) {
-                $"($env.HOME)/.config/roll-flow/rolls/($roll_num).nuon"
-            } else { null }
-            
-            let has_metadata = ($metadata_file != null) and ($metadata_file | path exists)
-            let verification = (check-roll-verification $roll_branch)
-            let verified_count = ($verification | values | where {|v| $v.verified == true} | length)
-            let total_hosts = ($config.hosts | length)
             let scope = (detect-roll-scope $roll_branch)
             
+            mut scope_codes = []
+            if $scope.nixos { $scope_codes = ($scope_codes | append "N") }
+            if $scope.home { $scope_codes = ($scope_codes | append "H") }
+            if $scope.flake { $scope_codes = ($scope_codes | append "F") }
+            if $scope.docs { $scope_codes = ($scope_codes | append "D") }
+            if ($scope_codes | is-empty) { $scope_codes = ["-"] }
+            
+            let verification = (check-roll-verification $roll_branch)
+            let verified_count = ($verification | values | where {|v| $v.verified} | length)
+            let total = ($config.hosts | length)
+            let promo_status = (check-roll-promotion-ready $roll_branch)
             let is_diverged = if (check-roll-graduated $roll_branch) {
                 (check-roll-diverged $roll_branch)
             } else { false }
             
-            if $is_current {
-                print $"  → (ansi green)($roll_branch)(ansi reset) (ansi default_dimmed)\(current\)(ansi reset)"
+            let status_str = if $promo_status.ready {
+                if $is_diverged { "!DIVERGED" } else { "PROMOTE" }
+            } else if (check-roll-graduated $roll_branch) {
+                "merged"
             } else {
-                print $"    ($roll_branch)"
+                "active"
             }
             
-            if $is_diverged {
-                print $"      (ansi red)⚠ Diverged! Branch has commits after graduation(ansi reset)"
+            {
+                roll: ($roll_branch | str substring 0..40)
+                cur: (if $is_current { ">" } else { "" })
+                scope: ($scope_codes | str join "")
+                files: $scope.files_count
+                verified: $"($verified_count)/($total)"
+                status: $status_str
             }
-            
-            mut scope_icons = []
-            if $scope.nixos { $scope_icons = ($scope_icons | append "🖥️") }
-            if $scope.home { $scope_icons = ($scope_icons | append "🏠") }
-            if $scope.flake { $scope_icons = ($scope_icons | append "📦") }
-            if $scope.docs { $scope_icons = ($scope_icons | append "📝") }
-            
-            if not ($scope_icons | is-empty) {
-                print $"      Scope: ($scope_icons | str join ' ')"
-            }
-            
-            let requirements = (get-verification-requirements $roll_branch)
-            if $requirements.check_type != "none" {
-                let req_color = match $requirements.check_type {
-                    "full" => "yellow",
-                    "light" => "cyan",
-                    "docs" => "green",
-                    _ => "default"
-                }
-                print $"      Requires: (ansi ($req_color))($requirements.description)(ansi reset)"
-            }
-            
-            if $total_hosts > 0 {
-                for host in $config.hosts {
-                    let info = ($verification | get $host)
-                    if $info.verified {
-                        mut type_marks = []
-                        if $info.required.nixos { $type_marks = ($type_marks | append "🖥️✅") }
-                        if $info.required.home { $type_marks = ($type_marks | append "🏠✅") }
-                        if (not $info.required.nixos) and (not $info.required.home) {
-                            $type_marks = ($type_marks | append "auto✅")
-                        }
-                        print $"      ✅ (ansi green)($host)(ansi reset) ($type_marks | str join ' ')"
-                    } else {
-                        mut missing = []
-                        if $info.required.nixos and (not $info.nixos) {
-                            $missing = ($missing | append "🖥️⏳")
-                        }
-                        if $info.required.home and (not $info.home) {
-                            $missing = ($missing | append "🏠⏳")
-                        }
-                        if ($missing | is-empty) {
-                            print $"      ⏳ (ansi yellow)($host)(ansi reset) pending"
-                        } else {
-                            print $"      ⏳ (ansi yellow)($host)(ansi reset) needs ($missing | str join ' ')"
-                        }
-                    }
-                }
-            }
-            
-            let promo_status = (check-roll-promotion-ready $roll_branch)
-            
-            if $promo_status.graduated {
-                if $is_diverged {
-                    print $"      Graduated: (ansi red)⚠ Merged but branch diverged(ansi reset)"
-                } else {
-                    print $"      Graduated: (ansi green)✓ Merged to ($config.rolling_branch)(ansi reset)"
-                }
-            } else if not $promo_status.docs_only {
-                print $"      Graduated: (ansi yellow)⏳ Not yet merged to ($config.rolling_branch)(ansi reset)"
-            }
-            
-            if $promo_status.ready {
-                if $is_diverged {
-                    print $"      Promotion: (ansi red)✗ Diverged - re-integrate first(ansi reset)"
-                } else {
-                    print $"      Promotion: (ansi green)✓ Ready to promote to ($config.stable_branch)(ansi reset)"
-                }
-            } else if $promo_status.fully_verified and not $promo_status.graduated and not $promo_status.docs_only {
-                print $"      Promotion: (ansi yellow)⏳ Needs graduation first(ansi reset)"
-            } else if not $promo_status.fully_verified {
-                print $"      Promotion: (ansi red)✗ Needs verification(ansi reset)"
-            }
-            
-            let dependencies = (detect-roll-dependencies $roll_branch)
-            let dependents = (find-roll-dependents $roll_branch)
-            
-            if not ($dependencies | is-empty) {
-                print $"      Dependencies: (ansi yellow)→ ($dependencies | str join ', ')(ansi reset)"
-            }
-            
-            if not ($dependents | is-empty) {
-                print $"      Depended on by: (ansi cyan)← ($dependents | str join ', ')(ansi reset)"
-            }
-            
-            if $has_metadata {
-                let metadata = (open $metadata_file)
-                
-                if ($metadata | get depends_on? | is-not-empty) and not ($metadata.depends_on | is-empty) {
-                    let manual_deps = ($metadata.depends_on | where {|dep| not ($dep in $dependencies)})
-                    if not ($manual_deps | is-empty) {
-                        print $"      Manual deps: (ansi magenta)($manual_deps | str join ', ')(ansi reset)"
-                    }
-                }
-            }
-            
-            print ""
-        }
+        })
+        
+        $all_records | table -e | lines | each {|line| print $"  ($line)" }
     }
+    print ""
 }
 
 # Test build on all hosts
@@ -1848,7 +1661,7 @@ def "main test-all" [] {
             git commit --allow-empty -m $commit_msg out+err>| ignore
             print $"  ✓ Commit created: (ansi yellow)test-all FAILED(ansi reset)"
         } catch {
-            print $"  ○ Could not create commit"
+            print $"  - Could not create commit"
         }
         return
     }
@@ -1926,7 +1739,7 @@ def "main test-all" [] {
         print $"  ✓ Commit created: (ansi cyan)test-all — ($host_results_str)(ansi reset)"
     } catch {
         let err = $env.LAST_EXIT_CODE
-        print $"  ○ Could not create commit (exit: ($err))"
+        print $"  - Could not create commit (exit: ($err))"
     }
     
     # Final summary
@@ -1943,7 +1756,7 @@ def "main test-all" [] {
     }
     if $failures_exist {
         print ""
-        print $"(ansi yellow)⚠ Some builds failed — check output above for details(ansi reset)"
+        print $"(ansi yellow)! Some builds failed — check output above for details(ansi reset)"
     }
     print ""
     print $"(ansi green)✓ test-all complete(ansi reset)"
@@ -2018,22 +1831,22 @@ def "main list" [] {
             
             # Display roll header
             if $is_current {
-                print $"  → (ansi green)($roll_branch)(ansi reset) (ansi default_dimmed)\(current\)(ansi reset)"
+                print $"  > (ansi green)($roll_branch)(ansi reset) (ansi default_dimmed)\(current\)(ansi reset)"
             } else {
                 print $"    ($roll_branch)"
             }
             
             # Show divergence warning
             if $is_diverged {
-                print $"      (ansi red)⚠ Diverged! Branch has commits after graduation(ansi reset)"
+                print $"      (ansi red)! Diverged! Branch has commits after graduation(ansi reset)"
             }
             
             # Show scope icons
             mut scope_icons = []
-            if $scope.nixos { $scope_icons = ($scope_icons | append "🖥️") }
-            if $scope.home { $scope_icons = ($scope_icons | append "🏠") }
-            if $scope.flake { $scope_icons = ($scope_icons | append "📦") }
-            if $scope.docs { $scope_icons = ($scope_icons | append "📝") }
+            if $scope.nixos { $scope_icons = ($scope_icons | append "N") }
+            if $scope.home { $scope_icons = ($scope_icons | append "H") }
+            if $scope.flake { $scope_icons = ($scope_icons | append "F") }
+            if $scope.docs { $scope_icons = ($scope_icons | append "D") }
             
             if not ($scope_icons | is-empty) {
                 print $"      Scope: ($scope_icons | str join ' ')"
@@ -2057,24 +1870,24 @@ def "main list" [] {
                     let info = ($verification | get $host)
                     if $info.verified {
                         mut type_marks = []
-                        if $info.required.nixos { $type_marks = ($type_marks | append "🖥️✅") }
-                        if $info.required.home { $type_marks = ($type_marks | append "🏠✅") }
+                        if $info.required.nixos { $type_marks = ($type_marks | append "N:ok") }
+                        if $info.required.home { $type_marks = ($type_marks | append "H:ok") }
                         if (not $info.required.nixos) and (not $info.required.home) {
-                            $type_marks = ($type_marks | append "auto✅")
+                            $type_marks = ($type_marks | append "auto")
                         }
-                        print $"      ✅ (ansi green)($host)(ansi reset) ($type_marks | str join ' ')"
+                        print $"      ok (ansi green)($host)(ansi reset) ($type_marks | str join ' ')"
                     } else {
                         mut missing = []
                         if $info.required.nixos and (not $info.nixos) {
-                            $missing = ($missing | append "🖥️⏳")
+                            $missing = ($missing | append "N:..")
                         }
                         if $info.required.home and (not $info.home) {
-                            $missing = ($missing | append "🏠⏳")
+                            $missing = ($missing | append "H:..")
                         }
                         if ($missing | is-empty) {
-                            print $"      ⏳ (ansi yellow)($host)(ansi reset) pending"
+                            print $"      .. (ansi yellow)($host)(ansi reset) pending"
                         } else {
-                            print $"      ⏳ (ansi yellow)($host)(ansi reset) needs ($missing | str join ' ')"
+                            print $"      .. (ansi yellow)($host)(ansi reset) needs ($missing | str join ' ')"
                         }
                     }
                 }
@@ -2085,24 +1898,24 @@ def "main list" [] {
             
             if $promo_status.graduated {
                 if $is_diverged {
-                    print $"      Graduated: (ansi red)⚠ Merged but branch diverged(ansi reset)"
+                    print $"      Graduated: (ansi red)! Diverged! Branch has commits after graduation(ansi reset)"
                 } else {
-                    print $"      Graduated: (ansi green)✓ Merged to ($config.rolling_branch)(ansi reset)"
+                    print $"      Graduated: (ansi green)ok Merged to ($config.rolling_branch)(ansi reset)"
                 }
             } else if not $promo_status.docs_only {
-                print $"      Graduated: (ansi yellow)⏳ Not yet merged to ($config.rolling_branch)(ansi reset)"
+                print $"      Graduated: (ansi yellow).. Not yet merged to ($config.rolling_branch)(ansi reset)"
             }
             
             if $promo_status.ready {
                 if $is_diverged {
-                    print $"      Promotion: (ansi red)✗ Diverged - re-integrate first(ansi reset)"
+                    print $"      Promotion: (ansi red)FAIL Diverged - re-integrate first(ansi reset)"
                 } else {
-                    print $"      Promotion: (ansi green)✓ Ready to promote to ($config.stable_branch)(ansi reset)"
+                    print $"      Promotion: (ansi green)ok Ready to promote to ($config.stable_branch)(ansi reset)"
                 }
             } else if $promo_status.fully_verified and not $promo_status.graduated and not $promo_status.docs_only {
-                print $"      Promotion: (ansi yellow)⏳ Needs graduation first(ansi reset)"
+                print $"      Promotion: (ansi yellow).. Needs graduation first(ansi reset)"
             } else if not $promo_status.fully_verified {
-                print $"      Promotion: (ansi red)✗ Needs verification(ansi reset)"
+                print $"      Promotion: (ansi red)FAIL Needs verification(ansi reset)"
             }
             
             # Show dependencies and dependents
@@ -2110,11 +1923,11 @@ def "main list" [] {
             let dependents = (find-roll-dependents $roll_branch)
             
             if not ($dependencies | is-empty) {
-                print $"      Dependencies: (ansi yellow)→ ($dependencies | str join ', ')(ansi reset)"
+                    print $"      Dependencies: (ansi yellow)-> ($dependencies | str join ', ')(ansi reset)"
             }
             
             if not ($dependents | is-empty) {
-                print $"      Depended on by: (ansi cyan)← ($dependents | str join ', ')(ansi reset)"
+                print $"      Depended on by: (ansi cyan)<- ($dependents | str join ', ')(ansi reset)"
             }
             
             # Show metadata if available
