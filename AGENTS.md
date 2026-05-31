@@ -108,7 +108,7 @@ When consulting on repositories outside your primary assignment:
 - **Situation Reports**: All agents must implement `/sitrep` command for standardized status reporting
   - Provides comprehensive operational status in agent-specific voice
   - Includes current operations, system health, recent activities, and recommendations
-  - Standard format with agent personality adaptations (see Scotty agent for reference implementation)
+  - Standard format with agent personality adaptations (see Commander Data for reference implementation)
   - Essential for fleet-wide situational awareness and coordination
 
 - **Log Integrity Repair**: All agents must implement `/fix-log` command for documentation maintenance
@@ -167,7 +167,7 @@ When consulting on repositories outside your primary assignment:
     5. Create `ARCHIVED-YYYY-MM-DD.txt` in `.tmp-oc-logs/` documenting what was moved
     6. Commit cleanup to dotfiles repo with reference to annex commit
   - **Archival Locations**:
-    - Engineering logs → `annex/crew-logs/scotty/engineering-logs/YYYY-MM/`
+    - Engineering logs → `annex/crew-logs/data/engineering-logs/YYYY-MM/`
     - Research reports → `annex/crew-logs/library-computer/research-logs/YYYY-MM/`
     - Command analysis → `annex/fleet/operations/reports/`
     - System logs → `annex/computer-logs/`
