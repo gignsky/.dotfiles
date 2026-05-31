@@ -407,6 +407,7 @@
     "home-manager": {
       "inputs": {
         "nixpkgs": [
+          "nixpkgs",
           "nixpkgs"
         ]
       },
@@ -565,6 +566,7 @@
       "inputs": {
         "flake-compat": "flake-compat_3",
         "nixpkgs": [
+          "nixpkgs",
           "nixpkgs"
         ]
       },
@@ -824,6 +826,7 @@
         "flake-compat": "flake-compat_5",
         "gitignore": "gitignore_2",
         "nixpkgs": [
+          "nixpkgs",
           "nixpkgs"
         ]
       },
@@ -942,6 +945,7 @@
     "sops-nix": {
       "inputs": {
         "nixpkgs": [
+          "nixpkgs",
           "nixpkgs"
         ]
       },
@@ -1008,6 +1012,7 @@
     "treefmt-nix": {
       "inputs": {
         "nixpkgs": [
+          "nixpkgs",
           "nixpkgs"
         ]
       },
@@ -1070,6 +1075,7 @@
       "inputs": {
         "flake-utils": "flake-utils",
         "nixpkgs": [
+          "nixpkgs",
           "nixpkgs"
         ]
       },
