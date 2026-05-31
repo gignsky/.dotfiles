@@ -239,6 +239,92 @@ def get-next-roll-number [] {
     }
 }
 
+# Check if a roll has been graduated to rolling
+def check-roll-graduated [
+    roll_branch: string
+] {
+    let config = get-config
+    
+    # Check if the roll branch has been merged to rolling
+    # We look for merge commits in rolling that reference this roll
+    let merge_check = try {
+        git log $config.rolling_branch --oneline --grep=$"Merge branch '($roll_branch)'" -1 | str trim
+    } catch {
+        ""
+    }
+    
+    not ($merge_check | is-empty)
+}
+
+# Check if a roll is ready to be promoted (fully verified and graduated)
+def check-roll-promotion-ready [
+    roll_branch: string
+] {
+    let config = get-config
+    
+    # Check if graduated
+    let graduated = (check-roll-graduated $roll_branch)
+    
+    # Check if fully verified
+    let verification = (check-roll-verification $roll_branch)
+    let fully_verified = ($verification | values | all {|v| $v == true})
+    
+    # Check scope - docs-only rolls don't need graduation
+    let scope = (detect-roll-scope $roll_branch)
+    let docs_only = $scope.docs and (not $scope.nixos) and (not $scope.home) and (not $scope.flake)
+    
+    {
+        graduated: $graduated,
+        fully_verified: $fully_verified,
+        docs_only: $docs_only,
+        ready: ($fully_verified and ($graduated or $docs_only))
+    }
+}
+
+# Get verification requirements for a roll based on its scope
+# Returns a record describing what verification is needed
+def get-verification-requirements [
+    roll_branch: string
+] {
+    let scope = (detect-roll-scope $roll_branch)
+    
+    mut requirements = []
+    mut check_type = "none"
+    
+    if $scope.nixos {
+        $requirements = ($requirements | append "NixOS rebuild on all hosts")
+        $check_type = "full"
+    }
+    
+    if $scope.home {
+        $requirements = ($requirements | append "Home-manager rebuild on all hosts")
+        $check_type = "full"
+    }
+    
+    if $scope.flake and (not $scope.nixos) and (not $scope.home) {
+        $requirements = ($requirements | append "Flake check (any host)")
+        if $check_type == "none" {
+            $check_type = "light"
+        }
+    }
+    
+    if $scope.docs and (not $scope.nixos) and (not $scope.home) and (not $scope.flake) {
+        $requirements = ($requirements | append "No rebuild required (docs-only)")
+        $check_type = "docs"
+    }
+    
+    if ($requirements | is-empty) {
+        $requirements = ($requirements | append "No changes detected")
+        $check_type = "none"
+    }
+    
+    {
+        requirements: $requirements,
+        check_type: $check_type,  # "none", "docs", "light", "full"
+        description: ($requirements | str join ", ")
+    }
+}
+
 # Detect which scopes a roll/branch affects based on changed files
 # Returns a record with scope flags: {nixos: bool, home: bool, flake: bool, docs: bool}
 def detect-roll-scope [
@@ -1160,7 +1246,19 @@ def "main status" [] {
                 print $"      Scope: ($scope_icons | str join ' ')"
             }
             
-            # Show verification
+            # Show verification requirements
+            let requirements = (get-verification-requirements $roll_branch)
+            if $requirements.check_type != "none" {
+                let req_color = match $requirements.check_type {
+                    "full" => "yellow",
+                    "light" => "cyan",
+                    "docs" => "green",
+                    _ => "default"
+                }
+                print $"      Requires: (ansi ($req_color))($requirements.description)(ansi reset)"
+            }
+            
+            # Show verification status
             if $total_hosts > 0 {
                 let percent = (($verified_count * 100) / $total_hosts | math round)
                 if $verified_count == $total_hosts {
@@ -1172,10 +1270,26 @@ def "main status" [] {
                 }
             }
             
+            # Show graduation and promotion status
+            let promo_status = (check-roll-promotion-ready $roll_branch)
+            
+            if $promo_status.graduated {
+                print $"      Graduated: (ansi green)✓ Merged to ($config.rolling_branch)(ansi reset)"
+            } else if not $promo_status.docs_only {
+                print $"      Graduated: (ansi yellow)⏳ Not yet merged to ($config.rolling_branch)(ansi reset)"
+            }
+            
+            if $promo_status.ready {
+                print $"      Promotion: (ansi green)✓ Ready to promote to ($config.stable_branch)(ansi reset)"
+            } else if $promo_status.fully_verified and not $promo_status.graduated and not $promo_status.docs_only {
+                print $"      Promotion: (ansi yellow)⏳ Needs graduation first(ansi reset)"
+            } else if not $promo_status.fully_verified {
+                print $"      Promotion: (ansi red)✗ Needs verification(ansi reset)"
+            }
+            
             # Show metadata if available
             if $has_metadata {
                 let metadata = (open $metadata_file)
-                print $"      Status: (ansi cyan)($metadata.status)(ansi reset)"
                 
                 if ($metadata | get depends_on? | is-not-empty) and not ($metadata.depends_on | is-empty) {
                     print $"      Depends on: ($metadata.depends_on | str join ', ')"
