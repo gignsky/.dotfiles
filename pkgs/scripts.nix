@@ -200,6 +200,9 @@ let
 in
 scripts
 // {
-  # Alias roll-flow to roll-flow for backward compatibility
-  roll-flow = scripts.roll-flow;
+  # Short alias 'rf' wraps the full 'roll-flow' command
+  rf = pkgs.writeShellScriptBin "rf" ''
+    # Wrapper that calls roll-flow with all arguments
+    exec ${scripts.roll-flow}/bin/roll-flow "$@"
+  '';
 }
