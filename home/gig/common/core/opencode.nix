@@ -193,7 +193,7 @@
     };
 
     # Enhanced rules with personality system
-    rules = ''
+    context = ''
             # OpenCode Agent Configuration
 
             This agent operates within a NixOS/home-manager environment at ~/.dotfiles.
