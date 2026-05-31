@@ -311,16 +311,23 @@ def check-roll-diverged [
     let merged_tip = $"($merge_commit)^2"
     
     # Check if roll branch HEAD differs from the merged tip
-    let roll_head = try {
-        git rev-parse $roll_branch | str trim
+    # Use complete to capture stdout/stderr and check exit code
+    # NOTE: out+err>| complete required to suppress stderr for remote-only branches
+    let rev_result = try {
+        git rev-parse $roll_branch out+err>| complete
     } catch {
         return false  # Branch doesn't exist
     }
     
+    if $rev_result.exit_code != 0 {
+        return false  # Branch doesn't exist
+    }
+    let roll_head = ($rev_result.stdout | str trim)
+    
     # If the roll branch HEAD doesn't match what was merged, it has diverged
     # Also check if rolling has commits beyond the merge that aren't on the roll branch
     let on_branch = try {
-        git branch --list $roll_branch --contains $merged_tip | lines | str trim | length
+        git branch --list $roll_branch --contains $merged_tip err>| ignore | lines | str trim | length
     } catch {
         0
     }
@@ -407,12 +414,66 @@ def get-verification-requirements [
     }
 }
 
+# Helper: resolve a branch name, trying local first then remote ref
+def resolve-roll-ref [
+    roll_branch: string
+] {
+    let config = get-config
+    
+    # Try local branch
+    let local_exists = try {
+        git rev-parse --verify $roll_branch out+err>| ignore
+        $env.LAST_EXIT_CODE == 0
+    } catch {
+        false
+    }
+    
+    if $local_exists {
+        $roll_branch
+    } else {
+        # Try remote tracking ref
+        let remote_ref = $"origin/($roll_branch)"
+        let remote_exists = try {
+            git rev-parse --verify $remote_ref out+err>| ignore
+            $env.LAST_EXIT_CODE == 0
+        } catch {
+            false
+        }
+        
+        if $remote_exists {
+            $remote_ref
+        } else {
+            null  # Neither local nor remote exists
+        }
+    }
+}
+
 # Detect which scopes a roll/branch affects based on changed files
 # Returns a record with scope flags: {nixos: bool, home: bool, flake: bool, docs: bool}
 def detect-roll-scope [
     roll_branch: string  # Roll branch name
 ] {
     let config = get-config
+    
+    # Resolve branch ref (local or remote)
+    let resolved = (resolve-roll-ref $roll_branch)
+    
+    if ($resolved | is-empty) or ($resolved == null) {
+        return {
+            nixos: false,
+            home: false,
+            flake: false,
+            docs: false,
+            empty: true,
+            files_count: 0,
+            files: [],
+            nixos_files: [],
+            home_files: [],
+            flake_files: [],
+            docs_files: [],
+            other_files: []
+        }
+    }
     
     # Determine changed files: compare against rolling branch (the correct base)
     # For graduated rolls, use the merge commit to see what the roll brought
@@ -437,7 +498,7 @@ def detect-roll-scope [
             } catch {
                 # Fallback: if roll has been modified since merge, show new changes vs rolling
                 try {
-                    git diff --name-only $config.rolling_branch...$roll_branch
+                    git diff --name-only $config.rolling_branch...$resolved
                     | lines
                 } catch {
                     []
@@ -446,7 +507,7 @@ def detect-roll-scope [
         } else {
             # Merge commit not found - fallback to standard comparison
             try {
-                git diff --name-only $config.rolling_branch...$roll_branch
+                git diff --name-only $config.rolling_branch...$resolved
                 | lines
             } catch {
                 []
@@ -455,7 +516,7 @@ def detect-roll-scope [
     } else {
         # Unmerged roll - compare directly against rolling to see what's unique
         try {
-            git diff --name-only $config.rolling_branch...$roll_branch
+            git diff --name-only $config.rolling_branch...$resolved
             | lines
         } catch {
             []
@@ -470,7 +531,12 @@ def detect-roll-scope [
             docs: false,
             empty: true,
             files_count: 0,
-            files: []
+            files: [],
+            nixos_files: [],
+            home_files: [],
+            flake_files: [],
+            docs_files: [],
+            other_files: []
         }
     }
     
@@ -570,49 +636,69 @@ def detect-roll-dependencies [
         }
     }
     
-    # Method 2: Structural analysis - check git merge-base
-    # If roll was branched from another roll (not from rolling), it depends on that roll
-    let merge_base = try {
-        git merge-base $config.rolling_branch $roll_branch | str trim
-    } catch {
-        null
-    }
+    # Resolve the roll ref once, used by both Method 2 and Method 3
+    let resolved = (resolve-roll-ref $roll_branch)
     
-    if ($merge_base != null) {
-        # Check if any other rolls contain this merge base
-        let all_rolls = try {
-            git branch --list $"($config.roll_prefix)*" 
-            | lines 
-            | each { |line| $line | str trim | str replace '* ' '' }
-        } catch {
-            []
+    # Method 2: Structural analysis - check git merge-base
+    # Only applicable for UNMERGED rolls (graduated rolls' changes are already in rolling)
+    # If an unmerged roll was branched from another roll (not from rolling), it depends on that roll
+    let is_graduated = (check-roll-graduated $roll_branch)
+    
+    if (not $is_graduated) and ($resolved != null) {
+        let mb_result = try {
+            git merge-base $config.rolling_branch $resolved | complete
+        } catch { null }
+        
+        let merge_base = if ($mb_result == null) or ($mb_result.exit_code != 0) {
+            null
+        } else {
+            $mb_result.stdout | str trim
         }
         
-        for other_roll in $all_rolls {
-            if $other_roll == $roll_branch {
-                continue
-            }
+        if ($merge_base != null) {
+            # Check if any other rolls contain this merge base
+            let all_rolls = try {
+                git branch --list $"($config.roll_prefix)*" 
+                | lines 
+                | each { |line| $line | str trim | str replace '* ' '' }
+            } catch { [] }
             
-            # Check if merge_base is within other_roll's history
-            let is_ancestor = try {
-                git merge-base --is-ancestor $merge_base $other_roll out+err>| ignore
-                $env.LAST_EXIT_CODE == 0
-            } catch {
-                false
-            }
-            
-            if $is_ancestor and not ($dependencies | any {|d| $d == $other_roll}) {
-                $dependencies = ($dependencies | append $other_roll)
+            for other_roll in $all_rolls {
+                if $other_roll == $roll_branch { continue }
+                
+                # Only consider earlier-numbered rolls (prevent circular deps)
+                let other_num = try {
+                    $other_roll | str replace $config.roll_prefix '' | split row '-' | get 0 | into int
+                } catch { null }
+                if ($other_num == null) or ($roll_num != null and $other_num >= $roll_num) {
+                    continue
+                }
+                
+                # Check if merge_base is within other_roll's history
+                let is_ancestor = try {
+                    git merge-base --is-ancestor $merge_base $other_roll out+err>| ignore
+                    $env.LAST_EXIT_CODE == 0
+                } catch { false }
+                
+                if $is_ancestor and not ($dependencies | any {|d| $d == $other_roll}) {
+                    $dependencies = ($dependencies | append $other_roll)
+                }
             }
         }
     }
     
     # Method 3: File overlap analysis
     # If rolls modify the same files, later roll might depend on earlier
-    let roll_files = try {
-        git diff --name-only $config.stable_branch...$roll_branch out+err>| complete | get stdout | lines
-    } catch {
-        []
+    # Works for both graduated and unmerged rolls
+    let roll_files = if ($resolved == null) { [] } else {
+        let diff_result = try {
+            git diff --name-only $config.rolling_branch...$resolved | complete
+        } catch { null }
+        if ($diff_result == null) or ($diff_result.exit_code != 0) {
+            []
+        } else {
+            $diff_result.stdout | lines
+        }
     }
     
     if not ($roll_files | is-empty) {
@@ -620,19 +706,18 @@ def detect-roll-dependencies [
             git branch --list $"($config.roll_prefix)*" 
             | lines 
             | each { |line| $line | str trim | str replace '* ' '' }
-        } catch {
-            []
-        }
+        } catch { [] }
         
         for other_roll in $all_rolls {
-            if $other_roll == $roll_branch {
-                continue
-            }
+            if $other_roll == $roll_branch { continue }
             
-            let other_files = try {
-                git diff --name-only $config.stable_branch...$other_roll out+err>| complete | get stdout | lines
-            } catch {
-                []
+            let other_resolved = (resolve-roll-ref $other_roll)
+            let other_files = if ($other_resolved == null) { [] } else {
+                let odiff = try {
+                    git diff --name-only $config.rolling_branch...$other_resolved | complete
+                } catch { null }
+                if ($odiff == null) or ($odiff.exit_code != 0) { [] }
+                else { $odiff.stdout | lines }
             }
             
             # Check for file overlap
@@ -642,9 +727,7 @@ def detect-roll-dependencies [
                 # Only add as dependency if other_roll is earlier (lower number)
                 let other_num = try {
                     $other_roll | str replace $config.roll_prefix '' | split row '-' | get 0 | into int
-                } catch {
-                    null
-                }
+                } catch { null }
                 
                 if ($other_num != null) and ($roll_num != null) and ($other_num < $roll_num) {
                     $dependencies = ($dependencies | append $other_roll)
@@ -730,10 +813,26 @@ def check-roll-verification [
     # Determine the search strategy based on merge status
     if ($roll_merge | is-empty) {
         # Roll not merged yet - check from branch point to rolling HEAD
-        let branch_point = try {
-            git merge-base $config.rolling_branch $roll_branch | str trim
-        } catch {
-            git rev-parse HEAD~20 | str trim
+        let resolved = (resolve-roll-ref $roll_branch)
+        # Helper to get HEAD~20 commit ref
+        let head_ref = try {
+            git rev-parse HEAD~20 | complete
+        } catch { null }
+        let head_ref_str = if ($head_ref == null) or ($head_ref.exit_code != 0) { "HEAD" } else { $head_ref.stdout | str trim }
+        
+        let branch_point = if ($resolved == null) {
+            $head_ref_str
+        } else {
+            let mb_result = try {
+                git merge-base $config.rolling_branch $resolved | complete
+            } catch {
+                null
+            }
+            if ($mb_result == null) or ($mb_result.exit_code != 0) {
+                $head_ref_str
+            } else {
+                $mb_result.stdout | str trim
+            }
         }
         
         mut host_status = {}
@@ -1222,7 +1321,7 @@ def "main promote" [
     for roll in $sorted_queue {
         print $"Merging (ansi cyan)($roll)(ansi reset)..."
         
-        let merge_result = (git merge --no-ff $roll -m $"Promote ($roll) to ($config.stable_branch)" | complete)
+        let merge_result = (git merge --no-ff $roll -m $"Promote ($roll) to ($config.stable_branch)" out+err>| complete)
         
         if $merge_result.exit_code == 0 {
             print $"  (ansi green)✓ Merged successfully(ansi reset)"
