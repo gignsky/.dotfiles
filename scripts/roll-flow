@@ -1504,7 +1504,7 @@ def "main status" [] {
                 mut v = ""
                 if $info.required.nixos { $v = ($v + "ok") }
                 if $info.required.home { $v = ($v + "ok") }
-                if not ($info.required.nixos) and not ($info.required.home) { $v = "--" }
+                if not ($info.required.nixos) and not ($info.required.home) { $v = "pass" }
                 $v
             } else {
                 mut v = ""
