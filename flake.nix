@@ -5,7 +5,8 @@
     #################### Official NixOS and HM Package Sources ####################
     # Stable
     # nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
-    nixpkgs.url = "github:gignsky/gigpkgs";
+    gigpkgs.url = "github:gignsky/gigpkgs";
+    nixpkgs.follows = "gigpkgs";
     # Unstable
     nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
     # Local
