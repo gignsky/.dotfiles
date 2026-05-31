@@ -278,7 +278,8 @@ def check-roll-graduated [
     # Check if the roll branch has been merged to rolling
     # We look for merge commits in rolling that reference this roll
     let merge_check = try {
-        git log $config.rolling_branch --oneline --grep=$"Merge branch '($roll_branch)'" -1 | str trim
+        let raw = (do -i { ^git log $config.rolling_branch --oneline --grep=$"Merge branch '($roll_branch)'" -1 })
+        if ($raw | is-empty) { "" } else { $raw | str trim }
     } catch {
         ""
     }
@@ -422,8 +423,8 @@ def resolve-roll-ref [
     
     # Try local branch
     let local_exists = try {
-        git rev-parse --verify $roll_branch out+err>| ignore
-        $env.LAST_EXIT_CODE == 0
+        let result = (do -i { ^git rev-parse --verify $roll_branch } | complete)
+        $result.exit_code == 0
     } catch {
         false
     }
@@ -434,8 +435,8 @@ def resolve-roll-ref [
         # Try remote tracking ref
         let remote_ref = $"origin/($roll_branch)"
         let remote_exists = try {
-            git rev-parse --verify $remote_ref out+err>| ignore
-            $env.LAST_EXIT_CODE == 0
+            let result = (do -i { ^git rev-parse --verify $remote_ref } | complete)
+            $result.exit_code == 0
         } catch {
             false
         }
@@ -481,10 +482,8 @@ def detect-roll-scope [
     let changed_files = if (check-roll-graduated $roll_branch) {
         # Roll has been merged into rolling - get scope from merge commit
         let merge_commit = try {
-            git log $config.rolling_branch --oneline --grep=$"Merge branch '($roll_branch)'" -1
-            | str trim
-            | split row ' '
-            | get 0
+            let raw = (do -i { ^git log $config.rolling_branch --oneline --grep=$"Merge branch '($roll_branch)'" -1 })
+            if ($raw | is-empty) { "" } else { $raw | str trim | split row ' ' | get 0 }
         } catch {
             ""
         }
@@ -492,35 +491,31 @@ def detect-roll-scope [
         if not ($merge_commit | is-empty) {
             # Diff between first parent (rolling before merge) and second parent (roll tip)
             # This shows exactly what files the roll brought in
-            try {
-                git diff --name-only $"($merge_commit)^1" $"($merge_commit)^2"
-                | lines
-            } catch {
+            let raw_diff = try {
+                do -i { ^git diff --name-only $"($merge_commit)^1" $"($merge_commit)^2" }
+            } catch { "" }
+            if ($raw_diff | is-empty) {
                 # Fallback: compare against rolling (the branch it was merged into)
-                try {
-                    git diff --name-only $config.rolling_branch...$resolved
-                    | lines
-                } catch {
-                    []
-                }
+                let raw_diff2 = try {
+                    do -i { ^git diff --name-only $config.rolling_branch...$resolved }
+                } catch { "" }
+                if ($raw_diff2 | is-empty) { [] } else { $raw_diff2 | lines }
+            } else {
+                $raw_diff | lines
             }
         } else {
             # Merge commit not found - fallback to standard comparison
-            try {
-                git diff --name-only $config.rolling_branch...$resolved
-                | lines
-            } catch {
-                []
-            }
+            let raw_diff = try {
+                do -i { ^git diff --name-only $config.rolling_branch...$resolved }
+            } catch { "" }
+            if ($raw_diff | is-empty) { [] } else { $raw_diff | lines }
         }
     } else {
         # Unmerged roll - compare directly against main to see what's unique to this roll
-        try {
-            git diff --name-only $config.stable_branch...$resolved
-            | lines
-        } catch {
-            []
-        }
+        let raw_diff = try {
+            do -i { ^git diff --name-only $config.stable_branch...$resolved }
+        } catch { "" }
+        if ($raw_diff | is-empty) { [] } else { $raw_diff | lines }
     }
     
     if ($changed_files | is-empty) {
@@ -676,8 +671,8 @@ def detect-roll-dependencies [
                 
                 # Check if merge_base is within other_roll's history
                 let is_ancestor = try {
-                    git merge-base --is-ancestor $merge_base $other_roll out+err>| ignore
-                    $env.LAST_EXIT_CODE == 0
+                    let result = (do -i { ^git merge-base --is-ancestor $merge_base $other_roll } | complete)
+                    $result.exit_code == 0
                 } catch { false }
                 
                 if $is_ancestor and not ($dependencies | any {|d| $d == $other_roll}) {
@@ -809,8 +804,7 @@ def check-roll-verification [
     let resolved = (resolve-roll-ref $roll_branch)
     let test_commit = if ($resolved != null) and ($resolved != "") {
         let raw = try {
-            bash -c $"git log ($resolved) --oneline --grep='^test\(($roll_branch)\):' -1 2>/dev/null"
-            | str trim
+            ^git log $resolved --oneline --grep=$"^test\(($roll_branch)\):" -1
         } catch { "" }
         if ($raw | is-empty) { "" } else { $raw | str trim }
     } else { "" }
@@ -819,7 +813,7 @@ def check-roll-verification [
         # Parse the test commit body for host results
         let commit_hash = ($test_commit | split row ' ' | get 0)
         let raw_body = try {
-            bash -c $"git log ($commit_hash) -1 --format='%b' 2>/dev/null"
+            ^git log $commit_hash -1 --format="%b"
         } catch { "" }
         let test_lines = if ($raw_body | is-empty) { [] } else { $raw_body | lines }
         
@@ -1102,8 +1096,8 @@ def "main graduate" [
     } else {
         # Verify the branch exists and looks like a roll
         let branch_exists = try {
-            git rev-parse --verify $roll_branch out+err>| ignore
-            $env.LAST_EXIT_CODE == 0
+            let result = (do -i { ^git rev-parse --verify $roll_branch } | complete)
+            $result.exit_code == 0
         } catch {
             false
         }
