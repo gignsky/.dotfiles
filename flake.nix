@@ -4,7 +4,7 @@
   inputs = {
     #################### Official NixOS and HM Package Sources ####################
     gigpkgs = {
-      url = "github:gignsky/gigpkgs/develop";
+      url = "github:gignsky/gigpkgs";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
