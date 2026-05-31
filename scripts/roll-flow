@@ -246,20 +246,32 @@ def detect-roll-scope [
 ] {
     let config = get-config
     
+    # Check if branch exists (local or remote)
+    let branch_exists = try {
+        git rev-parse --verify $roll_branch | complete | get exit_code
+    } catch {
+        1
+    }
+    
     # Get list of files changed in this roll
     # Use different strategies depending on whether it's a branch or commit
-    let changed_files = try {
-        # Try as branch first (compare to main/stable)
-        git diff --name-only $config.stable_branch...$roll_branch 
-        | lines
-    } catch {
+    let changed_files = if ($branch_exists == 0) {
         try {
-            # Try as commit range
-            git diff --name-only $roll_branch
+            # Try as branch first (compare to main/stable)
+            git diff --name-only $config.stable_branch...$roll_branch 
             | lines
         } catch {
-            []
+            try {
+                # Try as commit range
+                git diff --name-only $roll_branch
+                | lines
+            } catch {
+                []
+            }
         }
+    } else {
+        # Branch doesn't exist - return empty
+        []
     }
     
     if ($changed_files | is-empty) {
@@ -268,7 +280,9 @@ def detect-roll-scope [
             home: false,
             flake: false,
             docs: false,
-            empty: true
+            empty: true,
+            files_count: 0,
+            files: []
         }
     }
     
@@ -907,6 +921,16 @@ def "main status" [] {
             print $"  Features integrated: ($metadata.merged_features | length)"
         }
         
+        # Show dependency information
+        let deps = (detect-roll-dependencies $current_roll)
+        if not ($deps | is-empty) {
+            print ""
+            print "  Dependencies:"
+            for dep in $deps {
+                print $"    → (ansi yellow)($dep)(ansi reset)"
+            }
+        }
+        
         # Show verification status for current roll
         print ""
         print "  Host Verification Status:"
@@ -943,25 +967,100 @@ def "main status" [] {
     }
     
     print ""
-    print "=== Recent Rolls ==="
+    print "=== All Rolls ===" 
     
-    let rolls_dir = $"($env.HOME)/.config/roll-flow/rolls"
-    if ($rolls_dir | path exists) {
-        ls $rolls_dir 
-        | where type == file 
-        | get name 
-        | each { |file| 
-            let metadata = (open $file)
-            let status_color = if $metadata.status == "active" { "green" } else { "yellow" }
-            let roll_name = $metadata.roll
+    # Get all roll branches (local and remote)
+    let local_rolls = try {
+        git branch --list $"($config.roll_prefix)*"
+        | lines
+        | each { |line| $line | str trim | str replace '* ' '' }
+    } catch {
+        []
+    }
+    
+    let remote_rolls = try {
+        git branch -r
+        | lines
+        | each { |line| $line | str trim }
+        | where { |branch| $branch =~ $"origin/($config.roll_prefix)" }
+        | each { |branch| $branch | str replace 'origin/' '' }
+    } catch {
+        []
+    }
+    
+    let all_roll_branches = ($local_rolls | append $remote_rolls | uniq | sort)
+    
+    if ($all_roll_branches | is-empty) {
+        print "  No rolls found"
+    } else {
+        for roll_branch in $all_roll_branches {
+            # Check if it's the current roll
+            let is_current = ($roll_branch == $current_roll)
+            
+            # Get metadata if available
+            let roll_num = try {
+                $roll_branch | str replace $config.roll_prefix '' | split row '-' | get 0
+            } catch {
+                null
+            }
+            
+            let metadata_file = if ($roll_num != null) {
+                $"($env.HOME)/.config/roll-flow/rolls/($roll_num).nuon"
+            } else {
+                null
+            }
+            
+            let has_metadata = ($metadata_file != null) and ($metadata_file | path exists)
             
             # Get verification status
-            let verification = (check-roll-verification $roll_name)
+            let verification = (check-roll-verification $roll_branch)
             let verified_count = ($verification | values | where {|v| $v == true} | length)
             let total_hosts = ($config.hosts | length)
             
-            print $"  roll/($metadata.number) - ($metadata.theme) [(ansi ($status_color))($metadata.status)(ansi reset)]"
-            print $"    Verified: ($verified_count)/($total_hosts) hosts"
+            # Get scope
+            let scope = (detect-roll-scope $roll_branch)
+            
+            # Display roll header
+            if $is_current {
+                print $"  → (ansi green)($roll_branch)(ansi reset) (ansi default_dimmed)\(current\)(ansi reset)"
+            } else {
+                print $"    ($roll_branch)"
+            }
+            
+            # Show scope icons
+            mut scope_icons = []
+            if $scope.nixos { $scope_icons = ($scope_icons | append "🖥️") }
+            if $scope.home { $scope_icons = ($scope_icons | append "🏠") }
+            if $scope.flake { $scope_icons = ($scope_icons | append "📦") }
+            if $scope.docs { $scope_icons = ($scope_icons | append "📝") }
+            
+            if not ($scope_icons | is-empty) {
+                print $"      Scope: ($scope_icons | str join ' ')"
+            }
+            
+            # Show verification
+            if $total_hosts > 0 {
+                let percent = (($verified_count * 100) / $total_hosts | math round)
+                if $verified_count == $total_hosts {
+                    print $"      Verification: (ansi green)✓ ($verified_count)/($total_hosts) hosts(ansi reset)"
+                } else if $verified_count > 0 {
+                    print $"      Verification: (ansi yellow)⏳ ($verified_count)/($total_hosts) hosts ($percent)%(ansi reset)"
+                } else {
+                    print $"      Verification: (ansi red)✗ 0/($total_hosts) hosts(ansi reset)"
+                }
+            }
+            
+            # Show metadata if available
+            if $has_metadata {
+                let metadata = (open $metadata_file)
+                print $"      Status: (ansi cyan)($metadata.status)(ansi reset)"
+                
+                if ($metadata | get depends_on? | is-not-empty) and not ($metadata.depends_on | is-empty) {
+                    print $"      Depends on: ($metadata.depends_on | str join ', ')"
+                }
+            }
+            
+            print ""
         }
     }
 }
