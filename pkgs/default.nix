@@ -687,5 +687,6 @@ rec {
     run-iso-vm
     package-script
     rf
+    roll-flow
     ;
 }
