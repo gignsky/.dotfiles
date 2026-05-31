@@ -152,9 +152,9 @@ let
     };
 
     # Roll Flow workflow manager for NixOS multi-host configurations
-    roll-flow =
-      pkgs.writeShellScriptBin "roll-flow" ''
-        # Auto-generated wrapper for roll-flow (Nushell script)
+    rf =
+      pkgs.writeShellScriptBin "rf" ''
+        # Auto-generated wrapper for rf (Nushell script)
 
         # Make dependencies available in PATH
         export PATH="${
