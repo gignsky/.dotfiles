@@ -37,41 +37,164 @@ def main [] {
 
 # Initialize roll-flow configuration
 def "main init" [
-    --rolling-branch(-r): string = "rolling"  # Name of the rolling integration branch
-    --stable-branch(-s): string = "main"      # Name of the stable branch
-    --roll-prefix(-p): string = "roll/"       # Prefix for roll branches
-    --username(-u): string = "gig"            # Username for homeConfigurations
-    --hosts(-h): list<string> = ["ganoslal", "merlin", "wsl@merlins-windows", "wsl@ganoslals-windows"]  # List of hosts to test
+    --rolling-branch(-r): string  # Name of the rolling integration branch (auto-detected if omitted)
+    --stable-branch(-s): string   # Name of the stable branch (auto-detected if omitted)
+    --roll-prefix(-p): string     # Prefix for roll branches (default: roll/)
+    --username(-u): string        # Username for homeConfigurations (auto-detected if omitted)
+    --hosts(-h): list<string>     # List of hosts to test (auto-detected if omitted)
 ] {
+    print "Initializing roll-flow configuration..."
+    print ""
+    
+    # Auto-generate base config
+    let auto_config = (auto-generate-config)
+    
+    # Override with provided parameters
+    let config = {
+        repo_root: $auto_config.repo_root,
+        rolling_branch: (if ($rolling_branch | is-empty) { $auto_config.rolling_branch } else { $rolling_branch }),
+        stable_branch: (if ($stable_branch | is-empty) { $auto_config.stable_branch } else { $stable_branch }),
+        roll_prefix: (if ($roll_prefix | is-empty) { $auto_config.roll_prefix } else { $roll_prefix }),
+        username: (if ($username | is-empty) { $auto_config.username } else { $username }),
+        hosts: (if ($hosts | is-empty) { $auto_config.hosts } else { $hosts })
+    }
+    
+    # Ensure config directory exists
     let config_dir = $"($env.HOME)/.config/roll-flow"
     mkdir $config_dir
     
-    let config = {
-        repo_root: (git rev-parse --show-toplevel | str trim),
-        rolling_branch: $rolling_branch,
-        stable_branch: $stable_branch,
-        roll_prefix: $roll_prefix,
-        username: $username,
-        hosts: $hosts
-    }
-    
+    # Save config
     $config | save -f $"($config_dir)/config.nuon"
+    
     print $"✓ Initialized roll-flow in (ansi green)($config.repo_root)(ansi reset)"
     print ""
     print "Configuration:"
-    print $"  Rolling branch: (ansi cyan)($rolling_branch)(ansi reset)"
-    print $"  Stable branch:  (ansi cyan)($stable_branch)(ansi reset)"
-    print $"  Roll prefix:    (ansi cyan)($roll_prefix)(ansi reset)"
-    print $"  Username:       (ansi cyan)($username)(ansi reset)"
-    print $"  Hosts:          (ansi cyan)($hosts | str join ', ')(ansi reset)"
+    print $"  Rolling branch: (ansi cyan)($config.rolling_branch)(ansi reset)"
+    print $"  Stable branch:  (ansi cyan)($config.stable_branch)(ansi reset)"
+    print $"  Roll prefix:    (ansi cyan)($config.roll_prefix)(ansi reset)"
+    print $"  Username:       (ansi cyan)($config.username)(ansi reset)"
+    print $"  Hosts:          (ansi cyan)($config.hosts | str join ', ')(ansi reset)"
+    print ""
+    print $"(ansi green)Note:(ansi reset) Config will auto-regenerate if deleted. You can customize by re-running init with parameters."
 }
 
-# Get current configuration
-def get-config [] {
-    let config_file = $"($env.HOME)/.config/roll-flow/config.nuon"
-    if not ($config_file | path exists) {
-        error make {msg: "roll-flow not initialized. Run 'roll-flow init' first."}
+# Auto-generate config from repository metadata
+def auto-generate-config [] {
+    print "🔧 Auto-generating roll-flow config from repository..."
+    
+    # Get repository root
+    let repo_root = (git rev-parse --show-toplevel | str trim)
+    
+    # Detect branch names by checking if they exist
+    let rolling_branch = try {
+        git rev-parse --verify rolling out+err>| ignore
+        "rolling"
+    } catch {
+        "rolling"  # Default even if doesn't exist yet
     }
+    
+    let stable_branch = try {
+        git rev-parse --verify main out+err>| ignore
+        "main"
+    } catch {
+        # Try master as fallback
+        try {
+            git rev-parse --verify master out+err>| ignore
+            "master"
+        } catch {
+            "main"  # Default
+        }
+    }
+    
+    # Extract hosts from flake.nix
+    let hosts = try {
+        # Use nix to evaluate the flake outputs for more reliable parsing
+        let nixos_hosts = try {
+            nix eval $"($repo_root)#nixosConfigurations" --apply builtins.attrNames --json 
+            | from json
+        } catch {
+            []
+        }
+        
+        let home_configs = try {
+            nix eval $"($repo_root)#homeConfigurations" --apply builtins.attrNames --json
+            | from json
+            | each {|config|
+                # Extract hostname from "user@host" format
+                if ($config | str contains '@') {
+                    $config | split row '@' | get 1
+                } else {
+                    null
+                }
+            }
+            | where {|h| $h != null}
+        } catch {
+            []
+        }
+        
+        # Combine and deduplicate
+        let all_hosts = ($nixos_hosts | append $home_configs | uniq)
+        
+        if ($all_hosts | is-empty) {
+            # Fallback to default host list
+            ["ganoslal", "merlin", "wsl@merlins-windows", "wsl@ganoslals-windows"]
+        } else {
+            $all_hosts
+        }
+    } catch {
+        # Fallback to default host list if evaluation fails
+        ["ganoslal", "merlin", "wsl@merlins-windows", "wsl@ganoslals-windows"]
+    }
+    
+    # Get username from environment or flake
+    let username = try {
+        # Try to get first homeConfiguration and extract username
+        let first_home = (nix eval $"($repo_root)#homeConfigurations" --apply builtins.attrNames --json 
+            | from json 
+            | first
+        )
+        
+        if ($first_home | str contains '@') {
+            $first_home | split row '@' | get 0
+        } else {
+            $env.USER
+        }
+    } catch {
+        $env.USER
+    }
+    
+    # Build config structure
+    {
+        repo_root: $repo_root,
+        rolling_branch: $rolling_branch,
+        stable_branch: $stable_branch,
+        roll_prefix: "roll/",
+        username: $username,
+        hosts: $hosts
+    }
+}
+
+# Get current configuration (auto-generate if missing)
+def get-config [
+    --force-regenerate  # Force regeneration even if config exists
+] {
+    let config_file = $"($env.HOME)/.config/roll-flow/config.nuon"
+    
+    # Auto-generate if missing or forced
+    if $force_regenerate or not ($config_file | path exists) {
+        let config = (auto-generate-config)
+        
+        # Ensure config directory exists
+        let config_dir = ($config_file | path dirname)
+        mkdir $config_dir
+        
+        # Save config
+        $config | save -f $config_file
+        
+        print $"✓ Config saved to (ansi cyan)($config_file)(ansi reset)"
+        return $config
+    }
+    
     open $config_file
 }
 
