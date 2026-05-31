@@ -6,6 +6,7 @@
 let
   # Import packaged scripts
   scripts = import ./scripts.nix { inherit pkgs; };
+  rf = scripts.roll-flow;
 in
 rec {
   #################### Example Packages #################################
@@ -687,5 +688,6 @@ rec {
     run-iso-vm
     package-script
     roll-flow
+    rf
     ;
 }

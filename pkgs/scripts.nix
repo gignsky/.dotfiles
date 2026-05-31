@@ -199,3 +199,10 @@ let
 
 in
 scripts
+// {
+  # Short alias 'rf' wraps the full 'roll-flow' command
+  rf = pkgs.writeShellScriptBin "rf" ''
+    # Wrapper that calls roll-flow with all arguments
+    exec ${scripts.roll-flow}/bin/roll-flow "$@"
+  '';
+}
