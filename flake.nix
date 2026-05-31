@@ -165,15 +165,8 @@
           configLib
           ;
       };
-      customPkgs = import ./pkgs { inherit pkgs; };
-      pkgs =
-        import nixpkgs {
-          inherit system;
-          config = {
-            allowUnfree = true;
-          };
-        }
-        // customPkgs;
+      customPkgs = import ./pkgs { pkgs = nixpkgs.legacyPackages.${system}; };
+      pkgs = nixpkgs.legacyPackages.${system} // customPkgs;
     in
     {
       # NixOS configuration entrypoint
