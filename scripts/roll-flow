@@ -12,7 +12,7 @@ def main [] {
     print "  init [OPTIONS]          Initialize roll-flow in this repo"
     print "  start <theme>           Start a new roll branch"
     print "  integrate <branch>      Merge a feature branch into current roll"
-    print "  graduate                Graduate current roll to rolling branch"
+    print "  graduate [roll]         Graduate a roll to rolling branch (default: current)"
     print "  promote                 Promote rolling to main (with verification)"
     print "  status                  Show current roll status"
     print "  test-all                Test build on all configured hosts"
@@ -32,6 +32,7 @@ def main [] {
     print "  roll-flow start shell-improvements"
     print "  roll-flow integrate feature/zellij-config"
     print "  roll-flow graduate"
+    print "  roll-flow graduate roll/5-theme-name"
     print "  roll-flow promote"
 }
 
@@ -285,7 +286,55 @@ def check-roll-graduated [
     not ($merge_check | is-empty)
 }
 
-# Check if a roll is ready to be promoted (fully verified and graduated)
+# Check if a graduated roll branch has diverged from rolling (has commits after merge)
+def check-roll-diverged [
+    roll_branch: string
+] {
+    let config = get-config
+    
+    # Only makes sense for graduated rolls
+    if not (check-roll-graduated $roll_branch) {
+        return false
+    }
+    
+    # Find the merge commit
+    let merge_commit = try {
+        git log $config.rolling_branch --oneline --grep=$"Merge branch '($roll_branch)'" -1
+        | str trim
+        | split row ' '
+        | get 0
+    } catch {
+        return false  # No merge found, can't determine
+    }
+    
+    # Find what the roll branch looked like at merge time (second parent of merge commit)
+    let merged_tip = $"($merge_commit)^2"
+    
+    # Check if roll branch HEAD differs from the merged tip
+    let roll_head = try {
+        git rev-parse $roll_branch | str trim
+    } catch {
+        return false  # Branch doesn't exist
+    }
+    
+    # If the roll branch HEAD doesn't match what was merged, it has diverged
+    # Also check if rolling has commits beyond the merge that aren't on the roll branch
+    let on_branch = try {
+        git branch --list $roll_branch --contains $merged_tip | lines | str trim | length
+    } catch {
+        0
+    }
+    
+    # Roll is diverged if:
+    # 1. The roll branch has moved since merge OR
+    # 2. The merge tip isn't reachable from current roll branch
+    let roll_moved = ($roll_head != $merged_tip)
+    let rolled_back = ($on_branch == 0)
+    
+    $roll_moved or $rolled_back
+}
+
+# Check if a roll is ready to be promoted (fully verified and graduated, not diverged)
 def check-roll-promotion-ready [
     roll_branch: string
 ] {
@@ -294,9 +343,12 @@ def check-roll-promotion-ready [
     # Check if graduated
     let graduated = (check-roll-graduated $roll_branch)
     
+    # Check for divergence after graduation
+    let diverged = if $graduated { (check-roll-diverged $roll_branch) } else { false }
+    
     # Check if fully verified
     let verification = (check-roll-verification $roll_branch)
-    let fully_verified = ($verification | values | all {|v| $v == true})
+    let fully_verified = ($verification | values | all {|v| $v.verified == true})
     
     # Check scope - docs-only rolls don't need graduation
     let scope = (detect-roll-scope $roll_branch)
@@ -304,9 +356,10 @@ def check-roll-promotion-ready [
     
     {
         graduated: $graduated,
+        diverged: $diverged,
         fully_verified: $fully_verified,
         docs_only: $docs_only,
-        ready: ($fully_verified and ($graduated or $docs_only))
+        ready: ($fully_verified and ($graduated or $docs_only) and (not $diverged))
     }
 }
 
@@ -357,36 +410,56 @@ def get-verification-requirements [
 # Detect which scopes a roll/branch affects based on changed files
 # Returns a record with scope flags: {nixos: bool, home: bool, flake: bool, docs: bool}
 def detect-roll-scope [
-    roll_branch: string  # Roll branch name or commit range
+    roll_branch: string  # Roll branch name
 ] {
     let config = get-config
     
-    # Check if branch exists (local or remote)
-    let branch_exists = try {
-        git rev-parse --verify $roll_branch | complete | get exit_code
-    } catch {
-        1
-    }
-    
-    # Get list of files changed in this roll
-    # Use different strategies depending on whether it's a branch or commit
-    let changed_files = if ($branch_exists == 0) {
-        try {
-            # Try as branch first (compare to main/stable)
-            git diff --name-only $config.stable_branch...$roll_branch 
-            | lines
+    # Determine changed files: compare against rolling branch (the correct base)
+    # For graduated rolls, use the merge commit to see what the roll brought
+    # For unmerged rolls, show what's still pending
+    let changed_files = if (check-roll-graduated $roll_branch) {
+        # Roll has been merged into rolling - get scope from merge commit
+        let merge_commit = try {
+            git log $config.rolling_branch --oneline --grep=$"Merge branch '($roll_branch)'" -1
+            | str trim
+            | split row ' '
+            | get 0
         } catch {
+            ""
+        }
+        
+        if not ($merge_commit | is-empty) {
+            # Diff between first parent (rolling before merge) and second parent (roll tip)
+            # This shows exactly what files the roll brought in
             try {
-                # Try as commit range
-                git diff --name-only $roll_branch
+                git diff --name-only $"($merge_commit)^1" $"($merge_commit)^2"
+                | lines
+            } catch {
+                # Fallback: if roll has been modified since merge, show new changes vs rolling
+                try {
+                    git diff --name-only $config.rolling_branch...$roll_branch
+                    | lines
+                } catch {
+                    []
+                }
+            }
+        } else {
+            # Merge commit not found - fallback to standard comparison
+            try {
+                git diff --name-only $config.rolling_branch...$roll_branch
                 | lines
             } catch {
                 []
             }
         }
     } else {
-        # Branch doesn't exist - return empty
-        []
+        # Unmerged roll - compare directly against rolling to see what's unique
+        try {
+            git diff --name-only $config.rolling_branch...$roll_branch
+            | lines
+        } catch {
+            []
+        }
     }
     
     if ($changed_files | is-empty) {
@@ -634,7 +707,8 @@ def test-roll-builds-standalone [
 }
 
 # Check which hosts have verified a given roll with rebuilds
-# Returns a record with host verification status (scope-aware)
+# Returns a record with per-host, per-type verification status:
+# { hostname: { verified: bool, nixos: bool, home: bool } }
 def check-roll-verification [
     roll_branch: string  # Roll branch name (e.g., "roll/5-roll-flow-init")
 ] {
@@ -656,29 +730,29 @@ def check-roll-verification [
     # Determine the search strategy based on merge status
     if ($roll_merge | is-empty) {
         # Roll not merged yet - check from branch point to rolling HEAD
-        # Find where this roll branched from rolling
         let branch_point = try {
             git merge-base $config.rolling_branch $roll_branch | str trim
         } catch {
-            # If we can't find merge base, just check last 20 commits in rolling
             git rev-parse HEAD~20 | str trim
         }
         
         mut host_status = {}
         
         for host in $config.hosts {
-            # Check what verification is needed based on scope
             let needs_nixos = $scope.nixos
             let needs_home = $scope.home
-            let needs_flake = $scope.flake
             
-            # If only docs changed, mark as verified automatically
-            if $scope.docs and (not $needs_nixos) and (not $needs_home) and (not $needs_flake) {
-                $host_status = ($host_status | insert $host true)
+            # If only docs/flake changed, mark as verified automatically
+            if (not $needs_nixos) and (not $needs_home) {
+                $host_status = ($host_status | insert $host {
+                    verified: true,
+                    nixos: true,
+                    home: true,
+                    required: { nixos: false, home: false }
+                })
                 continue
             }
             
-            # Check for required rebuild commits
             let nixos_verified = if $needs_nixos {
                 let nixos_rebuild = try {
                     git log $config.rolling_branch --oneline --grep=$"^($host): generation" $"($branch_point)..($config.rolling_branch)" -1 
@@ -700,20 +774,16 @@ def check-roll-verification [
                 }
                 not ($home_rebuild | is-empty)
             } else {
-                true  # Not needed, so consider verified
-            }
-            
-            # For flake-only changes, we could check for flake check commits
-            # For now, just require at least one rebuild if flake changed
-            let flake_verified = if $needs_flake and (not $needs_nixos) and (not $needs_home) {
-                # Flake-only change - look for any rebuild as verification
-                $nixos_verified or $home_verified
-            } else {
                 true
             }
             
-            let verified = $nixos_verified and $home_verified and $flake_verified
-            $host_status = ($host_status | insert $host $verified)
+            let host_verified = ($nixos_verified and $home_verified)
+            $host_status = ($host_status | insert $host {
+                verified: $host_verified,
+                nixos: $nixos_verified,
+                home: $home_verified,
+                required: { nixos: $needs_nixos, home: $needs_home }
+            })
         }
         
         $host_status
@@ -722,18 +792,20 @@ def check-roll-verification [
         mut host_status = {}
         
         for host in $config.hosts {
-            # Check what verification is needed based on scope
             let needs_nixos = $scope.nixos
             let needs_home = $scope.home
-            let needs_flake = $scope.flake
             
-            # If only docs changed, mark as verified automatically
-            if $scope.docs and (not $needs_nixos) and (not $needs_home) and (not $needs_flake) {
-                $host_status = ($host_status | insert $host true)
+            # If only docs/flake changed, mark as verified automatically
+            if (not $needs_nixos) and (not $needs_home) {
+                $host_status = ($host_status | insert $host {
+                    verified: true,
+                    nixos: true,
+                    home: true,
+                    required: { nixos: false, home: false }
+                })
                 continue
             }
             
-            # Check for required rebuild commits
             let nixos_verified = if $needs_nixos {
                 let nixos_rebuild = try {
                     git log $config.rolling_branch --oneline --grep=$"^($host): generation" $"($roll_merge)..HEAD" -1 
@@ -743,7 +815,7 @@ def check-roll-verification [
                 }
                 not ($nixos_rebuild | is-empty)
             } else {
-                true  # Not needed, so consider verified
+                true
             }
             
             let home_verified = if $needs_home {
@@ -755,18 +827,16 @@ def check-roll-verification [
                 }
                 not ($home_rebuild | is-empty)
             } else {
-                true  # Not needed, so consider verified
-            }
-            
-            let flake_verified = if $needs_flake and (not $needs_nixos) and (not $needs_home) {
-                # Flake-only change
-                $nixos_verified or $home_verified
-            } else {
                 true
             }
             
-            let verified = $nixos_verified and $home_verified and $flake_verified
-            $host_status = ($host_status | insert $host $verified)
+            let host_verified = ($nixos_verified and $home_verified)
+            $host_status = ($host_status | insert $host {
+                verified: $host_verified,
+                nixos: $nixos_verified,
+                home: $home_verified,
+                required: { nixos: $needs_nixos, home: $needs_home }
+            })
         }
         
         $host_status
@@ -845,18 +915,43 @@ def "main integrate" [
     }
 }
 
-# Graduate current roll to rolling branch
-def "main graduate" [] {
-    let current_roll = get-current-roll
+# Graduate a roll to rolling branch
+# Can be run from any branch if roll_branch is provided
+def "main graduate" [
+    roll_branch?: string  # Optional: roll branch to graduate (defaults to current branch)
+] {
     let config = get-config
     
-    if ($current_roll == null) {
-        error make {msg: "Not currently on a roll branch."}
+    # Determine which roll to graduate
+    let target_roll = if ($roll_branch | is-empty) {
+        let current = get-current-roll
+        if ($current == null) {
+            error make {msg: "Not currently on a roll branch. Specify a roll branch to graduate: rf graduate roll/N-theme"}
+        }
+        $current
+    } else {
+        # Verify the branch exists and looks like a roll
+        let branch_exists = try {
+            git rev-parse --verify $roll_branch out+err>| ignore
+            $env.LAST_EXIT_CODE == 0
+        } catch {
+            false
+        }
+        
+        if not $branch_exists {
+            error make {msg: $"Roll branch '($roll_branch)' does not exist."}
+        }
+        
+        if not ($roll_branch | str starts-with $config.roll_prefix) {
+            error make {msg: $"Branch '($roll_branch)' does not look like a roll branch (expected '($config.roll_prefix)N-*')."}
+        }
+        
+        $roll_branch
     }
     
-    print $"Graduating (ansi cyan)($current_roll)(ansi reset) to (ansi cyan)($config.rolling_branch)(ansi reset)"
+    print $"Graduating (ansi cyan)($target_roll)(ansi reset) to (ansi cyan)($config.rolling_branch)(ansi reset)"
     print ""
-    print "This will merge the current roll into rolling branch."
+    print "This will merge the roll into rolling branch."
     print "Make sure you've tested this roll on at least one host!"
     print ""
     
@@ -867,15 +962,18 @@ def "main graduate" [] {
         return
     }
     
+    # Temporarily store current branch to return to it later
+    let orig_branch = (git branch --show-current | str trim)
+    
     git checkout $config.rolling_branch
     git pull
-    git merge --no-ff $current_roll
+    git merge --no-ff $target_roll
     
     if $env.LAST_EXIT_CODE == 0 {
         git push
         
         # Update metadata
-        let roll_num = ($current_roll | str replace 'roll/' '' | split row '-' | get 0)
+        let roll_num = ($target_roll | str replace 'roll/' '' | split row '-' | get 0)
         let metadata_file = $"($env.HOME)/.config/roll-flow/rolls/($roll_num).nuon"
         
         if ($metadata_file | path exists) {
@@ -885,10 +983,20 @@ def "main graduate" [] {
             $metadata | save -f $metadata_file
         }
         
-        print $"✓ Graduated (ansi green)($current_roll)(ansi reset) to ($config.rolling_branch)"
+        print $"✓ Graduated (ansi green)($target_roll)(ansi reset) to ($config.rolling_branch)"
         print "  Roll branch kept for reference (safe to delete later)"
+        
+        # Return to original branch if we came from elsewhere
+        if $orig_branch != $config.rolling_branch {
+            print $"  Returning to original branch: ($orig_branch)"
+            git checkout $orig_branch
+        }
     } else {
         print $"✗ Graduation failed. Check for conflicts."
+        # Return to original branch on failure too
+        if $orig_branch != (git branch --show-current | str trim) {
+            git checkout $orig_branch
+        }
     }
 }
 
@@ -947,7 +1055,7 @@ def "main promote" [
         
         let verified_rolls = ($all_branches | where {|branch|
             let verification = (check-roll-verification $branch)
-            let all_verified = ($verification | values | all {|v| $v == true})
+            let all_verified = ($verification | values | all {|v| $v.verified == true})
             $all_verified
         })
         
@@ -1029,13 +1137,24 @@ def "main promote" [
         
         for roll in $sorted_queue {
             let verification = (check-roll-verification $roll)
-            let unverified = ($verification | items {|host, verified| if not $verified { $host } else { null }} | where {|v| $v != null})
+            let unverified = ($verification | items {|host, info| if not $info.verified { $host } else { null }} | where {|v| $v != null})
             
             if not ($unverified | is-empty) {
-                print $"  (ansi red)✗ ($roll) - Missing verification on: ($unverified | str join ', ')(ansi reset)"
+                print $"  (ansi red)✗ ($roll)(ansi reset)"
+                for host in $unverified {
+                    let host_info = ($verification | get $host)
+                    mut missing_types = []
+                    if $host_info.required.nixos and (not $host_info.nixos) {
+                        $missing_types = ($missing_types | append "NixOS rebuild")
+                    }
+                    if $host_info.required.home and (not $host_info.home) {
+                        $missing_types = ($missing_types | append "Home rebuild")
+                    }
+                    print $"      (ansi yellow)⏳ ($host): ($missing_types | str join ', ') missing(ansi reset)"
+                }
                 $all_verified = false
             } else {
-                print $"  (ansi green)✓ ($roll) - Verified on all hosts(ansi reset)"
+                print $"  (ansi green)✓ ($roll) - All hosts verified(ansi reset)"
             }
         }
         
@@ -1052,6 +1171,34 @@ def "main promote" [
         
         print ""
         print $"(ansi green)✓ All rolls verified!(ansi reset)"
+    }
+    
+    # Check for diverged rolls (modified after graduation)
+    if not $force {
+        mut all_integrated = true
+        for roll in $sorted_queue {
+            let graduated = (check-roll-graduated $roll)
+            if $graduated {
+                let diverged = (check-roll-diverged $roll)
+                if $diverged {
+                    print $"  (ansi red)✗ ($roll) - Diverged! Branch has commits after graduation(ansi reset)"
+                    print $"    Re-integrate by merging into ($config.rolling_branch) again."
+                    $all_integrated = false
+                }
+            }
+        }
+        
+        if not $all_integrated {
+            print ""
+            print $"(ansi red)Cannot promote: Some rolls are diverged from ($config.rolling_branch).(ansi reset)"
+            print ""
+            print "Options:"
+            print $"  1. Merge the roll branch into ($config.rolling_branch) again to re-integrate"
+            print "  2. Use --force to skip integration check (not recommended)"
+            return
+        }
+        
+        print $"(ansi green)✓ All rolls properly integrated(ansi reset)"
     }
     
     # Confirm promotion
@@ -1227,11 +1374,28 @@ def "main status" [] {
         
         let verification = (check-roll-verification $current_roll)
         for host in $config.hosts {
-            let status = ($verification | get $host)
-            if $status {
-                print $"    ✅ (ansi green)($host)(ansi reset) - verified"
+            let info = ($verification | get $host)
+            if $info.verified {
+                mut type_marks = []
+                if $info.required.nixos { $type_marks = ($type_marks | append "NixOS✅") }
+                if $info.required.home { $type_marks = ($type_marks | append "Home✅") }
+                if not ($info.required.nixos) and not ($info.required.home) {
+                    $type_marks = ($type_marks | append "auto✅")
+                }
+                print $"    ✅ (ansi green)($host)(ansi reset) - ($type_marks | str join ' ')"
             } else {
-                print $"    ⏳ (ansi yellow)($host)(ansi reset) - not verified"
+                mut missing = []
+                if $info.required.nixos and (not $info.nixos) {
+                    $missing = ($missing | append "NixOS⏳")
+                }
+                if $info.required.home and (not $info.home) {
+                    $missing = ($missing | append "Home⏳")
+                }
+                if ($missing | is-empty) {
+                    print $"    ⏳ (ansi yellow)($host)(ansi reset) - pending"
+                } else {
+                    print $"    ⏳ (ansi yellow)($host)(ansi reset) - needs ($missing | str join ' ')"
+                }
             }
         }
     } else {
@@ -1286,17 +1450,29 @@ def "main status" [] {
             
             # Get verification status
             let verification = (check-roll-verification $roll_branch)
-            let verified_count = ($verification | values | where {|v| $v == true} | length)
+            let verified_count = ($verification | values | where {|v| $v.verified == true} | length)
             let total_hosts = ($config.hosts | length)
             
             # Get scope
             let scope = (detect-roll-scope $roll_branch)
+            
+            # Check for divergence if graduated
+            let is_diverged = if (check-roll-graduated $roll_branch) {
+                (check-roll-diverged $roll_branch)
+            } else {
+                false
+            }
             
             # Display roll header
             if $is_current {
                 print $"  → (ansi green)($roll_branch)(ansi reset) (ansi default_dimmed)\(current\)(ansi reset)"
             } else {
                 print $"    ($roll_branch)"
+            }
+            
+            # Show divergence warning
+            if $is_diverged {
+                print $"      (ansi red)⚠ Diverged! Branch has commits after graduation(ansi reset)"
             }
             
             # Show scope icons
@@ -1322,15 +1498,32 @@ def "main status" [] {
                 print $"      Requires: (ansi ($req_color))($requirements.description)(ansi reset)"
             }
             
-            # Show verification status
+            # Show per-host verification detail
             if $total_hosts > 0 {
-                let percent = (($verified_count * 100) / $total_hosts | math round)
-                if $verified_count == $total_hosts {
-                    print $"      Verification: (ansi green)✓ ($verified_count)/($total_hosts) hosts(ansi reset)"
-                } else if $verified_count > 0 {
-                    print $"      Verification: (ansi yellow)⏳ ($verified_count)/($total_hosts) hosts ($percent)%(ansi reset)"
-                } else {
-                    print $"      Verification: (ansi red)✗ 0/($total_hosts) hosts(ansi reset)"
+                for host in $config.hosts {
+                    let info = ($verification | get $host)
+                    if $info.verified {
+                        mut type_marks = []
+                        if $info.required.nixos { $type_marks = ($type_marks | append "🖥️✅") }
+                        if $info.required.home { $type_marks = ($type_marks | append "🏠✅") }
+                        if (not $info.required.nixos) and (not $info.required.home) {
+                            $type_marks = ($type_marks | append "auto✅")
+                        }
+                        print $"      ✅ (ansi green)($host)(ansi reset) ($type_marks | str join ' ')"
+                    } else {
+                        mut missing = []
+                        if $info.required.nixos and (not $info.nixos) {
+                            $missing = ($missing | append "🖥️⏳")
+                        }
+                        if $info.required.home and (not $info.home) {
+                            $missing = ($missing | append "🏠⏳")
+                        }
+                        if ($missing | is-empty) {
+                            print $"      ⏳ (ansi yellow)($host)(ansi reset) pending"
+                        } else {
+                            print $"      ⏳ (ansi yellow)($host)(ansi reset) needs ($missing | str join ' ')"
+                        }
+                    }
                 }
             }
             
@@ -1338,13 +1531,21 @@ def "main status" [] {
             let promo_status = (check-roll-promotion-ready $roll_branch)
             
             if $promo_status.graduated {
-                print $"      Graduated: (ansi green)✓ Merged to ($config.rolling_branch)(ansi reset)"
+                if $is_diverged {
+                    print $"      Graduated: (ansi red)⚠ Merged but branch diverged(ansi reset)"
+                } else {
+                    print $"      Graduated: (ansi green)✓ Merged to ($config.rolling_branch)(ansi reset)"
+                }
             } else if not $promo_status.docs_only {
                 print $"      Graduated: (ansi yellow)⏳ Not yet merged to ($config.rolling_branch)(ansi reset)"
             }
             
             if $promo_status.ready {
-                print $"      Promotion: (ansi green)✓ Ready to promote to ($config.stable_branch)(ansi reset)"
+                if $is_diverged {
+                    print $"      Promotion: (ansi red)✗ Diverged - re-integrate first(ansi reset)"
+                } else {
+                    print $"      Promotion: (ansi green)✓ Ready to promote to ($config.stable_branch)(ansi reset)"
+                }
             } else if $promo_status.fully_verified and not $promo_status.graduated and not $promo_status.docs_only {
                 print $"      Promotion: (ansi yellow)⏳ Needs graduation first(ansi reset)"
             } else if not $promo_status.fully_verified {
@@ -1455,17 +1656,29 @@ def "main list" [] {
             
             # Get verification status
             let verification = (check-roll-verification $roll_branch)
-            let verified_count = ($verification | values | where {|v| $v == true} | length)
+            let verified_count = ($verification | values | where {|v| $v.verified == true} | length)
             let total_hosts = ($config.hosts | length)
             
             # Get scope
             let scope = (detect-roll-scope $roll_branch)
+            
+            # Check for divergence if graduated
+            let is_diverged = if (check-roll-graduated $roll_branch) {
+                (check-roll-diverged $roll_branch)
+            } else {
+                false
+            }
             
             # Display roll header
             if $is_current {
                 print $"  → (ansi green)($roll_branch)(ansi reset) (ansi default_dimmed)\(current\)(ansi reset)"
             } else {
                 print $"    ($roll_branch)"
+            }
+            
+            # Show divergence warning
+            if $is_diverged {
+                print $"      (ansi red)⚠ Diverged! Branch has commits after graduation(ansi reset)"
             }
             
             # Show scope icons
@@ -1491,15 +1704,32 @@ def "main list" [] {
                 print $"      Requires: (ansi ($req_color))($requirements.description)(ansi reset)"
             }
             
-            # Show verification status
+            # Show per-host verification status
             if $total_hosts > 0 {
-                let percent = (($verified_count * 100) / $total_hosts | math round)
-                if $verified_count == $total_hosts {
-                    print $"      Verification: (ansi green)✓ ($verified_count)/($total_hosts) hosts(ansi reset)"
-                } else if $verified_count > 0 {
-                    print $"      Verification: (ansi yellow)⏳ ($verified_count)/($total_hosts) hosts ($percent)%(ansi reset)"
-                } else {
-                    print $"      Verification: (ansi red)✗ 0/($total_hosts) hosts(ansi reset)"
+                for host in $config.hosts {
+                    let info = ($verification | get $host)
+                    if $info.verified {
+                        mut type_marks = []
+                        if $info.required.nixos { $type_marks = ($type_marks | append "🖥️✅") }
+                        if $info.required.home { $type_marks = ($type_marks | append "🏠✅") }
+                        if (not $info.required.nixos) and (not $info.required.home) {
+                            $type_marks = ($type_marks | append "auto✅")
+                        }
+                        print $"      ✅ (ansi green)($host)(ansi reset) ($type_marks | str join ' ')"
+                    } else {
+                        mut missing = []
+                        if $info.required.nixos and (not $info.nixos) {
+                            $missing = ($missing | append "🖥️⏳")
+                        }
+                        if $info.required.home and (not $info.home) {
+                            $missing = ($missing | append "🏠⏳")
+                        }
+                        if ($missing | is-empty) {
+                            print $"      ⏳ (ansi yellow)($host)(ansi reset) pending"
+                        } else {
+                            print $"      ⏳ (ansi yellow)($host)(ansi reset) needs ($missing | str join ' ')"
+                        }
+                    }
                 }
             }
             
@@ -1507,13 +1737,21 @@ def "main list" [] {
             let promo_status = (check-roll-promotion-ready $roll_branch)
             
             if $promo_status.graduated {
-                print $"      Graduated: (ansi green)✓ Merged to ($config.rolling_branch)(ansi reset)"
+                if $is_diverged {
+                    print $"      Graduated: (ansi red)⚠ Merged but branch diverged(ansi reset)"
+                } else {
+                    print $"      Graduated: (ansi green)✓ Merged to ($config.rolling_branch)(ansi reset)"
+                }
             } else if not $promo_status.docs_only {
                 print $"      Graduated: (ansi yellow)⏳ Not yet merged to ($config.rolling_branch)(ansi reset)"
             }
             
             if $promo_status.ready {
-                print $"      Promotion: (ansi green)✓ Ready to promote to ($config.stable_branch)(ansi reset)"
+                if $is_diverged {
+                    print $"      Promotion: (ansi red)✗ Diverged - re-integrate first(ansi reset)"
+                } else {
+                    print $"      Promotion: (ansi green)✓ Ready to promote to ($config.stable_branch)(ansi reset)"
+                }
             } else if $promo_status.fully_verified and not $promo_status.graduated and not $promo_status.docs_only {
                 print $"      Promotion: (ansi yellow)⏳ Needs graduation first(ansi reset)"
             } else if not $promo_status.fully_verified {
