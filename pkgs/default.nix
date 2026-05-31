@@ -6,7 +6,6 @@
 let
   # Import packaged scripts
   scripts = import ./scripts.nix { inherit pkgs; };
-  rf = scripts.roll-flow;
 in
 rec {
   #################### Example Packages #################################
