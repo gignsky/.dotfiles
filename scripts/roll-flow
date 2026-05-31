@@ -326,6 +326,167 @@ def get-current-roll [] {
     }
 }
 
+# Detect dependencies for a roll using multiple methods
+# Returns list of roll branches that this roll depends on
+def detect-roll-dependencies [
+    roll_branch: string  # Roll branch to analyze
+] {
+    let config = get-config
+    mut dependencies = []
+    
+    # Method 1: Check explicit metadata declaration
+    let roll_num = try {
+        $roll_branch | str replace $config.roll_prefix '' | split row '-' | get 0 | into int
+    } catch {
+        null
+    }
+    
+    if ($roll_num != null) {
+        let metadata_file = $"($env.HOME)/.config/roll-flow/rolls/($roll_num).nuon"
+        if ($metadata_file | path exists) {
+            let metadata = (open $metadata_file)
+            if ($metadata | get depends_on? | is-not-empty) {
+                $dependencies = ($dependencies | append $metadata.depends_on)
+            }
+        }
+    }
+    
+    # Method 2: Structural analysis - check git merge-base
+    # If roll was branched from another roll (not from rolling), it depends on that roll
+    let merge_base = try {
+        git merge-base $config.rolling_branch $roll_branch | str trim
+    } catch {
+        null
+    }
+    
+    if ($merge_base != null) {
+        # Check if any other rolls contain this merge base
+        let all_rolls = try {
+            git branch --list $"($config.roll_prefix)*" 
+            | lines 
+            | each { |line| $line | str trim | str replace '* ' '' }
+        } catch {
+            []
+        }
+        
+        for other_roll in $all_rolls {
+            if $other_roll == $roll_branch {
+                continue
+            }
+            
+            # Check if merge_base is within other_roll's history
+            let is_ancestor = try {
+                git merge-base --is-ancestor $merge_base $other_roll out+err>| ignore
+                $env.LAST_EXIT_CODE == 0
+            } catch {
+                false
+            }
+            
+            if $is_ancestor and not ($dependencies | any {|d| $d == $other_roll}) {
+                $dependencies = ($dependencies | append $other_roll)
+            }
+        }
+    }
+    
+    # Method 3: File overlap analysis
+    # If rolls modify the same files, later roll might depend on earlier
+    let roll_files = try {
+        git diff --name-only $config.stable_branch...$roll_branch | lines
+    } catch {
+        []
+    }
+    
+    if not ($roll_files | is-empty) {
+        let all_rolls = try {
+            git branch --list $"($config.roll_prefix)*" 
+            | lines 
+            | each { |line| $line | str trim | str replace '* ' '' }
+        } catch {
+            []
+        }
+        
+        for other_roll in $all_rolls {
+            if $other_roll == $roll_branch {
+                continue
+            }
+            
+            let other_files = try {
+                git diff --name-only $config.stable_branch...$other_roll | lines
+            } catch {
+                []
+            }
+            
+            # Check for file overlap
+            let overlap = ($roll_files | where {|f| $f in $other_files})
+            
+            if not ($overlap | is-empty) and not ($dependencies | any {|d| $d == $other_roll}) {
+                # Only add as dependency if other_roll is earlier (lower number)
+                let other_num = try {
+                    $other_roll | str replace $config.roll_prefix '' | split row '-' | get 0 | into int
+                } catch {
+                    null
+                }
+                
+                if ($other_num != null) and ($roll_num != null) and ($other_num < $roll_num) {
+                    $dependencies = ($dependencies | append $other_roll)
+                }
+            }
+        }
+    }
+    
+    $dependencies | uniq
+}
+
+# Test if a roll can build without its dependencies
+# Returns {success: bool, error: string?}
+def test-roll-builds-standalone [
+    roll_branch: string
+] {
+    let config = get-config
+    
+    print $"Testing if (ansi cyan)($roll_branch)(ansi reset) builds standalone..."
+    
+    # Create temporary worktree for testing
+    let test_dir = $"/tmp/roll-flow-test-($roll_branch | str replace '/' '-')"
+    
+    try {
+        # Clean up any existing test directory
+        rm -rf $test_dir
+        
+        # Create worktree from main
+        git worktree add $test_dir $config.stable_branch out+err>| ignore
+        
+        # Apply just this roll's changes
+        cd $test_dir
+        git merge --no-ff $roll_branch out+err>| ignore
+        
+        # Try to build
+        let build_result = try {
+            nix flake check --no-build out+err>| ignore
+            $env.LAST_EXIT_CODE == 0
+        } catch {
+            false
+        }
+        
+        # Cleanup
+        cd -
+        git worktree remove $test_dir --force out+err>| ignore
+        
+        if $build_result {
+            {success: true, error: null}
+        } else {
+            {success: false, error: "Flake check failed - likely has dependencies"}
+        }
+    } catch { |e|
+        # Cleanup on error
+        try {
+            cd -
+            git worktree remove $test_dir --force out+err>| ignore
+        }
+        {success: false, error: $"Test failed: ($e)"}
+    }
+}
+
 # Check which hosts have verified a given roll with rebuilds
 # Returns a record with host verification status (scope-aware)
 def check-roll-verification [
@@ -492,7 +653,8 @@ def "main start" [
         theme: $theme,
         started: (date now | format date "%Y-%m-%d %H:%M:%S"),
         status: "active",
-        merged_features: []
+        merged_features: [],
+        depends_on: []  # Can be manually edited to add dependencies
     }
     
     $metadata | save -f $"($rolls_dir)/($next_num).nuon"
@@ -500,6 +662,8 @@ def "main start" [
     print $"✓ Started roll (ansi green)($roll_name)(ansi reset)"
     print $"  Branch from: ($config.rolling_branch)"
     print $"  Now on: ($roll_name)"
+    print ""
+    print $"(ansi yellow)Tip:(ansi reset) Edit ($rolls_dir)/($next_num).nuon to add explicit dependencies if needed"
 }
 
 # Integrate a feature branch into current roll
