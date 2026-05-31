@@ -35,11 +35,11 @@
   ns = "nix shell";
 
   # Agent calls directly
-  scotty = "opencode run --agent scotty";
+  data = "opencode run --agent data";
   oc = "opencode";
 
   # Test alias for rebuild verification
-  rebuild-test-verified = "echo 'Rebuild test successful on develop branch - Scotty'";
+  rebuild-test-verified = "echo 'Rebuild test successful on develop branch - Commander Data'";
 
   #recursive listing for searching
   # need to write a nushell script to make this work since it uses pipes
