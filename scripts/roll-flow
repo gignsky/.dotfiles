@@ -1,7 +1,7 @@
 #!/usr/bin/env nu
 
 # roll-flow: A git-flow-like workflow manager for NixOS dotfiles
-# Manages roll/N-* branches, rolling integration, and main promotion
+# Manages roll/N-* branches, develop integration, and main promotion
 
 def main [] {
     print "roll-flow: NixOS dotfiles workflow manager"
@@ -12,14 +12,14 @@ def main [] {
     print "  init [OPTIONS]          Initialize roll-flow in this repo"
     print "  start <theme>           Start a new roll branch"
     print "  integrate <branch>      Merge a feature branch into current roll"
-    print "  graduate [roll]         Graduate a roll to rolling branch (default: current)"
-    print "  promote                 Promote rolling to main (with verification)"
+    print "  graduate [roll]         Graduate a roll to develop branch (default: current)"
+    print "  promote                 Promote develop to main (with verification)"
     print "  status                  Show current roll status"
     print "  test-all                Test build on all configured hosts"
     print "  list                    List all rolls and their states"
     print ""
     print "Init Options:"
-    print "  -r, --rolling-branch <name>   Name of rolling branch (default: rolling)"
+    print "  -r, --rolling-branch <name>   Name of integration branch (default: develop)"
     print "  -s, --stable-branch <name>    Name of stable branch (default: main)"
     print "  -p, --roll-prefix <prefix>    Prefix for roll branches (default: roll/)"
     print "  -u, --username <name>         Username for homeConfigurations (default: gig)"
@@ -27,8 +27,8 @@ def main [] {
     print ""
     print "Examples:"
     print "  roll-flow init"
-    print "  roll-flow init --rolling-branch rolling-transitional-phase"
-    print "  roll-flow init -r rolling -s main -u gig -h ganoslal,merlin,wsl"
+    print "  roll-flow init --rolling-branch develop-transitional-phase"
+    print "  roll-flow init -r develop -s main -u gig -h ganoslal,merlin,wsl"
     print "  roll-flow start shell-improvements"
     print "  roll-flow integrate feature/zellij-config"
     print "  roll-flow graduate"
@@ -88,10 +88,10 @@ def auto-generate-config [] {
     
     # Detect branch names by checking if they exist
     let rolling_branch = try {
-        git rev-parse --verify rolling out+err>| ignore
-        "rolling"
+        git rev-parse --verify develop out+err>| ignore
+        "develop"
     } catch {
-        "rolling"  # Default even if doesn't exist yet
+        "develop"  # Default even if doesn't exist yet
     }
     
     let stable_branch = try {
