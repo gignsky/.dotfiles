@@ -595,7 +595,6 @@
       "inputs": {
         "flake-compat": "flake-compat_4",
         "nixpkgs": [
-          "nixpkgs",
           "nixpkgs"
         ]
       },
@@ -688,22 +687,6 @@
       "original": {
         "owner": "NixOS",
         "ref": "master",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
-    "nixpkgs-unstable_2": {
-      "locked": {
-        "lastModified": 1779560665,
-        "narHash": "sha256-tpyBcxPpcQb8ukyNF7DoCwfSY3VPsxHoYwj00Cayv5o=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "64c08a7ca051951c8eae34e3e3cb1e202fe36786",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "ref": "nixos-unstable",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -835,7 +818,6 @@
         "flake-compat": "flake-compat_5",
         "gitignore": "gitignore_2",
         "nixpkgs": [
-          "nixpkgs",
           "nixpkgs"
         ]
       },
@@ -876,7 +858,7 @@
         "gigvim": "gigvim",
         "git-aliases": "git-aliases",
         "home-manager": [
-          "nixpkgs",
+          "gigpkgs",
           "home-manager"
         ],
         "nix-secrets": "nix-secrets",
@@ -885,9 +867,13 @@
         "nixos-hardware": "nixos-hardware",
         "nixos-wsl": "nixos-wsl",
         "nixpkgs": [
-          "gigpkgs"
+          "gigpkgs",
+          "nixpkgs-stable"
         ],
-        "nixpkgs-unstable": "nixpkgs-unstable_2",
+        "nixpkgs-unstable": [
+          "gigpkgs",
+          "nixpkgs-unstable"
+        ],
         "pre-commit-hooks": "pre-commit-hooks_2",
         "sops-nix": "sops-nix",
         "treefmt-nix": "treefmt-nix",
@@ -960,7 +946,6 @@
     "sops-nix": {
       "inputs": {
         "nixpkgs": [
-          "nixpkgs",
           "nixpkgs"
         ]
       },
@@ -1027,7 +1012,6 @@
     "treefmt-nix": {
       "inputs": {
         "nixpkgs": [
-          "nixpkgs",
           "nixpkgs"
         ]
       },
@@ -1090,7 +1074,6 @@
       "inputs": {
         "flake-utils": "flake-utils",
         "nixpkgs": [
-          "nixpkgs",
           "nixpkgs"
         ]
       },
