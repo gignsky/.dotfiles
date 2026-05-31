@@ -3,6 +3,11 @@
 
   inputs = {
     #################### Official NixOS and HM Package Sources ####################
+    gigpkgs = {
+      url = "github:gignsky/gigpkgs";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Stable
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     # Unstable
