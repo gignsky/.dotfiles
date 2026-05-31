@@ -239,6 +239,81 @@ def get-next-roll-number [] {
     }
 }
 
+# Detect which scopes a roll/branch affects based on changed files
+# Returns a record with scope flags: {nixos: bool, home: bool, flake: bool, docs: bool}
+def detect-roll-scope [
+    roll_branch: string  # Roll branch name or commit range
+] {
+    let config = get-config
+    
+    # Get list of files changed in this roll
+    # Use different strategies depending on whether it's a branch or commit
+    let changed_files = try {
+        # Try as branch first (compare to main/stable)
+        git diff --name-only $config.stable_branch...$roll_branch 
+        | lines
+    } catch {
+        try {
+            # Try as commit range
+            git diff --name-only $roll_branch
+            | lines
+        } catch {
+            []
+        }
+    }
+    
+    if ($changed_files | is-empty) {
+        return {
+            nixos: false,
+            home: false,
+            flake: false,
+            docs: false,
+            empty: true
+        }
+    }
+    
+    # Categorize files by scope
+    mut nixos_changed = false
+    mut home_changed = false
+    mut flake_changed = false
+    mut docs_changed = false
+    
+    for file in $changed_files {
+        # Check each scope pattern
+        if ($file | str starts-with "hosts/") {
+            $nixos_changed = true
+        } else if ($file | str starts-with "home/") {
+            $home_changed = true
+        } else if (
+            ($file == "flake.nix") or
+            ($file == "flake.lock") or
+            ($file | str starts-with "scripts/") or
+            ($file | str starts-with "pkgs/") or
+            ($file | str starts-with "vars/") or
+            ($file | str starts-with "lib/")
+        ) {
+            $flake_changed = true
+        } else if (
+            ($file | str starts-with "docs/") or
+            ($file | str starts-with "operations/") or
+            ($file | str ends-with ".md")
+        ) {
+            $docs_changed = true
+        }
+    }
+    
+    # Return scope analysis
+    {
+        nixos: $nixos_changed,
+        home: $home_changed,
+        flake: $flake_changed,
+        docs: $docs_changed,
+        empty: false,
+        files_count: ($changed_files | length),
+        files: $changed_files
+    }
+}
+
 # Get current active roll
 def get-current-roll [] {
     let current_branch = (git branch --show-current | str trim)
@@ -252,11 +327,14 @@ def get-current-roll [] {
 }
 
 # Check which hosts have verified a given roll with rebuilds
-# Returns a record with host verification status
+# Returns a record with host verification status (scope-aware)
 def check-roll-verification [
     roll_branch: string  # Roll branch name (e.g., "roll/5-roll-flow-init")
 ] {
     let config = get-config
+    
+    # Detect what scopes this roll affects
+    let scope = (detect-roll-scope $roll_branch)
     
     # Find when this roll was merged to rolling
     let roll_merge = try {
@@ -282,25 +360,52 @@ def check-roll-verification [
         mut host_status = {}
         
         for host in $config.hosts {
-            # Check in rolling branch for rebuilds after the branch point
-            # Handle WSL hosts which use wsl@hostname format
-            let is_wsl_host = ($host | str starts-with "wsl@")
+            # Check what verification is needed based on scope
+            let needs_nixos = $scope.nixos
+            let needs_home = $scope.home
+            let needs_flake = $scope.flake
             
-            let nixos_rebuild = try {
-                git log $config.rolling_branch --oneline --grep=$"^($host): generation" $"($branch_point)..($config.rolling_branch)" -1 
-                | str trim
-            } catch {
-                ""
+            # If only docs changed, mark as verified automatically
+            if $scope.docs and (not $needs_nixos) and (not $needs_home) and (not $needs_flake) {
+                $host_status = ($host_status | insert $host true)
+                continue
             }
             
-            let home_rebuild = try {
-                git log $config.rolling_branch --oneline --grep=$"^($config.username)@($host):" $"($branch_point)..($config.rolling_branch)" -1 
-                | str trim
-            } catch {
-                ""
+            # Check for required rebuild commits
+            let nixos_verified = if $needs_nixos {
+                let nixos_rebuild = try {
+                    git log $config.rolling_branch --oneline --grep=$"^($host): generation" $"($branch_point)..($config.rolling_branch)" -1 
+                    | str trim
+                } catch {
+                    ""
+                }
+                not ($nixos_rebuild | is-empty)
+            } else {
+                true  # Not needed, so consider verified
             }
             
-            let verified = (not ($nixos_rebuild | is-empty)) and (not ($home_rebuild | is-empty))
+            let home_verified = if $needs_home {
+                let home_rebuild = try {
+                    git log $config.rolling_branch --oneline --grep=$"^($config.username)@($host):" $"($branch_point)..($config.rolling_branch)" -1 
+                    | str trim
+                } catch {
+                    ""
+                }
+                not ($home_rebuild | is-empty)
+            } else {
+                true  # Not needed, so consider verified
+            }
+            
+            # For flake-only changes, we could check for flake check commits
+            # For now, just require at least one rebuild if flake changed
+            let flake_verified = if $needs_flake and (not $needs_nixos) and (not $needs_home) {
+                # Flake-only change - look for any rebuild as verification
+                $nixos_verified or $home_verified
+            } else {
+                true
+            }
+            
+            let verified = $nixos_verified and $home_verified and $flake_verified
             $host_status = ($host_status | insert $host $verified)
         }
         
@@ -310,24 +415,50 @@ def check-roll-verification [
         mut host_status = {}
         
         for host in $config.hosts {
-            # Handle WSL hosts which use wsl@hostname format
-            let is_wsl_host = ($host | str starts-with "wsl@")
+            # Check what verification is needed based on scope
+            let needs_nixos = $scope.nixos
+            let needs_home = $scope.home
+            let needs_flake = $scope.flake
             
-            let nixos_rebuild = try {
-                git log $config.rolling_branch --oneline --grep=$"^($host): generation" $"($roll_merge)..HEAD" -1 
-                | str trim
-            } catch {
-                ""
+            # If only docs changed, mark as verified automatically
+            if $scope.docs and (not $needs_nixos) and (not $needs_home) and (not $needs_flake) {
+                $host_status = ($host_status | insert $host true)
+                continue
             }
             
-            let home_rebuild = try {
-                git log $config.rolling_branch --oneline --grep=$"^($config.username)@($host):" $"($roll_merge)..HEAD" -1 
-                | str trim
-            } catch {
-                ""
+            # Check for required rebuild commits
+            let nixos_verified = if $needs_nixos {
+                let nixos_rebuild = try {
+                    git log $config.rolling_branch --oneline --grep=$"^($host): generation" $"($roll_merge)..HEAD" -1 
+                    | str trim
+                } catch {
+                    ""
+                }
+                not ($nixos_rebuild | is-empty)
+            } else {
+                true  # Not needed, so consider verified
             }
             
-            let verified = (not ($nixos_rebuild | is-empty)) and (not ($home_rebuild | is-empty))
+            let home_verified = if $needs_home {
+                let home_rebuild = try {
+                    git log $config.rolling_branch --oneline --grep=$"^($config.username)@($host):" $"($roll_merge)..HEAD" -1 
+                    | str trim
+                } catch {
+                    ""
+                }
+                not ($home_rebuild | is-empty)
+            } else {
+                true  # Not needed, so consider verified
+            }
+            
+            let flake_verified = if $needs_flake and (not $needs_nixos) and (not $needs_home) {
+                # Flake-only change
+                $nixos_verified or $home_verified
+            } else {
+                true
+            }
+            
+            let verified = $nixos_verified and $home_verified and $flake_verified
             $host_status = ($host_status | insert $host $verified)
         }
         
@@ -579,12 +710,34 @@ def "main status" [] {
     if ($current_roll != null) {
         print $"✓ On active roll: (ansi green)($current_roll)(ansi reset)"
         
+        # Show scope analysis
+        let scope = (detect-roll-scope $current_roll)
+        print ""
+        print "  Scope Analysis:"
+        if $scope.nixos {
+            print $"    🖥️  (ansi cyan)NixOS(ansi reset) - System configuration changes detected"
+        }
+        if $scope.home {
+            print $"    🏠 (ansi cyan)Home(ansi reset) - Home-manager changes detected"
+        }
+        if $scope.flake {
+            print $"    📦 (ansi cyan)Flake(ansi reset) - Build system changes detected"
+        }
+        if $scope.docs {
+            print $"    📝 (ansi cyan)Docs(ansi reset) - Documentation changes detected"
+        }
+        if not ($scope.nixos or $scope.home or $scope.flake or $scope.docs) {
+            print $"    ℹ️  (ansi yellow)No changes detected(ansi reset)"
+        }
+        print $"    Files changed: ($scope.files_count)"
+        
         # Show roll details if available
         let roll_num = ($current_roll | str replace 'roll/' '' | split row '-' | get 0)
         let metadata_file = $"($env.HOME)/.config/roll-flow/rolls/($roll_num).nuon"
         
         if ($metadata_file | path exists) {
             let metadata = (open $metadata_file)
+            print ""
             print $"  Theme: ($metadata.theme)"
             print $"  Started: ($metadata.started)"
             print $"  Features integrated: ($metadata.merged_features | length)"
@@ -593,6 +746,25 @@ def "main status" [] {
         # Show verification status for current roll
         print ""
         print "  Host Verification Status:"
+        
+        # Build verification requirements message
+        mut requirements = []
+        if $scope.nixos {
+            $requirements = ($requirements | append "NixOS rebuild")
+        }
+        if $scope.home {
+            $requirements = ($requirements | append "Home rebuild")
+        }
+        if $scope.flake and (not $scope.nixos) and (not $scope.home) {
+            $requirements = ($requirements | append "Flake check")
+        }
+        
+        if ($requirements | is-empty) {
+            print $"    (ansi green)No rebuild verification required (docs-only changes)(ansi reset)"
+        } else {
+            print $"    Required: ($requirements | str join ', ')"
+        }
+        
         let verification = (check-roll-verification $current_roll)
         for host in $config.hosts {
             let status = ($verification | get $host)
