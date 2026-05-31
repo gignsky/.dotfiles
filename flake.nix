@@ -511,6 +511,7 @@
             quick-results
             upjust
             locker
+            roll-flow
             rf
             #necessary for bootstrapping
             ripgrep
@@ -519,9 +520,6 @@
 
         shellHook = ''
           ${self.pre-commit-check.shellHook}
-
-          # Alias roll-flow to rf for convenience
-          alias roll-flow='rf'
 
           echo "Welcome to the dotfiles devShell" | ${pkgs.lolcat}/bin/lolcat
           echo "  • roll-flow (rf) available for workflow management"

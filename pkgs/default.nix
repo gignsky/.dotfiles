@@ -6,6 +6,7 @@
 let
   # Import packaged scripts
   scripts = import ./scripts.nix { inherit pkgs; };
+  rf = scripts.roll-flow;
 in
 rec {
   #################### Example Packages #################################
@@ -686,7 +687,7 @@ rec {
     pre-commit-flake-check
     run-iso-vm
     package-script
-    rf
     roll-flow
+    rf
     ;
 }
