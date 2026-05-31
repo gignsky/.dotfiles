@@ -1378,13 +1378,145 @@ def "main status" [] {
     let current_branch = (git branch --show-current | str trim)
     let current_roll = get-current-roll
     
+    # ── Summary Header ──────────────────────────────────────────────
     print "=== Roll Flow Status ==="
-    print ""
-    print $"Current branch: (ansi cyan)($current_branch)(ansi reset)"
-    print $"Rolling branch: ($config.rolling_branch)"
-    print $"Stable branch:  ($config.stable_branch)"
+    print $"Current: (ansi cyan)($current_branch)(ansi reset)  |  Rolling: ($config.rolling_branch)  |  Stable: ($config.stable_branch)"
+    if ($current_roll != null) {
+        print $"✓ On roll: (ansi green)($current_roll)(ansi reset)"
+    }
     print ""
     
+    # ── Compact Summary Table ───────────────────────────────────────
+    # Gather all roll branches
+    let local_rolls = try {
+        git branch --list $"($config.roll_prefix)*"
+        | lines
+        | each { |line| $line | str trim | str replace '* ' '' }
+    } catch { [] }
+    
+    let remote_rolls = try {
+        git branch -r
+        | lines
+        | each { |line| $line | str trim }
+        | where { |branch| $branch =~ $"origin/($config.roll_prefix)" }
+        | each { |branch| $branch | str replace 'origin/' '' }
+    } catch { [] }
+    
+    let all_roll_branches = ($local_rolls | append $remote_rolls | uniq | sort)
+    
+    if ($all_roll_branches | is-empty) {
+        print "  (no rolls found)"
+        print ""
+        return
+    }
+    
+    # Build compact table data (immutable records so closures can capture)
+    let table_data = ($all_roll_branches | each {|roll_branch|
+        let is_current = ($roll_branch == $current_roll)
+        let scope = (detect-roll-scope $roll_branch)
+        let verification = (check-roll-verification $roll_branch)
+        
+        # Build scope icon string
+        mut s = ""
+        if $scope.nixos { $s = ($s + "🖥️") }
+        if $scope.home { $s = ($s + "🏠") }
+        if $scope.flake { $s = ($s + "📦") }
+        if $scope.docs { $s = ($s + "📝") }
+        if ($s | is-empty) { $s = "·" }
+        
+        # Build per-host verification string
+        mut host_strs = []
+        for host in $config.hosts {
+            let info = ($verification | get $host)
+            if $info.verified {
+                mut v = ""
+                if $info.required.nixos { $v = ($v + "✓") }
+                if $info.required.home { $v = ($v + "✓") }
+                if not ($info.required.nixos) and not ($info.required.home) {
+                    $v = "auto"
+                }
+                $host_strs = ($host_strs | append $v)
+            } else {
+                mut v = ""
+                if $info.required.nixos and (not $info.nixos) { $v = ($v + "⏳") }
+                if $info.required.home and (not $info.home) { $v = ($v + "⏳") }
+                if ($v | is-empty) { $v = "⏳" }
+                $host_strs = ($host_strs | append $v)
+            }
+        }
+        
+        {
+            branch: $roll_branch,
+            current: $is_current,
+            scope_str: $s,
+            host_marks: $host_strs
+        }
+    })
+    
+    # Print compact table - build header and separator with immutable operations
+    let max_name_len = ($table_data | each {|r| $r.branch | str length } | math max)
+    let name_pad = (if $max_name_len < 30 { $max_name_len + 2 } else { 32 })
+    
+    let roll_header = ("  Roll" | fill -c ' ' -w $name_pad -a 'l')
+    let host_headers = ($config.hosts | each {|h| "  " + $h } | str join "")
+    let header = $roll_header + $host_headers
+    
+    let sep_roll = ("  ────" | fill -c '─' -w $name_pad -a 'l')
+    let sep_hosts = ($config.hosts | each {|h| "  " + ("" | fill -c '─' -w ($h | str length) -a 'l') } | str join "")
+    let sep = $sep_roll + $sep_hosts
+    
+    print $"  (ansi default_dimmed)($header)(ansi reset)"
+    print $"  (ansi default_dimmed)($sep)(ansi reset)"
+    
+    for row in $table_data {
+        let prefix = (if $row.current { "→" } else { " " })
+        let name_raw = ($row.branch | str substring 0..(($name_pad - 3) | into int))
+        let name_padded = ($name_raw | fill -c ' ' -w ($name_pad - 2) -a 'l')
+        let scope_col = ($row.scope_str | fill -c ' ' -w 2 -a 'r')
+        
+        # Build the row string piece by piece
+        let row_start = if $row.current {
+            $"  (ansi green)($prefix)(ansi reset) ($name_padded) ($scope_col) "
+        } else {
+            $"  ($prefix) ($name_padded) ($scope_col) "
+        }
+        
+        print -n $row_start
+        
+        # Per-host verification marks
+        for i in 0..(($config.hosts | length) - 1) {
+            let mark = ($row.host_marks | get $i)
+            let host_name = ($config.hosts | get $i)
+            let host_width = ($host_name | str length)
+            
+            if ($mark == "auto") or (not ($mark | str contains "⏳")) {
+                print -n $"(ansi green)($mark)(ansi reset)"
+            } else {
+                print -n $"(ansi yellow)($mark)(ansi reset)"
+            }
+            
+            let mark_len = ($mark | str length)
+            let gap = (if $host_width > $mark_len { $host_width - $mark_len + 1 } else { 2 })
+            if $gap > 0 { print -n ("" | fill -c ' ' -w $gap -a 'l') }
+        }
+        print ""
+    }
+    print ""
+    
+    # ── Detail Prompt ───────────────────────────────────────────────
+    # Gracefully handle non-interactive contexts (piped through nix run)
+    let show_details = (try {
+        input "Show full details? (y/N): "
+    } catch {
+        ""
+    })
+    print ""
+    
+    if ($show_details | str trim | str downcase) != "y" {
+        return
+    }
+    
+    # ── Full Detailed View ──────────────────────────────────────────
     if ($current_roll != null) {
         print $"✓ On active roll: (ansi green)($current_roll)(ansi reset)"
         
@@ -1453,7 +1585,6 @@ def "main status" [] {
         print ""
         print "  Host Verification Status:"
         
-        # Build verification requirements message
         mut requirements = []
         if $scope.nixos {
             $requirements = ($requirements | append "NixOS rebuild")
@@ -1502,79 +1633,42 @@ def "main status" [] {
     }
     
     print ""
-    print "=== All Rolls ===" 
-    
-    # Get all roll branches (local and remote)
-    let local_rolls = try {
-        git branch --list $"($config.roll_prefix)*"
-        | lines
-        | each { |line| $line | str trim | str replace '* ' '' }
-    } catch {
-        []
-    }
-    
-    let remote_rolls = try {
-        git branch -r
-        | lines
-        | each { |line| $line | str trim }
-        | where { |branch| $branch =~ $"origin/($config.roll_prefix)" }
-        | each { |branch| $branch | str replace 'origin/' '' }
-    } catch {
-        []
-    }
-    
-    let all_roll_branches = ($local_rolls | append $remote_rolls | uniq | sort)
+    print "=== All Rolls ==="
     
     if ($all_roll_branches | is-empty) {
         print "  No rolls found"
     } else {
         for roll_branch in $all_roll_branches {
-            # Check if it's the current roll
             let is_current = ($roll_branch == $current_roll)
             
-            # Get metadata if available
             let roll_num = try {
                 $roll_branch | str replace $config.roll_prefix '' | split row '-' | get 0
-            } catch {
-                null
-            }
+            } catch { null }
             
             let metadata_file = if ($roll_num != null) {
                 $"($env.HOME)/.config/roll-flow/rolls/($roll_num).nuon"
-            } else {
-                null
-            }
+            } else { null }
             
             let has_metadata = ($metadata_file != null) and ($metadata_file | path exists)
-            
-            # Get verification status
             let verification = (check-roll-verification $roll_branch)
             let verified_count = ($verification | values | where {|v| $v.verified == true} | length)
             let total_hosts = ($config.hosts | length)
-            
-            # Get scope
             let scope = (detect-roll-scope $roll_branch)
             
-            # Check for divergence if graduated
             let is_diverged = if (check-roll-graduated $roll_branch) {
                 (check-roll-diverged $roll_branch)
-            } else {
-                false
-            }
+            } else { false }
             
-            # Display roll header
             if $is_current {
                 print $"  → (ansi green)($roll_branch)(ansi reset) (ansi default_dimmed)\(current\)(ansi reset)"
             } else {
                 print $"    ($roll_branch)"
             }
             
-            # Show divergence warning
             if $is_diverged {
                 print $"      (ansi red)⚠ Diverged! Branch has commits after graduation(ansi reset)"
             }
             
-            # Show scope icons
             mut scope_icons = []
             if $scope.nixos { $scope_icons = ($scope_icons | append "🖥️") }
             if $scope.home { $scope_icons = ($scope_icons | append "🏠") }
@@ -1585,7 +1679,6 @@ def "main status" [] {
                 print $"      Scope: ($scope_icons | str join ' ')"
             }
             
-            # Show verification requirements
             let requirements = (get-verification-requirements $roll_branch)
             if $requirements.check_type != "none" {
                 let req_color = match $requirements.check_type {
@@ -1597,7 +1690,6 @@ def "main status" [] {
                 print $"      Requires: (ansi ($req_color))($requirements.description)(ansi reset)"
             }
             
-            # Show per-host verification detail
             if $total_hosts > 0 {
                 for host in $config.hosts {
                     let info = ($verification | get $host)
@@ -1626,7 +1718,6 @@ def "main status" [] {
                 }
             }
             
-            # Show graduation and promotion status
             let promo_status = (check-roll-promotion-ready $roll_branch)
             
             if $promo_status.graduated {
@@ -1651,7 +1742,6 @@ def "main status" [] {
                 print $"      Promotion: (ansi red)✗ Needs verification(ansi reset)"
             }
             
-            # Show dependencies and dependents
             let dependencies = (detect-roll-dependencies $roll_branch)
             let dependents = (find-roll-dependents $roll_branch)
             
@@ -1663,7 +1753,6 @@ def "main status" [] {
                 print $"      Depended on by: (ansi cyan)← ($dependents | str join ', ')(ansi reset)"
             }
             
-            # Show metadata if available
             if $has_metadata {
                 let metadata = (open $metadata_file)
                 
@@ -1681,24 +1770,183 @@ def "main status" [] {
 }
 
 # Test build on all hosts
+# - Runs nix flake check first (shared evaluation: passes once = passes for all)
+# - Then builds homeConfigurations on each configured host
+# - Records results with a commit (like rebuild/home commands do)
 def "main test-all" [] {
     let config = get-config
+    let current_branch = (git branch --show-current | str trim)
     
-    print "Testing builds on all configured hosts..."
+    print "=== Test All ==="
+    print $"Branch: (ansi cyan)($current_branch)(ansi reset)"
     print ""
+    
+    let flake_result = {
+        passed: false,
+        details: ""
+    }
+    
+    # Step 1: Run nix flake check (evaluation is shared across hosts)
+    print $"Running (ansi yellow)nix flake check(ansi reset) to validate Nix syntax..."
+    print ""
+    
+    let flake_check_result = (try {
+        nix flake check --keep-going --show-trace out+err>| complete
+    } catch {
+        { exit_code: 1, stderr: "nix flake check command failed to execute" }
+    })
+    
+    if $flake_check_result.exit_code == 0 {
+        print $"  ✓ (ansi green)nix flake check passed(ansi reset)"
+        print ""
+    } else {
+        print $"  ✗ (ansi red)nix flake check FAILED(ansi reset)"
+        print ""
+        let stderr_str = ($flake_check_result.stderr | str trim)
+        if not ($stderr_str | is-empty) {
+            let error_lines = ($stderr_str | lines | where {|line|
+                ($line | str contains "error") or ($line | str contains "Error")
+            })
+            if not ($error_lines | is-empty) {
+                print "Key errors:"
+                for line in $error_lines {
+                    print $"  (ansi red)($line)(ansi reset)"
+                }
+            } else {
+                let all_lines = ($stderr_str | lines)
+                let tail_count = (if ($all_lines | length) > 15 { 15 } else { $all_lines | length })
+                let last_lines = ($all_lines | last $tail_count)
+                print "Last output lines:"
+                for line in $last_lines {
+                    print $"  ($line)"
+                }
+            }
+        }
+        print ""
+        print $"(ansi red)Aborting: Flake check must pass before builds can proceed(ansi reset)"
+        
+        # Record the failure with a commit for audit trail
+        print ""
+        print "Recording test-all result..."
+        let timestamp = (date now | format date "%Y-%m-%d %H:%M:%S")
+        let commit_lines = [
+            $"auto(test): test-all on ($current_branch) — flake-check FAILED",
+            "",
+            $"Timestamp: ($timestamp)",
+            $"Branch: ($current_branch)",
+            "",
+            "Flake Check: FAILED",
+            "",
+            "Details:",
+            ($flake_check_result.stderr | lines | first 20 | str join "\n"),
+            "",
+            "Command: roll-flow test-all"
+        ]
+        let commit_msg = ($commit_lines | str join "\n")
+        try {
+            git add -A out+err>| ignore
+            git commit --allow-empty -m $commit_msg out+err>| ignore
+            print $"  ✓ Commit created: (ansi yellow)test-all FAILED(ansi reset)"
+        } catch {
+            print $"  ○ Could not create commit"
+        }
+        return
+    }
+    
+    # Step 2: Build on all configured hosts
+    # Use immutable lists to track results (prevents mut-variable capture issues in closures)
+    print "Building on all configured hosts..."
+    print ""
+    
+    mut host_status_icons = []
+    mut host_detail_parts = []
+    mut failures_exist = false
     
     for host in $config.hosts {
         print $"Building for (ansi cyan)($host)(ansi reset)..."
         
-        try {
-            nix build $".#homeConfigurations.\"($config.username)@($host)\".activationPackage" --show-trace
-            print $"  ✓ (ansi green)($host) build succeeded(ansi reset)"
+        let build_result = (try {
+            nix build $".#homeConfigurations.\"($config.username)@($host)\".activationPackage" --show-trace out+err>| complete
         } catch {
-            print $"  ✗ (ansi red)($host) build failed(ansi reset)"
+            { exit_code: 1, stderr: "Build command failed to execute" }
+        })
+        
+        if $build_result.exit_code == 0 {
+            print $"  ✓ (ansi green)($host) build succeeded(ansi reset)"
+            $host_status_icons = ($host_status_icons | append $"($host) ✓")
+            $host_detail_parts = ($host_detail_parts | append $"  ($host): PASSED")
+        } else {
+            print $"  ✗ (ansi red)($host) build FAILED(ansi reset)"
+            $failures_exist = true
+            let error_summary = ($build_result.stderr
+                | lines
+                | where {|line| ($line | str contains "error") or ($line | str contains "Error") }
+                | first 5
+                | str join "\n"
+            )
+            $host_status_icons = ($host_status_icons | append $"($host) ✗")
+            $host_detail_parts = ($host_detail_parts | append $"  ($host): FAILED")
+            $host_detail_parts = ($host_detail_parts | append $"    Errors: ($error_summary)")
         }
         
         print ""
     }
+    
+    # Step 3: Record results with a commit (--allow-empty creates a log entry even with no changes)
+    # Freeze mutable lists to immutable variables for use in closures
+    let frozen_status_icons = $host_status_icons
+    let frozen_detail_parts = $host_detail_parts
+    
+    print "Recording test-all results..."
+    
+    let timestamp = (date now | format date "%Y-%m-%d %H:%M:%S")
+    let host_results_str = ($frozen_status_icons | str join ", ")
+    let host_detail_lines = ($frozen_detail_parts | str join "\n")
+    
+    let commit_lines = [
+        $"auto(test): test-all on ($current_branch) — flake-check ✓, host builds: ($host_results_str)",
+        "",
+        $"Timestamp: ($timestamp)",
+        $"Branch: ($current_branch)",
+        "",
+        "Flake Check: PASSED",
+        "",
+        "Host Results:",
+        $host_detail_lines,
+        "",
+        $"Summary: flake-check ✓, ($host_results_str)",
+        "",
+        "Command: roll-flow test-all"
+    ]
+    let commit_msg = ($commit_lines | str join "\n")
+    
+    try {
+        git add -A out+err>| ignore
+        git commit --allow-empty -m $commit_msg out+err>| ignore
+        print $"  ✓ Commit created: (ansi cyan)test-all — ($host_results_str)(ansi reset)"
+    } catch {
+        let err = $env.LAST_EXIT_CODE
+        print $"  ○ Could not create commit (exit: ($err))"
+    }
+    
+    # Final summary
+    print ""
+    print "=== Test-All Summary ==="
+    print $"  Branch:    ($current_branch)"
+    print $"  Flake:     (ansi green)✓ PASSED(ansi reset)"
+    for result in $frozen_status_icons {
+        if ($result | str contains "✗") {
+            print $"  (ansi red)($result)(ansi reset)"
+        } else {
+            print $"  (ansi green)($result)(ansi reset)"
+        }
+    }
+    if $failures_exist {
+        print ""
+        print $"(ansi yellow)⚠ Some builds failed — check output above for details(ansi reset)"
+    }
+    print ""
+    print $"(ansi green)✓ test-all complete(ansi reset)"
 }
 
 # List all rolls with detailed status
