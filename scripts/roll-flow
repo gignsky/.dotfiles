@@ -41,7 +41,7 @@ def "main init" [
     --stable-branch(-s): string = "main"      # Name of the stable branch
     --roll-prefix(-p): string = "roll/"       # Prefix for roll branches
     --username(-u): string = "gig"            # Username for homeConfigurations
-    --hosts(-h): list<string> = ["ganoslal", "merlin", "wsl"]  # List of hosts to test
+    --hosts(-h): list<string> = ["ganoslal", "merlin", "wsl@merlins-windows", "wsl@ganoslals-windows"]  # List of hosts to test
 ] {
     let config_dir = $"($env.HOME)/.config/roll-flow"
     mkdir $config_dir
@@ -160,6 +160,9 @@ def check-roll-verification [
         
         for host in $config.hosts {
             # Check in rolling branch for rebuilds after the branch point
+            # Handle WSL hosts which use wsl@hostname format
+            let is_wsl_host = ($host | str starts-with "wsl@")
+            
             let nixos_rebuild = try {
                 git log $config.rolling_branch --oneline --grep=$"^($host): generation" $"($branch_point)..($config.rolling_branch)" -1 
                 | str trim
@@ -184,6 +187,9 @@ def check-roll-verification [
         mut host_status = {}
         
         for host in $config.hosts {
+            # Handle WSL hosts which use wsl@hostname format
+            let is_wsl_host = ($host | str starts-with "wsl@")
+            
             let nixos_rebuild = try {
                 git log $config.rolling_branch --oneline --grep=$"^($host): generation" $"($roll_merge)..HEAD" -1 
                 | str trim
@@ -350,30 +356,15 @@ def "main promote" [] {
         for host in $config.hosts {
             print $"Checking (ansi cyan)($host)(ansi reset)..."
             
-            # Check for NixOS rebuild (format: "hostname: generation N")
+            # Check for NixOS rebuild (format: "hostname: generation N" or "wsl@hostname: generation N")
             let nixos_rebuild = (git log $config.rolling_branch --oneline --grep=$"^($host): generation" $"($latest_roll_merge)..HEAD" -1 | str trim)
             
-            # Check for home-manager rebuild (format: "gig@hostname: YYYY-MM-DD HH:MM : id N")
+            # Check for home-manager rebuild (format: "gig@hostname:" or "gig@wsl@hostname:")
             let home_rebuild = (git log $config.rolling_branch --oneline --grep=$"^($config.username)@($host):" $"($latest_roll_merge)..HEAD" -1 | str trim)
-            
-            # Also check for WSL instances on physical hosts (wsl@hostname format)
-            let wsl_nixos = if ($host != "wsl") {
-                (git log $config.rolling_branch --oneline --grep=$"^wsl@($host): generation" $"($latest_roll_merge)..HEAD" -1 | str trim)
-            } else {
-                ""
-            }
-            
-            let wsl_home = if ($host != "wsl") {
-                (git log $config.rolling_branch --oneline --grep=$"^($config.username)@wsl@($host):" $"($latest_roll_merge)..HEAD" -1 | str trim)
-            } else {
-                ""
-            }
             
             # Verify both NixOS and home-manager rebuilds exist
             let has_nixos = not ($nixos_rebuild | is-empty)
             let has_home = not ($home_rebuild | is-empty)
-            let has_wsl_nixos = if ($host != "wsl") { not ($wsl_nixos | is-empty) } else { true }
-            let has_wsl_home = if ($host != "wsl") { not ($wsl_home | is-empty) } else { true }
             
             if $has_nixos and $has_home {
                 print $"  ✓ NixOS: (ansi green)($nixos_rebuild)(ansi reset)"
@@ -386,22 +377,6 @@ def "main promote" [] {
                 if not $has_home {
                     print $"  ✗ (ansi red)Missing home-manager rebuild for ($host)(ansi reset)"
                     $all_verified = false
-                }
-            }
-            
-            # Check WSL instances if not the standalone wsl host
-            if ($host != "wsl") {
-                if $has_wsl_nixos and $has_wsl_home {
-                    print $"  ✓ WSL@($host) NixOS: (ansi green)($wsl_nixos)(ansi reset)"
-                    print $"  ✓ WSL@($host) Home:  (ansi green)($wsl_home)(ansi reset)"
-                } else if (not ($wsl_nixos | is-empty)) or (not ($wsl_home | is-empty)) {
-                    # Only warn if there's SOME WSL activity (meaning WSL instance exists)
-                    if not $has_wsl_nixos {
-                        print $"  ⚠️  (ansi yellow)WSL instance exists but missing NixOS rebuild for wsl@($host)(ansi reset)"
-                    }
-                    if not $has_wsl_home {
-                        print $"  ⚠️  (ansi yellow)WSL instance exists but missing home-manager rebuild for wsl@($host)(ansi reset)"
-                    }
                 }
             }
             
