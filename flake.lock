@@ -85,6 +85,22 @@
     "flake-compat": {
       "flake": false,
       "locked": {
+        "lastModified": 1767039857,
+        "narHash": "sha256-vNpUSpF5Nuw8xvDLj2KCwwksIbjua2LZCqhV1LNRDns=",
+        "owner": "NixOS",
+        "repo": "flake-compat",
+        "rev": "5edf11c44bc78a0d334f6334cdaf7d60d732daab",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "flake-compat",
+        "type": "github"
+      }
+    },
+    "flake-compat_2": {
+      "flake": false,
+      "locked": {
         "lastModified": 1751685974,
         "narHash": "sha256-NKw96t+BgHIYzHUjkTK95FqYRVKB8DHpVhefWSz/kTw=",
         "ref": "refs/heads/main",
@@ -96,22 +112,6 @@
       "original": {
         "type": "git",
         "url": "https://git.lix.systems/lix-project/flake-compat.git"
-      }
-    },
-    "flake-compat_2": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1767039857,
-        "narHash": "sha256-vNpUSpF5Nuw8xvDLj2KCwwksIbjua2LZCqhV1LNRDns=",
-        "owner": "edolstra",
-        "repo": "flake-compat",
-        "rev": "5edf11c44bc78a0d334f6334cdaf7d60d732daab",
-        "type": "github"
-      },
-      "original": {
-        "owner": "edolstra",
-        "repo": "flake-compat",
-        "type": "github"
       }
     },
     "flake-compat_3": {
@@ -131,6 +131,22 @@
       }
     },
     "flake-compat_4": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1767039857,
+        "narHash": "sha256-vNpUSpF5Nuw8xvDLj2KCwwksIbjua2LZCqhV1LNRDns=",
+        "owner": "edolstra",
+        "repo": "flake-compat",
+        "rev": "5edf11c44bc78a0d334f6334cdaf7d60d732daab",
+        "type": "github"
+      },
+      "original": {
+        "owner": "edolstra",
+        "repo": "flake-compat",
+        "type": "github"
+      }
+    },
+    "flake-compat_5": {
       "flake": false,
       "locked": {
         "lastModified": 1767039857,
@@ -265,6 +281,29 @@
         "type": "github"
       }
     },
+    "gigpkgs": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "nixpkgs-unstable": "nixpkgs-unstable",
+        "pre-commit-hooks": "pre-commit-hooks"
+      },
+      "locked": {
+        "lastModified": 1780197151,
+        "narHash": "sha256-Kacyns/kIGugRfnibNPlHcu5MFM+Ya+5UM9uuKeeIgA=",
+        "owner": "gignsky",
+        "repo": "gigpkgs",
+        "rev": "6be83f072325d26dac442b5eba52234168ecda78",
+        "type": "github"
+      },
+      "original": {
+        "owner": "gignsky",
+        "ref": "develop",
+        "repo": "gigpkgs",
+        "type": "github"
+      }
+    },
     "gigvim": {
       "inputs": {
         "flake-parts": [
@@ -346,6 +385,28 @@
       }
     },
     "gitignore": {
+      "inputs": {
+        "nixpkgs": [
+          "gigpkgs",
+          "pre-commit-hooks",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1709087332,
+        "narHash": "sha256-HG2cCnktfHsKV0s4XW83gU3F57gaTljL9KNSuG6bnQs=",
+        "owner": "hercules-ci",
+        "repo": "gitignore.nix",
+        "rev": "637db329424fd7e46cf4185293b9cc8c88c95394",
+        "type": "github"
+      },
+      "original": {
+        "owner": "hercules-ci",
+        "repo": "gitignore.nix",
+        "type": "github"
+      }
+    },
+    "gitignore_2": {
       "inputs": {
         "nixpkgs": [
           "pre-commit-hooks",
@@ -487,7 +548,7 @@
     },
     "nixos-cli": {
       "inputs": {
-        "flake-compat": "flake-compat_2",
+        "flake-compat": "flake-compat_3",
         "flake-parts": "flake-parts_4",
         "nixpkgs": [
           "nixpkgs-unstable"
@@ -525,7 +586,7 @@
     },
     "nixos-wsl": {
       "inputs": {
-        "flake-compat": "flake-compat_3",
+        "flake-compat": "flake-compat_4",
         "nixpkgs": [
           "nixpkgs"
         ]
@@ -592,6 +653,22 @@
       }
     },
     "nixpkgs-unstable": {
+      "locked": {
+        "lastModified": 1780193064,
+        "narHash": "sha256-zNMJTBAIHqv+fzu0Ojii1m6ECzvleTW7tYX6rGsFEUQ=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "1dfd9599a922bd6d7062b48cec3a930dc6313209",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "master",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs-unstable_2": {
       "locked": {
         "lastModified": 1779560665,
         "narHash": "sha256-tpyBcxPpcQb8ukyNF7DoCwfSY3VPsxHoYwj00Cayv5o=",
@@ -673,7 +750,7 @@
     },
     "nvf": {
       "inputs": {
-        "flake-compat": "flake-compat",
+        "flake-compat": "flake-compat_2",
         "flake-parts": "flake-parts_3",
         "mnw": "mnw",
         "ndg": "ndg",
@@ -724,8 +801,31 @@
     },
     "pre-commit-hooks": {
       "inputs": {
-        "flake-compat": "flake-compat_4",
+        "flake-compat": "flake-compat",
         "gitignore": "gitignore",
+        "nixpkgs": [
+          "gigpkgs",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1778507602,
+        "narHash": "sha256-kTwur1wV+01SdqskVMSo6JMEpg71ps3HpbFY2GsflKs=",
+        "owner": "cachix",
+        "repo": "git-hooks.nix",
+        "rev": "61ab0e80d9c7ab14c256b5b453d8b3fb0189ba0a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "cachix",
+        "repo": "git-hooks.nix",
+        "type": "github"
+      }
+    },
+    "pre-commit-hooks_2": {
+      "inputs": {
+        "flake-compat": "flake-compat_5",
+        "gitignore": "gitignore_2",
         "nixpkgs": [
           "nixpkgs"
         ]
@@ -763,6 +863,7 @@
     "root": {
       "inputs": {
         "fancy-fonts": "fancy-fonts",
+        "gigpkgs": "gigpkgs",
         "gigvim": "gigvim",
         "git-aliases": "git-aliases",
         "home-manager": "home-manager",
@@ -772,8 +873,8 @@
         "nixos-hardware": "nixos-hardware",
         "nixos-wsl": "nixos-wsl",
         "nixpkgs": "nixpkgs_4",
-        "nixpkgs-unstable": "nixpkgs-unstable",
-        "pre-commit-hooks": "pre-commit-hooks",
+        "nixpkgs-unstable": "nixpkgs-unstable_2",
+        "pre-commit-hooks": "pre-commit-hooks_2",
         "sops-nix": "sops-nix",
         "treefmt-nix": "treefmt-nix",
         "unstable-home-manager": "unstable-home-manager",
