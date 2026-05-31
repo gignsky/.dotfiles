@@ -6,9 +6,9 @@
     # Stable
     # nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     gigpkgs.url = "github:gignsky/gigpkgs";
-    nixpkgs.follows = "gigpkgs/nixpkgs-stable";
+    nixpkgs.follows = "gigpkgs/nixos-stable";
     # Unstable
-    nixpkgs-unstable.follows = "gigpkgs/nixpkgs-unstable";
+    nixpkgs-unstable.follows = "gigpkgs/nixos-unstable";
     # Local
     # nixpkgs-local.url = "git+file:///home/gig/local_repos/nixpkgs";
 
