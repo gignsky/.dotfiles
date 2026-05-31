@@ -6,9 +6,9 @@
     # Stable
     # nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     gigpkgs.url = "github:gignsky/gigpkgs";
-    nixpkgs.follows = "gigpkgs";
+    nixpkgs.follows = "gigpkgs/nixpkgs-stable";
     # Unstable
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs-unstable.follows = "gigpkgs/nixpkgs-unstable";
     # Local
     # nixpkgs-local.url = "git+file:///home/gig/local_repos/nixpkgs";
 
@@ -23,7 +23,7 @@
     # wsl stuff
     nixos-wsl = {
       url = "github:nix-community/NixOS-WSL/main";
-      inputs.nixpkgs.follows = "nixpkgs/nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # nixos-hardware, to fix hardware issues and firmware for specific machines
@@ -34,13 +34,13 @@
     # treefmt-nix.url = "github:numtide/treefmt-nix";
     treefmt-nix = {
       url = "github:numtide/treefmt-nix";
-      inputs.nixpkgs.follows = "nixpkgs/nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # Secrets management
     sops-nix = {
       url = "github:mic92/sops-nix/master";
-      inputs.nixpkgs.follows = "nixpkgs/nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
     # Unneeded after moving to stable 26.05
     # unstable-sops = {
@@ -52,7 +52,7 @@
     pre-commit-hooks = {
       # url = "github:cachix/git-hooks.nix/46d55f0aeb1d567a78223e69729734f3dca25a85";
       url = "github:cachix/git-hooks.nix";
-      inputs.nixpkgs.follows = "nixpkgs/nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     nixos-cli = {
@@ -120,7 +120,7 @@
     vscode-server = {
       url = "github:nix-community/nixos-vscode-server";
       inputs = {
-        nixpkgs.follows = "nixpkgs/nixpkgs";
+        nixpkgs.follows = "nixpkgs";
         # flake-utils.follows = "flake-utils";
       };
     };
