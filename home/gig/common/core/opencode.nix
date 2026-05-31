@@ -228,13 +228,13 @@
 
 
           ##  **Direct Agent Notes Protocol**:
-            - All agents must actively scan text files for `#AGENT_NAME` tags (e.g., `#SCOTTY`, `#CORTANA`)
+            - All agents must actively scan text files for `#AGENT_NAME` tags (e.g., `#DATA`, `#CORTANA`)
             - These tags indicate direct notes left specifically for that agent
             - When an agent finds their name tagged:
               - The note is primarily for that specific agent to read and act upon
               - Other agents may also read and comment if they have relevant information to contribute
               - Treat these as direct instructions or important context from Lord Gig
-              - Example: `#SCOTTY this needs your attention` is a note specifically for Chief Engineer Scotty
+              - Example: `#DATA this requires your technical analysis` is a note specifically for Commander Data
       >>>>>>> refs/rewritten/onto
 
             **Agent Self-Modification Requirements**:
