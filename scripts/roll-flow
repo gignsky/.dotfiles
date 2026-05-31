@@ -239,6 +239,35 @@ def get-next-roll-number [] {
     }
 }
 
+# Find which rolls depend on a given roll
+def find-roll-dependents [
+    roll_branch: string
+] {
+    let config = get-config
+    
+    # Get all roll branches
+    let all_rolls = try {
+        git branch --list $"($config.roll_prefix)*"
+        | lines
+        | each { |line| $line | str trim | str replace '* ' '' }
+    } catch {
+        []
+    }
+    
+    mut dependents = []
+    
+    for other_roll in $all_rolls {
+        if $other_roll != $roll_branch {
+            let deps = (detect-roll-dependencies $other_roll)
+            if ($roll_branch in $deps) {
+                $dependents = ($dependents | append $other_roll)
+            }
+        }
+    }
+    
+    $dependents
+}
+
 # Check if a roll has been graduated to rolling
 def check-roll-graduated [
     roll_branch: string
@@ -378,12 +407,20 @@ def detect-roll-scope [
     mut flake_changed = false
     mut docs_changed = false
     
+    mut nixos_files = []
+    mut home_files = []
+    mut flake_files = []
+    mut docs_files = []
+    mut other_files = []
+    
     for file in $changed_files {
         # Check each scope pattern
         if ($file | str starts-with "hosts/") {
             $nixos_changed = true
+            $nixos_files = ($nixos_files | append $file)
         } else if ($file | str starts-with "home/") {
             $home_changed = true
+            $home_files = ($home_files | append $file)
         } else if (
             ($file == "flake.nix") or
             ($file == "flake.lock") or
@@ -393,12 +430,16 @@ def detect-roll-scope [
             ($file | str starts-with "lib/")
         ) {
             $flake_changed = true
+            $flake_files = ($flake_files | append $file)
         } else if (
             ($file | str starts-with "docs/") or
             ($file | str starts-with "operations/") or
             ($file | str ends-with ".md")
         ) {
             $docs_changed = true
+            $docs_files = ($docs_files | append $file)
+        } else {
+            $other_files = ($other_files | append $file)
         }
     }
     
@@ -410,7 +451,12 @@ def detect-roll-scope [
         docs: $docs_changed,
         empty: false,
         files_count: ($changed_files | length),
-        files: $changed_files
+        files: $changed_files,
+        nixos_files: $nixos_files,
+        home_files: $home_files,
+        flake_files: $flake_files,
+        docs_files: $docs_files,
+        other_files: $other_files
     }
 }
 
@@ -491,7 +537,7 @@ def detect-roll-dependencies [
     # Method 3: File overlap analysis
     # If rolls modify the same files, later roll might depend on earlier
     let roll_files = try {
-        git diff --name-only $config.stable_branch...$roll_branch | lines
+        git diff --name-only $config.stable_branch...$roll_branch out+err>| complete | get stdout | lines
     } catch {
         []
     }
@@ -511,7 +557,7 @@ def detect-roll-dependencies [
             }
             
             let other_files = try {
-                git diff --name-only $config.stable_branch...$other_roll | lines
+                git diff --name-only $config.stable_branch...$other_roll out+err>| complete | get stdout | lines
             } catch {
                 []
             }
@@ -1102,20 +1148,38 @@ def "main status" [] {
         print "  Scope Analysis:"
         if $scope.nixos {
             print $"    🖥️  (ansi cyan)NixOS(ansi reset) - System configuration changes detected"
+            for file in $scope.nixos_files {
+                print $"        ├─ ($file)"
+            }
         }
         if $scope.home {
             print $"    🏠 (ansi cyan)Home(ansi reset) - Home-manager changes detected"
+            for file in $scope.home_files {
+                print $"        ├─ ($file)"
+            }
         }
         if $scope.flake {
             print $"    📦 (ansi cyan)Flake(ansi reset) - Build system changes detected"
+            for file in $scope.flake_files {
+                print $"        ├─ ($file)"
+            }
         }
         if $scope.docs {
             print $"    📝 (ansi cyan)Docs(ansi reset) - Documentation changes detected"
+            for file in $scope.docs_files {
+                print $"        ├─ ($file)"
+            }
+        }
+        if not ($scope.other_files | is-empty) {
+            print $"    ❓ (ansi yellow)Other(ansi reset) - Uncategorized files"
+            for file in $scope.other_files {
+                print $"        ├─ ($file)"
+            }
         }
         if not ($scope.nixos or $scope.home or $scope.flake or $scope.docs) {
             print $"    ℹ️  (ansi yellow)No changes detected(ansi reset)"
         }
-        print $"    Files changed: ($scope.files_count)"
+        print $"    Total files changed: ($scope.files_count)"
         
         # Show roll details if available
         let roll_num = ($current_roll | str replace 'roll/' '' | split row '-' | get 0)
@@ -1287,12 +1351,27 @@ def "main status" [] {
                 print $"      Promotion: (ansi red)✗ Needs verification(ansi reset)"
             }
             
+            # Show dependencies and dependents
+            let dependencies = (detect-roll-dependencies $roll_branch)
+            let dependents = (find-roll-dependents $roll_branch)
+            
+            if not ($dependencies | is-empty) {
+                print $"      Dependencies: (ansi yellow)→ ($dependencies | str join ', ')(ansi reset)"
+            }
+            
+            if not ($dependents | is-empty) {
+                print $"      Depended on by: (ansi cyan)← ($dependents | str join ', ')(ansi reset)"
+            }
+            
             # Show metadata if available
             if $has_metadata {
                 let metadata = (open $metadata_file)
                 
                 if ($metadata | get depends_on? | is-not-empty) and not ($metadata.depends_on | is-empty) {
-                    print $"      Depends on: ($metadata.depends_on | str join ', ')"
+                    let manual_deps = ($metadata.depends_on | where {|dep| not ($dep in $dependencies)})
+                    if not ($manual_deps | is-empty) {
+                        print $"      Manual deps: (ansi magenta)($manual_deps | str join ', ')(ansi reset)"
+                    }
                 }
             }
             
@@ -1322,82 +1401,150 @@ def "main test-all" [] {
     }
 }
 
-# List all rolls
+# List all rolls with detailed status
 def "main list" [] {
     let config = get-config
     let current_branch = (git branch --show-current | str trim)
+    let current_roll = get-current-roll
     
     print "=== All Rolls ==="
     print ""
     
-    # Get local branches
-    let local_branches = (git branch --list $"($config.roll_prefix)*"
+    # Get all roll branches (local and remote)
+    let local_rolls = try {
+        git branch --list $"($config.roll_prefix)*"
         | lines
-        | each { |line| 
-            let cleaned = ($line | str trim | str replace '* ' '')
-            let is_current = ($line | str starts-with '*')
-            
-            {
-                branch: $cleaned,
-                is_local: true,
-                is_remote: false,
-                is_current: $is_current
-            }
-        }
-    )
+        | each { |line| $line | str trim | str replace '* ' '' }
+    } catch {
+        []
+    }
     
-    # Get remote branches
-    let remote_branches = (git branch -r
+    let remote_rolls = try {
+        git branch -r
         | lines
         | each { |line| $line | str trim }
         | where { |branch| $branch =~ $"origin/($config.roll_prefix)" }
-        | each { |branch| 
-            let cleaned = ($branch | str replace 'origin/' '')
-            {
-                branch: $cleaned,
-                is_local: false,
-                is_remote: true,
-                is_current: false
+        | each { |branch| $branch | str replace 'origin/' '' }
+    } catch {
+        []
+    }
+    
+    let all_roll_branches = ($local_rolls | append $remote_rolls | uniq | sort)
+    
+    if ($all_roll_branches | is-empty) {
+        print "  No rolls found"
+    } else {
+        for roll_branch in $all_roll_branches {
+            # Check if it's the current roll
+            let is_current = ($roll_branch == $current_roll)
+            
+            # Get metadata if available
+            let roll_num = try {
+                $roll_branch | str replace $config.roll_prefix '' | split row '-' | get 0
+            } catch {
+                null
             }
-        }
-    )
-    
-    # Combine all branches
-    let all_branches = ($local_branches | append $remote_branches)
-    
-    # Group by branch name to detect local vs remote-only
-    let unique_branches = ($all_branches | get branch | uniq | sort)
-    
-    for branch in $unique_branches {
-        let branch_entries = ($all_branches | where branch == $branch)
-        let has_local = ($branch_entries | any {|entry| $entry.is_local})
-        let has_remote = ($branch_entries | any {|entry| $entry.is_remote})
-        let is_current = ($branch_entries | any {|entry| $entry.is_current})
-        
-        # Get verification status
-        let verification = (check-roll-verification $branch)
-        let verified_hosts = ($verification | items {|key, val| if $val { $key } else { null }} | where {|v| $v != null})
-        let unverified_hosts = ($verification | items {|key, val| if not $val { $key } else { null }} | where {|v| $v != null})
-        
-        # Format branch display with location indicator
-        if $is_current {
-            print $"  → (ansi green)($branch)(ansi reset) \(current\)"
-        } else if $has_local and $has_remote {
-            print $"    ($branch) \(local + remote\)"
-        } else if $has_local {
-            print $"    ($branch) \(local only\)"
-        } else if $has_remote {
-            print $"    (ansi cyan)($branch)(ansi reset) \(remote only\)"
-        }
-        
-        # Show host verification with symbols
-        if ($verified_hosts | length) > 0 {
-            let hosts_str = ($verified_hosts | str join ", ")
-            print $"      ✅ ($hosts_str)"
-        }
-        if ($unverified_hosts | length) > 0 {
-            let hosts_str = ($unverified_hosts | str join ", ")
-            print $"      ⏳ ($hosts_str)"
+            
+            let metadata_file = if ($roll_num != null) {
+                $"($env.HOME)/.config/roll-flow/rolls/($roll_num).nuon"
+            } else {
+                null
+            }
+            
+            let has_metadata = ($metadata_file != null) and ($metadata_file | path exists)
+            
+            # Get verification status
+            let verification = (check-roll-verification $roll_branch)
+            let verified_count = ($verification | values | where {|v| $v == true} | length)
+            let total_hosts = ($config.hosts | length)
+            
+            # Get scope
+            let scope = (detect-roll-scope $roll_branch)
+            
+            # Display roll header
+            if $is_current {
+                print $"  → (ansi green)($roll_branch)(ansi reset) (ansi default_dimmed)\(current\)(ansi reset)"
+            } else {
+                print $"    ($roll_branch)"
+            }
+            
+            # Show scope icons
+            mut scope_icons = []
+            if $scope.nixos { $scope_icons = ($scope_icons | append "🖥️") }
+            if $scope.home { $scope_icons = ($scope_icons | append "🏠") }
+            if $scope.flake { $scope_icons = ($scope_icons | append "📦") }
+            if $scope.docs { $scope_icons = ($scope_icons | append "📝") }
+            
+            if not ($scope_icons | is-empty) {
+                print $"      Scope: ($scope_icons | str join ' ')"
+            }
+            
+            # Show verification requirements
+            let requirements = (get-verification-requirements $roll_branch)
+            if $requirements.check_type != "none" {
+                let req_color = match $requirements.check_type {
+                    "full" => "yellow",
+                    "light" => "cyan",
+                    "docs" => "green",
+                    _ => "default"
+                }
+                print $"      Requires: (ansi ($req_color))($requirements.description)(ansi reset)"
+            }
+            
+            # Show verification status
+            if $total_hosts > 0 {
+                let percent = (($verified_count * 100) / $total_hosts | math round)
+                if $verified_count == $total_hosts {
+                    print $"      Verification: (ansi green)✓ ($verified_count)/($total_hosts) hosts(ansi reset)"
+                } else if $verified_count > 0 {
+                    print $"      Verification: (ansi yellow)⏳ ($verified_count)/($total_hosts) hosts ($percent)%(ansi reset)"
+                } else {
+                    print $"      Verification: (ansi red)✗ 0/($total_hosts) hosts(ansi reset)"
+                }
+            }
+            
+            # Show graduation and promotion status
+            let promo_status = (check-roll-promotion-ready $roll_branch)
+            
+            if $promo_status.graduated {
+                print $"      Graduated: (ansi green)✓ Merged to ($config.rolling_branch)(ansi reset)"
+            } else if not $promo_status.docs_only {
+                print $"      Graduated: (ansi yellow)⏳ Not yet merged to ($config.rolling_branch)(ansi reset)"
+            }
+            
+            if $promo_status.ready {
+                print $"      Promotion: (ansi green)✓ Ready to promote to ($config.stable_branch)(ansi reset)"
+            } else if $promo_status.fully_verified and not $promo_status.graduated and not $promo_status.docs_only {
+                print $"      Promotion: (ansi yellow)⏳ Needs graduation first(ansi reset)"
+            } else if not $promo_status.fully_verified {
+                print $"      Promotion: (ansi red)✗ Needs verification(ansi reset)"
+            }
+            
+            # Show dependencies and dependents
+            let dependencies = (detect-roll-dependencies $roll_branch)
+            let dependents = (find-roll-dependents $roll_branch)
+            
+            if not ($dependencies | is-empty) {
+                print $"      Dependencies: (ansi yellow)→ ($dependencies | str join ', ')(ansi reset)"
+            }
+            
+            if not ($dependents | is-empty) {
+                print $"      Depended on by: (ansi cyan)← ($dependents | str join ', ')(ansi reset)"
+            }
+            
+            # Show metadata if available
+            if $has_metadata {
+                let metadata = (open $metadata_file)
+                
+                if ($metadata | get depends_on? | is-not-empty) and not ($metadata.depends_on | is-empty) {
+                    let manual_deps = ($metadata.depends_on | where {|dep| not ($dep in $dependencies)})
+                    if not ($manual_deps | is-empty) {
+                        print $"      Manual deps: (ansi magenta)($manual_deps | str join ', ')(ansi reset)"
+                    }
+                }
+            }
+            
+            print ""
         }
     }
 }
