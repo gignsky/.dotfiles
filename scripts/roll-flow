@@ -792,6 +792,10 @@ def test-roll-builds-standalone [
 # Check which hosts have verified a given roll with rebuilds
 # Returns a record with per-host, per-type verification status:
 # { hostname: { verified: bool, nixos: bool, home: bool } }
+#
+# Verification sources (checked in order):
+# 1. test-all commits on the roll branch itself (structured test results)
+# 2. Rebuild commits on rolling branch (nixos-rebuild / home-manager-switch)
 def check-roll-verification [
     roll_branch: string  # Roll branch name (e.g., "roll/5-roll-flow-init")
 ] {
@@ -799,6 +803,71 @@ def check-roll-verification [
     
     # Detect what scopes this roll affects
     let scope = (detect-roll-scope $roll_branch)
+    
+    # Try source 1: Look for test-all commit on the roll branch
+    # Format: "test(roll/N-theme): flake=pass host=✓ ..."
+    let resolved = (resolve-roll-ref $roll_branch)
+    let test_commit = if ($resolved != null) and ($resolved != "") {
+        let raw = try {
+            bash -c $"git log ($resolved) --oneline --grep='^test\(($roll_branch)\):' -1 2>/dev/null"
+            | str trim
+        } catch { "" }
+        if ($raw | is-empty) { "" } else { $raw | str trim }
+    } else { "" }
+    
+    if not ($test_commit | is-empty) {
+        # Parse the test commit body for host results
+        let commit_hash = ($test_commit | split row ' ' | get 0)
+        let raw_body = try {
+            bash -c $"git log ($commit_hash) -1 --format='%b' 2>/dev/null"
+        } catch { "" }
+        let test_lines = if ($raw_body | is-empty) { [] } else { $raw_body | lines }
+        
+        # Extract Host-Results section
+        mut in_host_section = false
+        mut host_results = {}
+        for line in $test_lines {
+            let trimmed = ($line | str trim)
+            if ($trimmed | str starts-with "Host-Results:") { $in_host_section = true; continue }
+            if ($in_host_section) {
+                if ($trimmed | str starts-with "Flake-Check:") { $in_host_section = false; continue }
+                # Parse lines like "  host: PASSED" or "  host: FAILED"
+                let parts = ($trimmed | split row ": ")
+                if ($parts | length) >= 2 {
+                    let h = ($parts | get 0)
+                    let result = ($parts | get 1)
+                    if $h in $config.hosts {
+                        let passed = ($result == "PASSED" or $result == "pass")
+                        $host_results = ($host_results | insert $h {
+                            verified: $passed,
+                            nixos: (if $passed { $scope.nixos } else { false }),
+                            home: (if $passed { $scope.home } else { false }),
+                            required: { nixos: $scope.nixos, home: $scope.home }
+                        })
+                    }
+                }
+            }
+        }
+        
+        # Merge with defaults for any hosts not in the test results
+        mut final_status = {}
+        for host in $config.hosts {
+            if $host in ($host_results | columns) {
+                $final_status = ($final_status | insert $host ($host_results | get $host))
+            } else {
+                # Host not tested — mark as unverified
+                $final_status = ($final_status | insert $host {
+                    verified: false,
+                    nixos: false,
+                    home: false,
+                    required: { nixos: $scope.nixos, home: $scope.home }
+                })
+            }
+        }
+        return $final_status
+    }
+    
+    # Source 2: Fall back to rolling rebuild commit check
     
     # Find when this roll was merged to rolling
     let roll_merge = try {
@@ -1397,10 +1466,10 @@ def "main status" [] {
     } catch { [] }
     
     let remote_rolls = try {
-        git branch -r
-        | lines
+        let branches = (bash -c "git branch -r 2>/dev/null" | lines)
+        $branches
         | each { |line| $line | str trim }
-        | where { |branch| $branch =~ $"origin/($config.roll_prefix)" }
+        | where { |branch| ($branch | str starts-with $"origin/($config.roll_prefix)") }
         | each { |branch| $branch | str replace 'origin/' '' }
     } catch { [] }
     
@@ -1587,14 +1656,27 @@ def "main status" [] {
 # Test build on all hosts
 # - Runs nix flake check first (shared evaluation: passes once = passes for all)
 # - Then builds homeConfigurations on each configured host
-# - Records results with a commit (like rebuild/home commands do)
+# - Records results with a structured commit (like rebuild/home commands do)
+# - The commit is written to the current branch and can be read by check-roll-verification
 def "main test-all" [] {
     let config = get-config
     let current_branch = (git branch --show-current | str trim)
+    let current_roll = get-current-roll
     
     print "=== Test All ==="
     print $"Branch: (ansi cyan)($current_branch)(ansi reset)"
     print ""
+    
+    # Detect scope of changes on this branch
+    let scope = (detect-roll-scope $current_branch)
+    mut scope_codes = []
+    if $scope.nixos { $scope_codes = ($scope_codes | append "N") }
+    if $scope.home { $scope_codes = ($scope_codes | append "H") }
+    if $scope.flake { $scope_codes = ($scope_codes | append "F") }
+    if $scope.docs { $scope_codes = ($scope_codes | append "D") }
+    if ($scope_codes | is-empty) { $scope_codes = ["-"] }
+    let scope_str = ($scope_codes | str join "")
+    let changed_files = ($scope.files | str join ", ")
     
     let flake_result = {
         passed: false,
@@ -1640,22 +1722,25 @@ def "main test-all" [] {
         print ""
         print $"(ansi red)Aborting: Flake check must pass before builds can proceed(ansi reset)"
         
-        # Record the failure with a commit for audit trail
+        # Record the failure with a structured commit for audit trail
         print ""
         print "Recording test-all result..."
         let timestamp = (date now | format date "%Y-%m-%d %H:%M:%S")
         let commit_lines = [
-            $"auto(test): test-all on ($current_branch) — flake-check FAILED",
+            ("test(" + $current_branch + "): flake=fail"),
             "",
-            $"Timestamp: ($timestamp)",
+            "Host-Results:",
+            $"  (no hosts built — flake check failed)",
+            "Flake-Check: fail",
+            $"Scope: ($scope_str)",
+            $"Changed-Files: ($changed_files)",
             $"Branch: ($current_branch)",
+            $"Timestamp: ($timestamp)",
             "",
-            "Flake Check: FAILED",
+            "Command: roll-flow test-all",
             "",
             "Details:",
             ($flake_check_result.stderr | lines | first 20 | str join "\n"),
-            "",
-            "Command: roll-flow test-all"
         ]
         let commit_msg = ($commit_lines | str join "\n")
         try {
@@ -1716,20 +1801,23 @@ def "main test-all" [] {
     
     let timestamp = (date now | format date "%Y-%m-%d %H:%M:%S")
     let host_results_str = ($frozen_status_icons | str join ", ")
-    let host_detail_lines = ($frozen_detail_parts | str join "\n")
+    let host_results_lines = ($frozen_detail_parts | str join "\n")
+    # Build a parseable host-results map for the commit header
+    let host_results_map = ($frozen_status_icons | each {|icon|
+        let parts = ($icon | split row " ")
+        $"($parts.0)=($parts.1)"
+    } | str join " ")
     
     let commit_lines = [
-        $"auto(test): test-all on ($current_branch) — flake-check ✓, host builds: ($host_results_str)",
+        ("test(" + $current_branch + "): flake=pass " + $host_results_map),
         "",
-        $"Timestamp: ($timestamp)",
+        "Host-Results:",
+        $host_results_lines,
+        $"Flake-Check: pass",
+        $"Scope: ($scope_str)",
+        $"Changed-Files: ($changed_files)",
         $"Branch: ($current_branch)",
-        "",
-        "Flake Check: PASSED",
-        "",
-        "Host Results:",
-        $host_detail_lines,
-        "",
-        $"Summary: flake-check ✓, ($host_results_str)",
+        $"Timestamp: ($timestamp)",
         "",
         "Command: roll-flow test-all"
     ]
@@ -1748,6 +1836,7 @@ def "main test-all" [] {
     print ""
     print "=== Test-All Summary ==="
     print $"  Branch:    ($current_branch)"
+    print $"  Scope:     (ansi cyan)($scope_str)(ansi reset)  Files: ($scope.files_count)"
     print $"  Flake:     (ansi green)✓ PASSED(ansi reset)"
     for result in $frozen_status_icons {
         if ($result | str contains "✗") {
