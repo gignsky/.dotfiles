@@ -199,3 +199,7 @@ let
 
 in
 scripts
+// {
+  # Alias roll-flow to rf for backward compatibility
+  roll-flow = scripts.rf;
+}
