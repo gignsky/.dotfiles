@@ -72,7 +72,7 @@
         desktop = "^9";
         follow = true;
       };
-      "youtube-music" = {
+      "pear-desktop" = {
         desktop = "^9";
         follow = true;
       };
