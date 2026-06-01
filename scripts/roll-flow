@@ -1769,7 +1769,7 @@ def "main graduate" [
             break
         }
         
-        print $"    (ansi green)✓ Merge prepared (working tree)(ansi reset)"
+        print $"    (ansi green)✓ Merge prepared \(working tree\)(ansi reset)"
         
         # Step 2: Pre-commit flake check on the merged working tree
         # This catches issues before the merge commit is finalized
