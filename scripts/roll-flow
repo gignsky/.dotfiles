@@ -1169,6 +1169,56 @@ def "main integrate" [
     }
 }
 
+# Run nix flake check on a given branch, returning { passed: bool, output: string }
+# Checks out the branch, runs flake check, then returns to original branch.
+def run-flake-check [branch: string, label?: string] {
+    let orig = (git branch --show-current | str trim)
+    let display = if ($label | is-empty) { $branch } else { $label }
+    print $"  Running (ansi yellow)nix flake check(ansi reset) on ($display)..."
+    
+    # Stash any local changes if needed
+    let had_changes = ((do -i { ^git status --porcelain } | str trim | is-not-empty) and $orig != $branch)
+    if $had_changes {
+        do -i { ^git stash push -m "auto-stash before flake check" } | ignore
+    }
+    
+    # Checkout the target branch
+    let co = (do -i { ^git checkout $branch } | complete)
+    if $co.exit_code != 0 {
+        if $had_changes { do -i { ^git stash pop } | ignore }
+        do -i { ^git checkout $orig } | ignore
+        return { passed: false, output: $"Failed to checkout ($branch): ($co.stderr | str trim)" }
+    }
+    
+    # Pull latest if remote tracking exists
+    do -i { ^git pull --ff-only } | complete | ignore
+    
+    # Run flake check
+    let result = (try {
+        nix flake check --keep-going --show-trace out+err>| complete
+    } catch {
+        { exit_code: 1, stderr: "nix flake check command failed to execute" }
+    })
+    
+    let output = if $result.exit_code == 0 {
+        $"✓ nix flake check passed on ($display)"
+    } else {
+        let err_lines = ($result.stderr | lines | where {|l| ($l | str contains "error") or ($l | str contains "Error") })
+        let summary = if not ($err_lines | is-empty) {
+            $err_lines | first 5 | str join "\n      "
+        } else {
+            $result.stderr | lines | last 10 | str join "\n      "
+        }
+        $"✗ nix flake check FAILED on ($display):\n      ($summary)"
+    }
+    
+    # Return to original branch
+    do -i { ^git checkout $orig } | ignore
+    if $had_changes { do -i { ^git stash pop } | ignore }
+    
+    { passed: ($result.exit_code == 0), output: $output }
+}
+
 # Interactive graduate/promote with candidate selection, pre-flight checks,
 # merge execution, branch cleanup, and develop reintegration.
 # Replaces the old non-interactive graduate and promote commands.
@@ -1312,19 +1362,14 @@ def "main graduate" [
             
             for host in $config.hosts {
                 let info = ($verification | get $host)
-                let mark = if $info.verified {
-                    mut v = ""
-                    if $info.required.nixos { $v = ($v + "ok") }
-                    if $info.required.home { $v = ($v + "ok") }
-                    if not ($info.required.nixos) and not ($info.required.home) { $v = "pass" }
-                    $v
-                } else {
-                    mut v = ""
-                    if $info.required.nixos and (not $info.nixos) { $v = ($v + "N..") }
-                    if $info.required.home and (not $info.home) { $v = ($v + "H..") }
-                    if ($v | is-empty) { $v = ".." }
-                    $v
-                }
+                # Clear 2-char indicators: first char = NixOS, second = Home
+                let nixos_mark = if $info.required.nixos {
+                    if $info.nixos { "✓" } else { "⌛" }
+                } else { "—" }
+                let home_mark = if $info.required.home {
+                    if $info.home { "✓" } else { "⌛" }
+                } else { "—" }
+                let mark = $"($nixos_mark)($home_mark)"
                 $rec = ($rec | insert $host $mark)
             }
             $rec
@@ -1486,6 +1531,36 @@ def "main graduate" [
         }
     }
     
+    # Check 5: Flake check on each roll branch before merging
+    # For graduate mode: test each roll individually
+    # For promote mode: test develop (which contains all merged rolls)
+    if not $force {
+        if $mode == "graduate" {
+            for roll in $ordered {
+                let flake_result = (run-flake-check $roll $roll)
+                if $flake_result.passed {
+                    print $"  (ansi green)✓ ($roll) - flake check passed(ansi reset)"
+                } else {
+                    print $"  (ansi red)✗ ($roll) - flake check FAILED(ansi reset)"
+                    print $"      ($flake_result.output)"
+                    $checks_passed = false
+                }
+            }
+        } else if $mode == "promote" {
+            # For promote, test develop (which has all merged rolls integrated)
+            let flake_result = (run-flake-check $config.rolling_branch $config.rolling_branch)
+            if $flake_result.passed {
+                print $"  (ansi green)✓ ($config.rolling_branch) - flake check passed(ansi reset)"
+            } else {
+                print $"  (ansi red)✗ ($config.rolling_branch) - flake check FAILED(ansi reset)"
+                print $"      ($flake_result.output)"
+                $checks_passed = false
+            }
+        }
+    } else {
+        print $"  (ansi yellow)⚠ Flake check skipped (--force)(ansi reset)"
+    }
+    
     if not $checks_passed {
         print ""
         print $"(ansi red)Pre-merge checks failed.(ansi reset)"
@@ -1560,11 +1635,68 @@ def "main graduate" [
         }
         
         print $"  Merging (ansi cyan)($roll)(ansi reset)..."
-        let merge = (do -i { ^git merge --no-ff $roll -m $merge_msg } | complete)
         
-        if $merge.exit_code == 0 {
-            print $"    (ansi green)✓ Merged successfully(ansi reset)"
-            $merged_count = $merged_count + 1
+        # Step 1: Merge into working tree (no commit yet)
+        let merge = (do -i { ^git merge --no-ff --no-commit $roll } | complete)
+        
+        if $merge.exit_code != 0 {
+            print $"    (ansi red)✗ Merge failed - check for conflicts(ansi reset)"
+            print $"      ($merge.stderr | str trim)"
+            do -i { ^git merge --abort } | complete | ignore
+            $failed_count = $failed_count + 1
+            break
+        }
+        
+        print $"    (ansi green)✓ Merge prepared (working tree)(ansi reset)"
+        
+        # Step 2: Pre-commit flake check on the merged working tree
+        # This catches issues before the merge commit is finalized
+        mut do_commit = true
+        if not $force {
+            print $"    Running (ansi yellow)nix flake check(ansi reset) on merged tree..."
+            let post_check = (try {
+                nix flake check --keep-going --show-trace out+err>| complete
+            } catch {
+                { exit_code: 1, stderr: "nix flake check command failed to execute" }
+            })
+            
+            if $post_check.exit_code == 0 {
+                print $"      (ansi green)✓ Flake check passed(ansi reset)"
+            } else {
+                print $"      (ansi red)✗ Pre-commit flake check FAILED!(ansi reset)"
+                let err_lines = ($post_check.stderr | lines | where {|l| ($l | str contains "error") or ($l | str contains "Error") })
+                let summary = if not ($err_lines | is-empty) {
+                    $err_lines | first 5 | str join "\n      "
+                } else {
+                    $post_check.stderr | lines | last 10 | str join "\n      "
+                }
+                print $"      ($summary)"
+                print ""
+                let abort_choice = (try { input $"    Abort this merge? (Y/n): " } catch { "y" })
+                if ($abort_choice | str trim | str downcase) != "n" {
+                    do -i { ^git merge --abort } | complete | ignore
+                    print $"      (ansi yellow)✓ Merge aborted - ($roll) was NOT merged into ($target)(ansi reset)"
+                    $do_commit = false
+                    $failed_count = $failed_count + 1
+                    break
+                } else {
+                    print $"      (ansi yellow)⚠ Committing with failed flake check (user choice)(ansi reset)"
+                }
+            }
+        }
+        
+        if $do_commit {
+            # Step 3: Finalize the merge commit
+            let commit = (do -i { ^git commit -m $merge_msg } | complete)
+            if $commit.exit_code == 0 {
+                print $"    (ansi green)✓ Merged successfully(ansi reset)"
+                $merged_count = $merged_count + 1
+            } else {
+                print $"    (ansi red)✗ Commit failed after successful merge(ansi reset)"
+                print $"      ($commit.stderr | str trim)"
+                $failed_count = $failed_count + 1
+                break
+            }
             
             # Update metadata file
             let roll_num = try {
@@ -1591,13 +1723,8 @@ def "main graduate" [
                     print $"    (ansi yellow)⚠ Push failed - may retry later(ansi reset)"
                 }
             }
-        } else {
-            print $"    (ansi red)✗ Merge failed - check for conflicts(ansi reset)"
-            print $"      ($merge.stderr | str trim)"
-            $failed_count = $failed_count + 1
-            break
-        }
-    }
+        }   # end if $do_commit
+    }       # end for roll in $ordered
     
     # Tag for promote mode
     if $mode == "promote" and $merged_count > 0 and $failed_count == 0 {
@@ -1827,19 +1954,15 @@ def "main status" [] {
         # Add per-host columns dynamically
         for host in $config.hosts {
             let info = ($verification | get $host)
-            let mark = if $info.verified {
-                mut v = ""
-                if $info.required.nixos { $v = ($v + "ok") }
-                if $info.required.home { $v = ($v + "ok") }
-                if not ($info.required.nixos) and not ($info.required.home) { $v = "pass" }
-                $v
-            } else {
-                mut v = ""
-                if $info.required.nixos and (not $info.nixos) { $v = ($v + "N..") }
-                if $info.required.home and (not $info.home) { $v = ($v + "H..") }
-                if ($v | is-empty) { $v = ".." }
-                $v
-            }
+            # Clear 2-char indicators: first char = NixOS, second = Home
+            # ✓=verified  ⌛=pending  —=not needed
+            let nixos_mark = if $info.required.nixos {
+                if $info.nixos { "✓" } else { "⌛" }
+            } else { "—" }
+            let home_mark = if $info.required.home {
+                if $info.home { "✓" } else { "⌛" }
+            } else { "—" }
+            let mark = $"($nixos_mark)($home_mark)"
             $record = ($record | insert $host $mark)
         }
         
@@ -1853,8 +1976,9 @@ def "main status" [] {
     } | table --width 150 | to text | print
     print ""
     
-    # Legend for dev column
-    print $"(ansi default_dimmed)Legend - dev: ✓=merged, ↑=ahead \(unmerged\), ⚠=diverged \(modified after merge\), ↓=behind | blk: 🔒=blocked by deps(ansi reset)"
+    # Legend for columns
+    print $"(ansi default_dimmed)dev: ✓=merged, ↑=ahead, ⚠=diverged, ↓=behind | blk: 🔒=blocked by deps(ansi reset)"
+    print $"(ansi default_dimmed)verification: ✓=done ⌛=pending —=n/a | first char=NixOS second=Home \(e.g. ✓⌛=NixOS ok Home pending\)(ansi reset)"
     print ""
     
     # ── Detail Prompt ───────────────────────────────────────────────
@@ -1885,8 +2009,41 @@ def "main status" [] {
         if ($scope_codes | is-empty) { $scope_codes = ["-"] }
         
         let scope_str = ($scope_codes | str join "")
-        print $"  Scope: (ansi cyan)($scope_str)(ansi reset)  Files: ($scope.files_count)  " + 
-            (if ($scope.files_count) > 0 { $"(ansi default_dimmed)($scope.files | first 5 | str join ', ')(ansi reset)" } else { "" })
+        print $"  Scope: (ansi cyan)($scope_str)(ansi reset)  Files: ($scope.files_count)"
+        
+        # Get dependency file sets for overlap detection
+        let deps = (detect-roll-dependencies $current_roll)
+        mut dep_files = []
+        if not ($deps | is-empty) {
+            for dep in $deps {
+                let dep_scope = (detect-roll-scope $dep)
+                $dep_files = ($dep_files | append $dep_scope.files)
+            }
+        }
+        
+        # Show files grouped by category with overlap markers
+        if ($scope.files_count) > 0 {
+            let cat_info = [
+                [cat, label, files];
+                ["N", "  NixOS: ", $scope.nixos_files],
+                ["H", "  Home:  ", $scope.home_files],
+                ["F", "  Flake: ", $scope.flake_files],
+                ["D", "  Docs:  ", $scope.docs_files],
+                ["O", "  Other: ", $scope.other_files]
+            ]
+            
+            for row in $cat_info {
+                let files = $row.files
+                if ($files | is-empty) { continue }
+                let label = $row.label
+                for f_item in ($files | enumerate) {
+                    let prefix = if $f_item.index == 0 { $label } else { "         " }
+                    let f = $f_item.item
+                    let overlap = if ($f in $dep_files) { " ⤴ overlaps deps" } else { "" }
+                    print $"($prefix)(ansi default_dimmed)($f)(ansi reset)($overlap)"
+                }
+            }
+        }
         
         # Roll metadata
         let roll_num = ($current_roll | str replace 'roll/' '' | split row '-' | get 0)
@@ -1902,19 +2059,15 @@ def "main status" [] {
         let verification = (check-roll-verification $current_roll)
         let verif_records = ($config.hosts | each {|host|
             let info = ($verification | get $host)
-            if $info.verified {
-                mut marks = []
-                if $info.required.nixos { $marks = ($marks | append "N:ok") }
-                if $info.required.home { $marks = ($marks | append "H:ok") }
-                if not ($info.required.nixos) and not ($info.required.home) { $marks = ["auto"] }
-                { host: $host, status: "ok", detail: ($marks | str join " ") }
-            } else {
-                mut marks = []
-                if $info.required.nixos and (not $info.nixos) { $marks = ($marks | append "N:..") }
-                if $info.required.home and (not $info.home) { $marks = ($marks | append "H:..") }
-                if ($marks | is-empty) { $marks = ["pending"] }
-                { host: $host, status: "..", detail: ($marks | str join " ") }
-            }
+            let nixos_mark = if $info.required.nixos {
+                if $info.nixos { "✓" } else { "⌛" }
+            } else { "—" }
+            let home_mark = if $info.required.home {
+                if $info.home { "✓" } else { "⌛" }
+            } else { "—" }
+            let marks = $"NixOS:($nixos_mark) Home:($home_mark)"
+            let status = if $info.verified { "ok" } else { ".." }
+            { host: $host, status: $status, detail: $marks }
         })
         $verif_records | table -e | lines | each {|line| print $"  ($line)" }
         
@@ -1981,6 +2134,48 @@ def "main status" [] {
         })
         
         $all_records | table -e | lines | each {|line| print $"  ($line)" }
+    }
+    
+    # ── Develop / Non-Roll Branch Status ──────────────────────────
+    let current_branch = (git branch --show-current | str trim)
+    if ($current_branch != $config.rolling_branch) and (not ($current_branch | str starts-with "roll/")) {
+        # Non-roll, non-develop branch
+        print ""
+        print $"=== Branch: (ansi yellow)($current_branch)(ansi reset) ==="
+        let scope = (detect-roll-scope $current_branch)
+        if ($scope.files_count) > 0 {
+            print $"  Changed files (vs main): ($scope.files_count)"
+            for row in [ [cat, label, files]; ['N', '  NixOS: ', $scope.nixos_files], ['H', '  Home:  ', $scope.home_files], ['F', '  Flake: ', $scope.flake_files], ['D', '  Docs:  ', $scope.docs_files], ['O', '  Other: ', $scope.other_files] ] {
+                let files = $row.files
+                if ($files | is-empty) { continue }
+                for f in $files {
+                    print $"  ($row.label)(ansi default_dimmed)($f)(ansi reset)"
+                }
+            }
+        } else {
+            print "  (no changes vs main)"
+        }
+    }
+    
+    # ── Roll Queue / Merge Queue Status ───────────────────────────
+    let merged_rolls = ($all_roll_branches | where {|r| check-roll-graduated $r})
+    if not ($merged_rolls | is-empty) {
+        let unverified_merged = ($merged_rolls | where {|r|
+            let v = (check-roll-verification $r)
+            not ($v | values | all {|x| $x.verified})
+        })
+        if not ($unverified_merged | is-empty) {
+            print ""
+            print $"=== Merge Queue: (ansi yellow)($unverified_merged | length) merged roll(s) still need verification for promotion ==="
+            for r in $unverified_merged {
+                let v = (check-roll-verification $r)
+                let host_summary = ($config.hosts | each {|h|
+                    let info = ($v | get $h)
+                    if $info.verified { $"(ansi green)($h):✓(ansi reset)" } else { $"(ansi red)($h):⌛(ansi reset)" }
+                } | str join " ")
+                print $"  (ansi cyan)($r)(ansi reset) — ($host_summary)"
+            }
+        }
     }
     print ""
 }
