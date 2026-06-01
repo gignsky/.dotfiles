@@ -12,8 +12,8 @@ def main [] {
     print "  init [OPTIONS]          Initialize roll-flow in this repo"
     print "  start <theme>           Start a new roll branch"
     print "  integrate <branch>      Merge a feature branch into current roll"
-    print "  graduate [roll]         Graduate a roll to develop branch (default: current)"
-    print "  promote                 Promote develop to main (with verification)"
+    print "  graduate [--promote]    Interactive: graduate rolls to develop or promote to main"
+    print "  promote                 Alias for 'graduate --promote'"
     print "  status                  Show current roll status"
     print "  test-all                Test build on all configured hosts"
     print "  list                    List all rolls and their states"
@@ -33,6 +33,7 @@ def main [] {
     print "  roll-flow integrate feature/zellij-config"
     print "  roll-flow graduate"
     print "  roll-flow graduate roll/5-theme-name"
+    print "  roll-flow graduate --promote"
     print "  roll-flow promote"
 }
 
@@ -1079,88 +1080,472 @@ def "main integrate" [
     }
 }
 
-# Graduate a roll to rolling branch
-# Can be run from any branch if roll_branch is provided
+# Interactive graduate/promote with candidate selection, pre-flight checks,
+# merge execution, branch cleanup, and develop reintegration.
+# Replaces the old non-interactive graduate and promote commands.
 def "main graduate" [
-    roll_branch?: string  # Optional: roll branch to graduate (defaults to current branch)
+    ...targets: string           # Optional: roll branch names or table numbers
+    --dry-run                    # Show plan without executing
+    --force(-f)                  # Skip verification checks
+    --promote                    # Force promote mode (roll->main instead of roll->develop)
 ] {
     let config = get-config
+    let current = (git branch --show-current | str trim)
+    let current_roll = get-current-roll
     
-    # Determine which roll to graduate
-    let target_roll = if ($roll_branch | is-empty) {
-        let current = get-current-roll
-        if ($current == null) {
-            error make {msg: "Not currently on a roll branch. Specify a roll branch to graduate: rf graduate roll/N-theme"}
-        }
-        $current
+    # ── Phase A: Context & Mode ─────────────────────────────────────
+    
+    let on_rolling = ($current == $config.rolling_branch)
+    let on_stable = ($current == $config.stable_branch)
+    let on_roll = ($current_roll != null)
+    
+    let mode = if $promote or $on_rolling or $on_stable {
+        "promote"
+    } else if $on_roll {
+        "graduate"
     } else {
-        # Verify the branch exists and looks like a roll
-        let branch_exists = try {
-            let result = (do -i { ^git rev-parse --verify $roll_branch } | complete)
-            $result.exit_code == 0
-        } catch {
-            false
+        print "=== Roll Flow ==="
+        print $"Current branch: (ansi yellow)($current)(ansi reset)"
+        print ""
+        print "What would you like to do?"
+        print "  1) Graduate rolls to rolling branch"
+        print "  2) Promote rolls to stable branch"
+        let choice = (try { input "Choice (1/2) [1]: " } catch { "1" })
+        if ($choice | str trim) == "2" { "promote" } else { "graduate"
         }
-        
-        if not $branch_exists {
-            error make {msg: $"Roll branch '($roll_branch)' does not exist."}
-        }
-        
-        if not ($roll_branch | str starts-with $config.roll_prefix) {
-            error make {msg: $"Branch '($roll_branch)' does not look like a roll branch (expected '($config.roll_prefix)N-*')."}
-        }
-        
-        $roll_branch
     }
     
-    print $"Graduating (ansi cyan)($target_roll)(ansi reset) to (ansi cyan)($config.rolling_branch)(ansi reset)"
+    let target = if $mode == "promote" { $config.stable_branch } else { $config.rolling_branch }
+    let mode_label = if $mode == "promote" { "Promote" } else { "Graduate" }
+    
     print ""
-    print "This will merge the roll into rolling branch."
-    print "Make sure you've tested this roll on at least one host!"
+    print $"=== Roll Flow: ($mode_label) ==="
+    print $"  Current:  (ansi cyan)($current)(ansi reset)"
+    print $"  Target:   (ansi cyan)($target)(ansi reset)"
+    if $dry_run { print $"(ansi yellow)  DRY RUN - no changes will be made(ansi reset)" }
     print ""
     
-    let confirm = (input "Continue? (yes/no): ")
+    # ── Phase B: Gather Candidates ──────────────────────────────────
     
-    if $confirm != "yes" {
+    # Get all unique roll branches (local + remote)
+    let all_rolls = try {
+        let local = (do -i { ^git branch --list $"($config.roll_prefix)*" }
+            | lines
+            | each { |line| $line | str trim | str replace '* ' '' })
+        let remote = (do -i { ^git branch -r }
+            | lines
+            | each { |line| $line | str trim }
+            | where { |b| ($b | str starts-with $"origin/($config.roll_prefix)") }
+            | each { |b| $b | str replace 'origin/' '' })
+        ($local | append $remote | uniq | sort)
+    } catch { [] }
+    
+    if ($all_rolls | is-empty) {
+        print $"(ansi yellow)No roll branches found.(ansi reset)"
+        return
+    }
+    
+    # Filter based on mode
+    let candidates = if $mode == "promote" {
+        $all_rolls | where { |b| (check-roll-promotion-ready $b).ready }
+    } else {
+        $all_rolls | where { |b| not (check-roll-graduated $b) }
+    }
+    
+    if ($candidates | is-empty) {
+        let mode_down = ($mode_label | str downcase)
+        print $"(ansi yellow)No candidates for ($mode_down).(ansi reset)"
+        if $mode == "promote" {
+            print "  (no verified, graduated rolls ready)"
+        } else {
+            print "  (all rolls already graduated)"
+        }
+        return
+    }
+    
+    # ── Phase C: Selection ──────────────────────────────────────────
+    
+    # Resolve selections: if targets given, use them; otherwise interactive
+    let selected_rolls = if not ($targets | is-empty) {
+        $targets | each {|t|
+            if ($t | str starts-with $config.roll_prefix) {
+                if $t in $candidates { $t } else { null }
+            } else {
+                let idx = (try { $t | into int } catch { null })
+                if $idx != null and $idx >= 1 and $idx <= ($candidates | length) {
+                    $candidates | get ($idx - 1)
+                } else { null }
+            }
+        } | where { |b| $b != null }
+    } else {
+        # Build and show selection table
+        print $"Available candidates:"
+        print ""
+        
+        # Use enumerate for 0-based index; display shows index+1 for user-friendly numbering
+        let table_data = ($candidates | enumerate | each {|item|
+            let roll = $item.item
+            let scope = (detect-roll-scope $roll)
+            let verification = (check-roll-verification $roll)
+            
+            mut s = ""
+            if $scope.nixos { $s = ($s + "N") }
+            if $scope.home { $s = ($s + "H") }
+            if $scope.flake { $s = ($s + "F") }
+            if $scope.docs { $s = ($s + "D") }
+            if ($s | is-empty) { $s = "-" }
+            
+            mut rec = { roll: ($roll | str substring 0..36), scope: $s }
+            
+            for host in $config.hosts {
+                let info = ($verification | get $host)
+                let mark = if $info.verified {
+                    mut v = ""
+                    if $info.required.nixos { $v = ($v + "ok") }
+                    if $info.required.home { $v = ($v + "ok") }
+                    if not ($info.required.nixos) and not ($info.required.home) { $v = "pass" }
+                    $v
+                } else {
+                    mut v = ""
+                    if $info.required.nixos and (not $info.nixos) { $v = ($v + "N..") }
+                    if $info.required.home and (not $info.home) { $v = ($v + "H..") }
+                    if ($v | is-empty) { $v = ".." }
+                    $v
+                }
+                $rec = ($rec | insert $host $mark)
+            }
+            $rec
+        })
+        
+        $table_data | table --width 160 | to text | print
+        print ""
+        
+        let input_str = (try {
+            let mode_down = ($mode_label | str downcase)
+            input $"Select rolls to ($mode_down) (numbers 1-based, ranges, or 'all'): "
+        } catch { "" })
+        
+        let input_trimmed = ($input_str | str trim | str downcase)
+        
+        let selected_list = if $input_trimmed == "all" {
+            $candidates
+        } else if ($input_trimmed | is-empty) {
+            if ($candidates | length) >= 1 { [($candidates | get 0)] } else { [] }
+        } else {
+            # Parse comma-separated numbers and ranges (all 1-based)
+            $input_trimmed | split row "," | each {|part|
+                let trimmed = ($part | str trim)
+                let range = ($trimmed | split row "-")
+                if ($range | length) == 2 {
+                    let start = (try { $range | get 0 | into int } catch { null })
+                    let end = (try { $range | get 1 | into int } catch { null })
+                    if $start != null and $end != null and $start >= 1 and $end >= $start {
+                        $start..$end | each {|n|
+                            if $n >= 1 and $n <= ($candidates | length) { $candidates | get ($n - 1) } else { null }
+                        }
+                    } else { [] }
+                } else {
+                    let n = (try { $trimmed | into int } catch { null })
+                    if $n != null and $n >= 1 and $n <= ($candidates | length) {
+                        [($candidates | get ($n - 1))]
+                    } else { [] }
+                }
+            } | flatten | uniq
+        }
+        
+        $selected_list
+    }
+    
+    if ($selected_rolls | is-empty) {
+        print $"(ansi yellow)No rolls selected.(ansi reset)"
+        return
+    }
+    
+    # Resolve dependencies to build ordered merge queue
+    print ""
+    print "Analyzing dependencies..."
+    mut ordered = []
+    for roll in $selected_rolls {
+        let with_deps = (resolve-roll-dependencies $roll)
+        for r in $with_deps {
+            if not ($r in $ordered) and ($r in $all_rolls) {
+                $ordered = ($ordered | append $r)
+            }
+        }
+    }
+    
+    let all_valid = ($ordered | all {|r| $r in $all_rolls })
+    if not $all_valid {
+        print $"(ansi red)Error: dependency resolution found invalid rolls(ansi reset)"
+        return
+    }
+    
+    let num_ordered = ($ordered | length)
+    print $"  Resolved ($num_ordered) rolls in dependency order"
+    
+    # Show merge plan
+    print ""
+    print "Merge plan:"
+    for roll in $ordered {
+        print $"  -> (ansi cyan)($roll)(ansi reset) -> ($target)"
+    }
+    print ""
+    
+    # ── Phase D: Pre-Merge Checks ───────────────────────────────────
+    
+    print $"(ansi cyan)Pre-merge checks:(ansi reset)"
+    mut checks_passed = true
+    
+    # Check 1: Uncommitted changes (skipped with --force)
+    if not $force {
+        let status_raw = (do -i { ^git status --porcelain } | complete)
+        let has_uncommitted = ($status_raw.exit_code == 0 and ($status_raw.stdout | str trim | is-not-empty))
+        
+        if $has_uncommitted {
+            print $"  (ansi red)✗ Uncommitted changes detected. Commit or stash first, or use --force.(ansi reset)"
+            $checks_passed = false
+        } else {
+            print $"  (ansi green)✓ No uncommitted changes(ansi reset)"
+        }
+    } else {
+        print $"  (ansi yellow)✓ Uncommitted changes check skipped (--force)(ansi reset)"
+    }
+    
+    # Check 2: Verification (unless --force)
+    if not $force {
+        for roll in $ordered {
+            let verification = (check-roll-verification $roll)
+            let all_verified = ($verification | values | all {|v| $v.verified})
+            if not $all_verified {
+                print $"  (ansi red)✗ ($roll) - not fully verified(ansi reset)"
+                let unverified = ($verification | items {|h, i| if not $i.verified { $h } else { null }} | where {|v| $v != null})
+                for host in $unverified {
+                    print $"      .. ($host)"
+                }
+                $checks_passed = false
+            } else {
+                print $"  (ansi green)✓ ($roll) - all hosts verified(ansi reset)"
+            }
+        }
+    } else {
+        print $"  (ansi yellow)⚠ Verification skipped (--force)(ansi reset)"
+    }
+    
+    # Check 3: For promote mode, check divergence
+    if $mode == "promote" and not $force {
+        for roll in $ordered {
+            if (check-roll-diverged $roll) {
+                print $"  (ansi red)✗ ($roll) - diverged! Branch has commits after graduation(ansi reset)"
+                $checks_passed = false
+            }
+        }
+    }
+    
+    if not $checks_passed {
+        print ""
+        print $"(ansi red)Pre-merge checks failed.(ansi reset)"
+        print "  Fix the issues above, or use --force to skip checks."
+        return
+    }
+    
+    # ── Phase E: Confirmation ───────────────────────────────────────
+    
+    print ""
+    let mode_down = ($mode_label | str downcase)
+    let num_ordered2 = ($ordered | length)
+    print $"Ready to ($mode_down) ($num_ordered2) rolls to (ansi cyan)($target)(ansi reset)"
+    if $mode == "promote" {
+        print $"  (ansi yellow)Note:(ansi reset) After promotion, ($config.rolling_branch) will be rebased onto ($config.stable_branch)."
+    }
+    
+    let confirm = (try {
+        input "Proceed? (y/N): "
+    } catch { "n" })
+    
+    if ($confirm | str trim | str downcase) != "y" {
         print "Aborted."
         return
     }
     
-    # Temporarily store current branch to return to it later
-    let orig_branch = (git branch --show-current | str trim)
+    # ── Phase F: Execute Merges (unless dry-run) ────────────────────
     
-    git checkout $config.rolling_branch
-    git pull
-    git merge --no-ff $target_roll
+    if $dry_run {
+        print ""
+        print $"(ansi yellow)DRY RUN - no changes made(ansi reset)"
+        for roll in $ordered {
+            print $"  Would merge ($roll) -> ($target)"
+        }
+        if $mode == "promote" {
+            print $"  Would rebase ($config.rolling_branch) onto ($config.stable_branch)"
+        }
+        print ""
+        return
+    }
     
-    if $env.LAST_EXIT_CODE == 0 {
-        git push
-        
-        # Update metadata
-        let roll_num = ($target_roll | str replace 'roll/' '' | split row '-' | get 0)
-        let metadata_file = $"($env.HOME)/.config/roll-flow/rolls/($roll_num).nuon"
-        
-        if ($metadata_file | path exists) {
-            mut metadata = (open $metadata_file)
-            $metadata.status = "graduated"
-            $metadata.graduated = (date now | format date "%Y-%m-%d %H:%M:%S")
-            $metadata | save -f $metadata_file
+    print ""
+    let mode_down2 = ($mode_label | str downcase)
+    print $"($mode_down2) rolls..."
+    
+    let orig_branch = $current
+    let remote_url = (try {
+        do -i { ^git remote get-url origin } | str trim
+    } catch { "" })
+    let has_remote = ($remote_url | is-not-empty)
+    
+    mut merged_count = 0
+    mut failed_count = 0
+    
+    # Checkout target branch
+    let co = (do -i { ^git checkout $target } | complete)
+    if $co.exit_code != 0 {
+        print $"  (ansi red)✗ Failed to checkout ($target)(ansi reset)"
+        print $"    ($co.stderr | str trim)"
+        return
+    }
+    print $"  V Checked out (ansi cyan)($target)(ansi reset)"
+    
+    # Pull latest
+    do -i { ^git pull } | complete | ignore
+    
+    for roll in $ordered {
+        let merge_msg = if $mode == "promote" {
+            $"Promote ($roll) to ($config.stable_branch)"
+        } else {
+            $"Graduate ($roll) to ($config.rolling_branch)"
         }
         
-        print $"✓ Graduated (ansi green)($target_roll)(ansi reset) to ($config.rolling_branch)"
-        print "  Roll branch kept for reference (safe to delete later)"
+        print $"  Merging (ansi cyan)($roll)(ansi reset)..."
+        let merge = (do -i { ^git merge --no-ff $roll -m $merge_msg } | complete)
         
-        # Return to original branch if we came from elsewhere
-        if $orig_branch != $config.rolling_branch {
-            print $"  Returning to original branch: ($orig_branch)"
-            git checkout $orig_branch
+        if $merge.exit_code == 0 {
+            print $"    (ansi green)✓ Merged successfully(ansi reset)"
+            $merged_count = $merged_count + 1
+            
+            # Update metadata file
+            let roll_num = try {
+                $roll | str replace $config.roll_prefix '' | split row '-' | get 0
+            } catch { null }
+            if $roll_num != null {
+                let metadata_file = $"($env.HOME)/.config/roll-flow/rolls/($roll_num).nuon"
+                if ($metadata_file | path exists) {
+                    let metadata = (open $metadata_file)
+                    let new_status = if $mode == "promote" { "promoted" } else { "graduated" }
+                    let updated = ($metadata
+                        | upsert status $new_status
+                        | upsert $new_status (date now | format date "%Y-%m-%d %H:%M:%S"))
+                    $updated | save -f $metadata_file
+                }
+            }
+            
+            # Push after each merge (incremental safety)
+            if $has_remote {
+                let push_res = (do -i { ^git push } | complete)
+                if $push_res.exit_code == 0 {
+                    print $"    (ansi green)✓ Pushed to remote(ansi reset)"
+                } else {
+                    print $"    (ansi yellow)⚠ Push failed - may retry later(ansi reset)"
+                }
+            }
+        } else {
+            print $"    (ansi red)✗ Merge failed - check for conflicts(ansi reset)"
+            print $"      ($merge.stderr | str trim)"
+            $failed_count = $failed_count + 1
+            break
         }
-    } else {
-        print $"✗ Graduation failed. Check for conflicts."
-        # Return to original branch on failure too
-        if $orig_branch != (git branch --show-current | str trim) {
-            git checkout $orig_branch
+    }
+    
+    # Tag for promote mode
+    if $mode == "promote" and $merged_count > 0 and $failed_count == 0 {
+        let tag = $"stable-(date now | format date '%Y%m%d')"
+        let ordered_str = ($ordered | str join ', ')
+        let tag_msg = $"Promoted ($merged_count) rolls: ($ordered_str)"
+        let tag_result = (do -i { ^git tag -a $tag -m $tag_msg } | complete)
+        if $tag_result.exit_code == 0 {
+            print $"  V Tagged as (ansi cyan)($tag)(ansi reset)"
         }
+        if $has_remote {
+            do -i { ^git push origin $tag } | complete | ignore
+            print $"    V Tag pushed"
+        }
+    }
+    
+    # Return to original branch
+    do -i { ^git checkout $orig_branch } | complete | ignore
+    
+    # ── Phase G: Post-Merge Cleanup ─────────────────────────────────
+    
+    if $merged_count > 0 {
+        print ""
+        print "Post-merge cleanup:"
+        
+        for roll in $ordered {
+            let del = (try { input $"Delete '($roll)' branch? (y/N): " } catch { "n" })
+            if ($del | str trim | str downcase) == "y" {
+                let del_res = (do -i { ^git branch -d $roll } | complete)
+                if $del_res.exit_code == 0 {
+                    print $"  ✓ Deleted ($roll)"
+                    # Remote deletion
+                    if $has_remote {
+                        let remote_branches = (do -i { ^git branch -r } | lines | each {|l| $l | str trim })
+                        let remote_pattern = $"origin/($roll)"
+                        if ($remote_branches | any {|b| $b == $remote_pattern }) {
+                            let del_remote = (try { input $"  Delete remote '($roll)' too? (y/N): " } catch { "n" })
+                            if ($del_remote | str trim | str downcase) == "y" {
+                                do -i { ^git push origin --delete $roll } | complete | ignore
+                                print $"    V Remote ($roll) deleted"
+                            }
+                        }
+                    }
+                } else {
+                    print $"  ⚠ Could not delete ($roll) - not fully merged?"
+                    print $"    ($del_res.stderr | str trim)"
+                }
+            }
+        }
+        
+        # Reintegrate develop after promotion
+        if $mode == "promote" and $failed_count == 0 {
+            print ""
+            print "Reintegrating rolling branch..."
+            let dev_co = (do -i { ^git checkout $config.rolling_branch } | complete)
+            if $dev_co.exit_code == 0 {
+                do -i { ^git pull } | complete | ignore
+                let rebase = (do -i { ^git rebase $config.stable_branch } | complete)
+                if $rebase.exit_code == 0 {
+                    print $"  V ($config.rolling_branch) rebased onto ($config.stable_branch)(ansi reset)"
+                    if $has_remote {
+                        let push_dev = (do -i { ^git push } | complete)
+                        if $push_dev.exit_code == 0 {
+                            print $"  V ($config.rolling_branch) pushed(ansi reset)"
+                        } else {
+                            print $"  W ($config.rolling_branch) push failed - may need --force(ansi reset)"
+                        }
+                    }
+                } else {
+                    print $"  (ansi red)✗ Rebase failed - may need manual resolution(ansi reset)"
+                    print $"    ($rebase.stderr | str trim)"
+                }
+                do -i { ^git checkout $orig_branch } | complete | ignore
+            }
+        }
+    }
+    
+    # ── Phase H: Summary ────────────────────────────────────────────
+    
+    print ""
+    print "=== Summary ==="
+    print $"  Action:    ($mode_label)"
+    print $"  Target:    (ansi cyan)($target)(ansi reset)"
+    if $merged_count > 0 { print $"  Merged:    ($merged_count) rolls" }
+    if $failed_count > 0 { print $"  Failed:    ($failed_count) rolls" }
+    if $dry_run { print $"  (ansi yellow)DRY RUN - no changes made(ansi reset)" }
+    if $merged_count > 0 and $failed_count == 0 {
+        print ""
+        print $"(ansi green)✓ ($mode_label) complete!(ansi reset)"
+    } else if $failed_count > 0 {
+        print ""
+        print $"(ansi yellow)($mode_label) completed with failures.(ansi reset)"
+        print "  Check the output above and resolve any conflicts."
     }
 }
 
@@ -1196,245 +1581,16 @@ def resolve-roll-dependencies [
     $result
 }
 
-# Promote specific rolls to main with dependency resolution
+# Compatibility wrapper: delegates to 'graduate --promote'
+# (the old promote behavior is now part of the interactive graduate command)
 def "main promote" [
-    ...roll_numbers: int  # Roll numbers to promote (empty = promote all verified rolls)
-    --force(-f)           # Skip verification checks
+    ...roll_numbers: int       # Roll numbers (ignored - use 'graduate --promote' for fine control)
+    --force(-f)                # Skip verification checks
 ] {
-    let config = get-config
-    
-    # Determine which rolls to promote
-    let requested_rolls = if ($roll_numbers | is-empty) {
-        # No specific rolls requested - find all verified rolls
-        print "Finding all fully verified rolls..."
-        print ""
-        
-        let all_branches = try {
-            git branch --list $"($config.roll_prefix)*"
-            | lines
-            | each { |line| $line | str trim | str replace '* ' '' }
-        } catch {
-            []
-        }
-        
-        let verified_rolls = ($all_branches | where {|branch|
-            let verification = (check-roll-verification $branch)
-            let all_verified = ($verification | values | all {|v| $v.verified == true})
-            $all_verified
-        })
-        
-        if ($verified_rolls | is-empty) {
-            print $"(ansi yellow)No fully verified rolls found.(ansi reset)"
-            print ""
-            print "Use 'rf status' to see verification status of all rolls."
-            return
-        }
-        
-        print $"Found ($verified_rolls | length) fully verified rolls:"
-        for roll in $verified_rolls {
-            print $"  - ($roll)"
-        }
-        print ""
-        
-        $verified_rolls
-    } else {
-        # Specific rolls requested - convert numbers to branch names
-        $roll_numbers | each {|num| $"($config.roll_prefix)($num)-*" } | each {|pattern|
-            let branches = (git branch --list $pattern | lines | each { |line| $line | str trim | str replace '* ' '' })
-            if ($branches | is-empty) {
-                print $"(ansi red)✗ Roll ($pattern) not found(ansi reset)"
-                null
-            } else {
-                $branches | get 0
-            }
-        } | where {|b| $b != null}
-    }
-    
-    if ($requested_rolls | is-empty) {
-        print "No rolls to promote."
-        return
-    }
-    
-    # Build promotion queue with dependency resolution
-    print "Analyzing dependencies..."
-    mut promotion_queue = []
-    
-    for roll in $requested_rolls {
-        let roll_with_deps = (resolve-roll-dependencies $roll)
-        
-        # Add all to queue (avoiding duplicates)
-        for r in $roll_with_deps {
-            if not ($r in $promotion_queue) {
-                $promotion_queue = ($promotion_queue | append $r)
-            }
-        }
-    }
-    
-    # Sort queue by roll number to ensure correct order
-    let sorted_queue = ($promotion_queue | sort-by {|branch|
-        let num = try {
-            $branch | str replace $config.roll_prefix '' | split row '-' | get 0 | into int
-        } catch {
-            999999
-        }
-        $num
-    })
-    
+    print $"(ansi yellow)Note:(ansi reset) 'rf promote' is now 'rf graduate --promote'"
+    print $"(ansi yellow)Note:(ansi reset) Roll numbers provided will be ignored; using interactive selection."
     print ""
-    print $"(ansi cyan)Promotion Queue:(ansi reset) ($sorted_queue | length) rolls"
-    for roll in $sorted_queue {
-        let scope = (detect-roll-scope $roll)
-        mut scope_icons = []
-        if $scope.nixos { $scope_icons = ($scope_icons | append "N") }
-        if $scope.home { $scope_icons = ($scope_icons | append "H") }
-        if $scope.flake { $scope_icons = ($scope_icons | append "F") }
-        if $scope.docs { $scope_icons = ($scope_icons | append "D") }
-        
-        print $"  ($roll) ($scope_icons | str join ' ')"
-    }
-    print ""
-    
-    # Verify all rolls in queue unless --force
-    if not $force {
-        print "Verifying all rolls in queue..."
-        mut all_verified = true
-        
-        for roll in $sorted_queue {
-            let verification = (check-roll-verification $roll)
-            let unverified = ($verification | items {|host, info| if not $info.verified { $host } else { null }} | where {|v| $v != null})
-            
-            if not ($unverified | is-empty) {
-                print $"  (ansi red)✗ ($roll)(ansi reset)"
-                for host in $unverified {
-                    let host_info = ($verification | get $host)
-                    mut missing_types = []
-                    if $host_info.required.nixos and (not $host_info.nixos) {
-                        $missing_types = ($missing_types | append "NixOS rebuild")
-                    }
-                    if $host_info.required.home and (not $host_info.home) {
-                        $missing_types = ($missing_types | append "Home rebuild")
-                    }
-                    print $"      (ansi yellow).. ($host): ($missing_types | str join ', ') missing(ansi reset)"
-                }
-                $all_verified = false
-            } else {
-                print $"  (ansi green)✓ ($roll) - All hosts verified(ansi reset)"
-            }
-        }
-        
-        if not $all_verified {
-            print ""
-            print $"(ansi red)Cannot promote: Some rolls are not fully verified.(ansi reset)"
-            print ""
-            print "Options:"
-            print "  1. Verify missing hosts (rebuild on those hosts)"
-            print "  2. Use --force to skip verification (not recommended)"
-            print "  3. Remove unverified rolls from promotion queue"
-            return
-        }
-        
-        print ""
-        print $"(ansi green)✓ All rolls verified!(ansi reset)"
-    }
-    
-    # Check for diverged rolls (modified after graduation)
-    if not $force {
-        mut all_integrated = true
-        for roll in $sorted_queue {
-            let graduated = (check-roll-graduated $roll)
-            if $graduated {
-                let diverged = (check-roll-diverged $roll)
-                if $diverged {
-                    print $"  (ansi red)✗ ($roll) - Diverged! Branch has commits after graduation(ansi reset)"
-                    print $"    Re-integrate by merging into ($config.rolling_branch) again."
-                    $all_integrated = false
-                }
-            }
-        }
-        
-        if not $all_integrated {
-            print ""
-            print $"(ansi red)Cannot promote: Some rolls are diverged from ($config.rolling_branch).(ansi reset)"
-            print ""
-            print "Options:"
-            print $"  1. Merge the roll branch into ($config.rolling_branch) again to re-integrate"
-            print "  2. Use --force to skip integration check (not recommended)"
-            return
-        }
-        
-        print $"(ansi green)✓ All rolls properly integrated(ansi reset)"
-    }
-    
-    # Confirm promotion
-    print ""
-    print $"Ready to promote ($sorted_queue | length) rolls to (ansi cyan)($config.stable_branch)(ansi reset)"
-    let confirm = (input "Proceed? (yes/no): ")
-    
-    if $confirm != "yes" {
-        print "Aborted."
-        return
-    }
-    
-    # Perform promotion: merge each roll to main in order
-    print ""
-    print "Promoting rolls..."
-    
-    git checkout $config.stable_branch
-    git pull
-    
-    mut promoted_count = 0
-    for roll in $sorted_queue {
-        print $"Merging (ansi cyan)($roll)(ansi reset)..."
-        
-        let merge_result = (git merge --no-ff $roll -m $"Promote ($roll) to ($config.stable_branch)" out+err>| complete)
-        
-        if $merge_result.exit_code == 0 {
-            print $"  (ansi green)✓ Merged successfully(ansi reset)"
-            $promoted_count = $promoted_count + 1
-            
-            # Update metadata to mark as promoted
-            let roll_num = try {
-                $roll | str replace $config.roll_prefix '' | split row '-' | get 0
-            } catch {
-                null
-            }
-            
-            if $roll_num != null {
-                let metadata_file = $"($env.HOME)/.config/roll-flow/rolls/($roll_num).nuon"
-                if ($metadata_file | path exists) {
-                    let metadata = (open $metadata_file)
-                    let updated = ($metadata | upsert status "promoted" | upsert promoted (date now | format date "%Y-%m-%d %H:%M:%S"))
-                    $updated | save -f $metadata_file
-                }
-            }
-        } else {
-            print $"  (ansi red)✗ Merge failed - check for conflicts(ansi reset)"
-            print ""
-            print $merge_result.stderr
-            print ""
-            print "Promotion stopped. Fix conflicts and try again."
-            return
-        }
-    }
-    
-    # Create dated tag
-    let tag = $"stable-(date now | format date '%Y%m%d')"
-    let tag_msg = $"Promoted ($promoted_count) rolls: ($sorted_queue | str join ', ')\nVerified on: ($config.hosts | str join ', ')"
-    
-    git tag -a $tag -m $tag_msg
-    
-    print ""
-    print $"(ansi green)✓ Promotion complete!(ansi reset)"
-    print $"  Promoted: ($promoted_count) rolls"
-    print $"  Tagged as: ($tag)"
-    print ""
-    
-    let push_confirm = (input "Push to remote? (yes/no): ")
-    if $push_confirm == "yes" {
-        git push --tags
-        git push
-        print $"(ansi green)✓ Pushed to remote(ansi reset)"
-    }
+    main graduate --promote --force=($force)
 }
 
 # Show current status
