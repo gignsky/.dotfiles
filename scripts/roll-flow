@@ -328,6 +328,37 @@ def get-roll-git-status [
     }
 }
 
+# Check if a roll is blocked by ungraduated dependencies
+# Returns: { blocked: bool, ungraduated_deps: list<string> }
+def check-roll-blocked [
+    roll_branch: string
+] {
+    # If already graduated, can't be blocked
+    if (check-roll-graduated $roll_branch) {
+        return { blocked: false, ungraduated_deps: [] }
+    }
+    
+    # Get dependencies
+    let deps = (detect-roll-dependencies $roll_branch)
+    
+    if ($deps | is-empty) {
+        return { blocked: false, ungraduated_deps: [] }
+    }
+    
+    # Check which dependencies are not graduated
+    mut ungraduated = []
+    for dep in $deps {
+        if not (check-roll-graduated $dep) {
+            $ungraduated = ($ungraduated | append $dep)
+        }
+    }
+    
+    {
+        blocked: (not ($ungraduated | is-empty)),
+        ungraduated_deps: $ungraduated
+    }
+}
+
 # Check if a roll has been graduated to rolling
 def check-roll-graduated [
     roll_branch: string
@@ -1247,6 +1278,7 @@ def "main graduate" [
             let scope = (detect-roll-scope $roll)
             let verification = (check-roll-verification $roll)
             let git_status = (get-roll-git-status $roll)
+            let block_status = (check-roll-blocked $roll)
             
             # Format git status indicator
             let dev_status = match $git_status {
@@ -1258,6 +1290,13 @@ def "main graduate" [
                 _ => "?"
             }
             
+            # Format blocked status indicator
+            let blk_status = if $block_status.blocked {
+                "🔒"
+            } else {
+                ""
+            }
+            
             mut s = ""
             if $scope.nixos { $s = ($s + "N") }
             if $scope.home { $s = ($s + "H") }
@@ -1265,7 +1304,7 @@ def "main graduate" [
             if $scope.docs { $s = ($s + "D") }
             if ($s | is-empty) { $s = "-" }
             
-            mut rec = { roll: ($roll | str substring 0..36), dev: $dev_status, scope: $s }
+            mut rec = { roll: ($roll | str substring 0..36), dev: $dev_status, blk: $blk_status, scope: $s }
             
             for host in $config.hosts {
                 let info = ($verification | get $host)
@@ -1728,12 +1767,13 @@ def "main status" [] {
     }
     
     # Build and render compact summary table as structured Nushell data
-    # Each row is a record with: roll, cur (> if current), dev (git status vs develop), scope, and per-host columns
+    # Each row is a record with: roll, cur (> if current), dev (git status vs develop), blk (blocked), scope, and per-host columns
     let table_records = ($all_roll_branches | each {|roll_branch|
         let is_current = ($roll_branch == $current_roll)
         let scope = (detect-roll-scope $roll_branch)
         let verification = (check-roll-verification $roll_branch)
         let git_status = (get-roll-git-status $roll_branch)
+        let block_status = (check-roll-blocked $roll_branch)
         
         # Format git status indicator
         let dev_status = match $git_status {
@@ -1743,6 +1783,13 @@ def "main status" [] {
             "diverged" => "⚠",
             "even" => "=",
             _ => "?"
+        }
+        
+        # Format blocked status indicator
+        let blk_status = if $block_status.blocked {
+            "🔒"
+        } else {
+            ""
         }
         
         # Build scope text code (N= NixOS, H= Home, F= Flake, D= Docs)
@@ -1758,6 +1805,7 @@ def "main status" [] {
             roll: $roll_branch
             cur: (if $is_current { ">" } else { "" })
             dev: $dev_status
+            blk: $blk_status
             scope: $s
         }
         
@@ -1791,7 +1839,7 @@ def "main status" [] {
     print ""
     
     # Legend for dev column
-    print $"(ansi default_dimmed)Legend - dev: ✓=merged, ↑=ahead \(unmerged\), ⚠=diverged \(modified after merge\), ↓=behind(ansi reset)"
+    print $"(ansi default_dimmed)Legend - dev: ✓=merged, ↑=ahead \(unmerged\), ⚠=diverged \(modified after merge\), ↓=behind | blk: 🔒=blocked by deps(ansi reset)"
     print ""
     
     # ── Detail Prompt ───────────────────────────────────────────────
@@ -1857,9 +1905,16 @@ def "main status" [] {
         
         # Dependencies
         let deps = (detect-roll-dependencies $current_roll)
+        let block_info = (check-roll-blocked $current_roll)
+        
         if not ($deps | is-empty) {
             print ""
             print $"  Depends on: (ansi yellow)($deps | str join ', ')(ansi reset)"
+            
+            # Show blocking status if applicable
+            if $block_info.blocked {
+                print $"  (ansi red)🔒 BLOCKED(ansi reset) - Ungraduated dependencies: (ansi red)($block_info.ungraduated_deps | str join ', ')(ansi reset)"
+            }
         }
         print ""
     } else {
