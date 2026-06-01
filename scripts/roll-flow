@@ -75,7 +75,8 @@ def "main init" [
     print $"  Stable branch:  (ansi cyan)($config.stable_branch)(ansi reset)"
     print $"  Roll prefix:    (ansi cyan)($config.roll_prefix)(ansi reset)"
     print $"  Username:       (ansi cyan)($config.username)(ansi reset)"
-    print $"  Hosts:          (ansi cyan)($config.hosts | str join ', ')(ansi reset)"
+    let active_hosts = (get-active-hosts)
+    print $"  Active hosts:   (ansi cyan)($active_hosts | str join ', ')(ansi reset)"
     print ""
     print $"(ansi green)Note:(ansi reset) Config will auto-regenerate if deleted. You can customize by re-running init with parameters."
 }
@@ -165,6 +166,17 @@ def auto-generate-config [] {
         $env.USER
     }
     
+    # Read per-host active status from vars/hosts.nix
+    # Inactive hosts are excluded from operational consideration
+    # (e.g. while offline or being rebuilt)
+    let host_active = try {
+        nix eval --file $"($repo_root)/vars/hosts.nix" --json
+        | from json
+    } catch {
+        # Default: all hosts active
+        $hosts | reduce -f {} {|h, acc| $acc | insert $h true }
+    }
+    
     # Build config structure
     {
         repo_root: $repo_root,
@@ -172,8 +184,15 @@ def auto-generate-config [] {
         stable_branch: $stable_branch,
         roll_prefix: "roll/",
         username: $username,
-        hosts: $hosts
+        hosts: $hosts,
+        host_active: $host_active
     }
+}
+
+# Return only hosts that are marked as active in vars/hosts.nix
+def get-active-hosts [] {
+    let config = get-config
+    $config.hosts | where {|h| $config.host_active | get -o $h | default true }
 }
 
 # Get current configuration (auto-generate if missing)
@@ -960,7 +979,7 @@ def check-roll-verification [
         
         # Merge with defaults for any hosts not in the test results
         mut final_status = {}
-        for host in $config.hosts {
+        for host in (get-active-hosts) {
             if $host in ($host_results | columns) {
                 $final_status = ($final_status | insert $host ($host_results | get $host))
             } else {
@@ -1028,7 +1047,7 @@ def check-roll-verification [
         
         mut host_status = {}
         
-        for host in $config.hosts {
+        for host in (get-active-hosts) {
             let needs_nixos = $scope.nixos
             let needs_home = $scope.home
             let needs_flake = $scope.flake
@@ -1096,7 +1115,7 @@ def check-roll-verification [
         # Roll has been merged - check for rebuilds after the merge
         mut host_status = {}
         
-        for host in $config.hosts {
+        for host in (get-active-hosts) {
             let needs_nixos = $scope.nixos
             let needs_home = $scope.home
             
@@ -1448,7 +1467,7 @@ def "main graduate" [
             
             mut rec = { roll: ($roll | str substring 0..36), loc: $loc, dev: $dev_status, blk: $blk_status, scope: $s }
             
-            for host in $config.hosts {
+            for host in (get-active-hosts) {
                 let info = ($verification | get $host)
                 # For diverged rolls, verification is stale — show ✗ instead of old data
                 let nixos_mark = if $is_diverged {
@@ -2062,7 +2081,7 @@ def "main status" [] {
         }
         
         # Add per-host columns dynamically
-        for host in $config.hosts {
+        for host in (get-active-hosts) {
             let info = ($verification | get $host)
             # For diverged rolls, verification is stale — show ✗ instead of old data
             let nixos_mark = if $is_diverged {
@@ -2183,7 +2202,7 @@ def "main status" [] {
         let cur_is_diverged = if (check-roll-graduated $current_roll) {
             (check-roll-diverged $current_roll)
         } else { false }
-        let verif_records = ($config.hosts | each {|host|
+        let verif_records = ((get-active-hosts) | each {|host|
             let info = ($verification | get $host)
             # For diverged rolls, verification is stale — show ✗ instead of old data
             let nixos_mark = if $cur_is_diverged {
@@ -2249,7 +2268,7 @@ def "main status" [] {
             
             let verification = (check-roll-verification $roll_branch)
             let verified_count = ($verification | values | where {|v| $v.verified} | length)
-            let total = ($config.hosts | length)
+            let total = ((get-active-hosts) | length)
             let promo_status = (check-roll-promotion-ready $roll_branch)
             let is_diverged = if (check-roll-graduated $roll_branch) {
                 (check-roll-diverged $roll_branch)
@@ -2311,7 +2330,7 @@ def "main status" [] {
             print $"=== Merge Queue: (ansi yellow)($num_unverified) merged roll\(s\) still need verification for promotion ==="
             for r in $unverified_merged {
                 let v = (check-roll-verification $r)
-                let host_summary = ($config.hosts | each {|h|
+                let host_summary = ((get-active-hosts) | each {|h|
                     let info = ($v | get $h)
                     if $info.verified { $"(ansi green)($h):✓(ansi reset)" } else { $"(ansi red)($h):⌛(ansi reset)" }
                 } | str join " ")
@@ -2430,7 +2449,7 @@ def "main test-all" [] {
     mut host_detail_parts = []
     mut failures_exist = false
     
-    for host in $config.hosts {
+    for host in (get-active-hosts) {
         print $"Building for (ansi cyan)($host)(ansi reset)..."
         
         let build_result = (try {
@@ -2576,7 +2595,7 @@ def "main list" [] {
             # Get verification status
             let verification = (check-roll-verification $roll_branch)
             let verified_count = ($verification | values | where {|v| $v.verified == true} | length)
-            let total_hosts = ($config.hosts | length)
+            let total_hosts = ((get-active-hosts) | length)
             
             # Get scope
             let scope = (detect-roll-scope $roll_branch)
@@ -2623,7 +2642,7 @@ def "main list" [] {
             
             # Show per-host verification status
             if $total_hosts > 0 {
-                for host in $config.hosts {
+                for host in (get-active-hosts) {
                     let info = ($verification | get $host)
                     if $info.verified {
                         mut type_marks = []
