@@ -1344,7 +1344,7 @@ def "main graduate" [
             let is_diverged = (check-roll-diverged $current_roll)
             if $is_diverged {
                 print $"=== Roll Flow ==="
-                print $"Current roll: (ansi green)($current_roll)(ansi reset) already merged but (ansi yellow)diverged (has new commits)(ansi reset)"
+                print $"Current roll: (ansi green)($current_roll)(ansi reset) already merged but (ansi yellow)diverged \(has new commits\)(ansi reset)"
                 print $"  (ansi cyan)Re-graduate(ansi reset) from the menu below to merge new commits into ($config.rolling_branch)"
                 print ""
             } else {
