@@ -2154,13 +2154,20 @@ def "main status" [] {
         let scope_str = ($scope_codes | str join "")
         print $"  Scope: (ansi cyan)($scope_str)(ansi reset)  Files: ($scope.files_count)"
         
-        # Get dependency file sets for overlap detection
+        # Get dependency file sets for per-file overlap tracking
         let deps = (detect-roll-dependencies $current_roll)
-        mut dep_files = []
+        mut dep_file_map = {}
         if not ($deps | is-empty) {
             for dep in $deps {
                 let dep_scope = (detect-roll-scope $dep)
-                $dep_files = ($dep_files | append $dep_scope.files)
+                for f in $dep_scope.files {
+                    if $f in $dep_file_map {
+                        let existing = ($dep_file_map | get $f)
+                        $dep_file_map = ($dep_file_map | upsert $f ($existing | append $dep))
+                    } else {
+                        $dep_file_map = ($dep_file_map | insert $f [$dep])
+                    }
+                }
             }
         }
         
@@ -2182,7 +2189,10 @@ def "main status" [] {
                 for f_item in ($files | enumerate) {
                     let prefix = if $f_item.index == 0 { $label } else { "         " }
                     let f = $f_item.item
-                    let overlap = if ($f in $dep_files) { " ⤴ overlaps deps" } else { "" }
+                    let dep_rolls = ($dep_file_map | get -o $f | default [])
+                    let overlap = if not ($dep_rolls | is-empty) {
+                        $" ← also in ($dep_rolls | str join ', ')"
+                    } else { "" }
                     print $"($prefix)(ansi default_dimmed)($f)(ansi reset)($overlap)"
                 }
             }
