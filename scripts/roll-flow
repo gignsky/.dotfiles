@@ -900,21 +900,30 @@ def check-roll-verification [
     } else { "" }
     
     if not ($test_commit | is-empty) {
-        # Parse the test commit body for host results
+        # Parse the test commit body for host results and flake check
         let commit_hash = ($test_commit | split row ' ' | get 0)
         let raw_body = try {
             ^git log $commit_hash -1 --format="%b"
         } catch { "" }
         let test_lines = if ($raw_body | is-empty) { [] } else { $raw_body | lines }
         
-        # Extract Host-Results section
+        # Extract Flake-Check line and Host-Results section
         mut in_host_section = false
+        mut flake_check_passed = false
         mut host_results = {}
         for line in $test_lines {
             let trimmed = ($line | str trim)
+            if ($trimmed | str starts-with "Flake-Check:") {
+                # "Flake-Check: pass" or "Flake-Check: fail"
+                let parts = ($trimmed | split row ": ")
+                if ($parts | length) >= 2 {
+                    $flake_check_passed = (($parts | get 1) == "pass")
+                }
+                $in_host_section = false
+                continue
+            }
             if ($trimmed | str starts-with "Host-Results:") { $in_host_section = true; continue }
             if ($in_host_section) {
-                if ($trimmed | str starts-with "Flake-Check:") { $in_host_section = false; continue }
                 # Parse lines like "  host: PASSED" or "  host: FAILED"
                 let parts = ($trimmed | split row ": ")
                 if ($parts | length) >= 2 {
@@ -922,11 +931,14 @@ def check-roll-verification [
                     let result = ($parts | get 1)
                     if $h in $config.hosts {
                         let passed = ($result == "PASSED" or $result == "pass")
+                        # flake check is shared (not per-host), so same value for all
                         $host_results = ($host_results | insert $h {
                             verified: $passed,
                             nixos: (if $passed { $scope.nixos } else { false }),
                             home: (if $passed { $scope.home } else { false }),
-                            required: { nixos: $scope.nixos, home: $scope.home }
+                            flake: $flake_check_passed,
+                            docs: true,  # docs always considered verified (no build needed)
+                            required: { nixos: $scope.nixos, home: $scope.home, flake: $scope.flake, docs: $scope.docs }
                         })
                     }
                 }
@@ -944,7 +956,9 @@ def check-roll-verification [
                     verified: false,
                     nixos: false,
                     home: false,
-                    required: { nixos: $scope.nixos, home: $scope.home }
+                    flake: $flake_check_passed,
+                    docs: true,
+                    required: { nixos: $scope.nixos, home: $scope.home, flake: $scope.flake, docs: $scope.docs }
                 })
             }
         }
@@ -961,6 +975,17 @@ def check-roll-verification [
         | get 0?
     } catch {
         ""
+    }
+    
+    # Helper: determine if a flake check has been recorded since a given ref
+    # Returns true if a commit with "Flake-Check: pass" exists in the range
+    let check_flake_since = {|since_ref|
+        let result = try {
+            git log $config.rolling_branch --oneline --grep="Flake-Check: pass" $"($since_ref)..($config.rolling_branch)" -1
+            | str trim
+            | is-not-empty
+        } catch { false }
+        $result
     }
     
     # Determine the search strategy based on merge status
@@ -993,16 +1018,29 @@ def check-roll-verification [
         for host in $config.hosts {
             let needs_nixos = $scope.nixos
             let needs_home = $scope.home
+            let needs_flake = $scope.flake
             
-            # If only docs/flake changed, mark as verified automatically
-            if (not $needs_nixos) and (not $needs_home) {
+            # If nothing at all changed (auto-detect case), skip entirely
+            if (not $needs_nixos) and (not $needs_home) and (not $needs_flake) and (not $scope.docs) {
                 $host_status = ($host_status | insert $host {
                     verified: true,
                     nixos: true,
                     home: true,
-                    required: { nixos: false, home: false }
+                    flake: true,
+                    docs: true,
+                    required: { nixos: false, home: false, flake: false, docs: false }
                 })
                 continue
+            }
+            
+            # Docs always count as verified (no build needed)
+            let docs_verified = true
+            
+            # Check flake check if needed (shared — same for all hosts)
+            let flake_verified = if $needs_flake {
+                do $check_flake_since $branch_point
+            } else {
+                true  # Not needed
             }
             
             let nixos_verified = if $needs_nixos {
@@ -1014,7 +1052,7 @@ def check-roll-verification [
                 }
                 not ($nixos_rebuild | is-empty)
             } else {
-                true  # Not needed, so consider verified
+                true  # Not needed
             }
             
             let home_verified = if $needs_home {
@@ -1029,12 +1067,14 @@ def check-roll-verification [
                 true
             }
             
-            let host_verified = ($nixos_verified and $home_verified)
+            let host_verified = ($nixos_verified and $home_verified and $flake_verified and $docs_verified)
             $host_status = ($host_status | insert $host {
                 verified: $host_verified,
                 nixos: $nixos_verified,
                 home: $home_verified,
-                required: { nixos: $needs_nixos, home: $needs_home }
+                flake: $flake_verified,
+                docs: true,
+                required: { nixos: $needs_nixos, home: $needs_home, flake: $needs_flake, docs: $scope.docs }
             })
         }
         
@@ -1047,15 +1087,34 @@ def check-roll-verification [
             let needs_nixos = $scope.nixos
             let needs_home = $scope.home
             
-            # If only docs/flake changed, mark as verified automatically
-            if (not $needs_nixos) and (not $needs_home) {
+            # If nothing at all changed, skip entirely
+            if (not $needs_nixos) and (not $needs_home) and (not $scope.flake) and (not $scope.docs) {
                 $host_status = ($host_status | insert $host {
                     verified: true,
                     nixos: true,
                     home: true,
-                    required: { nixos: false, home: false }
+                    flake: true,
+                    docs: true,
+                    required: { nixos: false, home: false, flake: false, docs: false }
                 })
                 continue
+            }
+            
+            let docs_verified = true
+            
+            # For flake check, search BOTH:
+            # 1. The roll's own history (via $roll_merge^2) — catches pre-merge test-all commits
+            # 2. Post-merge commits on rolling — catches post-merge test-all runs
+            let flake_verified = if $scope.flake {
+                let on_roll = try {
+                    git log $"($roll_merge)^2" --oneline --grep="Flake-Check: pass" -1
+                    | str trim
+                    | is-not-empty
+                } catch { false }
+                let post_merge = do $check_flake_since $roll_merge
+                $on_roll or $post_merge
+            } else {
+                true
             }
             
             let nixos_verified = if $needs_nixos {
@@ -1082,12 +1141,14 @@ def check-roll-verification [
                 true
             }
             
-            let host_verified = ($nixos_verified and $home_verified)
+            let host_verified = ($nixos_verified and $home_verified and $flake_verified and $docs_verified)
             $host_status = ($host_status | insert $host {
                 verified: $host_verified,
                 nixos: $nixos_verified,
                 home: $home_verified,
-                required: { nixos: $needs_nixos, home: $needs_home }
+                flake: $flake_verified,
+                docs: true,
+                required: { nixos: $needs_nixos, home: $needs_home, flake: $scope.flake, docs: $scope.docs }
             })
         }
         
@@ -1362,14 +1423,20 @@ def "main graduate" [
             
             for host in $config.hosts {
                 let info = ($verification | get $host)
-                # Clear 2-char indicators: first char = NixOS, second = Home
+                # Clear 4-char indicators: 1st=NixOS 2nd=Home 3rd=Flake 4th=Docs
                 let nixos_mark = if $info.required.nixos {
                     if $info.nixos { "✓" } else { "⌛" }
                 } else { "—" }
                 let home_mark = if $info.required.home {
                     if $info.home { "✓" } else { "⌛" }
                 } else { "—" }
-                let mark = $"($nixos_mark)($home_mark)"
+                let flake_mark = if $info.required.flake {
+                    if $info.flake { "✓" } else { "⌛" }
+                } else { "—" }
+                let docs_mark = if $info.required.docs {
+                    if $info.docs { "✓" } else { "⌛" }
+                } else { "—" }
+                let mark = $"($nixos_mark)($home_mark)($flake_mark)($docs_mark)"
                 $rec = ($rec | insert $host $mark)
             }
             $rec
@@ -1954,7 +2021,7 @@ def "main status" [] {
         # Add per-host columns dynamically
         for host in $config.hosts {
             let info = ($verification | get $host)
-            # Clear 2-char indicators: first char = NixOS, second = Home
+            # Clear 4-char indicators: 1st=NixOS 2nd=Home 3rd=Flake 4th=Docs
             # ✓=verified  ⌛=pending  —=not needed
             let nixos_mark = if $info.required.nixos {
                 if $info.nixos { "✓" } else { "⌛" }
@@ -1962,7 +2029,13 @@ def "main status" [] {
             let home_mark = if $info.required.home {
                 if $info.home { "✓" } else { "⌛" }
             } else { "—" }
-            let mark = $"($nixos_mark)($home_mark)"
+            let flake_mark = if $info.required.flake {
+                if $info.flake { "✓" } else { "⌛" }
+            } else { "—" }
+            let docs_mark = if $info.required.docs {
+                if $info.docs { "✓" } else { "⌛" }
+            } else { "—" }
+            let mark = $"($nixos_mark)($home_mark)($flake_mark)($docs_mark)"
             $record = ($record | insert $host $mark)
         }
         
@@ -1977,8 +2050,9 @@ def "main status" [] {
     print ""
     
     # Legend for columns
+    print $"(ansi default_dimmed)scope codes: N=NixOS H=Home-manager F=Flake D=Docs \(e.g. NHFD=all four scopes\)(ansi reset)"
     print $"(ansi default_dimmed)dev: ✓=merged, ↑=ahead, ⚠=diverged, ↓=behind | blk: 🔒=blocked by deps(ansi reset)"
-    print $"(ansi default_dimmed)verification: ✓=done ⌛=pending —=n/a | first char=NixOS second=Home \(e.g. ✓⌛=NixOS ok Home pending\)(ansi reset)"
+    print $"(ansi default_dimmed)verification: ✓=done ⌛=pending —=n/a | 4 chars: N(ixOS) H(ome) F(lake) D(ocs) \(e.g. ✓✓⌛✓=NixOS+Home+Docs ok, Flake pending\)(ansi reset)"
     print ""
     
     # ── Detail Prompt ───────────────────────────────────────────────
@@ -2065,7 +2139,13 @@ def "main status" [] {
             let home_mark = if $info.required.home {
                 if $info.home { "✓" } else { "⌛" }
             } else { "—" }
-            let marks = $"NixOS:($nixos_mark) Home:($home_mark)"
+            let flake_mark = if $info.required.flake {
+                if $info.flake { "✓" } else { "⌛" }
+            } else { "—" }
+            let docs_mark = if $info.required.docs {
+                if $info.docs { "✓" } else { "⌛" }
+            } else { "—" }
+            let marks = $"N:($nixos_mark) H:($home_mark) F:($flake_mark) D:($docs_mark)"
             let status = if $info.verified { "ok" } else { ".." }
             { host: $host, status: $status, detail: $marks }
         })
@@ -2164,9 +2244,10 @@ def "main status" [] {
             let v = (check-roll-verification $r)
             not ($v | values | all {|x| $x.verified})
         })
-        if not ($unverified_merged | is-empty) {
+        let num_unverified = ($unverified_merged | length)
+        if $num_unverified > 0 {
             print ""
-            print $"=== Merge Queue: (ansi yellow)($unverified_merged | length) merged roll(s) still need verification for promotion ==="
+            print $"=== Merge Queue: (ansi yellow)($num_unverified) merged roll(s) still need verification for promotion ==="
             for r in $unverified_merged {
                 let v = (check-roll-verification $r)
                 let host_summary = ($config.hosts | each {|h|
