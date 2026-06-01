@@ -587,7 +587,7 @@ def detect-roll-scope [
             if ($raw_diff | is-empty) {
                 # Fallback: compare against rolling (the branch it was merged into)
                 let raw_diff2 = try {
-                    do -i { ^git diff --name-only $config.rolling_branch...$resolved }
+                    do -i { ^git diff --name-only $"($config.rolling_branch)...($resolved)" }
                 } catch { "" }
                 if ($raw_diff2 | is-empty) { [] } else { $raw_diff2 | lines }
             } else {
@@ -596,14 +596,14 @@ def detect-roll-scope [
         } else {
             # Merge commit not found - fallback to standard comparison
             let raw_diff = try {
-                do -i { ^git diff --name-only $config.rolling_branch...$resolved }
+                do -i { ^git diff --name-only $"($config.rolling_branch)...($resolved)" }
             } catch { "" }
             if ($raw_diff | is-empty) { [] } else { $raw_diff | lines }
         }
     } else {
         # Unmerged roll - compare directly against main to see what's unique to this roll
         let raw_diff = try {
-            do -i { ^git diff --name-only $config.stable_branch...$resolved }
+            do -i { ^git diff --name-only $"($config.stable_branch)...($resolved)" }
         } catch { "" }
         if ($raw_diff | is-empty) { [] } else { $raw_diff | lines }
     }
@@ -777,7 +777,7 @@ def detect-roll-dependencies [
     # Works for both graduated and unmerged rolls
     let roll_files = if ($resolved == null) { [] } else {
         let diff_result = try {
-            git diff --name-only $config.rolling_branch...$resolved | complete
+            git diff --name-only $"($config.rolling_branch)...($resolved)" | complete
         } catch { null }
         if ($diff_result == null) or ($diff_result.exit_code != 0) {
             []
@@ -799,10 +799,9 @@ def detect-roll-dependencies [
             let other_resolved = (resolve-roll-ref $other_roll)
             let other_files = if ($other_resolved == null) { [] } else {
                 let odiff = try {
-                    git diff --name-only $config.rolling_branch...$other_resolved | complete
+                    git diff --name-only $"($config.rolling_branch)...($other_resolved)" | complete
                 } catch { null }
-                if ($odiff == null) or ($odiff.exit_code != 0) { [] }
-                else { $odiff.stdout | lines }
+                if ($odiff == null) or ($odiff.exit_code != 0) { [] } else { $odiff.stdout | lines }
             }
             
             # Check for file overlap
@@ -1413,11 +1412,10 @@ def "main graduate" [
             }
             
             mut s = ""
-            if $scope.nixos { $s = ($s + "N") }
-            if $scope.home { $s = ($s + "H") }
-            if $scope.flake { $s = ($s + "F") }
-            if $scope.docs { $s = ($s + "D") }
-            if ($s | is-empty) { $s = "-" }
+            if $scope.nixos { $s = ($s + "N") } else { $s = ($s + "-") }
+            if $scope.home { $s = ($s + "H") } else { $s = ($s + "-") }
+            if $scope.flake { $s = ($s + "F") } else { $s = ($s + "-") }
+            if $scope.docs { $s = ($s + "D") } else { $s = ($s + "-") }
             
             mut rec = { roll: ($roll | str substring 0..36), dev: $dev_status, blk: $blk_status, scope: $s }
             
@@ -2003,11 +2001,10 @@ def "main status" [] {
         
         # Build scope text code (N= NixOS, H= Home, F= Flake, D= Docs)
         mut s = ""
-        if $scope.nixos { $s = ($s + "N") }
-        if $scope.home { $s = ($s + "H") }
-        if $scope.flake { $s = ($s + "F") }
-        if $scope.docs { $s = ($s + "D") }
-        if ($s | is-empty) { $s = "-" }
+        if $scope.nixos { $s = ($s + "N") } else { $s = ($s + "-") }
+        if $scope.home { $s = ($s + "H") } else { $s = ($s + "-") }
+        if $scope.flake { $s = ($s + "F") } else { $s = ($s + "-") }
+        if $scope.docs { $s = ($s + "D") } else { $s = ($s + "-") }
         
         # Start with common columns
         mut record = {
@@ -2076,11 +2073,10 @@ def "main status" [] {
         
         # Scope summary line
         mut scope_codes = []
-        if $scope.nixos { $scope_codes = ($scope_codes | append "N") }
-        if $scope.home { $scope_codes = ($scope_codes | append "H") }
-        if $scope.flake { $scope_codes = ($scope_codes | append "F") }
-        if $scope.docs { $scope_codes = ($scope_codes | append "D") }
-        if ($scope_codes | is-empty) { $scope_codes = ["-"] }
+        if $scope.nixos { $scope_codes = ($scope_codes | append "N") } else { $scope_codes = ($scope_codes | append "-") }
+        if $scope.home { $scope_codes = ($scope_codes | append "H") } else { $scope_codes = ($scope_codes | append "-") }
+        if $scope.flake { $scope_codes = ($scope_codes | append "F") } else { $scope_codes = ($scope_codes | append "-") }
+        if $scope.docs { $scope_codes = ($scope_codes | append "D") } else { $scope_codes = ($scope_codes | append "-") }
         
         let scope_str = ($scope_codes | str join "")
         print $"  Scope: (ansi cyan)($scope_str)(ansi reset)  Files: ($scope.files_count)"
@@ -2181,11 +2177,10 @@ def "main status" [] {
             let scope = (detect-roll-scope $roll_branch)
             
             mut scope_codes = []
-            if $scope.nixos { $scope_codes = ($scope_codes | append "N") }
-            if $scope.home { $scope_codes = ($scope_codes | append "H") }
-            if $scope.flake { $scope_codes = ($scope_codes | append "F") }
-            if $scope.docs { $scope_codes = ($scope_codes | append "D") }
-            if ($scope_codes | is-empty) { $scope_codes = ["-"] }
+            if $scope.nixos { $scope_codes = ($scope_codes | append "N") } else { $scope_codes = ($scope_codes | append "-") }
+            if $scope.home { $scope_codes = ($scope_codes | append "H") } else { $scope_codes = ($scope_codes | append "-") }
+            if $scope.flake { $scope_codes = ($scope_codes | append "F") } else { $scope_codes = ($scope_codes | append "-") }
+            if $scope.docs { $scope_codes = ($scope_codes | append "D") } else { $scope_codes = ($scope_codes | append "-") }
             
             let verification = (check-roll-verification $roll_branch)
             let verified_count = ($verification | values | where {|v| $v.verified} | length)
@@ -2247,7 +2242,7 @@ def "main status" [] {
         let num_unverified = ($unverified_merged | length)
         if $num_unverified > 0 {
             print ""
-            print $"=== Merge Queue: (ansi yellow)($num_unverified) merged roll(s) still need verification for promotion ==="
+            print $"=== Merge Queue: (ansi yellow)($num_unverified) merged roll\(s\) still need verification for promotion ==="
             for r in $unverified_merged {
                 let v = (check-roll-verification $r)
                 let host_summary = ($config.hosts | each {|h|
@@ -2278,11 +2273,10 @@ def "main test-all" [] {
     # Detect scope of changes on this branch
     let scope = (detect-roll-scope $current_branch)
     mut scope_codes = []
-    if $scope.nixos { $scope_codes = ($scope_codes | append "N") }
-    if $scope.home { $scope_codes = ($scope_codes | append "H") }
-    if $scope.flake { $scope_codes = ($scope_codes | append "F") }
-    if $scope.docs { $scope_codes = ($scope_codes | append "D") }
-    if ($scope_codes | is-empty) { $scope_codes = ["-"] }
+    if $scope.nixos { $scope_codes = ($scope_codes | append "N") } else { $scope_codes = ($scope_codes | append "-") }
+    if $scope.home { $scope_codes = ($scope_codes | append "H") } else { $scope_codes = ($scope_codes | append "-") }
+    if $scope.flake { $scope_codes = ($scope_codes | append "F") } else { $scope_codes = ($scope_codes | append "-") }
+    if $scope.docs { $scope_codes = ($scope_codes | append "D") } else { $scope_codes = ($scope_codes | append "-") }
     let scope_str = ($scope_codes | str join "")
     let changed_files = ($scope.files | str join ", ")
     
@@ -2542,14 +2536,12 @@ def "main list" [] {
             
             # Show scope icons
             mut scope_icons = []
-            if $scope.nixos { $scope_icons = ($scope_icons | append "N") }
-            if $scope.home { $scope_icons = ($scope_icons | append "H") }
-            if $scope.flake { $scope_icons = ($scope_icons | append "F") }
-            if $scope.docs { $scope_icons = ($scope_icons | append "D") }
+            if $scope.nixos { $scope_icons = ($scope_icons | append "N") } else { $scope_icons = ($scope_icons | append "-") }
+            if $scope.home { $scope_icons = ($scope_icons | append "H") } else { $scope_icons = ($scope_icons | append "-") }
+            if $scope.flake { $scope_icons = ($scope_icons | append "F") } else { $scope_icons = ($scope_icons | append "-") }
+            if $scope.docs { $scope_icons = ($scope_icons | append "D") } else { $scope_icons = ($scope_icons | append "-") }
             
-            if not ($scope_icons | is-empty) {
-                print $"      Scope: ($scope_icons | str join ' ')"
-            }
+            print $"      Scope: ($scope_icons | str join ' ')"
             
             # Show verification requirements
             let requirements = (get-verification-requirements $roll_branch)
