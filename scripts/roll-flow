@@ -1306,9 +1306,17 @@ def "main graduate" [
     } else {
         # If on a graduated roll, inform user before interactive selection
         if $on_graduated_roll {
-            print $"=== Roll Flow ==="
-            print $"Current roll: (ansi green)($current_roll)(ansi reset) is (ansi cyan)already merged to ($config.rolling_branch)(ansi reset)"
-            print ""
+            let is_diverged = (check-roll-diverged $current_roll)
+            if $is_diverged {
+                print $"=== Roll Flow ==="
+                print $"Current roll: (ansi green)($current_roll)(ansi reset) already merged but (ansi yellow)diverged (has new commits)(ansi reset)"
+                print $"  (ansi cyan)Re-graduate(ansi reset) from the menu below to merge new commits into ($config.rolling_branch)"
+                print ""
+            } else {
+                print $"=== Roll Flow ==="
+                print $"Current roll: (ansi green)($current_roll)(ansi reset) is (ansi cyan)already merged to ($config.rolling_branch)(ansi reset)"
+                print ""
+            }
         }
         print "What would you like to do?"
         print "  1) Graduate rolls to rolling branch"
@@ -1352,8 +1360,9 @@ def "main graduate" [
     let candidates = if $mode == "promote" {
         $all_rolls | where { |b| (check-roll-promotion-ready $b).ready }
     } else {
-        # For graduate mode: include all ungraduated rolls (verification not required for develop)
-        $all_rolls | where { |b| not (check-roll-graduated $b) }
+        # For graduate mode: include ungraduated rolls plus graduated-but-diverged rolls
+        # (diverged rolls have new commits that need to be re-merged)
+        $all_rolls | where { |b| not (check-roll-graduated $b) or (check-roll-diverged $b) }
     }
     
     if ($candidates | is-empty) {
@@ -1362,7 +1371,7 @@ def "main graduate" [
         if $mode == "promote" {
             print "  (no verified, graduated rolls ready)"
         } else {
-            print "  (all rolls already graduated)"
+            print "  (all rolls already up to date)"
         }
         return
     }
@@ -1497,9 +1506,9 @@ def "main graduate" [
     for roll in $selected_rolls {
         let with_deps = (resolve-roll-dependencies $roll)
         for r in $with_deps {
-            # For graduate mode: skip already graduated rolls (they're already in develop)
+            # For graduate mode: skip already-graduated rolls unless diverged (new commits to merge)
             # For promote mode: include all rolls (they all need to go to main)
-            if $mode == "graduate" and (check-roll-graduated $r) {
+            if $mode == "graduate" and (check-roll-graduated $r) and not (check-roll-diverged $r) {
                 continue
             }
             if not ($r in $ordered) and ($r in $all_rolls) {
