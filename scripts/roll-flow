@@ -1377,6 +1377,11 @@ def "main graduate" [
     for roll in $selected_rolls {
         let with_deps = (resolve-roll-dependencies $roll)
         for r in $with_deps {
+            # For graduate mode: skip already graduated rolls (they're already in develop)
+            # For promote mode: include all rolls (they all need to go to main)
+            if $mode == "graduate" and (check-roll-graduated $r) {
+                continue
+            }
             if not ($r in $ordered) and ($r in $all_rolls) {
                 $ordered = ($ordered | append $r)
             }
