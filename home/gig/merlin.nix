@@ -20,7 +20,7 @@
   home.packages = with pkgs; [
     plex-desktop
     remmina
-    youtube-music
+    pear-desktop
     # bitwarden-cli
     # bitwarden-desktop
     discord

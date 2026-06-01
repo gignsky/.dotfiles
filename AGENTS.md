@@ -16,6 +16,36 @@ This repository operates under **Lord Gig's Realm** organizational structure. Al
   - Rebuild command behavior and automatic host detection
   - Essential for proper operation in WSL environments
 
+## Git Workflow: Roll Flow System
+
+This repository uses **Roll Flow**, a git workflow designed specifically for multi-host NixOS configurations. It provides structured management of changes across multiple systems while maintaining stability.
+
+### Core Concepts
+- **`main`** - Verified stable state for ALL hosts
+- **`rolling`** - Integration branch (continuous, like nixos-unstable)
+- **`roll/N-MMDD-theme`** - Numbered batches of themed changes
+- **Feature branches** - Individual features or fixes
+
+### Quick Commands
+```bash
+just roll-start <theme>        # Start new roll batch
+just roll-integrate <branch>   # Add feature to current roll
+just roll-graduate             # Move roll → rolling (tested on some hosts)
+just roll-promote              # Move rolling → main (verified on ALL hosts)
+just roll-status               # Check current state
+```
+
+### Documentation
+- **Full Guide**: [docs/guides/ROLL-FLOW-WORKFLOW.md](docs/guides/ROLL-FLOW-WORKFLOW.md)
+- **Quick Reference**: [docs/guides/ROLL-FLOW-QUICKREF.md](docs/guides/ROLL-FLOW-QUICKREF.md)
+- **Tool**: Nix package `roll-flow` (source: `scripts/roll-flow`, packaged via `pkgs/scripts.nix`)
+
+### Integration with Fleet Protocols
+- All roll commits follow fleet git standards (see commit protocol below)
+- Major rolls should have corresponding quest reports
+- Use `.tmp-oc-logs/` for research during roll development
+- Archive logs to annex before graduating rolls to main
+
 ## Fleet Operations & Quest Protocols
 
 ### Expedition of Consultation Requirements
@@ -78,7 +108,7 @@ When consulting on repositories outside your primary assignment:
 - **Situation Reports**: All agents must implement `/sitrep` command for standardized status reporting
   - Provides comprehensive operational status in agent-specific voice
   - Includes current operations, system health, recent activities, and recommendations
-  - Standard format with agent personality adaptations (see Scotty agent for reference implementation)
+  - Standard format with agent personality adaptations (see Commander Data for reference implementation)
   - Essential for fleet-wide situational awareness and coordination
 
 - **Log Integrity Repair**: All agents must implement `/fix-log` command for documentation maintenance
@@ -120,6 +150,29 @@ When consulting on repositories outside your primary assignment:
     - Include agent signatures in footers: `Chief-Engineer: [AgentName] <timestamp>`
     - Add technical metadata when available (build times, generation numbers, scope impact)
     - Maintain clean history principles from GIT-CONVENTIONS.md
+
+- **Log Archival**: All agents must implement end-of-branch archival protocol for `.tmp-oc-logs/`
+  - **Purpose**: Preserve research, engineering logs, and analysis before branch completion
+  - **When**: Before merging, deleting, or significantly modifying feature branches
+  - **Destination**: `~/local_repos/annex/` (appropriate crew-logs/ or fleet/ subdirectory)
+  - **Archival Process**:
+    1. Review all files in `.tmp-oc-logs/` for archival-worthy content
+    2. Add YAML frontmatter with Obsidian-compatible metadata:
+       - `mission:` and `mission-id:` for grouping related files
+       - `tags:` array for categorization
+       - `related-files:` with `[[wiki-links]]` to other mission files
+       - `status:`, `outcome:`, and other contextual metadata
+    3. Move to annex with descriptive naming: `YYYY-MM-DD-description.md`
+    4. Commit to annex with context about branch/investigation
+    5. Create `ARCHIVED-YYYY-MM-DD.txt` in `.tmp-oc-logs/` documenting what was moved
+    6. Commit cleanup to dotfiles repo with reference to annex commit
+  - **Archival Locations**:
+    - Engineering logs → `annex/crew-logs/data/engineering-logs/YYYY-MM/`
+    - Research reports → `annex/crew-logs/library-computer/research-logs/YYYY-MM/`
+    - Command analysis → `annex/fleet/operations/reports/`
+    - System logs → `annex/computer-logs/`
+  - **Obsidian Integration**: Use consistent metadata tags and [[wiki-links]] for cross-referencing
+  - **Critical**: Research and engineering logs are NOT temporary - preserve all significant work
 
 ## Build Commands
 - **System rebuild**: `just rebuild` or `scripts/system-flake-rebuild.sh [HOST]`

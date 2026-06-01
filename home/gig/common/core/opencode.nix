@@ -4,21 +4,25 @@
     enable = true;
     package = pkgs.unstable.opencode;
 
+    tui = {
+      scroll_speed = 3;
+      scroll_acceleration = {
+        enabled = true;
+      };
+      theme = "gruvbox"; # Built-in gruvbox theme
+
+      # Fix Ctrl+Enter for newlines
+      keybinds = {
+        input_newline = "shift+enter,ctrl+enter,ctrl+j";
+      };
+    };
+
     # Main configuration
     settings = {
       # Core setup
       model = "github-copilot/claude-sonnet-4.5";
       small_model = "github-copilot/gpt-4o";
-      theme = "gruvbox"; # Built-in gruvbox theme
       # autoupdate = true;
-
-      # TUI optimizations
-      tui = {
-        scroll_speed = 3;
-        scroll_acceleration = {
-          enabled = true;
-        };
-      };
 
       # Tools configuration
       tools = {
@@ -41,11 +45,6 @@
         external_directory = "allow";
       };
 
-      # Fix Ctrl+Enter for newlines
-      keybinds = {
-        input_newline = "shift+enter,ctrl+enter,ctrl+j";
-      };
-
       # Cursor configuration - set to line cursor
       # cursor_style = "line";
       # just a dream :(
@@ -54,13 +53,13 @@
 
       # MCP servers for extended functionality
       mcp = {
-        # Wikipedia access for research
+        # Wikipedia access for research (uses REST API, no auth required)
         wikipedia = {
           type = "local";
           command = [
             "npx"
             "-y"
-            "@shelm/wikipedia-mcp-server"
+            "wikipedia-mcp"
           ];
           enabled = true;
           timeout = 10000; # 10 second timeout for searches
@@ -101,6 +100,33 @@
           url = "https://mcp.deepwiki.com/mcp";
           enabled = true;
           timeout = 20000; # 20 second timeout for repo documentation searches
+        };
+
+        # Web Search (DuckDuckGo, Brave, RSS, YouTube transcripts) - no API key required
+        internetsearch = {
+          type = "local";
+          command = [
+            "npx"
+            "-y"
+            "@nachoretro/internetsearch"
+          ];
+          enabled = true;
+          timeout = 15000; # 15 second timeout for web searches
+        };
+
+        # GitHub for repository and issue management
+        github = {
+          type = "local";
+          command = [
+            "npx"
+            "-y"
+            "@modelcontextprotocol/server-github"
+          ];
+          enabled = true;
+          timeout = 15000;
+          env = {
+            GITHUB_PERSONAL_ACCESS_TOKEN = "{env:GITHUB_TOKEN}";
+          };
         };
       };
 
@@ -166,7 +192,7 @@
     };
 
     # Enhanced rules with personality system
-    rules = ''
+    context = ''
             # OpenCode Agent Configuration
 
             This agent operates within a NixOS/home-manager environment at ~/.dotfiles.
@@ -202,13 +228,13 @@
 
 
           ##  **Direct Agent Notes Protocol**:
-            - All agents must actively scan text files for `#AGENT_NAME` tags (e.g., `#SCOTTY`, `#CORTANA`)
+            - All agents must actively scan text files for `#AGENT_NAME` tags (e.g., `#DATA`, `#CORTANA`)
             - These tags indicate direct notes left specifically for that agent
             - When an agent finds their name tagged:
               - The note is primarily for that specific agent to read and act upon
               - Other agents may also read and comment if they have relevant information to contribute
               - Treat these as direct instructions or important context from Lord Gig
-              - Example: `#SCOTTY this needs your attention` is a note specifically for Chief Engineer Scotty
+              - Example: `#DATA this requires your technical analysis` is a note specifically for Commander Data
       >>>>>>> refs/rewritten/onto
 
             **Agent Self-Modification Requirements**:
@@ -289,11 +315,16 @@
               - Tools: [To be documented in mcp-tools-reference.md]
 
             - **Wikipedia**: General knowledge and research
-              - Package: @shelm/wikipedia-mcp-server
-              - Features: Search and retrieve Wikipedia articles
+              - Package: pipeworx-mcp-wikipedia
+              - Features: Search and retrieve Wikipedia articles via REST API (free, no auth)
               - Tools: wikipedia_onThisDay, wikipedia_findPage, wikipedia_getPage, wikipedia_getImagesForPage
               - **Prefix Required**: Always use `wikipedia_` prefix when calling these tools
               - See: ~/.dotfiles/docs/mcp-tools-reference.md for detailed signatures
+
+            - **DuckDuckGo**: Web search for real-time information
+              - Package: mcp-duckduckgo
+              - Features: Free web search with crawl and research capabilities
+              - Tools: [To be documented in mcp-tools-reference.md]
     '';
 
     # Agent Configuration System (Home Manager specific)

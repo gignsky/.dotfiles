@@ -13,6 +13,9 @@
     # (configLib.relativeToRoot "hosts/common/optional/neofetch.nix")
     # inputs.nixos-wsl.modules
     # inputs.home-manager.nixosModules.home-manager
+
+    # MAGEC Multi-Agent Platform Services (PostgreSQL + Redis)
+    (configLib.relativeToRoot "hosts/common/optional/services/magec.nix")
   ];
 
   # WSL-specific user ID override (group stays at 1701)
@@ -20,7 +23,10 @@
 
   tailscale.enable = false;
 
-  networking.hostName = "nixos";
+  networking = {
+    hostName = "nixos";
+    resolvconf.enable = false;
+  };
 
   # Tailscale configuration (currently disabled)
   # To enable Tailscale on WSL:
