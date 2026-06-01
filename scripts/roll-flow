@@ -1149,6 +1149,7 @@ def "main graduate" [
     let candidates = if $mode == "promote" {
         $all_rolls | where { |b| (check-roll-promotion-ready $b).ready }
     } else {
+        # For graduate mode: include all ungraduated rolls (verification not required for develop)
         $all_rolls | where { |b| not (check-roll-graduated $b) }
     }
     
@@ -1311,8 +1312,27 @@ def "main graduate" [
         print $"  (ansi yellow)✓ Uncommitted changes check skipped (--force)(ansi reset)"
     }
     
-    # Check 2: Verification (unless --force)
-    if not $force {
+    # Check 2: Dependency graduation check (for graduate mode)
+    # Ensure all dependencies are already merged to rolling before allowing graduation
+    if $mode == "graduate" and not $force {
+        mut all_deps_graduated = true
+        for roll in $ordered {
+            let deps = (detect-roll-dependencies $roll)
+            for dep in $deps {
+                if not (check-roll-graduated $dep) {
+                    print $"  (ansi red)✗ ($roll) - dependency ($dep) not yet graduated(ansi reset)"
+                    $all_deps_graduated = false
+                    $checks_passed = false
+                }
+            }
+        }
+        if $all_deps_graduated {
+            print $"  (ansi green)✓ All dependencies already graduated(ansi reset)"
+        }
+    }
+    
+    # Check 3: Verification (only required for promote mode, unless --force)
+    if $mode == "promote" and not $force {
         for roll in $ordered {
             let verification = (check-roll-verification $roll)
             let all_verified = ($verification | values | all {|v| $v.verified})
@@ -1327,11 +1347,13 @@ def "main graduate" [
                 print $"  (ansi green)✓ ($roll) - all hosts verified(ansi reset)"
             }
         }
+    } else if $mode == "graduate" {
+        print $"  (ansi cyan)ℹ Verification not required for graduation to ($config.rolling_branch)(ansi reset)"
     } else {
         print $"  (ansi yellow)⚠ Verification skipped (--force)(ansi reset)"
     }
     
-    # Check 3: For promote mode, check divergence
+    # Check 4: For promote mode, check divergence
     if $mode == "promote" and not $force {
         for roll in $ordered {
             if (check-roll-diverged $roll) {
@@ -1603,7 +1625,12 @@ def "main status" [] {
     print "=== Roll Flow Status ==="
     print $"Current: (ansi cyan)($current_branch)(ansi reset)  |  Rolling: ($config.rolling_branch)  |  Stable: ($config.stable_branch)"
     if ($current_roll != null) {
-        print $"✓ On roll: (ansi green)($current_roll)(ansi reset)"
+        let is_graduated = (check-roll-graduated $current_roll)
+        if $is_graduated {
+            print $"✓ On roll: (ansi green)($current_roll)(ansi reset) (ansi cyan)[merged to ($config.rolling_branch)](ansi reset)"
+        } else {
+            print $"✓ On roll: (ansi green)($current_roll)(ansi reset) (ansi yellow)[not yet merged](ansi reset)"
+        }
     }
     print ""
     
