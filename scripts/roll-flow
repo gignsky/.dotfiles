@@ -1187,15 +1187,19 @@ def "main graduate" [
     let on_rolling = ($current == $config.rolling_branch)
     let on_stable = ($current == $config.stable_branch)
     let on_roll = ($current_roll != null)
+    let on_graduated_roll = ($on_roll and (check-roll-graduated $current_roll))
     
     let mode = if $promote or $on_rolling or $on_stable {
         "promote"
-    } else if $on_roll {
+    } else if $on_roll and not $on_graduated_roll {
         "graduate"
     } else {
-        print "=== Roll Flow ==="
-        print $"Current branch: (ansi yellow)($current)(ansi reset)"
-        print ""
+        # If on a graduated roll, inform user before interactive selection
+        if $on_graduated_roll {
+            print $"=== Roll Flow ==="
+            print $"Current roll: (ansi green)($current_roll)(ansi reset) is (ansi cyan)already merged to ($config.rolling_branch)(ansi reset)"
+            print ""
+        }
         print "What would you like to do?"
         print "  1) Graduate rolls to rolling branch"
         print "  2) Promote rolls to stable branch"
@@ -1339,7 +1343,13 @@ def "main graduate" [
         let selected_list = if $input_trimmed == "all" {
             $candidates
         } else if ($input_trimmed | is-empty) {
-            if ($candidates | length) >= 1 { [($candidates | get 0)] } else { [] }
+            # When on a graduated roll, don't auto-select the first candidate
+            if $on_graduated_roll {
+                print $"(ansi yellow)Current roll already merged. Select a candidate or abort \(empty = abort\).(ansi reset)"
+                []
+            } else if ($candidates | length) >= 1 {
+                [($candidates | get 0)]
+            } else { [] }
         } else {
             # Parse comma-separated numbers and ranges (all 1-based)
             $input_trimmed | split row "," | each {|part|
