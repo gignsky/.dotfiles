@@ -1418,11 +1418,11 @@ def "main graduate" [
         $targets | each {|t|
             if ($t | str starts-with $config.roll_prefix) {
                 if $t in $candidates { $t } else { null }
-            } else {
-                let idx = (try { $t | into int } catch { null })
-                if $idx != null and $idx >= 1 and $idx <= ($candidates | length) {
-                    $candidates | get ($idx - 1)
-                } else { null }
+        } else {
+            let idx = (try { $t | into int } catch { null })
+            if $idx != null and $idx >= 0 and $idx < ($candidates | length) {
+                $candidates | get $idx
+            } else { null }
             }
         } | where { |b| $b != null }
     } else {
@@ -1430,7 +1430,7 @@ def "main graduate" [
         print $"Available candidates:"
         print ""
         
-        # Use enumerate for 0-based index; display shows index+1 for user-friendly numbering
+        # Use enumerate for 0-based index; # column and input parsing both use 0-based
         let table_data = ($candidates | enumerate | each {|item|
             let roll = $item.item
             let scope = (detect-roll-scope $roll)
@@ -1503,7 +1503,7 @@ def "main graduate" [
         
         let input_str = (try {
             let mode_down = ($mode_label | str downcase)
-            input $"Select rolls to ($mode_down) (numbers 1-based, ranges, or 'all'): "
+            input $"Select rolls to ($mode_down) (numbers, ranges like 0-2, or 'all'): "
         } catch { "" })
         
         let input_trimmed = ($input_str | str trim | str downcase)
@@ -1511,30 +1511,29 @@ def "main graduate" [
         let selected_list = if $input_trimmed == "all" {
             $candidates
         } else if ($input_trimmed | is-empty) {
-            # When on a graduated roll, don't auto-select the first candidate
-            if $on_graduated_roll {
-                print $"(ansi yellow)Current roll already merged. Select a candidate or abort \(empty = abort\).(ansi reset)"
-                []
-            } else if ($candidates | length) >= 1 {
+            # Auto-select the first candidate on empty input.
+            # Graduated-but-diverged rolls are in the candidate list (line 1400),
+            # so auto-selecting works correctly for re-graduation too.
+            if ($candidates | length) >= 1 {
                 [($candidates | get 0)]
             } else { [] }
         } else {
-            # Parse comma-separated numbers and ranges (all 1-based)
+            # Parse comma-separated numbers and ranges (0-based, matching the # column)
             $input_trimmed | split row "," | each {|part|
                 let trimmed = ($part | str trim)
                 let range = ($trimmed | split row "-")
                 if ($range | length) == 2 {
                     let start = (try { $range | get 0 | into int } catch { null })
                     let end = (try { $range | get 1 | into int } catch { null })
-                    if $start != null and $end != null and $start >= 1 and $end >= $start {
+                    if $start != null and $end != null and $start >= 0 and $end >= $start {
                         $start..$end | each {|n|
-                            if $n >= 1 and $n <= ($candidates | length) { $candidates | get ($n - 1) } else { null }
+                            if $n >= 0 and $n < ($candidates | length) { $candidates | get $n } else { null }
                         }
                     } else { [] }
                 } else {
                     let n = (try { $trimmed | into int } catch { null })
-                    if $n != null and $n >= 1 and $n <= ($candidates | length) {
-                        [($candidates | get ($n - 1))]
+                    if $n != null and $n >= 0 and $n < ($candidates | length) {
+                        [($candidates | get $n)]
                     } else { [] }
                 }
             } | flatten | uniq
