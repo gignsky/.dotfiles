@@ -2052,7 +2052,7 @@ def "main status" [] {
     # Legend for columns
     print $"(ansi default_dimmed)scope codes: N=NixOS H=Home-manager F=Flake D=Docs \(e.g. NHFD=all four scopes\)(ansi reset)"
     print $"(ansi default_dimmed)dev: ✓=merged, ↑=ahead, ⚠=diverged, ↓=behind | blk: 🔒=blocked by deps(ansi reset)"
-    print $"(ansi default_dimmed)verification: ✓=done ⌛=pending —=n/a | 4 chars: N(ixOS) H(ome) F(lake) D(ocs) \(e.g. ✓✓⌛✓=NixOS+Home+Docs ok, Flake pending\)(ansi reset)"
+    print $"(ansi default_dimmed)verification: ✓=done ⌛=pending —=n/a | 4 chars: N\(ixOS\) H\(ome\) F\(lake\) D\(ocs\) \(e.g. ✓✓⌛✓=NixOS+Home+Docs ok, Flake pending\)(ansi reset)"
     print ""
     
     # ── Detail Prompt ───────────────────────────────────────────────
