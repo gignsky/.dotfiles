@@ -270,6 +270,64 @@ def find-roll-dependents [
     $dependents
 }
 
+# Get git status relationship between roll and rolling branch
+# Returns: "merged", "ahead", "behind", "diverged", or "unknown"
+def get-roll-git-status [
+    roll_branch: string
+] {
+    let config = get-config
+    
+    # Check if graduated first
+    let graduated = (check-roll-graduated $roll_branch)
+    
+    # Try to resolve the roll ref
+    let resolved = (resolve-roll-ref $roll_branch)
+    if ($resolved == null) {
+        return "unknown"
+    }
+    
+    # If graduated, check for divergence (commits after merge)
+    if $graduated {
+        let diverged = (check-roll-diverged $roll_branch)
+        if $diverged {
+            return "diverged"
+        } else {
+            return "merged"
+        }
+    }
+    
+    # Not graduated yet - check ahead/behind status relative to rolling
+    let ahead_behind = try {
+        git rev-list --left-right --count $"($config.rolling_branch)...($resolved)" 
+        | str trim 
+        | split row "\t"
+    } catch {
+        []
+    }
+    
+    if ($ahead_behind | length) != 2 {
+        return "unknown"
+    }
+    
+    let behind = try { $ahead_behind | get 0 | into int } catch { 0 }
+    let ahead = try { $ahead_behind | get 1 | into int } catch { 0 }
+    
+    # For unmerged rolls:
+    # - If ahead > 0: show "ahead" (normal state - roll has work not in develop)
+    # - If behind > 0 and ahead == 0: show "behind" (roll is outdated, needs rebase)
+    # - If both > 0: still show "ahead" since the roll has unmerged work
+    #   (the "behind" aspect is expected as develop moves forward)
+    if $ahead == 0 and $behind == 0 {
+        "even"
+    } else if $ahead > 0 {
+        "ahead"  # Has commits not in develop (normal for unmerged rolls)
+    } else if $behind > 0 {
+        "behind"  # Roll is outdated, no unique commits
+    } else {
+        "unknown"
+    }
+}
+
 # Check if a roll has been graduated to rolling
 def check-roll-graduated [
     roll_branch: string
@@ -1188,6 +1246,17 @@ def "main graduate" [
             let roll = $item.item
             let scope = (detect-roll-scope $roll)
             let verification = (check-roll-verification $roll)
+            let git_status = (get-roll-git-status $roll)
+            
+            # Format git status indicator
+            let dev_status = match $git_status {
+                "merged" => "✓",
+                "ahead" => "↑",
+                "behind" => "↓",
+                "diverged" => "⚠",
+                "even" => "=",
+                _ => "?"
+            }
             
             mut s = ""
             if $scope.nixos { $s = ($s + "N") }
@@ -1196,7 +1265,7 @@ def "main graduate" [
             if $scope.docs { $s = ($s + "D") }
             if ($s | is-empty) { $s = "-" }
             
-            mut rec = { roll: ($roll | str substring 0..36), scope: $s }
+            mut rec = { roll: ($roll | str substring 0..36), dev: $dev_status, scope: $s }
             
             for host in $config.hosts {
                 let info = ($verification | get $host)
@@ -1659,11 +1728,22 @@ def "main status" [] {
     }
     
     # Build and render compact summary table as structured Nushell data
-    # Each row is a record with: roll, cur (> if current), scope, and per-host columns
+    # Each row is a record with: roll, cur (> if current), dev (git status vs develop), scope, and per-host columns
     let table_records = ($all_roll_branches | each {|roll_branch|
         let is_current = ($roll_branch == $current_roll)
         let scope = (detect-roll-scope $roll_branch)
         let verification = (check-roll-verification $roll_branch)
+        let git_status = (get-roll-git-status $roll_branch)
+        
+        # Format git status indicator
+        let dev_status = match $git_status {
+            "merged" => "✓",
+            "ahead" => "↑",
+            "behind" => "↓",
+            "diverged" => "⚠",
+            "even" => "=",
+            _ => "?"
+        }
         
         # Build scope text code (N= NixOS, H= Home, F= Flake, D= Docs)
         mut s = ""
@@ -1677,6 +1757,7 @@ def "main status" [] {
         mut record = {
             roll: $roll_branch
             cur: (if $is_current { ">" } else { "" })
+            dev: $dev_status
             scope: $s
         }
         
@@ -1707,6 +1788,10 @@ def "main status" [] {
     $table_records | each {|row|
         $row | merge {$"roll": ($row.roll | str substring 0..36)}
     } | table --width 150 | to text | print
+    print ""
+    
+    # Legend for dev column
+    print $"(ansi default_dimmed)Legend - dev: ✓=merged, ↑=ahead \(unmerged\), ⚠=diverged \(modified after merge\), ↓=behind(ansi reset)"
     print ""
     
     # ── Detail Prompt ───────────────────────────────────────────────
