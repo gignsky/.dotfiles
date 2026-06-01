@@ -539,6 +539,20 @@ def resolve-roll-ref [
     }
 }
 
+# Check where a branch exists: local, remote, or both
+# Returns: "L" (local), "R" (remote), "B" (both), "-" (neither)
+def get-branch-location [
+    branch: string
+] {
+    let config = get-config
+    let local_try = (do -i { ^git rev-parse --verify $branch } | complete)
+    let local = ($local_try.exit_code == 0)
+    let remote_try = (do -i { ^git rev-parse --verify $"origin/($branch)" } | complete)
+    let remote = ($remote_try.exit_code == 0)
+    
+    if $local and $remote { "B" } else if $local { "L" } else if $remote { "R" } else { "-" }
+}
+
 # Detect which scopes a roll/branch affects based on changed files
 # Returns a record with scope flags: {nixos: bool, home: bool, flake: bool, docs: bool}
 def detect-roll-scope [
@@ -1426,21 +1440,35 @@ def "main graduate" [
             if $scope.flake { $s = ($s + "F") } else { $s = ($s + "-") }
             if $scope.docs { $s = ($s + "D") } else { $s = ($s + "-") }
             
-            mut rec = { roll: ($roll | str substring 0..36), dev: $dev_status, blk: $blk_status, scope: $s }
+            let loc = (get-branch-location $roll)
+            
+            let is_diverged = if (check-roll-graduated $roll) {
+                (check-roll-diverged $roll)
+            } else { false }
+            
+            mut rec = { roll: ($roll | str substring 0..36), loc: $loc, dev: $dev_status, blk: $blk_status, scope: $s }
             
             for host in $config.hosts {
                 let info = ($verification | get $host)
-                # Clear 4-char indicators: 1st=NixOS 2nd=Home 3rd=Flake 4th=Docs
-                let nixos_mark = if $info.required.nixos {
+                # For diverged rolls, verification is stale — show ✗ instead of old data
+                let nixos_mark = if $is_diverged {
+                    if $info.required.nixos { "✗" } else { "—" }
+                } else if $info.required.nixos {
                     if $info.nixos { "✓" } else { "⌛" }
                 } else { "—" }
-                let home_mark = if $info.required.home {
+                let home_mark = if $is_diverged {
+                    if $info.required.home { "✗" } else { "—" }
+                } else if $info.required.home {
                     if $info.home { "✓" } else { "⌛" }
                 } else { "—" }
-                let flake_mark = if $info.required.flake {
+                let flake_mark = if $is_diverged {
+                    if $info.required.flake { "✗" } else { "—" }
+                } else if $info.required.flake {
                     if $info.flake { "✓" } else { "⌛" }
                 } else { "—" }
-                let docs_mark = if $info.required.docs {
+                let docs_mark = if $is_diverged {
+                    if $info.required.docs { "✗" } else { "—" }
+                } else if $info.required.docs {
                     if $info.docs { "✓" } else { "⌛" }
                 } else { "—" }
                 let mark = $"($nixos_mark)($home_mark)($flake_mark)($docs_mark)"
@@ -2015,10 +2043,19 @@ def "main status" [] {
         if $scope.flake { $s = ($s + "F") } else { $s = ($s + "-") }
         if $scope.docs { $s = ($s + "D") } else { $s = ($s + "-") }
         
+        # Check branch location (local / remote / both)
+        let loc = (get-branch-location $roll_branch)
+        
+        # Check if graduated and diverged (verification is stale)
+        let is_diverged = if (check-roll-graduated $roll_branch) {
+            (check-roll-diverged $roll_branch)
+        } else { false }
+        
         # Start with common columns
         mut record = {
             roll: $roll_branch
             cur: (if $is_current { ">" } else { "" })
+            loc: $loc
             dev: $dev_status
             blk: $blk_status
             scope: $s
@@ -2027,18 +2064,25 @@ def "main status" [] {
         # Add per-host columns dynamically
         for host in $config.hosts {
             let info = ($verification | get $host)
-            # Clear 4-char indicators: 1st=NixOS 2nd=Home 3rd=Flake 4th=Docs
-            # ✓=verified  ⌛=pending  —=not needed
-            let nixos_mark = if $info.required.nixos {
+            # For diverged rolls, verification is stale — show ✗ instead of old data
+            let nixos_mark = if $is_diverged {
+                if $info.required.nixos { "✗" } else { "—" }
+            } else if $info.required.nixos {
                 if $info.nixos { "✓" } else { "⌛" }
             } else { "—" }
-            let home_mark = if $info.required.home {
+            let home_mark = if $is_diverged {
+                if $info.required.home { "✗" } else { "—" }
+            } else if $info.required.home {
                 if $info.home { "✓" } else { "⌛" }
             } else { "—" }
-            let flake_mark = if $info.required.flake {
+            let flake_mark = if $is_diverged {
+                if $info.required.flake { "✗" } else { "—" }
+            } else if $info.required.flake {
                 if $info.flake { "✓" } else { "⌛" }
             } else { "—" }
-            let docs_mark = if $info.required.docs {
+            let docs_mark = if $is_diverged {
+                if $info.required.docs { "✗" } else { "—" }
+            } else if $info.required.docs {
                 if $info.docs { "✓" } else { "⌛" }
             } else { "—" }
             let mark = $"($nixos_mark)($home_mark)($flake_mark)($docs_mark)"
@@ -2057,8 +2101,8 @@ def "main status" [] {
     
     # Legend for columns
     print $"(ansi default_dimmed)scope codes: N=NixOS H=Home-manager F=Flake D=Docs \(e.g. NHFD=all four scopes\)(ansi reset)"
-    print $"(ansi default_dimmed)dev: ✓=merged, ↑=ahead, ⚠=diverged, ↓=behind | blk: 🔒=blocked by deps(ansi reset)"
-    print $"(ansi default_dimmed)verification: ✓=done ⌛=pending —=n/a | 4 chars: N\(ixOS\) H\(ome\) F\(lake\) D\(ocs\) \(e.g. ✓✓⌛✓=NixOS+Home+Docs ok, Flake pending\)(ansi reset)"
+    print $"(ansi default_dimmed)dev: ✓=merged, ↑=ahead, ⚠=diverged, ↓=behind | blk: 🔒=blocked by deps | loc: B=both, L=local, R=remote(ansi reset)"
+    print $"(ansi default_dimmed)verification: ✓=done ⌛=pending —=n/a ✗=stale \(diverged\) | 4 chars: N\(ixOS\) H\(ome\) F\(lake\) D\(ocs\) \(e.g. ✓✓⌛✓=NixOS+Home+Docs ok, Flake pending\)(ansi reset)"
     print ""
     
     # ── Detail Prompt ───────────────────────────────────────────────
@@ -2136,22 +2180,34 @@ def "main status" [] {
         print ""
         print "  Verification:"
         let verification = (check-roll-verification $current_roll)
+        let cur_is_diverged = if (check-roll-graduated $current_roll) {
+            (check-roll-diverged $current_roll)
+        } else { false }
         let verif_records = ($config.hosts | each {|host|
             let info = ($verification | get $host)
-            let nixos_mark = if $info.required.nixos {
+            # For diverged rolls, verification is stale — show ✗ instead of old data
+            let nixos_mark = if $cur_is_diverged {
+                if $info.required.nixos { "✗" } else { "—" }
+            } else if $info.required.nixos {
                 if $info.nixos { "✓" } else { "⌛" }
             } else { "—" }
-            let home_mark = if $info.required.home {
+            let home_mark = if $cur_is_diverged {
+                if $info.required.home { "✗" } else { "—" }
+            } else if $info.required.home {
                 if $info.home { "✓" } else { "⌛" }
             } else { "—" }
-            let flake_mark = if $info.required.flake {
+            let flake_mark = if $cur_is_diverged {
+                if $info.required.flake { "✗" } else { "—" }
+            } else if $info.required.flake {
                 if $info.flake { "✓" } else { "⌛" }
             } else { "—" }
-            let docs_mark = if $info.required.docs {
+            let docs_mark = if $cur_is_diverged {
+                if $info.required.docs { "✗" } else { "—" }
+            } else if $info.required.docs {
                 if $info.docs { "✓" } else { "⌛" }
             } else { "—" }
             let marks = $"N:($nixos_mark) H:($home_mark) F:($flake_mark) D:($docs_mark)"
-            let status = if $info.verified { "ok" } else { ".." }
+            let status = if $cur_is_diverged { "✗" } else if $info.verified { "ok" } else { ".." }
             { host: $host, status: $status, detail: $marks }
         })
         $verif_records | table -e | lines | each {|line| print $"  ($line)" }
@@ -2210,9 +2266,10 @@ def "main status" [] {
             {
                 roll: ($roll_branch | str substring 0..40)
                 cur: (if $is_current { ">" } else { "" })
+                loc: (get-branch-location $roll_branch)
                 scope: ($scope_codes | str join "")
                 files: $scope.files_count
-                verified: $"($verified_count)/($total)"
+                verified: (if $is_diverged { "✗" } else { $"($verified_count)/($total)" })
                 status: $status_str
             }
         })
