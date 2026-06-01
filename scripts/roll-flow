@@ -58,7 +58,8 @@ def "main init" [
         stable_branch: (if ($stable_branch | is-empty) { $auto_config.stable_branch } else { $stable_branch }),
         roll_prefix: (if ($roll_prefix | is-empty) { $auto_config.roll_prefix } else { $roll_prefix }),
         username: (if ($username | is-empty) { $auto_config.username } else { $username }),
-        hosts: (if ($hosts | is-empty) { $auto_config.hosts } else { $hosts })
+        hosts: (if ($hosts | is-empty) { $auto_config.hosts } else { $hosts }),
+        host_active: $auto_config.host_active
     }
     
     # Ensure config directory exists
@@ -192,7 +193,8 @@ def auto-generate-config [] {
 # Return only hosts that are marked as active in vars/hosts.nix
 def get-active-hosts [] {
     let config = get-config
-    $config.hosts | where {|h| $config.host_active | get -o $h | default true }
+    let host_active = ($config | get -o host_active | default {})
+    $config.hosts | where {|h| $host_active | get -o $h | default true }
 }
 
 # Get current configuration (auto-generate if missing)
