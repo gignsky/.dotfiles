@@ -574,6 +574,101 @@ def get-branch-location [
     if $local and $remote { "B" } else if $local { "L" } else if $remote { "R" } else { "-" }
 }
 
+# Get files for a roll using multi-diff strategy
+# Returns: {total: [files], own: [files], inherited: [files], attr: {file: [origin_rolls]}}
+def get-roll-files [
+    roll_branch: string
+    --skip-attr       # Skip attribution (faster when only counts needed)
+] {
+    let config = get-config
+    let stable_ref = $"($config.stable_branch)...($roll_branch)"
+    let rolling_ref = $"($config.rolling_branch)...($roll_branch)"
+    
+    let total = (do -i { ^git diff --name-only $stable_ref } | complete)
+    let total_files = if $total.exit_code == 0 { $total.stdout | lines } else { [] }
+    
+    let own = (do -i { ^git diff --name-only $rolling_ref } | complete)
+    let own_files = if $own.exit_code == 0 { $own.stdout | lines } else { [] }
+    
+    let inherited = ($total_files | where {|f| $f not-in $own_files})
+    
+    mut result = {
+        total: $total_files
+        own: $own_files
+        inherited: $inherited
+        count_total: ($total_files | length)
+        count_own: ($own_files | length)
+        count_inherited: ($inherited | length)
+        attr: {}
+    }
+    
+    if not $skip_attr and ($inherited | is-not-empty) {
+        $result = ($result | merge {attr: (attribute-files $roll_branch $inherited)})
+    }
+    
+    $result
+}
+
+# Attribute inherited files to their originating rolls via merge-commit diffs
+# Returns: {file_path: [roll/branch, ...], ...}
+def attribute-files [
+    roll_branch: string
+    inherited_files: list
+] {
+    let config = get-config
+    
+    # Collect file sets from all other rolls (local + remote)
+    let local = (do -i { ^git branch --list $"($config.roll_prefix)*" } | lines | each {|l| $l | str trim | str replace '* ' '' })
+    let remote = (do -i { ^git branch -r } | lines | each {|l| $l | str trim } | where {|b| ($b | str starts-with $"origin/($config.roll_prefix)") } | each {|b| $b | str replace 'origin/' '' })
+    let all = ($local | append $remote | uniq | sort)
+    
+    mut map = {}
+    
+    for r in $all {
+        if $r == $roll_branch { continue }
+        
+        let resolved = (resolve-roll-ref $r)
+        if $resolved == null { continue }
+        
+        let is_grad = (check-roll-graduated $r)
+        let r_files = if $is_grad {
+            let merge_pattern = $"Merge branch '($r)'"
+            let merge = (do -i { ^git log $config.rolling_branch --oneline --grep=$merge_pattern -1 } | complete)
+            if $merge.exit_code == 0 and ($merge.stdout | str trim | is-not-empty) {
+                let mc = ($merge.stdout | str trim | split row ' ' | get 0)
+                let mc1 = $"($mc)^1"
+                let mc2 = $"($mc)^2"
+                # Try two-parent merge first, fall back to squash merge
+                let diff = (do -i { ^git diff --name-only $mc1 $mc2 } | complete)
+                if $diff.exit_code == 0 and ($diff.stdout | str trim | is-not-empty) {
+                    $diff.stdout | lines
+                } else {
+                    # Squash merge: diff against single parent
+                    let sq = (do -i { ^git diff --name-only $"($mc)^1" $mc } | complete)
+                    if $sq.exit_code == 0 { $sq.stdout | lines } else { [] }
+                }
+            } else { [] }
+        } else {
+            let dep_ref = $"($config.rolling_branch)...($resolved)"
+            let diff = (do -i { ^git diff --name-only $dep_ref } | complete)
+            if $diff.exit_code == 0 { $diff.stdout | lines } else { [] }
+        }
+        
+        # Check inherited files against this roll's files
+        for f in $inherited_files {
+            if $f in $r_files {
+                $map = (if $f in $map {
+                    $map | upsert $f (($map | get $f) | append $r)
+                } else {
+                    $map | insert $f [$r]
+                })
+            }
+        }
+    }
+    
+    $map
+}
+
 # Detect which scopes a roll/branch affects based on changed files
 # Returns a record with scope flags: {nixos: bool, home: bool, flake: bool, docs: bool}
 def detect-roll-scope [
@@ -1987,6 +2082,134 @@ def "main promote" [
     main graduate --promote --force=($force)
 }
 
+# ── File Tree Rendering ────────────────────────────────────────────
+
+def render-file-tree [
+    files: list
+    attr: record
+    own_files: list
+] {
+    let sorted = ($files | sort)
+    mut prev_dir = ""
+    mut dir_counts = {}  # dir -> remaining files in that dir
+    
+    # Count files per dir first
+    for f in $sorted {
+        let dir = ($f | path dirname)
+        $dir_counts = ($dir_counts | upsert $dir (($dir_counts | get -o $dir | default 0) + 1))
+    }
+    
+    # Track how many we've printed from each directory
+    mut dir_done = {}
+    
+    # Determine origin tag for a file
+    let get_tag = {|f|
+        if $f in $own_files {
+            {label: "new", color: 0}
+        } else if $f in $attr {
+            let origins = ($attr | get $f)
+            if ($origins | is-not-empty) {
+                let label = ($origins | str join ", ")
+                {label: $label, color: 1}
+            } else {
+                {label: "?", color: 5}
+            }
+        } else {
+            {label: "?", color: 5}
+        }
+    }
+    
+    print "  ./"
+    for i in 0..($sorted | length) {
+        let f = ($sorted | get $i)
+        let is_last = ($i == ($sorted | length) - 1)
+        let dir = ($f | path dirname)
+        let fname = ($f | path basename)
+        
+        # Print directory header if new
+        if $dir != $prev_dir and $dir != "." {
+            if $prev_dir != "" { print "" }  # blank line between directories
+            # Count siblings at this dir level
+            let depth = ($dir | split row '/' | length)
+            let indent = 2
+            print $"  (ansi default_bold)($dir)/(ansi reset)"
+            $prev_dir = $dir
+        } else if $dir == "." and $prev_dir == "" {
+            $prev_dir = "."
+        }
+        
+        # File line
+        let tag = (do $get_tag $f)
+        let label = $tag.label
+        let color_idx = $tag.color
+        
+        let tree_prefix = if $is_last { "  └── " } else { "  ├── " }
+        
+        if $color_idx == 0 {
+            print $"  ($tree_prefix)(ansi green)($fname)(ansi reset)  [($label)]"
+        } else if $color_idx == 5 {
+            print $"  ($tree_prefix)(ansi default_dimmed)($fname)(ansi reset)  [?]"
+        } else {
+            let c = ["" $"(ansi yellow_bold)" $"(ansi blue_bold)" $"(ansi cyan_bold)" $"(ansi purple_bold)" $"(ansi default_dimmed)"] | get $color_idx
+            print $"  ($tree_prefix)($c)($fname)(ansi reset)  [($label)]"
+        }
+    }
+}
+
+# ── Roll Summary Table (shared by status and list) ────────────────
+
+def show-roll-summary-table [
+    config: record
+    current_roll: string
+    all_branches: list
+] {
+    if ($all_branches | is-empty) {
+        print "  (no rolls found)"
+        return
+    }
+    
+    let records = ($all_branches | each {|roll_branch|
+        let is_current = ($roll_branch == $current_roll)
+        let scope = (detect-roll-scope $roll_branch)
+        
+        mut s = ""
+        if $scope.nixos { $s = ($s + "N") } else { $s = ($s + "-") }
+        if $scope.home { $s = ($s + "H") } else { $s = ($s + "-") }
+        if $scope.flake { $s = ($s + "F") } else { $s = ($s + "-") }
+        if $scope.docs { $s = ($s + "D") } else { $s = ($s + "-") }
+        
+        let verification = (check-roll-verification $roll_branch)
+        let verified_count = ($verification | values | where {|v| $v.verified} | length)
+        let total = ((get-active-hosts) | length)
+        let promo_status = (check-roll-promotion-ready $roll_branch)
+        let is_diverged = if (check-roll-graduated $roll_branch) {
+            (check-roll-diverged $roll_branch)
+        } else { false }
+        
+        let status_str = if $promo_status.ready {
+            if $is_diverged { "!DIV" } else { "PROMOTE" }
+        } else if (check-roll-graduated $roll_branch) {
+            "merged"
+        } else {
+            "active"
+        }
+        
+        {
+            roll: ($roll_branch | str substring 0..40)
+            cur: (if $is_current { ">" } else { "" })
+            loc: (get-branch-location $roll_branch)
+            scope: $s
+            files: $scope.files_count
+            verified: (if $is_diverged { "✗" } else { $"($verified_count)/($total)" })
+            status: $status_str
+        }
+    })
+    
+    $records | table -e | lines | each {|line| print $"  ($line)" }
+    print ""
+    print $"(ansi default_dimmed)scope: NHFD codes  verified: N/M hosts done  status: merged/active/PROMOTE/DIV(ansi reset)"
+}
+
 # Show current status
 def "main status" [] {
     let config = get-config
@@ -2006,8 +2229,7 @@ def "main status" [] {
     }
     print ""
     
-    # ── Compact Summary Table ───────────────────────────────────────
-    # Gather all roll branches
+    # Gather all roll branches (used by both pre/post prompt sections)
     let local_rolls = try {
         git branch --list $"($config.roll_prefix)*"
         | lines
@@ -2024,106 +2246,15 @@ def "main status" [] {
     
     let all_roll_branches = ($local_rolls | append $remote_rolls | uniq | sort)
     
-    if ($all_roll_branches | is-empty) {
-        print "  (no rolls found)"
+    # ── On main/develop: show table before prompt ────────────────
+    let on_roll = ($current_roll != null)
+    let on_main_dev = not $on_roll and (($current_branch == $config.stable_branch) or ($current_branch == $config.rolling_branch))
+    
+    if $on_main_dev {
         print ""
-        return
+        show-roll-summary-table $config $current_roll $all_roll_branches
+        print ""
     }
-    
-    # Build and render compact summary table as structured Nushell data
-    # Each row is a record with: roll, cur (> if current), dev (git status vs develop), blk (blocked), scope, and per-host columns
-    let table_records = ($all_roll_branches | each {|roll_branch|
-        let is_current = ($roll_branch == $current_roll)
-        let scope = (detect-roll-scope $roll_branch)
-        let verification = (check-roll-verification $roll_branch)
-        let git_status = (get-roll-git-status $roll_branch)
-        let block_status = (check-roll-blocked $roll_branch)
-        
-        # Format git status indicator
-        let dev_status = match $git_status {
-            "merged" => "✓",
-            "ahead" => "↑",
-            "behind" => "↓",
-            "diverged" => "⚠",
-            "even" => "=",
-            _ => "?"
-        }
-        
-        # Format blocked status indicator
-        let blk_status = if $block_status.blocked {
-            "🔒"
-        } else {
-            ""
-        }
-        
-        # Build scope text code (N= NixOS, H= Home, F= Flake, D= Docs)
-        mut s = ""
-        if $scope.nixos { $s = ($s + "N") } else { $s = ($s + "-") }
-        if $scope.home { $s = ($s + "H") } else { $s = ($s + "-") }
-        if $scope.flake { $s = ($s + "F") } else { $s = ($s + "-") }
-        if $scope.docs { $s = ($s + "D") } else { $s = ($s + "-") }
-        
-        # Check branch location (local / remote / both)
-        let loc = (get-branch-location $roll_branch)
-        
-        # Check if graduated and diverged (verification is stale)
-        let is_diverged = if (check-roll-graduated $roll_branch) {
-            (check-roll-diverged $roll_branch)
-        } else { false }
-        
-        # Start with common columns
-        mut record = {
-            roll: $roll_branch
-            cur: (if $is_current { ">" } else { "" })
-            loc: $loc
-            dev: $dev_status
-            blk: $blk_status
-            scope: $s
-        }
-        
-        # Add per-host columns dynamically
-        for host in (get-active-hosts) {
-            let info = ($verification | get $host)
-            # For diverged rolls, verification is stale — show ✗ instead of old data
-            let nixos_mark = if $is_diverged {
-                if $info.required.nixos { "✗" } else { "—" }
-            } else if $info.required.nixos {
-                if $info.nixos { "✓" } else { "⌛" }
-            } else { "—" }
-            let home_mark = if $is_diverged {
-                if $info.required.home { "✗" } else { "—" }
-            } else if $info.required.home {
-                if $info.home { "✓" } else { "⌛" }
-            } else { "—" }
-            let flake_mark = if $is_diverged {
-                if $info.required.flake { "✗" } else { "—" }
-            } else if $info.required.flake {
-                if $info.flake { "✓" } else { "⌛" }
-            } else { "—" }
-            let docs_mark = if $is_diverged {
-                if $info.required.docs { "✗" } else { "—" }
-            } else if $info.required.docs {
-                if $info.docs { "✓" } else { "⌛" }
-            } else { "—" }
-            let mark = $"($nixos_mark)($home_mark)($flake_mark)($docs_mark)"
-            $record = ($record | insert $host $mark)
-        }
-        
-        $record
-    })
-    
-    # Let Nushell's native table formatter handle the rendering
-    # Truncate roll names to keep table readable; Note: `| to text | print` required for script context
-    $table_records | each {|row|
-        $row | merge {$"roll": ($row.roll | str substring 0..36)}
-    } | table --width 150 | to text | print
-    print ""
-    
-    # Legend for columns
-    print $"(ansi default_dimmed)scope codes: N=NixOS H=Home-manager F=Flake D=Docs \(e.g. NHFD=all four scopes\)(ansi reset)"
-    print $"(ansi default_dimmed)dev: ✓=merged, ↑=ahead, ⚠=diverged, ↓=behind | blk: 🔒=blocked by deps | loc: B=both, L=local, R=remote(ansi reset)"
-    print $"(ansi default_dimmed)verification: ✓=done ⌛=pending —=n/a ✗=stale \(diverged\) | 4 chars: N\(ixOS\) H\(ome\) F\(lake\) D\(ocs\) \(e.g. ✓✓⌛✓=NixOS+Home+Docs ok, Flake pending\)(ansi reset)"
-    print ""
     
     # ── Detail Prompt ───────────────────────────────────────────────
     # Gracefully handle non-interactive contexts (piped through nix run)
@@ -2139,10 +2270,17 @@ def "main status" [] {
     }
     
     # ── Full Detailed View ──────────────────────────────────────────
+    # Show table (if not already shown above)
+    if not $on_main_dev {
+        print "=== All Rolls ==="
+        show-roll-summary-table $config $current_roll $all_roll_branches
+        print ""
+    }
+    
     # ── Current Roll Details ────────────────────────────────────────
     if ($current_roll != null) {
-        print $"=== Current Roll: (ansi green)($current_roll)(ansi reset) ==="
         let scope = (detect-roll-scope $current_roll)
+        print $"=== Current Roll: (ansi green)($current_roll)(ansi reset) ==="
         
         # Scope summary line
         mut scope_codes = []
@@ -2152,50 +2290,18 @@ def "main status" [] {
         if $scope.docs { $scope_codes = ($scope_codes | append "D") } else { $scope_codes = ($scope_codes | append "-") }
         
         let scope_str = ($scope_codes | str join "")
-        print $"  Scope: (ansi cyan)($scope_str)(ansi reset)  Files: ($scope.files_count)"
         
-        # Get dependency file sets for per-file overlap tracking
-        let deps = (detect-roll-dependencies $current_roll)
-        mut dep_file_map = {}
-        if not ($deps | is-empty) {
-            for dep in $deps {
-                let dep_scope = (detect-roll-scope $dep)
-                for f in $dep_scope.files {
-                    if $f in $dep_file_map {
-                        let existing = ($dep_file_map | get $f)
-                        $dep_file_map = ($dep_file_map | upsert $f ($existing | append $dep))
-                    } else {
-                        $dep_file_map = ($dep_file_map | insert $f [$dep])
-                    }
-                }
-            }
-        }
+        # Get file attribution via multi-diff
+        let files_info = (get-roll-files $current_roll)
         
-        # Show files grouped by category with overlap markers
+        print $"  Scope: (ansi cyan)($scope_str)(ansi reset)  Files: ($scope.files_count)   \(($files_info.count_own) own + ($files_info.count_inherited) from prior rolls\)"
+        
+        # Show files with attribution (tree format + colors)
         if ($scope.files_count) > 0 {
-            let cat_info = [
-                [cat, label, files];
-                ["N", "  NixOS: ", $scope.nixos_files],
-                ["H", "  Home:  ", $scope.home_files],
-                ["F", "  Flake: ", $scope.flake_files],
-                ["D", "  Docs:  ", $scope.docs_files],
-                ["O", "  Other: ", $scope.other_files]
-            ]
-            
-            for row in $cat_info {
-                let files = $row.files
-                if ($files | is-empty) { continue }
-                let label = $row.label
-                for f_item in ($files | enumerate) {
-                    let prefix = if $f_item.index == 0 { $label } else { "         " }
-                    let f = $f_item.item
-                    let dep_rolls = ($dep_file_map | get -o $f | default [])
-                    let overlap = if not ($dep_rolls | is-empty) {
-                        $" ← also in ($dep_rolls | str join ', ')"
-                    } else { "" }
-                    print $"($prefix)(ansi default_dimmed)($f)(ansi reset)($overlap)"
-                }
-            }
+            print ""
+            render-file-tree $files_info.total $files_info.attr $files_info.own
+            print ""
+            print "  Color legend: (ansi green)green(ansi reset)=new  (ansi yellow_bold)yellow(ansi reset)=roll/1-2  (ansi blue_bold)blue(ansi reset)=roll/3-4  (ansi cyan_bold)cyan(ansi reset)=roll/5-6  (ansi purple_bold)purple(ansi reset)=roll/7+"
         }
         
         # Roll metadata
@@ -2258,53 +2364,6 @@ def "main status" [] {
         print ""
     } else {
         print "  ℹ not on a roll branch"
-    }
-    
-    # ── All Rolls Summary ───────────────────────────────────────────
-    print "=== All Rolls ==="
-    
-    if ($all_roll_branches | is-empty) {
-        print "  (none)"
-    } else {
-        # Build structured records for each roll
-        let all_records = ($all_roll_branches | each {|roll_branch|
-            let is_current = ($roll_branch == $current_roll)
-            let scope = (detect-roll-scope $roll_branch)
-            
-            mut scope_codes = []
-            if $scope.nixos { $scope_codes = ($scope_codes | append "N") } else { $scope_codes = ($scope_codes | append "-") }
-            if $scope.home { $scope_codes = ($scope_codes | append "H") } else { $scope_codes = ($scope_codes | append "-") }
-            if $scope.flake { $scope_codes = ($scope_codes | append "F") } else { $scope_codes = ($scope_codes | append "-") }
-            if $scope.docs { $scope_codes = ($scope_codes | append "D") } else { $scope_codes = ($scope_codes | append "-") }
-            
-            let verification = (check-roll-verification $roll_branch)
-            let verified_count = ($verification | values | where {|v| $v.verified} | length)
-            let total = ((get-active-hosts) | length)
-            let promo_status = (check-roll-promotion-ready $roll_branch)
-            let is_diverged = if (check-roll-graduated $roll_branch) {
-                (check-roll-diverged $roll_branch)
-            } else { false }
-            
-            let status_str = if $promo_status.ready {
-                if $is_diverged { "!DIVERGED" } else { "PROMOTE" }
-            } else if (check-roll-graduated $roll_branch) {
-                "merged"
-            } else {
-                "active"
-            }
-            
-            {
-                roll: ($roll_branch | str substring 0..40)
-                cur: (if $is_current { ">" } else { "" })
-                loc: (get-branch-location $roll_branch)
-                scope: ($scope_codes | str join "")
-                files: $scope.files_count
-                verified: (if $is_diverged { "✗" } else { $"($verified_count)/($total)" })
-                status: $status_str
-            }
-        })
-        
-        $all_records | table -e | lines | each {|line| print $"  ($line)" }
     }
     
     # ── Develop / Non-Roll Branch Status ──────────────────────────
