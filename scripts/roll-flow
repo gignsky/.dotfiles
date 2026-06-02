@@ -907,10 +907,7 @@ def detect-quasi-rolls [] {
             let parts = ($l | split row ' ')
             {hash: ($parts | get 0), msg: ($parts | skip 1 | str join ' ')}
         } | where {|c|
-            (not ($c.msg | str starts-with "test("))
-            and (not ($c.msg | str contains "generation"))
-            and (not ($c.msg | str contains "gig@"))
-            and (not ($c.msg | str starts-with "Flake-Check:"))
+            (not ($c.msg | str starts-with "test(")) and (not ($c.msg | str contains "generation")) and (not ($c.msg | str contains "gig@")) and (not ($c.msg | str starts-with "Flake-Check:"))
         })
         
         if ($commits | is-empty) { continue }
