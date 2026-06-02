@@ -2099,7 +2099,7 @@ def "main graduate" [
             }
         }
         if $all_deps_graduated {
-            print $"  (ansi green)✓ All dependencies satisfied (graduated or queued in this batch)(ansi reset)"
+            print $"  (ansi green)✓ All dependencies satisfied [graduated or queued in batch](ansi reset)"
         }
     }
     
