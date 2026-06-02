@@ -359,8 +359,8 @@ def check-roll-blocked [
         return { blocked: false, ungraduated_deps: [] }
     }
     
-    # Get dependencies
-    let deps = (detect-roll-dependencies $roll_branch)
+    # Get dependencies (basic — only Methods 1-3, merge-blocking deps)
+    let deps = (detect-roll-dependencies $roll_branch --basic)
     
     if ($deps | is-empty) {
         return { blocked: false, ungraduated_deps: [] }
@@ -665,6 +665,28 @@ def attribute-files [
         }
     }
     
+    # ── Quasi-roll attribution ──
+    # For files not yet attributed to any roll, check quasi-roll file sets
+    let quasi_rolls = (detect-quasi-rolls)
+    if ($quasi_rolls | is-not-empty) {
+        for qr in $quasi_rolls {
+            let qid = $qr.id
+            let qr_files = $qr.files
+            for f in $inherited_files {
+                if $f in $qr_files {
+                    if $f not-in $map {
+                        $map = ($map | insert $f [$qid])
+                    } else {
+                        let origins = ($map | get $f)
+                        if $qid not-in $origins {
+                            $map = ($map | upsert $f ($origins | append $qid))
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
     $map
 }
 
@@ -825,10 +847,233 @@ def get-current-roll [] {
     }
 }
 
+# Detect quasi-rolls: direct-to-[rolling] commits grouped by inter-roll periods
+# Returns list of records: [{id: "q1", after_merge: "roll/N", commits: [{hash, msg}], count: int, files: [file1, ...], theme: "..."}]
+def detect-quasi-rolls [] {
+    let config = get-config
+    let roll_prefix = $config.roll_prefix
+    let rolling = $config.rolling_branch
+    let stable = $config.stable_branch
+    
+    # Get all roll merge commits on rolling branch (newest first from git log)
+    let merge_result = (do -i { ^git log $rolling --oneline --grep=$"Merge branch '($roll_prefix)'" } | complete)
+    if $merge_result.exit_code != 0 { return [] }
+    
+    let merge_lines = ($merge_result.stdout | lines | each {|l| $l | str trim} | where {|l| ($l | is-not-empty)})
+    if ($merge_lines | is-empty) { return [] }
+    
+    # Parse into {hash, roll_name}, then order chronologically (oldest first)
+    let merges = ($merge_lines | each {|l|
+        let parts = ($l | split row ' ')
+        let hash = ($parts | get 0)
+        let msg = ($parts | range 1.. | str join ' ')
+        let roll_name = (try {
+            $msg
+            | str replace "Merge branch '" ""
+            | str replace "' into " " "
+            | split row ' '
+            | get 0
+        } catch { null })
+        if $roll_name != null { {hash: $hash, roll: $roll_name} } else { null }
+    } | where {|x| $x != null} | reverse)
+    
+    if ($merges | is-empty) { return [] }
+    
+    mut quasi_rolls = []
+    let total = ($merges | length)
+    
+    for i in 0..<$total {
+        let merge_info = ($merges | get $i)
+        let start_hash = $merge_info.hash
+        
+        # End boundary: next merge's first parent, or current tip of rolling
+        let end_rev = if $i + 1 < $total {
+            $"($merges | get ($i + 1) | get hash)^1"
+        } else {
+            $rolling
+        }
+        
+        let range = $"($start_hash)..($end_rev)"
+        
+        # Get non-merge commits in this range (exclusive of both boundaries)
+        let commit_result = (do -i { ^git log $range --oneline --no-merges } | complete)
+        if $commit_result.exit_code != 0 { continue }
+        let commits_raw = ($commit_result.stdout | lines | each {|l| $l | str trim} | where {|l| ($l | is-not-empty)})
+        if ($commits_raw | is-empty) { continue }
+        
+        # Parse and filter out auto-generated commits
+        let commits = ($commits_raw | each {|l|
+            let parts = ($l | split row ' ')
+            {hash: ($parts | get 0), msg: ($parts | range 1.. | str join ' ')}
+        } | where {|c|
+            (not ($c.msg | str starts-with "test("))
+            and (not ($c.msg | str contains "generation"))
+            and (not ($c.msg | str contains "gig@"))
+            and (not ($c.msg | str starts-with "Flake-Check:"))
+        })
+        
+        if ($commits | is-empty) { continue }
+        
+        # Get files changed in this period
+        let files_result = (do -i { ^git diff --name-only $range } | complete)
+        let files = if $files_result.exit_code == 0 {
+            ($files_result.stdout | lines | each {|l| $l | str trim} | where {|l| ($l | is-not-empty)})
+        } else { [] }
+        
+        if ($files | is-empty) { continue }
+        
+        let qid = $"q($i + 1)"
+        let theme = ($commits | get 0).msg
+        
+        $quasi_rolls = ($quasi_rolls | append {
+            id: $qid,
+            after_merge: $merge_info.roll,
+            commits: $commits,
+            count: ($commits | length),
+            files: $files,
+            theme: $theme
+        })
+    }
+    
+    $quasi_rolls
+}
+
+# Check if a quasi-roll has been promoted to main
+# Returns true if the quasi-roll's commits exist on main
+def check-quasi-roll-promoted [
+    quasi_id: string     # e.g. "q1", "q2"
+] {
+    let config = get-config
+    let quasi_rolls = (detect-quasi-rolls)
+    let qr = ($quasi_rolls | where {|q| $q.id == $quasi_id} | first)
+    
+    if ($qr == null) { return false }
+    
+    # Check if all commits in this quasi-roll exist on main
+    let all_on_main = ($qr.commits | all {|c|
+        let check = (do -i { ^git branch $config.stable_branch --contains $c.hash } | complete)
+        $check.exit_code == 0
+    })
+    
+    $all_on_main
+}
+
+# Check verification status for a quasi-roll
+# Quasi-rolls are verified if test-all commits exist on develop after their last commit
+def check-quasi-roll-verification [
+    quasi_id: string
+] {
+    let config = get-config
+    let quasi_rolls = (detect-quasi-rolls)
+    let qr = ($quasi_rolls | where {|q| $q.id == $quasi_id} | first)
+    
+    if ($qr == null) {
+        return {}  # Empty record if not found
+    }
+    
+    # Get the last commit hash in this quasi-roll batch
+    let last_commit = ($qr.commits | last).hash
+    
+    # Detect scope (which hosts need verification)
+    let scope = {
+        nixos: ($qr.files | any {|f| $f | str starts-with "hosts/" and ($f | str ends-with ".nix")})
+        home: ($qr.files | any {|f| $f | str starts-with "home/"})
+        flake: ($qr.files | any {|f| $f == "flake.nix" or $f == "flake.lock"})
+        docs: ($qr.files | any {|f| $f | str starts-with "docs/" or ($f | str ends-with ".md")})
+    }
+    
+    mut host_status = {}
+    
+    for host in (get-active-hosts) {
+        let needs_nixos = $scope.nixos
+        let needs_home = $scope.home
+        let needs_flake = $scope.flake
+        
+        # Check for verification commits on develop after the quasi-roll's last commit
+        let range = $"($last_commit)..($config.rolling_branch)"
+        
+        let flake_verified = if $needs_flake {
+            let flake_check = (do -i { ^git log $range --oneline --grep="test(" -1 } | complete)
+            ($flake_check.exit_code == 0) and ($flake_check.stdout | str trim | is-not-empty)
+        } else { true }
+        
+        let nixos_verified = if $needs_nixos {
+            let nixos_rebuild = (do -i { ^git log $range --oneline --grep=$"^($host): generation" -1 } | complete)
+            ($nixos_rebuild.exit_code == 0) and ($nixos_rebuild.stdout | str trim | is-not-empty)
+        } else { true }
+        
+        let home_verified = if $needs_home {
+            let home_rebuild = (do -i { ^git log $range --oneline --grep=$"^($config.username)@($host):" -1 } | complete)
+            ($home_rebuild.exit_code == 0) and ($home_rebuild.stdout | str trim | is-not-empty)
+        } else { true }
+        
+        let host_verified = ($nixos_verified and $home_verified and $flake_verified)
+        $host_status = ($host_status | insert $host {
+            verified: $host_verified,
+            nixos: $nixos_verified,
+            home: $home_verified,
+            flake: $flake_verified,
+            docs: true,
+            required: {nixos: $needs_nixos, home: $needs_home, flake: $needs_flake, docs: $scope.docs}
+        })
+    }
+    
+    $host_status
+}
+
+# Detect dependencies for quasi-rolls: other quasi-rolls or real rolls that touch the same files
+# Returns: {rolls: [roll/1, ...], quasi_rolls: [q1, q2, ...]}
+def detect-quasi-roll-dependencies [
+    quasi_id: string
+] {
+    let config = get-config
+    let quasi_rolls = (detect-quasi-rolls)
+    let qr = ($quasi_rolls | where {|q| $q.id == $quasi_id} | first)
+    
+    if ($qr == null) { return {rolls: [], quasi_rolls: []} }
+    
+    let qr_files = $qr.files
+    mut roll_deps = []
+    mut quasi_deps = []
+    
+    # Check other quasi-rolls (earlier ones only)
+    for other_qr in $quasi_rolls {
+        if $other_qr.id == $quasi_id { break }  # Only consider earlier quasi-rolls
+        
+        let overlap = ($qr_files | where {|f| $f in $other_qr.files})
+        if ($overlap | is-not-empty) and ($other_qr.id not-in $quasi_deps) {
+            $quasi_deps = ($quasi_deps | append $other_qr.id)
+        }
+    }
+    
+    # Check real rolls (graduated ones that touched the same files)
+    let all_rolls = (do -i { ^git branch --list $"($config.roll_prefix)*" } | lines | each {|l| $l | str trim | str replace '* ' '' })
+    for roll in $all_rolls {
+        if not (check-roll-graduated $roll) { continue }  # Only check graduated rolls
+        
+        # Get roll's files
+        let merge = (do -i { ^git log $config.rolling_branch --oneline --grep=$"Merge branch '($roll)'" -1 } | complete)
+        if $merge.exit_code != 0 or ($merge.stdout | str trim | is-empty) { continue }
+        
+        let mc = ($merge.stdout | str trim | split row ' ' | get 0)
+        let roll_files = (do -i { ^git diff --name-only $"($mc)^1" $"($mc)^2" } | complete)
+        if $roll_files.exit_code != 0 { continue }
+        
+        let overlap = ($qr_files | where {|f| $f in ($roll_files.stdout | lines)})
+        if ($overlap | is-not-empty) and ($roll not-in $roll_deps) {
+            $roll_deps = ($roll_deps | append $roll)
+        }
+    }
+    
+    {rolls: $roll_deps, quasi_rolls: $quasi_deps}
+}
+
 # Detect dependencies for a roll using multiple methods
 # Returns list of roll branches that this roll depends on
+# Use --basic to exclude Method 4 (transitive baseline / promotion ordering) deps
 def detect-roll-dependencies [
     roll_branch: string  # Roll branch to analyze
+    --basic              # Only Methods 1-3 (merge-blocking deps), exclude Method 4 (ordering)
 ] {
     let config = get-config
     mut dependencies = []
@@ -949,6 +1194,45 @@ def detect-roll-dependencies [
         }
     }
     
+    # Method 4: Transitive baseline dependencies (file inheritance) — ONLY when --basic is NOT set
+    # These are promotion ordering constraints, not merge-blocking deps.
+    # If a lower-numbered roll was merged to develop before this roll was created,
+    # this roll's baseline includes that roll's changes. This creates a transitive
+    # ordering constraint — this roll cannot be promoted to main without the prior
+    # roll being promoted first, since main doesn't have those changes yet.
+    if (not $basic) and ($roll_num != null) {
+        # Gather ALL roll branches (local + remote)
+        let local_branches = try {
+            git branch --list $"($config.roll_prefix)*" 
+            | lines | each {|l| $l | str trim | str replace '* ' '' }
+        } catch { [] }
+        let remote_branches = try {
+            git branch -r | lines | each {|l| $l | str trim }
+            | where {|b| ($b | str starts-with $"origin/($config.roll_prefix)") }
+            | each {|b| $b | str replace 'origin/' '' }
+        } catch { [] }
+        let all_branches = ($local_branches | append $remote_branches | uniq)
+        
+        # Pre-compute graduation status for all rolls (avoids N×N git log calls)
+        let grad_map = ($all_branches | reduce -f {} {|r, acc| $acc | insert $r (check-roll-graduated $r)})
+        
+        for r in $all_branches {
+            if $r == $roll_branch { continue }
+            
+            let other_num = try {
+                $r | str replace $config.roll_prefix '' | split row '-' | get 0 | into int
+            } catch { null }
+            
+            # Only lower-numbered, graduated rolls
+            if ($other_num != null) and ($other_num < $roll_num) and ($grad_map | get $r) {
+                if not ($dependencies | any {|d| $d == $r}) {
+                    $dependencies = ($dependencies | append $r)
+                }
+            }
+        }
+    }
+    
+    # Deduplicate and return
     $dependencies | uniq
 }
 
@@ -1416,12 +1700,14 @@ def "main graduate" [
     --dry-run                    # Show plan without executing
     --force(-f)                  # Skip verification checks
     --promote                    # Force promote mode (roll->main instead of roll->develop)
+    --all                        # Include quasi-rolls in promotion (promote mode only)
+    --quasi                      # Promote ONLY quasi-rolls (promote mode only)
 ] {
     let config = get-config
     let current = (git branch --show-current | str trim)
     let current_roll = get-current-roll
     
-    # ── Phase A: Context & Mode ─────────────────────────────────────
+    # ── Phase A: Context & Mode ─────────────────────────────────────────
     
     let on_rolling = ($current == $config.rolling_branch)
     let on_stable = ($current == $config.stable_branch)
@@ -1457,6 +1743,13 @@ def "main graduate" [
     
     let target = if $mode == "promote" { $config.stable_branch } else { $config.rolling_branch }
     let mode_label = if $mode == "promote" { "Promote" } else { "Graduate" }
+    
+    # Validate quasi-roll flags
+    if ($quasi or $all) and $mode != "promote" {
+        print $"(ansi red)Error:(ansi reset) --quasi and --all flags are only valid in promote mode"
+        print "  Quasi-rolls are already on ($config.rolling_branch) — they can only be promoted to ($config.stable_branch)"
+        return
+    }
     
     print ""
     print $"=== Roll Flow: ($mode_label) ==="
@@ -1646,7 +1939,7 @@ def "main graduate" [
     print "Analyzing dependencies..."
     mut ordered = []
     for roll in $selected_rolls {
-        let with_deps = (resolve-roll-dependencies $roll)
+        let with_deps = (resolve-roll-dependencies $roll --basic)
         for r in $with_deps {
             # For graduate mode: skip already-graduated rolls unless diverged (new commits to merge)
             # For promote mode: include all rolls (they all need to go to main)
@@ -1701,7 +1994,7 @@ def "main graduate" [
     if $mode == "graduate" and not $force {
         mut all_deps_graduated = true
         for roll in $ordered {
-            let deps = (detect-roll-dependencies $roll)
+            let deps = (detect-roll-dependencies $roll --basic)
             for dep in $deps {
                 if not (check-roll-graduated $dep) {
                     print $"  (ansi red)✗ ($roll) - dependency ($dep) not yet graduated(ansi reset)"
@@ -2041,7 +2334,8 @@ def "main graduate" [
 # Helper: Build list of rolls with dependencies (recursive)
 def resolve-roll-dependencies [
     roll_name: string
-    --seen: list = []  # Already processed rolls
+    --basic               # Only Methods 1-3 deps (exclude promotion ordering)
+    --seen: list = []     # Already processed rolls
 ] {
     let config = get-config
     
@@ -2053,11 +2347,19 @@ def resolve-roll-dependencies [
     }
     
     # Get dependencies
-    let deps = (detect-roll-dependencies $roll_name)
+    let deps = (if $basic {
+        detect-roll-dependencies $roll_name --basic
+    } else {
+        detect-roll-dependencies $roll_name
+    })
     
     # Process dependencies first (depth-first)
     for dep in $deps {
-        let dep_result = (resolve-roll-dependencies $dep --seen ($seen | append $roll_name | append $result))
+        let dep_result = (if $basic {
+            resolve-roll-dependencies $dep --basic --seen ($seen | append $roll_name | append $result)
+        } else {
+            resolve-roll-dependencies $dep --seen ($seen | append $roll_name | append $result)
+        })
         $result = ($result | append $dep_result)
     }
     
@@ -2094,7 +2396,8 @@ def render-file-tree [
     
     # Determine origin tag and color for a file
     # Color: 0=new(green), 1=roll/1-2(yellow), 2=roll/3-4(blue),
-    #        3=roll/5-6(cyan), 4=roll/7+(purple), 5=unknown(dimmed)
+    #        3=roll/5-6(cyan), 4=roll/7+(purple), 5=unknown(dimmed),
+    #        6=quasi-roll (bold/default)
     let get_tag = {|f|
         if $f in $own_files {
             {label: "new", color: 0}
@@ -2104,13 +2407,17 @@ def render-file-tree [
                 let nums = ($origins | each {|o|
                     try { $o | str replace $roll_prefix "" | split row "-" | get 0 | into int } catch { null }
                 } | where {|x| $x != null} | sort)
-                let label = if ($nums | is-empty) {
-                    ($origins | str join ", ")
-                } else {
-                    ($nums | str join ",")
-                }
+                let quasi = ($origins | where {|o|
+                    ($o | str starts-with "q") and ($o | str length) >= 2
+                } | sort)
+                mut label_parts = []
+                if ($nums | is-not-empty) { $label_parts = ($label_parts | append ($nums | each {|n| $n | into string} | str join ",")) }
+                if ($quasi | is-not-empty) { $label_parts = ($label_parts | append ($quasi | str join ",")) }
+                let label = ($label_parts | str join ",")
                 let max = (if ($nums | is-not-empty) { $nums | last } else { 0 })
-                let color_idx = if $max <= 2 { 1 } else if $max <= 4 { 2 } else if $max <= 6 { 3 } else { 4 }
+                let color_idx = if ($nums | is-empty) and ($quasi | is-not-empty) {
+                    6  # quasi-roll only (no real roll origins)
+                } else if $max <= 2 { 1 } else if $max <= 4 { 2 } else if $max <= 6 { 3 } else { 4 }
                 {label: $label, color: $color_idx}
             } else {
                 {label: "?", color: 5}
@@ -2139,6 +2446,8 @@ def render-file-tree [
             print $"    (ansi green)($fname)(ansi reset)   ($tag.label)"
         } else if $color_idx == 5 {
             print $"    (ansi default_dimmed)($fname)(ansi reset)   ?"
+        } else if $color_idx == 6 {
+            print $"    (ansi default_bold)($fname)(ansi reset)   ($tag.label)"
         } else {
             let c = ["" $"(ansi yellow_bold)" $"(ansi blue_bold)" $"(ansi cyan_bold)" $"(ansi purple_bold)"] | get $color_idx
             print $"    ($c)($fname)(ansi reset)   ($tag.label)"
@@ -2150,7 +2459,7 @@ def render-file-tree [
 
 def show-roll-summary-table [
     config: record
-    current_roll: string
+    current_roll: any           # Can be string (roll name) or null (on main/develop)
     all_branches: list
     --deps
 ] {
@@ -2187,13 +2496,13 @@ def show-roll-summary-table [
             "active"
         }
         
-        # Build deps string (roll numbers only) if --deps flag is set
+        # Build deps string (roll numbers only, sorted numerically) if --deps flag is set
         let deps_str = if $deps {
-            let deps = (detect-roll-dependencies $roll_branch)
+            let deps = (detect-roll-dependencies $roll_branch --basic)
             if ($deps | is-not-empty) {
                 ($deps | each {|d|
-                    try { $d | str replace $config.roll_prefix '' | split row '-' | get 0 } catch { null }
-                } | where {|x| $x != null} | str join ",")
+                    try { $d | str replace $config.roll_prefix '' | split row '-' | get 0 | into int } catch { null }
+                } | where {|x| $x != null} | sort | each {|n| $n | into string} | str join ",")
             } else { "" }
         } else { "" }
         
@@ -2250,17 +2559,16 @@ def "main status" [] {
     
     let all_roll_branches = ($local_rolls | append $remote_rolls | uniq | sort)
     
-    # ── On main/develop: show table before prompt ────────────────
+    # ── On main/develop: simple indicator before prompt ──────────
     let on_roll = ($current_roll != null)
     let on_main_dev = not $on_roll and (($current_branch == $config.stable_branch) or ($current_branch == $config.rolling_branch))
     
     if $on_main_dev {
-        print ""
-        show-roll-summary-table $config $current_roll $all_roll_branches
+        print "  (on main/develop — use 'rf list' to see all rolls)" 
         print ""
     }
     
-    # ── Current Roll Scope Summary (always visible) ───────────────
+    # ── Current Roll Details (always visible) ──────────────────────
     if ($current_roll != null) {
         let scope = (detect-roll-scope $current_roll)
         mut scope_codes = []
@@ -2270,44 +2578,19 @@ def "main status" [] {
         if $scope.docs { $scope_codes = ($scope_codes | append "D") } else { $scope_codes = ($scope_codes | append "-") }
         let scope_str = ($scope_codes | str join "")
         
-        let files_info = (get-roll-files $current_roll --skip-attr)
+        # Compute files_info once (with attribution) for both count and file tree
+        let files_info = (get-roll-files $current_roll)
         print $"  Scope: (ansi cyan)($scope_str)(ansi reset)  Files: ($scope.files_count)   \(($files_info.count_own) own + ($files_info.count_inherited) from prior rolls\)"
         print ""
-    }
-    
-    # ── Detail Prompt ───────────────────────────────────────────────
-    # Gracefully handle non-interactive contexts (piped through nix run)
-    let show_details = (try {
-        input "Show full details? (y/N): "
-    } catch {
-        ""
-    })
-    print ""
-    
-    if ($show_details | str trim | str downcase) != "y" {
-        return
-    }
-    
-    # ── Full Detailed View ──────────────────────────────────────────
-    # Show table (if not already shown above)
-    if not $on_main_dev {
-        print "=== All Rolls ==="
-        show-roll-summary-table $config $current_roll $all_roll_branches
-        print ""
-    }
-    
-    # ── Current Roll Details ────────────────────────────────────────
-    if ($current_roll != null) {
-        let scope = (detect-roll-scope $current_roll)
+        
         print $"=== Current Roll: (ansi green)($current_roll)(ansi reset) ==="
         
         # File tree
-        let files_info = (get-roll-files $current_roll)
         if ($scope.files_count) > 0 {
             print ""
             render-file-tree $files_info.total $files_info.attr $files_info.own
             print ""
-            print "  Color legend: (ansi green)green(ansi reset)=new  (ansi yellow_bold)yellow(ansi reset)=roll/1-2  (ansi blue_bold)blue(ansi reset)=roll/3-4  (ansi cyan_bold)cyan(ansi reset)=roll/5-6  (ansi purple_bold)purple(ansi reset)=roll/7+"
+            print $"  Color legend: (ansi green)green(ansi reset)=new  (ansi yellow_bold)yellow(ansi reset)=roll/1-2  (ansi blue_bold)blue(ansi reset)=roll/3-4  (ansi cyan_bold)cyan(ansi reset)=roll/5-6  (ansi purple_bold)purple(ansi reset)=roll/7+  (ansi default_bold)bold(ansi reset)=quasi-roll"
         }
         
         # Roll metadata
@@ -2354,8 +2637,8 @@ def "main status" [] {
         })
         $verif_records | table -e | lines | each {|line| print $"  ($line)" }
         
-        # Dependencies
-        let deps = (detect-roll-dependencies $current_roll)
+        # Dependencies (basic — merge-blocking deps only)
+        let deps = (detect-roll-dependencies $current_roll --basic)
         let block_info = (check-roll-blocked $current_roll)
         
         if not ($deps | is-empty) {
@@ -2370,11 +2653,30 @@ def "main status" [] {
         print ""
     } else {
         print "  ℹ not on a roll branch"
+        print ""
     }
     
+    # ── Detail Prompt ───────────────────────────────────────────────
+    # Gracefully handle non-interactive contexts (piped through nix run)
+    let show_details = (try {
+        input "Show full details? (y/N): "
+    } catch {
+        ""
+    })
+    print ""
+    
+    if ($show_details | str trim | str downcase) != "y" {
+        return
+    }
+    
+    # ── All Rolls Table (behind prompt, directly above Merge Queue) ─
+    print "=== All Rolls ==="
+    show-roll-summary-table $config $current_roll $all_roll_branches
+    print ""
+    
     # ── Develop / Non-Roll Branch Status ──────────────────────────
-    let current_branch = (git branch --show-current | str trim)
-    if ($current_branch != $config.rolling_branch) and (not ($current_branch | str starts-with "roll/")) {
+    let is_non_roll = ($current_branch != $config.rolling_branch) and (not ($current_branch | str starts-with "roll/"))
+    if $is_non_roll {
         # Non-roll, non-develop branch
         print ""
         print $"=== Branch: (ansi yellow)($current_branch)(ansi reset) ==="
@@ -2709,7 +3011,7 @@ def "main list" [] {
             
             # Color legend
             print ""
-            print $"  (ansi green)■ new to this roll(ansi reset)  (ansi yellow_bold)■ roll/1-2(ansi reset)  (ansi blue_bold)■ roll/3-4(ansi reset)  (ansi cyan_bold)■ roll/5-6(ansi reset)  (ansi purple_bold)■ roll/7+(ansi reset)"
+            print $"  (ansi green)■ new to this roll(ansi reset)  (ansi yellow_bold)■ roll/1-2(ansi reset)  (ansi blue_bold)■ roll/3-4(ansi reset)  (ansi cyan_bold)■ roll/5-6(ansi reset)  (ansi purple_bold)■ roll/7+(ansi reset)  (ansi default_bold)■ quasi-roll(ansi reset)"
         }
         
         print ""
@@ -2759,8 +3061,8 @@ def "main list" [] {
             }
         }
         
-        # Dependencies
-        let deps = (detect-roll-dependencies $roll_branch)
+        # Dependencies (basic — merge-blocking deps only)
+        let deps = (detect-roll-dependencies $roll_branch --basic)
         if ($deps | is-not-empty) {
             print $"  Depends on: (ansi yellow)($deps | str join ', ')(ansi reset)"
         }
