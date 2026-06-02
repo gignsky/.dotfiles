@@ -4,21 +4,25 @@
     enable = true;
     package = pkgs.unstable.opencode;
 
+    tui = {
+      scroll_speed = 3;
+      scroll_acceleration = {
+        enabled = true;
+      };
+      theme = "gruvbox"; # Built-in gruvbox theme
+
+      # Fix Ctrl+Enter for newlines
+      keybinds = {
+        input_newline = "shift+enter,ctrl+enter,ctrl+j";
+      };
+    };
+
     # Main configuration
     settings = {
       # Core setup
       model = "github-copilot/claude-sonnet-4.5";
       small_model = "github-copilot/gpt-4o";
-      theme = "gruvbox"; # Built-in gruvbox theme
       # autoupdate = true;
-
-      # TUI optimizations
-      tui = {
-        scroll_speed = 3;
-        scroll_acceleration = {
-          enabled = true;
-        };
-      };
 
       # Tools configuration
       tools = {
@@ -39,11 +43,6 @@
         webfetch = "allow";
         doom_loop = "allow";
         external_directory = "allow";
-      };
-
-      # Fix Ctrl+Enter for newlines
-      keybinds = {
-        input_newline = "shift+enter,ctrl+enter,ctrl+j";
       };
 
       # Cursor configuration - set to line cursor
@@ -193,7 +192,7 @@
     };
 
     # Enhanced rules with personality system
-    rules = ''
+    context = ''
             # OpenCode Agent Configuration
 
             This agent operates within a NixOS/home-manager environment at ~/.dotfiles.
