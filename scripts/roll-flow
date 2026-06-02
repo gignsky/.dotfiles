@@ -380,22 +380,29 @@ def check-roll-blocked [
     }
 }
 
+# Find the latest merge commit hash for a roll branch on the given branch
+# Searches both git-standard "Merge branch 'roll/...'" and rf-style "Graduate roll/..." messages
+# Returns the hash of the latest matching commit, or empty string if none found
+def get-roll-merge-commit [
+    branch: string          # The branch to search on (e.g. develop)
+    roll_branch: string     # The roll branch name
+] {
+    try {
+        # Search for either format - git OR's multiple --grep flags by default
+        let raw = (do -i { 
+            ^git log $branch --oneline --grep=$"Merge branch '($roll_branch)'" --grep=$"Graduate ($roll_branch)" -1
+        })
+        if ($raw | is-empty) { "" } else { $raw | str trim | split row ' ' | get 0 }
+    } catch { "" }
+}
+
 # Check if a roll has been graduated to rolling
 def check-roll-graduated [
     roll_branch: string
 ] {
     let config = get-config
-    
-    # Check if the roll branch has been merged to rolling
-    # We look for merge commits in rolling that reference this roll
-    let merge_check = try {
-        let raw = (do -i { ^git log $config.rolling_branch --oneline --grep=$"Merge branch '($roll_branch)'" -1 })
-        if ($raw | is-empty) { "" } else { $raw | str trim }
-    } catch {
-        ""
-    }
-    
-    not ($merge_check | is-empty)
+    let merge_hash = (get-roll-merge-commit $config.rolling_branch $roll_branch)
+    ($merge_hash | is-not-empty)
 }
 
 # Check if a graduated roll branch has diverged from rolling (has commits after merge)
@@ -409,13 +416,9 @@ def check-roll-diverged [
         return false
     }
     
-    # Find the merge commit
-    let merge_commit = try {
-        git log $config.rolling_branch --oneline --grep=$"Merge branch '($roll_branch)'" -1
-        | str trim
-        | split row ' '
-        | get 0
-    } catch {
+    # Find the merge commit (use helper that checks both "Merge branch" and "Graduate" formats)
+    let merge_commit = (get-roll-merge-commit $config.rolling_branch $roll_branch)
+    if ($merge_commit | is-empty) {
         return false  # No merge found, can't determine
     }
     
@@ -2138,7 +2141,7 @@ def "main graduate" [
         let merge_msg = if $mode == "promote" {
             $"Promote ($roll) to ($config.stable_branch)"
         } else {
-            $"Graduate ($roll) to ($config.rolling_branch)"
+            $"Merge branch '($roll)'"
         }
         
         print $"  Merging (ansi cyan)($roll)(ansi reset)..."
