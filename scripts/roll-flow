@@ -422,19 +422,19 @@ def check-roll-diverged [
         return false  # No merge found, can't determine
     }
     
-    # Find what the roll branch looked like at merge time (second parent of merge commit)
+    # Find what the roll branch looked like at merge time (second parent of merge commit).
+    # Validate ^2 exists — squash/linear merges have no second parent.
+    # Use do -i { ^git } | complete (the codebase's established pattern for fallible git calls).
     let merged_tip = $"($merge_commit)^2"
-
-    # Validate that ^2 actually exists (squash/linear merges have no second parent)
-    let merged_tip_check = try {
-        git rev-parse $merged_tip out+err>| complete
-    } catch { {exit_code: 1, stdout: ""} }
-    if $merged_tip_check.exit_code != 0 {
-        # Squash or linear Graduate — no ^2 parent. Can't compare commit hashes,
-        # so conservatively report not-diverged.
+    let tip_result = (do -i { ^git rev-parse $merged_tip } | complete)
+    if $tip_result.exit_code != 0 {
+        # No ^2 parent (squash/linear Graduate). Can't compare hashes; report not-diverged.
         return false
     }
-    let merged_tip_hash = ($merged_tip_check.stdout | str trim)
+    let merged_tip_hash = ($tip_result.stdout | str trim)
+    if ($merged_tip_hash | is-empty) {
+        return false
+    }
 
     # Resolve the branch ref — prefer local, fall back to remote tracking ref
     let roll_ref = (resolve-roll-ref $roll_branch)
@@ -444,27 +444,25 @@ def check-roll-diverged [
     let is_remote_only = ($roll_ref != $roll_branch)
 
     # Get the current tip of the roll branch (local or via remote ref)
-    let rev_result = try {
-        git rev-parse $roll_ref out+err>| complete
-    } catch {
+    let head_result = (do -i { ^git rev-parse $roll_ref } | complete)
+    if $head_result.exit_code != 0 {
         return false
     }
-    if $rev_result.exit_code != 0 {
-        return false
-    }
-    let roll_head = ($rev_result.stdout | str trim)
+    let roll_head = ($head_result.stdout | str trim)
 
     # If the roll branch HEAD doesn't match what was merged, it has diverged.
     # Also check if the merged tip is still reachable from the roll branch
     # (catches force-pushes or hard-resets that dropped the graduation commit).
-    # Use 'git branch -r' for remote-only branches.
-    let on_branch = try {
-        if $is_remote_only {
-            git branch -r --list $"origin/($roll_branch)" --contains $merged_tip err>| ignore | lines | str trim | length
-        } else {
-            git branch --list $roll_branch --contains $merged_tip err>| ignore | lines | str trim | length
-        }
-    } catch {
+    # Use resolved hash directly (not the ^2 expression) and do -i | complete
+    # instead of err>| ignore to avoid redirect-as-argument parse issues.
+    let on_branch_result = if $is_remote_only {
+        (do -i { ^git branch -r --list $"origin/($roll_branch)" --contains $merged_tip_hash } | complete)
+    } else {
+        (do -i { ^git branch --list $roll_branch --contains $merged_tip_hash } | complete)
+    }
+    let on_branch = if $on_branch_result.exit_code == 0 {
+        $on_branch_result.stdout | lines | where {|l| ($l | str trim | is-not-empty)} | length
+    } else {
         0
     }
 
