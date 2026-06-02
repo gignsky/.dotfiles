@@ -209,11 +209,12 @@ let
           --quasi
         ]
         export extern "rf promote" [ roll?: string@"nu-complete rf rolls" ]
+        export extern "rf update" [ --force(-f) --dry-run ]
         export extern "rf status" []
         export extern "rf test-all" []
         export extern "rf list" []
         def "nu-complete rf commands" [] {
-          ["init" "start" "integrate" "graduate" "promote" "status" "test-all" "list"]
+          ["init" "start" "integrate" "graduate" "promote" "update" "status" "test-all" "list"]
         }
         def "nu-complete git branches" [] {
           git branch --list | lines | str trim | str replace "* " ""

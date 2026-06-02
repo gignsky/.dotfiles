@@ -14,6 +14,7 @@ def main [] {
     print "  integrate <branch>      Merge a feature branch into current roll"
     print "  graduate [--promote]    Interactive: graduate rolls to develop or promote to main"
     print "  promote                 Alias for 'graduate --promote'"
+    print "  update                  Merge main into all ungraduated local roll branches"
     print "  status                  Show current roll status"
     print "  test-all                Test build on all configured hosts"
     print "  list                    List all rolls and their states"
@@ -2368,7 +2369,7 @@ def "main graduate" [
         if $has_remote {
             print $"  (ansi cyan)r(ansi reset)emote   - remote only"
         }
-        print $"  (ansi cyan)n(ansi reset)one     - keep all (default)"
+        print $"  (ansi cyan)n(ansi reset)one     - keep all [default]"
         let choice = (try { input "Choice [n]: " } catch { "n" })
         let c = ($choice | str trim | str downcase)
 
@@ -2512,6 +2513,146 @@ def "main promote" [
     print $"(ansi yellow)Note:(ansi reset) Roll numbers provided will be ignored; using interactive selection."
     print ""
     main graduate --promote --force=($force)
+}
+
+# Update ungraduated local roll branches by merging the stable branch into each
+def "main update" [
+    --force(-f)                # Skip confirmation prompt
+    --dry-run                  # Show what would be updated without making changes
+] {
+    let config = get-config
+    let orig_branch = (git branch --show-current | str trim)
+
+    print "=== Roll Flow: Update ==="
+    print $"  Source: (ansi cyan)($config.stable_branch)(ansi reset)"
+    print ""
+
+    # Block on uncommitted changes — checking out branches would lose work
+    let status_raw = (do -i { ^git status --porcelain } | complete)
+    let has_uncommitted = ($status_raw.exit_code == 0 and ($status_raw.stdout | str trim | is-not-empty))
+    if $has_uncommitted {
+        print $"(ansi red)✗ Uncommitted changes detected. Commit or stash first.(ansi reset)"
+        return
+    }
+
+    # Detect remote
+    let remote_url = (do -i { ^git remote get-url origin } | complete | get stdout | str trim)
+    let has_remote = ($remote_url | is-not-empty)
+
+    # Fetch latest stable so the merge picks up the newest commits
+    if $has_remote {
+        print "Fetching latest from origin..."
+        do -i { ^git fetch origin } | complete | ignore
+        # Fast-forward the local stable branch if it tracks origin
+        do -i {
+            ^git fetch origin $"($config.stable_branch):($config.stable_branch)"
+        } | complete | ignore
+    }
+
+    # Find ungraduated local roll branches
+    let local_rolls = (
+        do -i { ^git branch --list $"($config.roll_prefix)*" } | complete
+        | if $in.exit_code == 0 {
+            $in.stdout | lines
+            | each {|l| $l | str trim | str replace '* ' ''}
+            | where {|l| $l | is-not-empty}
+        } else { [] }
+    )
+
+    let candidates = ($local_rolls | where {|r| not (check-roll-graduated $r)})
+
+    if ($candidates | is-empty) {
+        print $"(ansi yellow)No ungraduated local rolls to update.(ansi reset)"
+        return
+    }
+
+    print "Rolls to update:"
+    for r in $candidates {
+        print $"  - (ansi cyan)($r)(ansi reset)"
+    }
+    print ""
+
+    if not $force {
+        let confirm = (try { input "Proceed? (Y/n): " } catch { "n" })
+        if ($confirm | str trim | str downcase) == "n" {
+            print "Aborted."
+            return
+        }
+    }
+
+    if $dry_run {
+        print ""
+        print $"(ansi yellow)DRY RUN - no changes made(ansi reset)"
+        for r in $candidates {
+            print $"  Would merge ($config.stable_branch) into ($r)"
+        }
+        return
+    }
+
+    mut updated = 0
+    mut already = 0
+    mut failed = 0
+    mut conflict_branch = ""
+
+    for roll in $candidates {
+        print ""
+        print $"Updating (ansi cyan)($roll)(ansi reset)..."
+
+        let co = (do -i { ^git checkout $roll } | complete)
+        if $co.exit_code != 0 {
+            print $"  (ansi red)✗ Could not checkout ($roll)(ansi reset)"
+            print $"    ($co.stderr | str trim)"
+            $failed = $failed + 1
+            continue
+        }
+
+        # If stable is already an ancestor of this roll, nothing to merge
+        let is_anc = (do -i {
+            ^git merge-base --is-ancestor $config.stable_branch $roll
+        } | complete)
+        if $is_anc.exit_code == 0 {
+            print $"  (ansi green)✓ Already up-to-date with ($config.stable_branch)(ansi reset)"
+            $already = $already + 1
+            continue
+        }
+
+        let merge_msg = $"Merge ($config.stable_branch) into ($roll)"
+        let merge = (do -i {
+            ^git merge --no-ff $config.stable_branch -m $merge_msg
+        } | complete)
+        if $merge.exit_code == 0 {
+            print $"  (ansi green)✓ Merged(ansi reset)"
+            $updated = $updated + 1
+
+            if $has_remote {
+                let push = (do -i { ^git push } | complete)
+                if $push.exit_code == 0 {
+                    print $"  (ansi green)✓ Pushed(ansi reset)"
+                } else {
+                    print $"  (ansi yellow)⚠ Push failed - may need manual push(ansi reset)"
+                }
+            }
+        } else {
+            print $"  (ansi red)✗ Merge failed - resolve conflicts manually(ansi reset)"
+            print $"    ($merge.stderr | str trim)"
+            $failed = $failed + 1
+            $conflict_branch = $roll
+            break
+        }
+    }
+
+    print ""
+    print "=== Summary ==="
+    if $updated > 0 { print $"  Updated:            ($updated) rolls" }
+    if $already > 0 { print $"  Already up-to-date: ($already) rolls" }
+    if $failed > 0  { print $"  Failed:             ($failed) rolls" }
+
+    if $failed == 0 {
+        do -i { ^git checkout $orig_branch } | complete | ignore
+        print $"  Returned to (ansi cyan)($orig_branch)(ansi reset)"
+    } else {
+        print $"  Left on (ansi yellow)($conflict_branch)(ansi reset) for conflict resolution"
+    }
 }
 
 # ── File Tree Rendering ────────────────────────────────────────────
