@@ -2347,9 +2347,9 @@ def "main graduate" [
         }
     }
     
-    # Return to original branch
-    do -i { ^git checkout $orig_branch } | complete | ignore
-    
+    # Stay on the target branch after the merge loop (we'll handle the final
+    # checkout below after reintegration runs).
+
     # ── Phase G: Post-Merge Cleanup ─────────────────────────────────
     
     if $merged_count > 0 {
@@ -2404,11 +2404,19 @@ def "main graduate" [
                     print $"  (ansi red)✗ Merge failed - may need manual resolution(ansi reset)"
                     print $"    ($merge.stderr | str trim)"
                 }
-                do -i { ^git checkout $orig_branch } | complete | ignore
             }
         }
     }
-    
+
+    # Final checkout: leave the user on the target branch (develop for graduate,
+    # main for promote). Skip if there were failures so the user can investigate
+    # from their original location.
+    if $failed_count == 0 {
+        do -i { ^git checkout $target } | complete | ignore
+    } else {
+        do -i { ^git checkout $orig_branch } | complete | ignore
+    }
+
     # ── Phase H: Summary ────────────────────────────────────────────
     
     print ""
