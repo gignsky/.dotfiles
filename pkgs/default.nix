@@ -2,8 +2,56 @@
 
 {
   pkgs ? import <nixpkgs> { },
+  lib,
+  configLib,
+  ...
 }:
 let
+  # 1. Define the base package set (simple attribute set)
+  # basePkgs = rec {
+  # # commented out as it was an example anyway
+  #   supertree =
+  #     pkgs.writeShellScriptBin "supertree" ''
+  #       ${pkgs.tree}/bin/tree ..
+  #     ''
+  #     // {
+  #       passthru.tests = {
+  #         basic = pkgs.runCommand "supertree-test" { buildInputs = [ supertree ]; } ''
+  #           set -e
+  #           # Should print something, check for a known directory in the output
+  #           supertree > $out
+  #           grep -q "home" $out
+  #         '';
+  #       };
+  #     };
+  # };
+
+  # 2. CRITICAL STEP: Use configLib.scanPaths here to get the list of modules.
+  #    This list is simple data and is computed outside lib.evalModules to break recursion.
+  containerModules = configLib.scanPaths ./container-packages;
+
+  # 3. Define the container-packages/default.nix as the main module collector
+  containerCollector = ./container-packages/default.nix;
+
+  # 4. EVALUATE the module system.
+  #    This processes the modules and collects the package definitions.
+  containerModuleResult = lib.evalModules {
+    # CRITICAL: Pass pkgs, lib, and configLib to specialArgs so the modules
+    # (like pihole.nix) can access them.
+    specialArgs = {
+      inherit pkgs lib configLib;
+    };
+
+    # We pass the collector module and then the list of scanned modules via 'imports'.
+    modules = [
+      containerCollector
+      { imports = containerModules; }
+    ];
+  };
+
+  # 5. Extract the flat package set from the evaluated config using the defined option path.
+  containerPkgs = containerModuleResult.config.dotspacedock.packages.container-packages;
+
   # Import packaged scripts
   scripts = import ./scripts.nix { inherit pkgs; };
 in
@@ -688,3 +736,4 @@ rec {
     package-script
     ;
 }
+// containerPkgs
