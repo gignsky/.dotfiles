@@ -152,49 +152,93 @@ let
     };
 
     # Roll Flow workflow manager for NixOS multi-host configurations
-    roll-flow =
-      pkgs.writeShellScriptBin "roll-flow" ''
-        # Auto-generated wrapper for roll-flow (Nushell script)
+    roll-flow = pkgs.stdenv.mkDerivation {
+      pname = "roll-flow";
+      version = "1.0.0";
 
-        # Make dependencies available in PATH
-        export PATH="${
-          pkgs.lib.makeBinPath (
-            with pkgs;
-            [
-              nushell
-              git
-              nix
-            ]
-          )
-        }:$PATH"
+      src = ../scripts/roll-flow;
+      dontUnpack = true;
 
-        # Execute the roll-flow Nushell script with all arguments
-        exec ${pkgs.nushell}/bin/nu "${../scripts/roll-flow}" "$@"
-      ''
-      // {
-        meta = {
-          description = "Git workflow manager for NixOS multi-host dotfiles (Roll Flow system)";
-        };
-        passthru = {
-          scriptPath = ../scripts/roll-flow;
-          dependencies = with pkgs; [
-            nushell
-            git
-            nix
-          ];
-          # Basic test that the script can be executed
-          tests.basic =
-            pkgs.runCommand "roll-flow-test"
-              {
-                buildInputs = with pkgs; [ nushell ];
-              }
-              ''
-                # Test that the script is executable and has valid nushell syntax
-                ${pkgs.nushell}/bin/nu -c "nu-check ${../scripts/roll-flow}" || exit 1
-                echo "Roll-flow Nushell syntax check passed" > $out
-              '';
-        };
+      nativeBuildInputs = [ pkgs.makeWrapper ];
+
+      installPhase = ''
+                mkdir -p $out/bin
+                mkdir -p $out/share/nu/completions
+                
+                # Create wrapper script
+                cat > $out/bin/roll-flow <<'WRAPPER'
+        #!/bin/sh
+        exec ${pkgs.nushell}/bin/nu SCRIPT_PATH "$@"
+        WRAPPER
+                
+                sed -i "s|SCRIPT_PATH|$src|g" $out/bin/roll-flow
+                chmod +x $out/bin/roll-flow
+                
+                # Wrap with dependencies in PATH
+                wrapProgram $out/bin/roll-flow \
+                  --prefix PATH : ${
+                    pkgs.lib.makeBinPath (
+                      with pkgs;
+                      [
+                        nushell
+                        git
+                        nix
+                      ]
+                    )
+                  }
+                
+                # Create Nushell completion file
+                cat > $out/share/nu/completions/roll-flow.nu <<'EOF'
+        export extern "rf" [
+          command?: string@"nu-complete rf commands"
+          --help(-h)
+        ]
+        export extern "rf init" [
+          --rolling-branch(-r): string
+          --stable-branch(-s): string
+          --roll-prefix(-p): string
+          --username(-u): string
+          --hosts(-h): string
+        ]
+        export extern "rf start" [ theme: string ]
+        export extern "rf integrate" [ branch: string@"nu-complete git branches" ]
+        export extern "rf graduate" [
+          roll?: string@"nu-complete rf rolls"
+          --promote
+          --all
+          --quasi
+        ]
+        export extern "rf promote" [ roll?: string@"nu-complete rf rolls" ]
+        export extern "rf update" [ --force(-f) --dry-run ]
+        export extern "rf status" []
+        export extern "rf test-all" []
+        export extern "rf list" []
+        def "nu-complete rf commands" [] {
+          ["init" "start" "integrate" "graduate" "promote" "update" "status" "test-all" "list"]
+        }
+        def "nu-complete git branches" [] {
+          git branch --list | lines | str trim | str replace "* " ""
+        }
+        def "nu-complete rf rolls" [] {
+          git branch --list "roll/*" | lines | str trim | str replace "* " ""
+        }
+        EOF
+      '';
+
+      meta = {
+        description = "Git workflow manager for NixOS multi-host dotfiles (Roll Flow system)";
+        mainProgram = "roll-flow";
       };
+
+      passthru = {
+        scriptPath = ../scripts/roll-flow;
+        dependencies = with pkgs; [
+          nushell
+          git
+          nix
+        ];
+      };
+    };
   };
 
 in
