@@ -867,7 +867,7 @@ def detect-quasi-rolls [] {
     let merges = ($merge_lines | each {|l|
         let parts = ($l | split row ' ')
         let hash = ($parts | get 0)
-        let msg = ($parts | range 1.. | str join ' ')
+        let msg = ($parts | skip 1 | str join ' ')
         let roll_name = (try {
             $msg
             | str replace "Merge branch '" ""
@@ -905,7 +905,7 @@ def detect-quasi-rolls [] {
         # Parse and filter out auto-generated commits
         let commits = ($commits_raw | each {|l|
             let parts = ($l | split row ' ')
-            {hash: ($parts | get 0), msg: ($parts | range 1.. | str join ' ')}
+            {hash: ($parts | get 0), msg: ($parts | skip 1 | str join ' ')}
         } | where {|c|
             (not ($c.msg | str starts-with "test("))
             and (not ($c.msg | str contains "generation"))
