@@ -2572,14 +2572,6 @@ def "main update" [
     }
     print ""
 
-    if not $force {
-        let confirm = (try { input "Proceed? (Y/n): " } catch { "n" })
-        if ($confirm | str trim | str downcase) == "n" {
-            print "Aborted."
-            return
-        }
-    }
-
     if $dry_run {
         print ""
         print $"(ansi yellow)DRY RUN - no changes made(ansi reset)"
@@ -2587,6 +2579,14 @@ def "main update" [
             print $"  Would merge ($config.stable_branch) into ($r)"
         }
         return
+    }
+
+    if not $force {
+        let confirm = (try { input "Proceed? (Y/n): " } catch { "n" })
+        if ($confirm | str trim | str downcase) == "n" {
+            print "Aborted."
+            return
+        }
     }
 
     mut updated = 0
