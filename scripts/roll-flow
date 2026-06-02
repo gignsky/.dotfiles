@@ -2131,17 +2131,17 @@ def render-file-tree [
             $prev_dir = $dir
         }
         
-        # File line (5 spaces indent under directory)
+        # File line (2-space indent, tag right-aligned)
         let tag = (do $get_tag $f)
         let color_idx = $tag.color
         
         if $color_idx == 0 {
-            print $"      (ansi green)($fname)(ansi reset)  ($tag.label)"
+            print $"    (ansi green)($fname)(ansi reset)   ($tag.label)"
         } else if $color_idx == 5 {
-            print $"      (ansi default_dimmed)($fname)(ansi reset)  ?"
+            print $"    (ansi default_dimmed)($fname)(ansi reset)   ?"
         } else {
             let c = ["" $"(ansi yellow_bold)" $"(ansi blue_bold)" $"(ansi cyan_bold)" $"(ansi purple_bold)"] | get $color_idx
-            print $"      ($c)($fname)(ansi reset)  ($tag.label)"
+            print $"    ($c)($fname)(ansi reset)   ($tag.label)"
         }
     }
 }
@@ -2698,12 +2698,12 @@ def "main list" [] {
         print $"  Scope: (ansi cyan)($s)(ansi reset)  Files: ($scope.files_count)"
         
         # File attribution
-        let files_info = (get-roll-files $roll_branch --skip-attr)
+        mut files_info = (get-roll-files $roll_branch --skip-attr)
         print $"  Files: ($files_info.count_total) total  \(($files_info.count_own) unique + ($files_info.count_inherited) inherited\)"
         
         if ($files_info.count_inherited) > 0 {
             print $"  (ansi default_dimmed)Tracing inherited files to origin rolls...(ansi reset)"
-            let files_info = (get-roll-files $roll_branch)
+            $files_info = (get-roll-files $roll_branch)
             
             # Color legend
             print ""
