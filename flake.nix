@@ -4,22 +4,22 @@
   inputs = {
     #################### Official NixOS and HM Package Sources ####################
     # Stable
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+    # nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+    gigpkgs.url = "github:gignsky/gigpkgs";
+    nixpkgs.follows = "nixpkgs-stable";
+    nixpkgs-stable.follows = "gigpkgs/nixos-stable";
     # Unstable
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs-unstable.follows = "gigpkgs/nixos-unstable";
     # Local
     # nixpkgs-local.url = "git+file:///home/gig/local_repos/nixpkgs";
 
     # Home manager
-    home-manager = {
-      url = "github:nix-community/home-manager/release-26.05";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    home-manager.follows = "gigpkgs/home-manager";
 
     # wsl stuff
     nixos-wsl = {
       url = "github:nix-community/NixOS-WSL/main";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-stable";
     };
 
     # nixos-hardware, to fix hardware issues and firmware for specific machines
@@ -30,20 +30,20 @@
     # treefmt-nix.url = "github:numtide/treefmt-nix";
     treefmt-nix = {
       url = "github:numtide/treefmt-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-stable";
     };
 
     # Secrets management
     sops-nix = {
       url = "github:mic92/sops-nix/master";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-stable";
     };
 
     # Pre-commit hooks for managing Git hooks declaratively
     pre-commit-hooks = {
       # url = "github:cachix/git-hooks.nix/46d55f0aeb1d567a78223e69729734f3dca25a85";
       url = "github:cachix/git-hooks.nix";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs-stable";
     };
 
     nixos-cli = {
@@ -111,7 +111,7 @@
     vscode-server = {
       url = "github:nix-community/nixos-vscode-server";
       inputs = {
-        nixpkgs.follows = "nixpkgs";
+        nixpkgs.follows = "nixpkgs-stable";
         # flake-utils.follows = "flake-utils";
       };
     };
@@ -155,15 +155,8 @@
           configLib
           ;
       };
-      customPkgs = import ./pkgs { inherit pkgs; };
-      pkgs =
-        import nixpkgs {
-          inherit system;
-          config = {
-            allowUnfree = true;
-          };
-        }
-        // customPkgs;
+      customPkgs = import ./pkgs { pkgs = inputs.gigpkgs.legacyPackages.${system}; };
+      pkgs = inputs.gigpkgs.legacyPackages.${system} // customPkgs;
     in
     {
       # NixOS configuration entrypoint
