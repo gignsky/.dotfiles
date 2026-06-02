@@ -1198,15 +1198,19 @@ def detect-roll-dependencies [
         
         for other_roll in $all_rolls {
             if $other_roll == $roll_branch { continue }
-            
+
             let other_resolved = (resolve-roll-ref $other_roll)
+            # Use --no-merges so files that entered other_roll only via a merge FROM
+            # the current roll (or its descendants) don't create a false dependency.
             let other_files = if ($other_resolved == null) { [] } else {
-                let odiff = try {
-                    git diff --name-only $"($config.rolling_branch)...($other_resolved)" | complete
-                } catch { null }
-                if ($odiff == null) or ($odiff.exit_code != 0) { [] } else { $odiff.stdout | lines }
+                let olog = (do -i {
+                    ^git log --no-merges --format='' --name-only $"($config.rolling_branch)..($other_resolved)"
+                } | complete)
+                if $olog.exit_code == 0 {
+                    $olog.stdout | lines | where {|l| ($l | str trim | is-not-empty)} | uniq
+                } else { [] }
             }
-            
+
             # Check for file overlap
             let overlap = ($roll_files | where {|f| $f in $other_files})
             
