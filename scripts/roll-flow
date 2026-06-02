@@ -2662,7 +2662,7 @@ def "main list" [] {
     }
     
     loop {
-        print $"(ansi default_dimmed)Inspect roll # (or press Enter to quit):(ansi reset) "
+        print $"(ansi default_dimmed)Inspect roll # \(or press Enter to quit\):(ansi reset) "
         let sel = (input | str trim)
         
         if ($sel | is-empty) {
