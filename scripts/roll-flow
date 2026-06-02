@@ -632,8 +632,7 @@ def attribute-files [
         
         let is_grad = (check-roll-graduated $r)
         let r_files = if $is_grad {
-            let merge_pattern = $"Merge branch '($r)'"
-            let merge = (do -i { ^git log $config.rolling_branch --oneline --grep=$merge_pattern -1 } | complete)
+            let merge = (do -i { ^git log $config.rolling_branch --oneline --grep=$"Merge branch '($r)'" -1 } | complete)
             if $merge.exit_code == 0 and ($merge.stdout | str trim | is-not-empty) {
                 let mc = ($merge.stdout | str trim | split row ' ' | get 0)
                 let mc1 = $"($mc)^1"
@@ -2091,26 +2090,28 @@ def render-file-tree [
 ] {
     let sorted = ($files | sort)
     mut prev_dir = ""
-    mut dir_counts = {}  # dir -> remaining files in that dir
+    let roll_prefix = (get-config).roll_prefix
     
-    # Count files per dir first
-    for f in $sorted {
-        let dir = ($f | path dirname)
-        $dir_counts = ($dir_counts | upsert $dir (($dir_counts | get -o $dir | default 0) + 1))
-    }
-    
-    # Track how many we've printed from each directory
-    mut dir_done = {}
-    
-    # Determine origin tag for a file
+    # Determine origin tag and color for a file
+    # Color: 0=new(green), 1=roll/1-2(yellow), 2=roll/3-4(blue),
+    #        3=roll/5-6(cyan), 4=roll/7+(purple), 5=unknown(dimmed)
     let get_tag = {|f|
         if $f in $own_files {
             {label: "new", color: 0}
         } else if $f in $attr {
             let origins = ($attr | get $f)
             if ($origins | is-not-empty) {
-                let label = ($origins | str join ", ")
-                {label: $label, color: 1}
+                let nums = ($origins | each {|o|
+                    try { $o | str replace $roll_prefix "" | split row "-" | get 0 | into int } catch { null }
+                } | where {|x| $x != null} | sort)
+                let label = if ($nums | is-empty) {
+                    ($origins | str join ", ")
+                } else {
+                    ($nums | str join ",")
+                }
+                let max = (if ($nums | is-not-empty) { $nums | last } else { 0 })
+                let color_idx = if $max <= 2 { 1 } else if $max <= 4 { 2 } else if $max <= 6 { 3 } else { 4 }
+                {label: $label, color: $color_idx}
             } else {
                 {label: "?", color: 5}
             }
@@ -2119,39 +2120,28 @@ def render-file-tree [
         }
     }
     
-    print "  ./"
-    for i in 0..($sorted | length) {
+    for i in 0..<($sorted | length) {
         let f = ($sorted | get $i)
-        let is_last = ($i == ($sorted | length) - 1)
         let dir = ($f | path dirname)
         let fname = ($f | path basename)
         
-        # Print directory header if new
+        # Print directory header when entering a new directory
         if $dir != $prev_dir and $dir != "." {
-            if $prev_dir != "" { print "" }  # blank line between directories
-            # Count siblings at this dir level
-            let depth = ($dir | split row '/' | length)
-            let indent = 2
             print $"  (ansi default_bold)($dir)/(ansi reset)"
             $prev_dir = $dir
-        } else if $dir == "." and $prev_dir == "" {
-            $prev_dir = "."
         }
         
-        # File line
+        # File line (5 spaces indent under directory)
         let tag = (do $get_tag $f)
-        let label = $tag.label
         let color_idx = $tag.color
         
-        let tree_prefix = if $is_last { "  └── " } else { "  ├── " }
-        
         if $color_idx == 0 {
-            print $"  ($tree_prefix)(ansi green)($fname)(ansi reset)  [($label)]"
+            print $"      (ansi green)($fname)(ansi reset)  ($tag.label)"
         } else if $color_idx == 5 {
-            print $"  ($tree_prefix)(ansi default_dimmed)($fname)(ansi reset)  [?]"
+            print $"      (ansi default_dimmed)($fname)(ansi reset)  ?"
         } else {
-            let c = ["" $"(ansi yellow_bold)" $"(ansi blue_bold)" $"(ansi cyan_bold)" $"(ansi purple_bold)" $"(ansi default_dimmed)"] | get $color_idx
-            print $"  ($tree_prefix)($c)($fname)(ansi reset)  [($label)]"
+            let c = ["" $"(ansi yellow_bold)" $"(ansi blue_bold)" $"(ansi cyan_bold)" $"(ansi purple_bold)"] | get $color_idx
+            print $"      ($c)($fname)(ansi reset)  ($tag.label)"
         }
     }
 }
@@ -2662,24 +2652,32 @@ def "main list" [] {
     }
     
     loop {
-        print $"(ansi default_dimmed)Inspect roll # \(or press Enter to quit\):(ansi reset) "
+        print $"(ansi default_dimmed)Inspect roll number \(or press Enter to quit\):(ansi reset) "
         let sel = (input | str trim)
         
         if ($sel | is-empty) {
             break
         }
         
-        let idx = (try { $sel | into int } catch {
+        let req_num = (try { $sel | into int } catch {
             print $"  (ansi red)Invalid number: ($sel)(ansi reset)"
             continue
         })
         
-        if $idx < 0 or $idx >= ($all_roll_branches | length) {
-            print $"  (ansi red)Number out of range \(0-($all_roll_branches | length) - 1\)(ansi reset)"
+        # Find roll by number (match roll/N- prefix)
+        let match = ($all_roll_branches | where {|b|
+            try {
+                let n = ($b | str replace $"(get-config).roll_prefix" "" | split row "-" | get 0 | into int)
+                $n == $req_num
+            } catch { false }
+        })
+        
+        if ($match | is-empty) {
+            print $"  (ansi red)No roll #($req_num) found(ansi reset)"
             continue
         }
         
-        let roll_branch = ($all_roll_branches | get $idx)
+        let roll_branch = ($match | get 0)
         let is_current = ($roll_branch == $current_roll)
         
         print ""
@@ -2706,7 +2704,7 @@ def "main list" [] {
             
             # Color legend
             print ""
-            print "  (ansi green)■ new to this roll(ansi reset)  (ansi yellow_bold)■ roll/1-2(ansi reset)  (ansi blue_bold)■ roll/3-4(ansi reset)  (ansi cyan_bold)■ roll/5-6(ansi reset)  (ansi purple_bold)■ roll/7+(ansi reset)"
+            print $"  (ansi green)■ new to this roll(ansi reset)  (ansi yellow_bold)■ roll/1-2(ansi reset)  (ansi blue_bold)■ roll/3-4(ansi reset)  (ansi cyan_bold)■ roll/5-6(ansi reset)  (ansi purple_bold)■ roll/7+(ansi reset)"
         }
         
         print ""
@@ -2769,6 +2767,6 @@ def "main list" [] {
         }
         
         print ""
-        print "  (ansi default_dimmed)---(ansi reset)"
+        print $"  (ansi default_dimmed)---(ansi reset)"
     }
 }
