@@ -2625,6 +2625,21 @@ def "main status" [] {
     
     if $on_main_dev {
         show-roll-summary-table $config $current_roll $all_roll_branches
+        
+        # ── Quasi-Rolls Section (direct-to-develop commits) ──────────
+        let quasi_rolls = (detect-quasi-rolls)
+        if not ($quasi_rolls | is-empty) {
+            print ""
+            print $"=== Quasi-Rolls: (ansi yellow)($quasi_rolls | length) direct-to-($config.rolling_branch) commit group\(s\) ==="
+            print ""
+            
+            for qr in $quasi_rolls {
+                let promoted = (check-quasi-roll-promoted $qr.id)
+                let status = if $promoted { $"(ansi green)promoted(ansi reset)" } else { $"(ansi yellow)pending(ansi reset)" }
+                print $"  ($qr.id): ($qr.theme) — (ansi cyan)($qr.count) commit\(s\)(ansi reset) after ($qr.after_merge) — ($status)"
+            }
+            print ""
+        }
     }
     
     # ── Current Roll Details (always visible) ──────────────────────
@@ -2758,20 +2773,35 @@ def "main status" [] {
     let merged_rolls = ($all_roll_branches | where {|r| check-roll-graduated $r})
     if not ($merged_rolls | is-empty) {
         let unverified_merged = ($merged_rolls | where {|r|
-            let v = (check-roll-verification $r)
-            not ($v | values | all {|x| $x.verified})
+            # Check if diverged - if so, verification is stale and doesn't count
+            let is_diverged = (check-roll-diverged $r)
+            if $is_diverged {
+                true  # Diverged rolls are always "unverified" (stale verification)
+            } else {
+                let v = (check-roll-verification $r)
+                not ($v | values | all {|x| $x.verified})
+            }
         })
         let num_unverified = ($unverified_merged | length)
         if $num_unverified > 0 {
             print ""
             print $"=== Merge Queue: (ansi yellow)($num_unverified) merged roll\(s\) still need verification for promotion ==="
             for r in $unverified_merged {
+                let is_diverged = (check-roll-diverged $r)
                 let v = (check-roll-verification $r)
                 let host_summary = ((get-active-hosts) | each {|h|
                     let info = ($v | get $h)
-                    if $info.verified { $"(ansi green)($h):✓(ansi reset)" } else { $"(ansi red)($h):⌛(ansi reset)" }
+                    # Show ✗ for diverged (stale verification), otherwise show actual status
+                    if $is_diverged {
+                        $"(ansi red)($h):✗(ansi reset)"
+                    } else if $info.verified {
+                        $"(ansi green)($h):✓(ansi reset)"
+                    } else {
+                        $"(ansi red)($h):⌛(ansi reset)"
+                    }
                 } | str join " ")
-                print $"  (ansi cyan)($r)(ansi reset) — ($host_summary)"
+                let div_marker = if $is_diverged { $" (ansi red)[DIVERGED](ansi reset)" } else { "" }
+                print $"  (ansi cyan)($r)(ansi reset) — ($host_summary)($div_marker)"
             }
         }
     }
