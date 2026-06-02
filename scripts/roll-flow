@@ -1181,7 +1181,7 @@ def detect-roll-dependencies [
     # depends on roll/9). Uses the ^2 parent of each merge commit to identify the source branch.
     if ($resolved != null) {
         let merge_hashes_result = (do -i {
-            ^git log --merges --format='%H' $"($config.rolling_branch)..$resolved"
+            ^git log --merges --format='%H' $"($config.rolling_branch)..($resolved)"
         } | complete)
 
         if $merge_hashes_result.exit_code == 0 {
@@ -1249,11 +1249,13 @@ def detect-roll-dependencies [
             if $other_roll == $roll_branch { continue }
 
             let other_resolved = (resolve-roll-ref $other_roll)
-            # Use --no-merges so files that entered other_roll only via a merge FROM
-            # the current roll (or its descendants) don't create a false dependency.
+            # Use --first-parent --no-merges so files that entered other_roll only via a
+            # merge FROM the current roll (or its descendants) don't create a false dependency.
+            # --no-merges alone is insufficient — it excludes merge commits but still walks
+            # commits brought in by them. --first-parent restricts to the main-line history.
             let other_files = if ($other_resolved == null) { [] } else {
                 let olog = (do -i {
-                    ^git log --no-merges --format='' --name-only $"($config.rolling_branch)..($other_resolved)"
+                    ^git log --first-parent --no-merges --format='' --name-only $"($config.rolling_branch)..($other_resolved)"
                 } | complete)
                 if $olog.exit_code == 0 {
                     $olog.stdout | lines | where {|l| ($l | str trim | is-not-empty)} | uniq
