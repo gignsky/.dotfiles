@@ -1,4 +1,4 @@
-{ configLib, pkgs, ... }:
+{ configLib, pkgs, inputs, ... }:
 
 {
   imports = configLib.scanPaths ./.;
@@ -6,8 +6,7 @@
   # ++ (builtins.attrValues outputs.nixosModules); # TODO: IMPORT THIS when implementing the modules subdirectory
 
   nixpkgs = {
-    # you can add global overlays here
-    # overlays = builtins.attrValues outputs.overlays;
+    overlays = [ inputs.gigpkgs.overlays.default ];
     config = {
       allowUnfree = true;
     };
