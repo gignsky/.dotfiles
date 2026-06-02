@@ -1,0 +1,3460 @@
+#!/usr/bin/env nu
+
+# roll-flow: A git-flow-like workflow manager for NixOS dotfiles
+# Manages roll/N-* branches, develop integration, and main promotion
+
+def main [] {
+    print "roll-flow: NixOS dotfiles workflow manager"
+    print ""
+    print "Usage: roll-flow <command> [args]"
+    print ""
+    print "Commands:"
+    print "  init [OPTIONS]          Initialize roll-flow in this repo"
+    print "  start <theme>           Start a new roll branch"
+    print "  integrate <branch>      Merge a feature branch into current roll"
+    print "  graduate [--promote]    Interactive: graduate rolls to develop or promote to main"
+    print "  promote                 Alias for 'graduate --promote'"
+    print "  update                  Merge main into all ungraduated local roll branches"
+    print "  status                  Show current roll status"
+    print "  test-all                Test build on all configured hosts"
+    print "  list                    List all rolls and their states"
+    print ""
+    print "Init Options:"
+    print "  -r, --rolling-branch <name>   Name of integration branch (default: develop)"
+    print "  -s, --stable-branch <name>    Name of stable branch (default: main)"
+    print "  -p, --roll-prefix <prefix>    Prefix for roll branches (default: roll/)"
+    print "  -u, --username <name>         Username for homeConfigurations (default: gig)"
+    print "  -h, --hosts <list>            Comma-separated list of hosts"
+    print ""
+    print "Examples:"
+    print "  roll-flow init"
+    print "  roll-flow init --rolling-branch develop-transitional-phase"
+    print "  roll-flow init -r develop -s main -u gig -h ganoslal,merlin,wsl"
+    print "  roll-flow start shell-improvements"
+    print "  roll-flow integrate feature/zellij-config"
+    print "  roll-flow graduate"
+    print "  roll-flow graduate roll/5-theme-name"
+    print "  roll-flow graduate --promote"
+    print "  roll-flow promote"
+}
+
+# Initialize roll-flow configuration
+def "main init" [
+    --rolling-branch(-r): string  # Name of the rolling integration branch (auto-detected if omitted)
+    --stable-branch(-s): string   # Name of the stable branch (auto-detected if omitted)
+    --roll-prefix(-p): string     # Prefix for roll branches (default: roll/)
+    --username(-u): string        # Username for homeConfigurations (auto-detected if omitted)
+    --hosts(-h): list<string>     # List of hosts to test (auto-detected if omitted)
+] {
+    print "Initializing roll-flow configuration..."
+    print ""
+    
+    # Auto-generate base config
+    let auto_config = (auto-generate-config)
+    
+    # Override with provided parameters
+    let config = {
+        repo_root: $auto_config.repo_root,
+        rolling_branch: (if ($rolling_branch | is-empty) { $auto_config.rolling_branch } else { $rolling_branch }),
+        stable_branch: (if ($stable_branch | is-empty) { $auto_config.stable_branch } else { $stable_branch }),
+        roll_prefix: (if ($roll_prefix | is-empty) { $auto_config.roll_prefix } else { $roll_prefix }),
+        username: (if ($username | is-empty) { $auto_config.username } else { $username }),
+        hosts: (if ($hosts | is-empty) { $auto_config.hosts } else { $hosts }),
+        host_active: $auto_config.host_active
+    }
+    
+    # Ensure config directory exists
+    let config_dir = $"($env.HOME)/.config/roll-flow"
+    mkdir $config_dir
+    
+    # Save config
+    $config | save -f $"($config_dir)/config.nuon"
+    
+    print $"✓ Initialized roll-flow in (ansi green)($config.repo_root)(ansi reset)"
+    print ""
+    print "Configuration:"
+    print $"  Rolling branch: (ansi cyan)($config.rolling_branch)(ansi reset)"
+    print $"  Stable branch:  (ansi cyan)($config.stable_branch)(ansi reset)"
+    print $"  Roll prefix:    (ansi cyan)($config.roll_prefix)(ansi reset)"
+    print $"  Username:       (ansi cyan)($config.username)(ansi reset)"
+    let active_hosts = (get-active-hosts)
+    print $"  Active hosts:   (ansi cyan)($active_hosts | str join ', ')(ansi reset)"
+    print ""
+    print $"(ansi green)Note:(ansi reset) Config will auto-regenerate if deleted. You can customize by re-running init with parameters."
+}
+
+# Auto-generate config from repository metadata
+def auto-generate-config [] {
+    print "Auto-generating roll-flow config from repository..."
+    
+    # Get repository root
+    let repo_root = (git rev-parse --show-toplevel | str trim)
+    
+    # Detect branch names by checking if they exist
+    let rolling_branch = try {
+        git rev-parse --verify develop out+err>| ignore
+        "develop"
+    } catch {
+        "develop"  # Default even if doesn't exist yet
+    }
+    
+    let stable_branch = try {
+        git rev-parse --verify main out+err>| ignore
+        "main"
+    } catch {
+        # Try master as fallback
+        try {
+            git rev-parse --verify master out+err>| ignore
+            "master"
+        } catch {
+            "main"  # Default
+        }
+    }
+    
+    # Extract hosts from flake.nix
+    let hosts = try {
+        # Use nix to evaluate the flake outputs for more reliable parsing
+        let nixos_hosts = try {
+            nix eval $"($repo_root)#nixosConfigurations" --apply builtins.attrNames --json 
+            | from json
+        } catch {
+            []
+        }
+        
+        let home_configs = try {
+            nix eval $"($repo_root)#homeConfigurations" --apply builtins.attrNames --json
+            | from json
+            | each {|config|
+                # Extract hostname from "user@host" format
+                if ($config | str contains '@') {
+                    $config | split row '@' | get 1
+                } else {
+                    null
+                }
+            }
+            | where {|h| $h != null}
+        } catch {
+            []
+        }
+        
+        # Combine and deduplicate
+        let all_hosts = ($nixos_hosts | append $home_configs | uniq)
+        
+        if ($all_hosts | is-empty) {
+            # Fallback to default host list
+            ["ganoslal", "merlin", "wsl@merlins-windows", "wsl@ganoslal"]
+        } else {
+            $all_hosts
+        }
+    } catch {
+        # Fallback to default host list if evaluation fails
+        ["ganoslal", "merlin", "wsl@merlins-windows", "wsl@ganoslal"]
+    }
+    
+    # Get username from environment or flake
+    let username = try {
+        # Try to get first homeConfiguration and extract username
+        let first_home = (nix eval $"($repo_root)#homeConfigurations" --apply builtins.attrNames --json 
+            | from json 
+            | first
+        )
+        
+        if ($first_home | str contains '@') {
+            $first_home | split row '@' | get 0
+        } else {
+            $env.USER
+        }
+    } catch {
+        $env.USER
+    }
+    
+    # Read per-host active status from vars/hosts.nix
+    # Inactive hosts are excluded from operational consideration
+    # (e.g. while offline or being rebuilt)
+    let host_active = try {
+        nix eval --file $"($repo_root)/vars/hosts.nix" --json
+        | from json
+    } catch {
+        # Default: all hosts active
+        $hosts | reduce -f {} {|h, acc| $acc | insert $h true }
+    }
+    
+    # Build config structure
+    {
+        repo_root: $repo_root,
+        rolling_branch: $rolling_branch,
+        stable_branch: $stable_branch,
+        roll_prefix: "roll/",
+        username: $username,
+        hosts: $hosts,
+        host_active: $host_active
+    }
+}
+
+# Return only hosts that are marked as active in vars/hosts.nix
+def get-active-hosts [] {
+    let config = get-config
+    let host_active = ($config | get -o host_active | default {})
+    $config.hosts | where {|h| $host_active | get -o $h | default true }
+}
+
+# Get current configuration (auto-generate if missing)
+def get-config [
+    --force-regenerate  # Force regeneration even if config exists
+] {
+    let config_file = $"($env.HOME)/.config/roll-flow/config.nuon"
+    
+    # Auto-generate if missing or forced
+    if $force_regenerate or not ($config_file | path exists) {
+        let config = (auto-generate-config)
+        
+        # Ensure config directory exists
+        let config_dir = ($config_file | path dirname)
+        mkdir $config_dir
+        
+        # Save config
+        $config | save -f $config_file
+        
+        print $"✓ Config saved to (ansi cyan)($config_file)(ansi reset)"
+        return $config
+    }
+    
+    open $config_file
+}
+
+# Get the next roll number
+def get-next-roll-number [] {
+    let config = get-config
+    
+    # Get local roll branches
+    let local_rolls = (git branch --list $"($config.roll_prefix)*" 
+        | lines 
+        | each { |line| 
+            $line 
+            | str trim 
+            | str replace '* ' ''
+        }
+    )
+    
+    # Get remote roll branches
+    let remote_rolls = (git branch -r 
+        | lines
+        | each { |line| $line | str trim }
+        | where { |branch| $branch =~ $"origin/($config.roll_prefix)" }
+        | each { |branch| $branch | str replace 'origin/' '' }
+    )
+    
+    # Combine and extract numbers
+    let rolls = ($local_rolls | append $remote_rolls
+        | uniq
+        | each { |branch| 
+            $branch 
+            | str replace $config.roll_prefix '' 
+            | split row '-' 
+            | get 0 
+            | into int
+        }
+    )
+    
+    if ($rolls | is-empty) {
+        1
+    } else {
+        ($rolls | math max) + 1
+    }
+}
+
+# Find which rolls depend on a given roll
+def find-roll-dependents [
+    roll_branch: string
+] {
+    let config = get-config
+    
+    # Get all roll branches
+    let all_rolls = try {
+        git branch --list $"($config.roll_prefix)*"
+        | lines
+        | each { |line| $line | str trim | str replace '* ' '' }
+    } catch {
+        []
+    }
+    
+    mut dependents = []
+    
+    for other_roll in $all_rolls {
+        if $other_roll != $roll_branch {
+            let deps = (detect-roll-dependencies $other_roll)
+            if ($roll_branch in $deps) {
+                $dependents = ($dependents | append $other_roll)
+            }
+        }
+    }
+    
+    $dependents
+}
+
+# Get git status relationship between roll and rolling branch
+# Returns: "merged", "ahead", "behind", "diverged", or "unknown"
+def get-roll-git-status [
+    roll_branch: string
+] {
+    let config = get-config
+    
+    # Check if graduated first
+    let graduated = (check-roll-graduated $roll_branch)
+    
+    # Try to resolve the roll ref
+    let resolved = (resolve-roll-ref $roll_branch)
+    if ($resolved == null) {
+        return "unknown"
+    }
+    
+    # If graduated, check for divergence (commits after merge)
+    if $graduated {
+        let diverged = (check-roll-diverged $roll_branch)
+        if $diverged {
+            return "diverged"
+        } else {
+            return "merged"
+        }
+    }
+    
+    # Not graduated yet - check ahead/behind status relative to rolling
+    let ahead_behind = try {
+        git rev-list --left-right --count $"($config.rolling_branch)...($resolved)" 
+        | str trim 
+        | split row "\t"
+    } catch {
+        []
+    }
+    
+    if ($ahead_behind | length) != 2 {
+        return "unknown"
+    }
+    
+    let behind = try { $ahead_behind | get 0 | into int } catch { 0 }
+    let ahead = try { $ahead_behind | get 1 | into int } catch { 0 }
+    
+    # For unmerged rolls:
+    # - If ahead > 0: show "ahead" (normal state - roll has work not in develop)
+    # - If behind > 0 and ahead == 0: show "behind" (roll is outdated, needs rebase)
+    # - If both > 0: still show "ahead" since the roll has unmerged work
+    #   (the "behind" aspect is expected as develop moves forward)
+    if $ahead == 0 and $behind == 0 {
+        "even"
+    } else if $ahead > 0 {
+        "ahead"  # Has commits not in develop (normal for unmerged rolls)
+    } else if $behind > 0 {
+        "behind"  # Roll is outdated, no unique commits
+    } else {
+        "unknown"
+    }
+}
+
+# Check if a roll is blocked by ungraduated dependencies
+# Returns: { blocked: bool, ungraduated_deps: list<string> }
+def check-roll-blocked [
+    roll_branch: string
+] {
+    # If already graduated, can't be blocked
+    if (check-roll-graduated $roll_branch) {
+        return { blocked: false, ungraduated_deps: [] }
+    }
+    
+    # Get dependencies (basic — only Methods 1-3, merge-blocking deps)
+    let deps = (detect-roll-dependencies $roll_branch --basic)
+    
+    if ($deps | is-empty) {
+        return { blocked: false, ungraduated_deps: [] }
+    }
+    
+    # Check which dependencies are not graduated
+    mut ungraduated = []
+    for dep in $deps {
+        if not (check-roll-graduated $dep) {
+            $ungraduated = ($ungraduated | append $dep)
+        }
+    }
+    
+    {
+        blocked: (not ($ungraduated | is-empty)),
+        ungraduated_deps: $ungraduated
+    }
+}
+
+# Find the latest merge commit hash for a roll branch on the given branch
+# Searches both git-standard "Merge branch 'roll/...'" and rf-style "Graduate roll/..." messages
+# Returns the hash of the latest matching commit, or empty string if none found
+def get-roll-merge-commit [
+    branch: string          # The branch to search on (e.g. develop)
+    roll_branch: string     # The roll branch name
+] {
+    try {
+        # Search for either format - git OR's multiple --grep flags by default
+        let raw = (do -i { 
+            ^git log $branch --oneline --grep=$"Merge branch '($roll_branch)'" --grep=$"Graduate ($roll_branch)" -1
+        })
+        if ($raw | is-empty) { "" } else { $raw | str trim | split row ' ' | get 0 }
+    } catch { "" }
+}
+
+# Check if a roll has been graduated to rolling
+def check-roll-graduated [
+    roll_branch: string
+] {
+    let config = get-config
+    let merge_hash = (get-roll-merge-commit $config.rolling_branch $roll_branch)
+    ($merge_hash | is-not-empty)
+}
+
+# Check if a graduated roll branch has diverged from rolling (has commits after merge)
+def check-roll-diverged [
+    roll_branch: string
+] {
+    let config = get-config
+    
+    # Only makes sense for graduated rolls
+    if not (check-roll-graduated $roll_branch) {
+        return false
+    }
+    
+    # Find the merge commit (use helper that checks both "Merge branch" and "Graduate" formats)
+    let merge_commit = (get-roll-merge-commit $config.rolling_branch $roll_branch)
+    if ($merge_commit | is-empty) {
+        return false  # No merge found, can't determine
+    }
+    
+    # Find what the roll branch looked like at merge time (second parent of merge commit).
+    # Validate ^2 exists — squash/linear merges have no second parent.
+    # Use do -i { ^git } | complete (the codebase's established pattern for fallible git calls).
+    let merged_tip = $"($merge_commit)^2"
+    let tip_result = (do -i { ^git rev-parse $merged_tip } | complete)
+    if $tip_result.exit_code != 0 {
+        # No ^2 parent (squash/linear Graduate). Can't compare hashes; report not-diverged.
+        return false
+    }
+    let merged_tip_hash = ($tip_result.stdout | str trim)
+    if ($merged_tip_hash | is-empty) {
+        return false
+    }
+
+    # Resolve the branch ref — prefer local, fall back to remote tracking ref
+    let roll_ref = (resolve-roll-ref $roll_branch)
+    if ($roll_ref == null) {
+        return false  # Branch doesn't exist locally or remotely
+    }
+    let is_remote_only = ($roll_ref != $roll_branch)
+
+    # Get the current tip of the roll branch (local or via remote ref)
+    let head_result = (do -i { ^git rev-parse $roll_ref } | complete)
+    if $head_result.exit_code != 0 {
+        return false
+    }
+    let roll_head = ($head_result.stdout | str trim)
+
+    # If the roll branch HEAD doesn't match what was merged, it has diverged.
+    # Also check if the merged tip is still reachable from the roll branch
+    # (catches force-pushes or hard-resets that dropped the graduation commit).
+    # Use resolved hash directly (not the ^2 expression) and do -i | complete
+    # instead of err>| ignore to avoid redirect-as-argument parse issues.
+    let on_branch_result = if $is_remote_only {
+        (do -i { ^git branch -r --list $"origin/($roll_branch)" --contains $merged_tip_hash } | complete)
+    } else {
+        (do -i { ^git branch --list $roll_branch --contains $merged_tip_hash } | complete)
+    }
+    let on_branch = if $on_branch_result.exit_code == 0 {
+        $on_branch_result.stdout | lines | where {|l| ($l | str trim | is-not-empty)} | length
+    } else {
+        0
+    }
+
+    # Roll is diverged if:
+    # 1. The roll branch has moved since merge OR
+    # 2. The merge tip isn't reachable from current roll branch
+    let roll_moved = ($roll_head != $merged_tip_hash)
+    let rolled_back = ($on_branch == 0)
+
+    $roll_moved or $rolled_back
+}
+
+# Check if a roll is ready to be promoted (fully verified and graduated, not diverged)
+def check-roll-promotion-ready [
+    roll_branch: string
+] {
+    let config = get-config
+    
+    # Check if graduated
+    let graduated = (check-roll-graduated $roll_branch)
+    
+    # Check for divergence after graduation
+    let diverged = if $graduated { (check-roll-diverged $roll_branch) } else { false }
+    
+    # Check if fully verified
+    let verification = (check-roll-verification $roll_branch)
+    let fully_verified = ($verification | values | all {|v| $v.verified == true})
+    
+    # Check scope - docs-only rolls don't need graduation
+    let scope = (detect-roll-scope $roll_branch)
+    let docs_only = $scope.docs and (not $scope.nixos) and (not $scope.home) and (not $scope.flake)
+    
+    {
+        graduated: $graduated,
+        diverged: $diverged,
+        fully_verified: $fully_verified,
+        docs_only: $docs_only,
+        ready: ($fully_verified and ($graduated or $docs_only) and (not $diverged))
+    }
+}
+
+# Get verification requirements for a roll based on its scope
+# Returns a record describing what verification is needed
+def get-verification-requirements [
+    roll_branch: string
+] {
+    let scope = (detect-roll-scope $roll_branch)
+    
+    mut requirements = []
+    mut check_type = "none"
+    
+    if $scope.nixos {
+        $requirements = ($requirements | append "NixOS rebuild on all hosts")
+        $check_type = "full"
+    }
+    
+    if $scope.home {
+        $requirements = ($requirements | append "Home-manager rebuild on all hosts")
+        $check_type = "full"
+    }
+    
+    if $scope.flake and (not $scope.nixos) and (not $scope.home) {
+        $requirements = ($requirements | append "Flake check (any host)")
+        if $check_type == "none" {
+            $check_type = "light"
+        }
+    }
+    
+    if $scope.docs and (not $scope.nixos) and (not $scope.home) and (not $scope.flake) {
+        $requirements = ($requirements | append "No rebuild required (docs-only)")
+        $check_type = "docs"
+    }
+    
+    if ($requirements | is-empty) {
+        $requirements = ($requirements | append "No changes detected")
+        $check_type = "none"
+    }
+    
+    {
+        requirements: $requirements,
+        check_type: $check_type,  # "none", "docs", "light", "full"
+        description: ($requirements | str join ", ")
+    }
+}
+
+# Helper: resolve a branch name, trying local first then remote ref
+def resolve-roll-ref [
+    roll_branch: string
+] {
+    let config = get-config
+    
+    # Try local branch
+    let local_exists = try {
+        let result = (do -i { ^git rev-parse --verify $roll_branch } | complete)
+        $result.exit_code == 0
+    } catch {
+        false
+    }
+    
+    if $local_exists {
+        $roll_branch
+    } else {
+        # Try remote tracking ref
+        let remote_ref = $"origin/($roll_branch)"
+        let remote_exists = try {
+            let result = (do -i { ^git rev-parse --verify $remote_ref } | complete)
+            $result.exit_code == 0
+        } catch {
+            false
+        }
+        
+        if $remote_exists {
+            $remote_ref
+        } else {
+            null  # Neither local nor remote exists
+        }
+    }
+}
+
+# Check where a branch exists: local, remote, or both
+# Returns: "L" (local), "R" (remote), "B" (both), "-" (neither)
+def get-branch-location [
+    branch: string
+] {
+    let config = get-config
+    let local_try = (do -i { ^git rev-parse --verify $branch } | complete)
+    let local = ($local_try.exit_code == 0)
+    let remote_try = (do -i { ^git rev-parse --verify $"origin/($branch)" } | complete)
+    let remote = ($remote_try.exit_code == 0)
+    
+    if $local and $remote { "B" } else if $local { "L" } else if $remote { "R" } else { "-" }
+}
+
+# Get files for a roll using multi-diff strategy
+# Returns: {total: [files], own: [files], inherited: [files], attr: {file: [origin_rolls]}}
+def get-roll-files [
+    roll_branch: string
+    --skip-attr       # Skip attribution (faster when only counts needed)
+] {
+    let config = get-config
+    let stable_ref = $"($config.stable_branch)...($roll_branch)"
+    let rolling_ref = $"($config.rolling_branch)...($roll_branch)"
+    
+    let total = (do -i { ^git diff --name-only $stable_ref } | complete)
+    let total_files = if $total.exit_code == 0 { $total.stdout | lines } else { [] }
+    
+    let own = (do -i { ^git diff --name-only $rolling_ref } | complete)
+    let own_files = if $own.exit_code == 0 { $own.stdout | lines } else { [] }
+    
+    let inherited = ($total_files | where {|f| $f not-in $own_files})
+    
+    mut result = {
+        total: $total_files
+        own: $own_files
+        inherited: $inherited
+        count_total: ($total_files | length)
+        count_own: ($own_files | length)
+        count_inherited: ($inherited | length)
+        attr: {}
+    }
+    
+    if not $skip_attr and ($inherited | is-not-empty) {
+        $result = ($result | merge {attr: (attribute-files $roll_branch $inherited)})
+    }
+    
+    $result
+}
+
+# Attribute inherited files to their originating rolls via merge-commit diffs
+# Returns: {file_path: [roll/branch, ...], ...}
+def attribute-files [
+    roll_branch: string
+    inherited_files: list
+] {
+    let config = get-config
+
+    # Only lower-numbered rolls can be the origin of a file inherited by this roll.
+    # A file is "inherited" because an earlier roll already changed it and the change
+    # is present in this roll's baseline. Higher-numbered rolls are irrelevant.
+    let roll_num = try {
+        $roll_branch | str replace $config.roll_prefix '' | split row '-' | get 0 | into int
+    } catch { null }
+
+    # Collect file sets from all other rolls (local + remote), filtered to lower-numbered only
+    let local = (do -i { ^git branch --list $"($config.roll_prefix)*" } | lines | each {|l| $l | str trim | str replace '* ' '' })
+    let remote = (do -i { ^git branch -r } | lines | each {|l| $l | str trim } | where {|b| ($b | str starts-with $"origin/($config.roll_prefix)") } | each {|b| $b | str replace 'origin/' '' })
+    let all = ($local | append $remote | uniq | sort | where {|r|
+        if $r == $roll_branch { false } else {
+            let other_num = try {
+                $r | str replace $config.roll_prefix '' | split row '-' | get 0 | into int
+            } catch { null }
+            # Include only lower-numbered rolls (the ones that could actually be origins)
+            ($other_num != null) and ($roll_num != null) and ($other_num < $roll_num)
+        }
+    })
+
+    mut map = {}
+
+    for r in $all {
+        let resolved = (resolve-roll-ref $r)
+        if $resolved == null { continue }
+
+        let is_grad = (check-roll-graduated $r)
+        let r_files = if $is_grad {
+            # Use get-roll-merge-commit to handle both "Merge branch" and "Graduate" formats
+            let mc = (get-roll-merge-commit $config.rolling_branch $r)
+            if ($mc | is-not-empty) {
+                # Try two-parent merge first, fall back to squash merge
+                let diff = (do -i { ^git diff --name-only $"($mc)^1" $"($mc)^2" } | complete)
+                if $diff.exit_code == 0 and ($diff.stdout | str trim | is-not-empty) {
+                    $diff.stdout | lines
+                } else {
+                    # Squash merge: diff against single parent
+                    let sq = (do -i { ^git diff --name-only $"($mc)^1" $mc } | complete)
+                    if $sq.exit_code == 0 { $sq.stdout | lines } else { [] }
+                }
+            } else { [] }
+        } else {
+            let dep_ref = $"($config.rolling_branch)...($resolved)"
+            let diff = (do -i { ^git diff --name-only $dep_ref } | complete)
+            if $diff.exit_code == 0 { $diff.stdout | lines } else { [] }
+        }
+
+        # Check inherited files against this roll's files
+        for f in $inherited_files {
+            if $f in $r_files {
+                $map = (if $f in $map {
+                    $map | upsert $f (($map | get $f) | append $r)
+                } else {
+                    $map | insert $f [$r]
+                })
+            }
+        }
+    }
+    
+    # ── Quasi-roll attribution ──
+    # For files not yet attributed to any roll, check quasi-roll file sets
+    let quasi_rolls = (detect-quasi-rolls)
+    if ($quasi_rolls | is-not-empty) {
+        for qr in $quasi_rolls {
+            let qid = $qr.id
+            let qr_files = $qr.files
+            for f in $inherited_files {
+                if $f in $qr_files {
+                    if $f not-in $map {
+                        $map = ($map | insert $f [$qid])
+                    } else {
+                        let origins = ($map | get $f)
+                        if $qid not-in $origins {
+                            $map = ($map | upsert $f ($origins | append $qid))
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    $map
+}
+
+# Detect which scopes a roll/branch affects based on changed files
+# Returns a record with scope flags: {nixos: bool, home: bool, flake: bool, docs: bool}
+def detect-roll-scope [
+    roll_branch: string  # Roll branch name
+] {
+    let config = get-config
+    
+    # Resolve branch ref (local or remote)
+    let resolved = (resolve-roll-ref $roll_branch)
+    
+    if ($resolved | is-empty) or ($resolved == null) {
+        return {
+            nixos: false,
+            home: false,
+            flake: false,
+            docs: false,
+            empty: true,
+            files_count: 0,
+            files: [],
+            nixos_files: [],
+            home_files: [],
+            flake_files: [],
+            docs_files: [],
+            other_files: []
+        }
+    }
+    
+    # Determine changed files: compare against stable branch (main) as the base
+    # For graduated rolls, use the merge commit to see what the roll brought
+    # For unmerged rolls, show what's unique compared to main
+    let changed_files = if (check-roll-graduated $roll_branch) {
+        # Roll has been merged into rolling - get scope from merge commit
+        let merge_commit = try {
+            let raw = (do -i { ^git log $config.rolling_branch --oneline --grep=$"Merge branch '($roll_branch)'" -1 })
+            if ($raw | is-empty) { "" } else { $raw | str trim | split row ' ' | get 0 }
+        } catch {
+            ""
+        }
+        
+        if not ($merge_commit | is-empty) {
+            # Diff between first parent (rolling before merge) and second parent (roll tip)
+            # This shows exactly what files the roll brought in
+            let raw_diff = try {
+                do -i { ^git diff --name-only $"($merge_commit)^1" $"($merge_commit)^2" }
+            } catch { "" }
+            if ($raw_diff | is-empty) {
+                # Fallback: compare against rolling (the branch it was merged into)
+                let raw_diff2 = try {
+                    do -i { ^git diff --name-only $"($config.rolling_branch)...($resolved)" }
+                } catch { "" }
+                if ($raw_diff2 | is-empty) { [] } else { $raw_diff2 | lines }
+            } else {
+                $raw_diff | lines
+            }
+        } else {
+            # Merge commit not found - fallback to standard comparison
+            let raw_diff = try {
+                do -i { ^git diff --name-only $"($config.rolling_branch)...($resolved)" }
+            } catch { "" }
+            if ($raw_diff | is-empty) { [] } else { $raw_diff | lines }
+        }
+    } else {
+        # Unmerged roll - compare directly against main to see what's unique to this roll
+        let raw_diff = try {
+            do -i { ^git diff --name-only $"($config.stable_branch)...($resolved)" }
+        } catch { "" }
+        if ($raw_diff | is-empty) { [] } else { $raw_diff | lines }
+    }
+    
+    if ($changed_files | is-empty) {
+        return {
+            nixos: false,
+            home: false,
+            flake: false,
+            docs: false,
+            empty: true,
+            files_count: 0,
+            files: [],
+            nixos_files: [],
+            home_files: [],
+            flake_files: [],
+            docs_files: [],
+            other_files: []
+        }
+    }
+    
+    # Categorize files by scope
+    mut nixos_changed = false
+    mut home_changed = false
+    mut flake_changed = false
+    mut docs_changed = false
+    
+    mut nixos_files = []
+    mut home_files = []
+    mut flake_files = []
+    mut docs_files = []
+    mut other_files = []
+    
+    for file in $changed_files {
+        # Check each scope pattern
+        if ($file | str starts-with "hosts/") {
+            $nixos_changed = true
+            $nixos_files = ($nixos_files | append $file)
+        } else if ($file | str starts-with "home/") {
+            $home_changed = true
+            $home_files = ($home_files | append $file)
+        } else if (
+            ($file == "flake.nix") or
+            ($file == "flake.lock") or
+            ($file | str starts-with "scripts/") or
+            ($file | str starts-with "pkgs/") or
+            ($file | str starts-with "vars/") or
+            ($file | str starts-with "lib/")
+        ) {
+            $flake_changed = true
+            $flake_files = ($flake_files | append $file)
+        } else if (
+            ($file | str starts-with "docs/") or
+            ($file | str starts-with "operations/") or
+            ($file | str ends-with ".md")
+        ) {
+            $docs_changed = true
+            $docs_files = ($docs_files | append $file)
+        } else {
+            $other_files = ($other_files | append $file)
+        }
+    }
+    
+    # Return scope analysis
+    {
+        nixos: $nixos_changed,
+        home: $home_changed,
+        flake: $flake_changed,
+        docs: $docs_changed,
+        empty: false,
+        files_count: ($changed_files | length),
+        files: $changed_files,
+        nixos_files: $nixos_files,
+        home_files: $home_files,
+        flake_files: $flake_files,
+        docs_files: $docs_files,
+        other_files: $other_files
+    }
+}
+
+# Get current active roll
+def get-current-roll [] {
+    let current_branch = (git branch --show-current | str trim)
+    let config = get-config
+    
+    if ($current_branch | str starts-with $config.roll_prefix) {
+        $current_branch
+    } else {
+        null
+    }
+}
+
+# Detect quasi-rolls: direct-to-[rolling] commits grouped by inter-roll periods
+# Returns list of records: [{id: "q1", after_merge: "roll/N", commits: [{hash, msg}], count: int, files: [file1, ...], theme: "..."}]
+def detect-quasi-rolls [] {
+    let config = get-config
+    let roll_prefix = $config.roll_prefix
+    let rolling = $config.rolling_branch
+    let stable = $config.stable_branch
+    
+    # Get all roll merge commits on rolling branch (newest first from git log)
+    # Use regex pattern instead of quoted string to avoid Nushell quoting issues
+    let merge_result = (do -i { ^git log $rolling --oneline --grep=$"Merge branch .($roll_prefix)" } | complete)
+    if $merge_result.exit_code != 0 { return [] }
+    
+    let merge_lines = ($merge_result.stdout | lines | each {|l| $l | str trim} | where {|l| ($l | is-not-empty)})
+    if ($merge_lines | is-empty) { return [] }
+    
+    # Parse into {hash, roll_name}, then order chronologically (oldest first)
+    let merges = ($merge_lines | each {|l|
+        let parts = ($l | split row ' ')
+        let hash = ($parts | get 0)
+        let msg = ($parts | skip 1 | str join ' ')
+        let roll_name = (try {
+            $msg
+            | str replace "Merge branch '" ""
+            | str replace "' into " " "
+            | split row ' '
+            | get 0
+        } catch { null })
+        if $roll_name != null { {hash: $hash, roll: $roll_name} } else { null }
+    } | where {|x| $x != null} | reverse)
+    
+    if ($merges | is-empty) { return [] }
+    
+    mut quasi_rolls = []
+    let total = ($merges | length)
+    
+    for i in 0..<$total {
+        let merge_info = ($merges | get $i)
+        let start_hash = $merge_info.hash
+        
+        # End boundary: next merge's first parent, or current tip of rolling
+        let end_rev = if $i + 1 < $total {
+            $"($merges | get ($i + 1) | get hash)^1"
+        } else {
+            $rolling
+        }
+        
+        let range = $"($start_hash)..($end_rev)"
+        
+        # Get non-merge commits in this range (exclusive of both boundaries)
+        let commit_result = (do -i { ^git log $range --oneline --no-merges } | complete)
+        if $commit_result.exit_code != 0 { continue }
+        let commits_raw = ($commit_result.stdout | lines | each {|l| $l | str trim} | where {|l| ($l | is-not-empty)})
+        if ($commits_raw | is-empty) { continue }
+        
+        # Parse and filter out auto-generated commits
+        let commits = ($commits_raw | each {|l|
+            let parts = ($l | split row ' ')
+            {hash: ($parts | get 0), msg: ($parts | skip 1 | str join ' ')}
+        } | where {|c|
+            (not ($c.msg | str starts-with "test(")) and (not ($c.msg | str contains "generation")) and (not ($c.msg | str contains "gig@")) and (not ($c.msg | str starts-with "Flake-Check:"))
+        })
+        
+        if ($commits | is-empty) { continue }
+        
+        # Get files changed in this period
+        let files_result = (do -i { ^git diff --name-only $range } | complete)
+        let files = if $files_result.exit_code == 0 {
+            ($files_result.stdout | lines | each {|l| $l | str trim} | where {|l| ($l | is-not-empty)})
+        } else { [] }
+        
+        if ($files | is-empty) { continue }
+        
+        let qid = $"q($i + 1)"
+        let theme = ($commits | get 0).msg
+        
+        $quasi_rolls = ($quasi_rolls | append {
+            id: $qid,
+            after_merge: $merge_info.roll,
+            commits: $commits,
+            count: ($commits | length),
+            files: $files,
+            theme: $theme
+        })
+    }
+    
+    $quasi_rolls
+}
+
+# Check if a quasi-roll has been promoted to main
+# Returns true if the quasi-roll's commits exist on main
+def check-quasi-roll-promoted [
+    quasi_id: string     # e.g. "q1", "q2"
+] {
+    let config = get-config
+    let quasi_rolls = (detect-quasi-rolls)
+    let qr = ($quasi_rolls | where {|q| $q.id == $quasi_id} | first)
+    
+    if ($qr == null) { return false }
+    
+    # Check if all commits in this quasi-roll exist on main
+    let all_on_main = ($qr.commits | all {|c|
+        let check = (do -i { ^git branch $config.stable_branch --contains $c.hash } | complete)
+        $check.exit_code == 0 and ($check.stdout | str trim | is-not-empty)
+    })
+    
+    $all_on_main
+}
+
+# Check verification status for a quasi-roll
+# Quasi-rolls are verified if test-all commits exist on develop after their last commit
+def check-quasi-roll-verification [
+    quasi_id: string
+] {
+    let config = get-config
+    let quasi_rolls = (detect-quasi-rolls)
+    let qr = ($quasi_rolls | where {|q| $q.id == $quasi_id} | first)
+    
+    if ($qr == null) {
+        return {}  # Empty record if not found
+    }
+    
+    # Get the last commit hash in this quasi-roll batch
+    let last_commit = ($qr.commits | last).hash
+    
+    # Detect scope (which hosts need verification)
+    let scope = {
+        nixos: ($qr.files | any {|f| $f | str starts-with "hosts/" and ($f | str ends-with ".nix")})
+        home: ($qr.files | any {|f| $f | str starts-with "home/"})
+        flake: ($qr.files | any {|f| $f == "flake.nix" or $f == "flake.lock"})
+        docs: ($qr.files | any {|f| $f | str starts-with "docs/" or ($f | str ends-with ".md")})
+    }
+    
+    mut host_status = {}
+    
+    for host in (get-active-hosts) {
+        let needs_nixos = $scope.nixos
+        let needs_home = $scope.home
+        let needs_flake = $scope.flake
+        
+        # Check for verification commits on develop after the quasi-roll's last commit
+        let range = $"($last_commit)..($config.rolling_branch)"
+        
+        let flake_verified = if $needs_flake {
+            let flake_check = (do -i { ^git log $range --oneline --grep="test(" -1 } | complete)
+            ($flake_check.exit_code == 0) and ($flake_check.stdout | str trim | is-not-empty)
+        } else { true }
+        
+        let nixos_verified = if $needs_nixos {
+            # Pattern uses [^:]* to match optional @machine suffix (e.g. wsl@merlins-windows)
+            let nixos_rebuild = (do -i { ^git log $range --oneline --grep=$"^($host)[^:]*: generation" -1 } | complete)
+            ($nixos_rebuild.exit_code == 0) and ($nixos_rebuild.stdout | str trim | is-not-empty)
+        } else { true }
+
+        let home_verified = if $needs_home {
+            # Pattern uses [^:]* to match optional @machine suffix (e.g. gig@wsl@merlins-windows)
+            let home_rebuild = (do -i { ^git log $range --oneline --grep=$"^($config.username)@($host)[^:]*:" -1 } | complete)
+            ($home_rebuild.exit_code == 0) and ($home_rebuild.stdout | str trim | is-not-empty)
+        } else { true }
+        
+        let host_verified = ($nixos_verified and $home_verified and $flake_verified)
+        $host_status = ($host_status | insert $host {
+            verified: $host_verified,
+            nixos: $nixos_verified,
+            home: $home_verified,
+            flake: $flake_verified,
+            docs: true,
+            required: {nixos: $needs_nixos, home: $needs_home, flake: $needs_flake, docs: $scope.docs}
+        })
+    }
+    
+    $host_status
+}
+
+# Detect dependencies for quasi-rolls: other quasi-rolls or real rolls that touch the same files
+# Returns: {rolls: [roll/1, ...], quasi_rolls: [q1, q2, ...]}
+def detect-quasi-roll-dependencies [
+    quasi_id: string
+] {
+    let config = get-config
+    let quasi_rolls = (detect-quasi-rolls)
+    let qr = ($quasi_rolls | where {|q| $q.id == $quasi_id} | first)
+    
+    if ($qr == null) { return {rolls: [], quasi_rolls: []} }
+    
+    let qr_files = $qr.files
+    mut roll_deps = []
+    mut quasi_deps = []
+    
+    # Check other quasi-rolls (earlier ones only)
+    for other_qr in $quasi_rolls {
+        if $other_qr.id == $quasi_id { break }  # Only consider earlier quasi-rolls
+        
+        let overlap = ($qr_files | where {|f| $f in $other_qr.files})
+        if ($overlap | is-not-empty) and ($other_qr.id not-in $quasi_deps) {
+            $quasi_deps = ($quasi_deps | append $other_qr.id)
+        }
+    }
+    
+    # Check real rolls (graduated ones that touched the same files)
+    let all_rolls = (do -i { ^git branch --list $"($config.roll_prefix)*" } | lines | each {|l| $l | str trim | str replace '* ' '' })
+    for roll in $all_rolls {
+        if not (check-roll-graduated $roll) { continue }  # Only check graduated rolls
+        
+        # Get roll's files
+        let merge = (do -i { ^git log $config.rolling_branch --oneline --grep=$"Merge branch '($roll)'" -1 } | complete)
+        if $merge.exit_code != 0 or ($merge.stdout | str trim | is-empty) { continue }
+        
+        let mc = ($merge.stdout | str trim | split row ' ' | get 0)
+        let roll_files = (do -i { ^git diff --name-only $"($mc)^1" $"($mc)^2" } | complete)
+        if $roll_files.exit_code != 0 { continue }
+        
+        let overlap = ($qr_files | where {|f| $f in ($roll_files.stdout | lines)})
+        if ($overlap | is-not-empty) and ($roll not-in $roll_deps) {
+            $roll_deps = ($roll_deps | append $roll)
+        }
+    }
+    
+    {rolls: $roll_deps, quasi_rolls: $quasi_deps}
+}
+
+# Detect dependencies for a roll using multiple methods
+# Returns list of roll branches that this roll depends on
+# Use --basic to exclude Method 4 (transitive baseline / promotion ordering) deps
+def detect-roll-dependencies [
+    roll_branch: string  # Roll branch to analyze
+    --basic              # Only Methods 1-3 (merge-blocking deps), exclude Method 4 (ordering)
+] {
+    let config = get-config
+    mut dependencies = []
+    
+    # Method 1: Check explicit metadata declaration
+    let roll_num = try {
+        $roll_branch | str replace $config.roll_prefix '' | split row '-' | get 0 | into int
+    } catch {
+        null
+    }
+    
+    if ($roll_num != null) {
+        let metadata_file = $"($env.HOME)/.config/roll-flow/rolls/($roll_num).nuon"
+        if ($metadata_file | path exists) {
+            let metadata = (open $metadata_file)
+            if ($metadata | get depends_on? | is-not-empty) {
+                $dependencies = ($dependencies | append $metadata.depends_on)
+            }
+        }
+    }
+    
+    # Resolve the roll ref once, used by both Method 2 and Method 3
+    let resolved = (resolve-roll-ref $roll_branch)
+    
+    # Method 2: Structural analysis - check git merge-base
+    # Only applicable for UNMERGED rolls (graduated rolls' changes are already in rolling)
+    # If an unmerged roll was branched from another roll (not from rolling), it depends on that roll
+    let is_graduated = (check-roll-graduated $roll_branch)
+    
+    if (not $is_graduated) and ($resolved != null) {
+        # Check if any lower-numbered unmerged roll's tip is an ancestor of this roll.
+        # That means this roll was branched from (or includes commits from) that other roll,
+        # so merging this roll to develop would implicitly bring that other roll's commits along.
+        # NOTE: we use the resolved tip of other_roll, not merge_base, to avoid false positives
+        # from shared develop ancestors.
+        let all_rolls = try {
+            git branch --list $"($config.roll_prefix)*"
+            | lines
+            | each { |line| $line | str trim | str replace '* ' '' }
+        } catch { [] }
+
+        for other_roll in $all_rolls {
+            if $other_roll == $roll_branch { continue }
+
+            # Only consider earlier-numbered rolls (prevent circular deps)
+            let other_num = try {
+                $other_roll | str replace $config.roll_prefix '' | split row '-' | get 0 | into int
+            } catch { null }
+            if ($other_num == null) or ($roll_num != null and $other_num >= $roll_num) {
+                continue
+            }
+
+            # Skip already-graduated rolls (their commits are already in rolling, not a concern)
+            if (check-roll-graduated $other_roll) { continue }
+
+            let other_resolved = (resolve-roll-ref $other_roll)
+            if ($other_resolved == null) { continue }
+
+            # Is other_roll's tip an ancestor of this roll?
+            # If yes, this roll's history contains other_roll's commits — a real git dependency.
+            let is_ancestor = (do -i { ^git merge-base --is-ancestor $other_resolved $resolved } | complete)
+
+            if $is_ancestor.exit_code == 0 and not ($dependencies | any {|d| $d == $other_roll}) {
+                $dependencies = ($dependencies | append $other_roll)
+            }
+        }
+    }
+
+    # Method 2b: Explicit merge-from detection (via merge commit subject parsing)
+    # Parses default "Merge branch 'X' into Y" messages and registers X as a dependency
+    # if X matches a known roll branch name. This applies regardless of roll-number ordering
+    # (e.g. roll/5 merged roll/9 → roll/5 depends on roll/9). Ancestry-based checks were
+    # too permissive — a merge of a non-roll branch could coincidentally share history with
+    # other rolls and produce false positives. Subject parsing is precise.
+    if ($resolved != null) {
+        let merge_subjects_result = (do -i {
+            ^git log --merges --format='%s' $"($config.rolling_branch)..($resolved)"
+        } | complete)
+
+        if $merge_subjects_result.exit_code == 0 {
+            let merge_subjects = (
+                $merge_subjects_result.stdout
+                | lines
+                | where {|l| ($l | str trim | is-not-empty)}
+            )
+            let local_rolls = (
+                do -i { ^git branch --list $"($config.roll_prefix)*" } | complete
+                | if $in.exit_code == 0 {
+                    $in.stdout | lines
+                    | each {|l| $l | str trim | str replace '* ' ''}
+                    | where {|l| $l | is-not-empty}
+                } else { [] }
+            )
+            let remote_rolls = (
+                do -i { ^git branch -r } | complete
+                | if $in.exit_code == 0 {
+                    $in.stdout | lines | each {|l| $l | str trim}
+                    | where {|l| $l | str starts-with $"origin/($config.roll_prefix)"}
+                    | each {|l| $l | str replace 'origin/' ''}
+                } else { [] }
+            )
+            let known_rolls = ($local_rolls | append $remote_rolls | uniq)
+
+            for subject in $merge_subjects {
+                let match = ($subject | parse --regex "^Merge branch '(?P<branch>[^']+)'")
+                if ($match | length) > 0 {
+                    let merged_branch = ($match | get 0 | get branch)
+                    if ($merged_branch in $known_rolls) and ($merged_branch != $roll_branch) {
+                        if not ($dependencies | any {|d| $d == $merged_branch}) {
+                            $dependencies = ($dependencies | append $merged_branch)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    # Method 3: File overlap analysis
+    # If rolls modify the same files, later roll might depend on earlier
+    # Works for both graduated and unmerged rolls
+    let roll_files = if ($resolved == null) { [] } else {
+        let diff_result = try {
+            git diff --name-only $"($config.rolling_branch)...($resolved)" | complete
+        } catch { null }
+        if ($diff_result == null) or ($diff_result.exit_code != 0) {
+            []
+        } else {
+            $diff_result.stdout | lines
+        }
+    }
+    
+    if not ($roll_files | is-empty) {
+        let all_rolls = try {
+            git branch --list $"($config.roll_prefix)*" 
+            | lines 
+            | each { |line| $line | str trim | str replace '* ' '' }
+        } catch { [] }
+        
+        for other_roll in $all_rolls {
+            if $other_roll == $roll_branch { continue }
+
+            let other_resolved = (resolve-roll-ref $other_roll)
+            # Use --first-parent --no-merges so files that entered other_roll only via a
+            # merge FROM the current roll (or its descendants) don't create a false dependency.
+            # --no-merges alone is insufficient — it excludes merge commits but still walks
+            # commits brought in by them. --first-parent restricts to the main-line history.
+            let other_files = if ($other_resolved == null) { [] } else {
+                let olog = (do -i {
+                    ^git log --first-parent --no-merges --format='' --name-only $"($config.rolling_branch)..($other_resolved)"
+                } | complete)
+                if $olog.exit_code == 0 {
+                    $olog.stdout | lines | where {|l| ($l | str trim | is-not-empty)} | uniq
+                } else { [] }
+            }
+
+            # Check for file overlap
+            let overlap = ($roll_files | where {|f| $f in $other_files})
+            
+            if not ($overlap | is-empty) and not ($dependencies | any {|d| $d == $other_roll}) {
+                # Only add as dependency if other_roll is earlier (lower number)
+                let other_num = try {
+                    $other_roll | str replace $config.roll_prefix '' | split row '-' | get 0 | into int
+                } catch { null }
+                
+                if ($other_num != null) and ($roll_num != null) and ($other_num < $roll_num) {
+                    $dependencies = ($dependencies | append $other_roll)
+                }
+            }
+        }
+    }
+    
+    # Method 4: Transitive baseline dependencies (file inheritance) — ONLY when --basic is NOT set
+    # These are promotion ordering constraints, not merge-blocking deps.
+    # If a lower-numbered roll was merged to develop before this roll was created,
+    # this roll's baseline includes that roll's changes. This creates a transitive
+    # ordering constraint — this roll cannot be promoted to main without the prior
+    # roll being promoted first, since main doesn't have those changes yet.
+    if (not $basic) and ($roll_num != null) {
+        # Gather ALL roll branches (local + remote)
+        let local_branches = try {
+            git branch --list $"($config.roll_prefix)*" 
+            | lines | each {|l| $l | str trim | str replace '* ' '' }
+        } catch { [] }
+        let remote_branches = try {
+            git branch -r | lines | each {|l| $l | str trim }
+            | where {|b| ($b | str starts-with $"origin/($config.roll_prefix)") }
+            | each {|b| $b | str replace 'origin/' '' }
+        } catch { [] }
+        let all_branches = ($local_branches | append $remote_branches | uniq)
+        
+        # Pre-compute graduation status for all rolls (avoids N×N git log calls)
+        let grad_map = ($all_branches | reduce -f {} {|r, acc| $acc | insert $r (check-roll-graduated $r)})
+        
+        for r in $all_branches {
+            if $r == $roll_branch { continue }
+            
+            let other_num = try {
+                $r | str replace $config.roll_prefix '' | split row '-' | get 0 | into int
+            } catch { null }
+            
+            # Only lower-numbered, graduated rolls
+            if ($other_num != null) and ($other_num < $roll_num) and ($grad_map | get $r) {
+                if not ($dependencies | any {|d| $d == $r}) {
+                    $dependencies = ($dependencies | append $r)
+                }
+            }
+        }
+    }
+    
+    # Deduplicate and return
+    $dependencies | uniq
+}
+
+# Test if a roll can build without its dependencies
+# Returns {success: bool, error: string?}
+def test-roll-builds-standalone [
+    roll_branch: string
+] {
+    let config = get-config
+    
+    print $"Testing if (ansi cyan)($roll_branch)(ansi reset) builds standalone..."
+    
+    # Create temporary worktree for testing
+    let test_dir = $"/tmp/roll-flow-test-($roll_branch | str replace '/' '-')"
+    
+    try {
+        # Clean up any existing test directory
+        rm -rf $test_dir
+        
+        # Create worktree from main
+        git worktree add $test_dir $config.stable_branch out+err>| ignore
+        
+        # Apply just this roll's changes
+        cd $test_dir
+        git merge --no-ff $roll_branch out+err>| ignore
+        
+        # Try to build
+        let build_result = try {
+            nix flake check --no-build out+err>| ignore
+            $env.LAST_EXIT_CODE == 0
+        } catch {
+            false
+        }
+        
+        # Cleanup
+        cd -
+        git worktree remove $test_dir --force out+err>| ignore
+        
+        if $build_result {
+            {success: true, error: null}
+        } else {
+            {success: false, error: "Flake check failed - likely has dependencies"}
+        }
+    } catch { |e|
+        # Cleanup on error
+        try {
+            cd -
+            git worktree remove $test_dir --force out+err>| ignore
+        }
+        {success: false, error: $"Test failed: ($e)"}
+    }
+}
+
+# Check which hosts have verified a given roll with rebuilds
+# Returns a record with per-host, per-type verification status:
+# { hostname: { verified: bool, nixos: bool, home: bool } }
+#
+# Verification sources (checked in order):
+# 1. test-all commits on the roll branch itself (structured test results)
+# 2. Rebuild commits on rolling branch (nixos-rebuild / home-manager-switch)
+def check-roll-verification [
+    roll_branch: string  # Roll branch name (e.g., "roll/5-roll-flow-init")
+] {
+    let config = get-config
+    
+    # Detect what scopes this roll affects
+    let scope = (detect-roll-scope $roll_branch)
+    
+    # Try source 1: Look for test-all commit on the roll branch
+    # Format: "test(roll/N-theme): flake=pass host=✓ ..."
+    let resolved = (resolve-roll-ref $roll_branch)
+    let test_commit = if ($resolved != null) and ($resolved != "") {
+        let raw = try {
+            ^git log $resolved --oneline --grep=$"^test\(($roll_branch)\):" -1
+        } catch { "" }
+        if ($raw | is-empty) { "" } else { $raw | str trim }
+    } else { "" }
+    
+    if not ($test_commit | is-empty) {
+        # Parse the test commit body for host results and flake check
+        let commit_hash = ($test_commit | split row ' ' | get 0)
+        let raw_body = try {
+            ^git log $commit_hash -1 --format="%b"
+        } catch { "" }
+        let test_lines = if ($raw_body | is-empty) { [] } else { $raw_body | lines }
+        
+        # Extract Flake-Check line and Host-Results section
+        mut in_host_section = false
+        mut flake_check_passed = false
+        mut host_results = {}
+        for line in $test_lines {
+            let trimmed = ($line | str trim)
+            if ($trimmed | str starts-with "Flake-Check:") {
+                # "Flake-Check: pass" or "Flake-Check: fail"
+                let parts = ($trimmed | split row ": ")
+                if ($parts | length) >= 2 {
+                    $flake_check_passed = (($parts | get 1) == "pass")
+                }
+                $in_host_section = false
+                continue
+            }
+            if ($trimmed | str starts-with "Host-Results:") { $in_host_section = true; continue }
+            if ($in_host_section) {
+                # Parse lines like "  host: PASSED" or "  host: FAILED"
+                let parts = ($trimmed | split row ": ")
+                if ($parts | length) >= 2 {
+                    let h = ($parts | get 0)
+                    let result = ($parts | get 1)
+                    if $h in $config.hosts {
+                        let passed = ($result == "PASSED" or $result == "pass")
+                        # flake check is shared (not per-host), so same value for all
+                        $host_results = ($host_results | insert $h {
+                            verified: $passed,
+                            nixos: (if $passed { $scope.nixos } else { false }),
+                            home: (if $passed { $scope.home } else { false }),
+                            flake: $flake_check_passed,
+                            docs: true,  # docs always considered verified (no build needed)
+                            required: { nixos: $scope.nixos, home: $scope.home, flake: $scope.flake, docs: $scope.docs }
+                        })
+                    }
+                }
+            }
+        }
+        
+        # Merge with defaults for any hosts not in the test results
+        mut final_status = {}
+        for host in (get-active-hosts) {
+            if $host in ($host_results | columns) {
+                $final_status = ($final_status | insert $host ($host_results | get $host))
+            } else {
+                # Host not tested — mark as unverified
+                $final_status = ($final_status | insert $host {
+                    verified: false,
+                    nixos: false,
+                    home: false,
+                    flake: $flake_check_passed,
+                    docs: true,
+                    required: { nixos: $scope.nixos, home: $scope.home, flake: $scope.flake, docs: $scope.docs }
+                })
+            }
+        }
+        return $final_status
+    }
+    
+    # Source 2: Fall back to rolling rebuild commit check
+
+    # Find when this roll was merged to rolling.
+    # get-roll-merge-commit handles both "Merge branch '...'" and "Graduate ..." formats.
+    let roll_merge = (get-roll-merge-commit $config.rolling_branch $roll_branch)
+    
+    # Helper: determine if a flake check has been recorded since a given ref
+    # Returns true if a commit with "Flake-Check: pass" exists in the range
+    let check_flake_since = {|since_ref|
+        let result = try {
+            git log $config.rolling_branch --oneline --grep="Flake-Check: pass" $"($since_ref)..($config.rolling_branch)" -1
+            | str trim
+            | is-not-empty
+        } catch { false }
+        $result
+    }
+    
+    # Determine the search strategy based on merge status
+    if ($roll_merge | is-empty) {
+        # Roll not merged yet - check from branch point to rolling HEAD
+        let resolved = (resolve-roll-ref $roll_branch)
+        # Helper to get HEAD~20 commit ref
+        let head_ref = try {
+            git rev-parse HEAD~20 | complete
+        } catch { null }
+        let head_ref_str = if ($head_ref == null) or ($head_ref.exit_code != 0) { "HEAD" } else { $head_ref.stdout | str trim }
+        
+        let branch_point = if ($resolved == null) {
+            $head_ref_str
+        } else {
+            let mb_result = try {
+                git merge-base $config.rolling_branch $resolved | complete
+            } catch {
+                null
+            }
+            if ($mb_result == null) or ($mb_result.exit_code != 0) {
+                $head_ref_str
+            } else {
+                $mb_result.stdout | str trim
+            }
+        }
+        
+        mut host_status = {}
+        
+        for host in (get-active-hosts) {
+            let needs_nixos = $scope.nixos
+            let needs_home = $scope.home
+            let needs_flake = $scope.flake
+            
+            # If nothing at all changed (auto-detect case), skip entirely
+            if (not $needs_nixos) and (not $needs_home) and (not $needs_flake) and (not $scope.docs) {
+                $host_status = ($host_status | insert $host {
+                    verified: true,
+                    nixos: true,
+                    home: true,
+                    flake: true,
+                    docs: true,
+                    required: { nixos: false, home: false, flake: false, docs: false }
+                })
+                continue
+            }
+            
+            # Docs always count as verified (no build needed)
+            let docs_verified = true
+            
+            # Check flake check if needed (shared — same for all hosts)
+            let flake_verified = if $needs_flake {
+                do $check_flake_since $branch_point
+            } else {
+                true  # Not needed
+            }
+            
+            let nixos_verified = if $needs_nixos {
+                let nixos_rebuild = try {
+                    # Pattern uses [^:]* to match optional @machine suffix (e.g. wsl@merlins-windows)
+                    git log $config.rolling_branch --oneline --grep=$"^($host)[^:]*: generation" $"($branch_point)..($config.rolling_branch)" -1
+                    | str trim
+                } catch {
+                    ""
+                }
+                not ($nixos_rebuild | is-empty)
+            } else {
+                true  # Not needed
+            }
+
+            let home_verified = if $needs_home {
+                let home_rebuild = try {
+                    # Pattern uses [^:]* to match optional @machine suffix (e.g. gig@wsl@merlins-windows)
+                    git log $config.rolling_branch --oneline --grep=$"^($config.username)@($host)[^:]*:" $"($branch_point)..($config.rolling_branch)" -1
+                    | str trim
+                } catch {
+                    ""
+                }
+                not ($home_rebuild | is-empty)
+            } else {
+                true
+            }
+
+            let host_verified = ($nixos_verified and $home_verified and $flake_verified and $docs_verified)
+            $host_status = ($host_status | insert $host {
+                verified: $host_verified,
+                nixos: $nixos_verified,
+                home: $home_verified,
+                flake: $flake_verified,
+                docs: true,
+                required: { nixos: $needs_nixos, home: $needs_home, flake: $needs_flake, docs: $scope.docs }
+            })
+        }
+
+        $host_status
+    } else {
+        # Roll has been merged - check for rebuilds after the merge
+        mut host_status = {}
+        
+        for host in (get-active-hosts) {
+            let needs_nixos = $scope.nixos
+            let needs_home = $scope.home
+            
+            # If nothing at all changed, skip entirely
+            if (not $needs_nixos) and (not $needs_home) and (not $scope.flake) and (not $scope.docs) {
+                $host_status = ($host_status | insert $host {
+                    verified: true,
+                    nixos: true,
+                    home: true,
+                    flake: true,
+                    docs: true,
+                    required: { nixos: false, home: false, flake: false, docs: false }
+                })
+                continue
+            }
+            
+            let docs_verified = true
+            
+            # For flake check, search BOTH:
+            # 1. The roll's own history (via $roll_merge^2) — catches pre-merge test-all commits
+            # 2. Post-merge commits on rolling — catches post-merge test-all runs
+            let flake_verified = if $scope.flake {
+                let on_roll = try {
+                    git log $"($roll_merge)^2" --oneline --grep="Flake-Check: pass" -1
+                    | str trim
+                    | is-not-empty
+                } catch { false }
+                let post_merge = do $check_flake_since $roll_merge
+                $on_roll or $post_merge
+            } else {
+                true
+            }
+            
+            let nixos_verified = if $needs_nixos {
+                let nixos_rebuild = try {
+                    # Pattern uses [^:]* to match optional @machine suffix (e.g. wsl@merlins-windows)
+                    git log $config.rolling_branch --oneline --grep=$"^($host)[^:]*: generation" $"($roll_merge)..HEAD" -1
+                    | str trim
+                } catch {
+                    ""
+                }
+                not ($nixos_rebuild | is-empty)
+            } else {
+                true
+            }
+
+            let home_verified = if $needs_home {
+                let home_rebuild = try {
+                    # Pattern uses [^:]* to match optional @machine suffix (e.g. gig@wsl@merlins-windows)
+                    git log $config.rolling_branch --oneline --grep=$"^($config.username)@($host)[^:]*:" $"($roll_merge)..HEAD" -1
+                    | str trim
+                } catch {
+                    ""
+                }
+                not ($home_rebuild | is-empty)
+            } else {
+                true
+            }
+            
+            let host_verified = ($nixos_verified and $home_verified and $flake_verified and $docs_verified)
+            $host_status = ($host_status | insert $host {
+                verified: $host_verified,
+                nixos: $nixos_verified,
+                home: $home_verified,
+                flake: $flake_verified,
+                docs: true,
+                required: { nixos: $needs_nixos, home: $needs_home, flake: $scope.flake, docs: $scope.docs }
+            })
+        }
+        
+        $host_status
+    }
+}
+
+# Start a new roll
+def "main start" [
+    theme: string  # Theme/description for this roll
+] {
+    let config = get-config
+    let next_num = get-next-roll-number
+    let date_str = (date now | format date "%m%d")
+    let roll_name = $"($config.roll_prefix)($next_num)-($date_str)-($theme)"
+    
+    print $"Creating new roll: (ansi cyan)($roll_name)(ansi reset)"
+    
+    # Create roll from stable branch (main)
+    git checkout $config.stable_branch
+    git pull
+    git checkout -b $roll_name
+    
+    # Save roll metadata
+    let rolls_dir = $"($env.HOME)/.config/roll-flow/rolls"
+    mkdir $rolls_dir
+    
+    let metadata = {
+        roll: $roll_name,
+        number: $next_num,
+        theme: $theme,
+        started: (date now | format date "%Y-%m-%d %H:%M:%S"),
+        status: "active",
+        base: $config.stable_branch,
+        merged_features: [],
+        depends_on: []  # Can be manually edited to add dependencies
+    }
+    
+    $metadata | save -f $"($rolls_dir)/($next_num).nuon"
+    
+    print $"✓ Started roll (ansi green)($roll_name)(ansi reset)"
+    print $"  Branch from: ($config.stable_branch)"
+    print $"  Now on: ($roll_name)"
+    print ""
+    print $"(ansi yellow)Tip:(ansi reset) To merge in latest rolling changes, run: git merge ($config.rolling_branch)"
+    print $"(ansi yellow)Tip:(ansi reset) Edit ($rolls_dir)/($next_num).nuon to add explicit dependencies if needed"
+}
+
+# Integrate a feature branch into current roll
+def "main integrate" [
+    feature_branch: string  # Feature branch to integrate
+] {
+    let current_roll = get-current-roll
+    
+    if ($current_roll == null) {
+        error make {msg: "Not currently on a roll branch. Run 'roll-flow start' first."}
+    }
+    
+    print $"Integrating (ansi cyan)($feature_branch)(ansi reset) into (ansi cyan)($current_roll)(ansi reset)"
+    
+    # Merge with no-ff to preserve history
+    git merge --no-ff $feature_branch
+    
+    if $env.LAST_EXIT_CODE == 0 {
+        # Update metadata
+        let roll_num = ($current_roll | str replace 'roll/' '' | split row '-' | get 0)
+        let metadata_file = $"($env.HOME)/.config/roll-flow/rolls/($roll_num).nuon"
+        
+        if ($metadata_file | path exists) {
+            mut metadata = (open $metadata_file)
+            $metadata.merged_features = ($metadata.merged_features | append $feature_branch)
+            $metadata | save -f $metadata_file
+        }
+        
+        print $"✓ Integrated (ansi green)($feature_branch)(ansi reset)"
+        print $"  You can now test with: just rebuild"
+    } else {
+        print $"✗ Merge failed. Resolve conflicts and commit manually."
+    }
+}
+
+# Run nix flake check on a given branch, returning { passed: bool, output: string }
+# Checks out the branch, runs flake check, then returns to original branch.
+def run-flake-check [branch: string, label?: string] {
+    let orig = (git branch --show-current | str trim)
+    let display = if ($label | is-empty) { $branch } else { $label }
+    print $"  Running (ansi yellow)nix flake check(ansi reset) on ($display)..."
+    
+    # Stash any local changes if needed
+    let had_changes = ((do -i { ^git status --porcelain } | str trim | is-not-empty) and $orig != $branch)
+    if $had_changes {
+        do -i { ^git stash push -m "auto-stash before flake check" } | ignore
+    }
+    
+    # Checkout the target branch
+    let co = (do -i { ^git checkout $branch } | complete)
+    if $co.exit_code != 0 {
+        if $had_changes { do -i { ^git stash pop } | ignore }
+        do -i { ^git checkout $orig } | ignore
+        return { passed: false, output: $"Failed to checkout ($branch): ($co.stderr | str trim)" }
+    }
+    
+    # Pull latest if remote tracking exists
+    do -i { ^git pull --ff-only } | complete | ignore
+    
+    # Run flake check
+    let result = (try {
+        nix flake check --keep-going --show-trace out+err>| complete
+    } catch {
+        { exit_code: 1, stderr: "nix flake check command failed to execute" }
+    })
+    
+    let output = if $result.exit_code == 0 {
+        $"✓ nix flake check passed on ($display)"
+    } else {
+        let err_lines = ($result.stderr | lines | where {|l| ($l | str contains "error") or ($l | str contains "Error") })
+        let summary = if not ($err_lines | is-empty) {
+            $err_lines | first 5 | str join "\n      "
+        } else {
+            $result.stderr | lines | last 10 | str join "\n      "
+        }
+        $"✗ nix flake check FAILED on ($display):\n      ($summary)"
+    }
+    
+    # Return to original branch
+    do -i { ^git checkout $orig } | ignore
+    if $had_changes { do -i { ^git stash pop } | ignore }
+    
+    { passed: ($result.exit_code == 0), output: $output }
+}
+
+# Interactive graduate/promote with candidate selection, pre-flight checks,
+# merge execution, branch cleanup, and develop reintegration.
+# Replaces the old non-interactive graduate and promote commands.
+def "main graduate" [
+    ...targets: string           # Optional: roll branch names or table numbers
+    --dry-run                    # Show plan without executing
+    --force(-f)                  # Skip verification checks
+    --promote                    # Force promote mode (roll->main instead of roll->develop)
+    --all                        # Include quasi-rolls in promotion (promote mode only)
+    --quasi                      # Promote ONLY quasi-rolls (promote mode only)
+] {
+    let config = get-config
+    let current = (git branch --show-current | str trim)
+    let current_roll = get-current-roll
+    
+    # ── Phase A: Context & Mode ─────────────────────────────────────────
+    
+    let on_rolling = ($current == $config.rolling_branch)
+    let on_stable = ($current == $config.stable_branch)
+    let on_roll = ($current_roll != null)
+    let on_graduated_roll = ($on_roll and (check-roll-graduated $current_roll))
+    
+    let mode = if $promote or $on_rolling or $on_stable {
+        "promote"
+    } else if $on_roll and not $on_graduated_roll {
+        "graduate"
+    } else {
+        # If on a graduated roll, inform user before interactive selection
+        if $on_graduated_roll {
+            let is_diverged = (check-roll-diverged $current_roll)
+            if $is_diverged {
+                print $"=== Roll Flow ==="
+                print $"Current roll: (ansi green)($current_roll)(ansi reset) already merged but (ansi yellow)diverged \(has new commits\)(ansi reset)"
+                print $"  (ansi cyan)Re-graduate(ansi reset) from the menu below to merge new commits into ($config.rolling_branch)"
+                print ""
+            } else {
+                print $"=== Roll Flow ==="
+                print $"Current roll: (ansi green)($current_roll)(ansi reset) is (ansi cyan)already merged to ($config.rolling_branch)(ansi reset)"
+                print ""
+            }
+        }
+        print "What would you like to do?"
+        print "  1) Graduate rolls to rolling branch"
+        print "  2) Promote rolls to stable branch"
+        let choice = (try { input "Choice (1/2) [1]: " } catch { "1" })
+        if ($choice | str trim) == "2" { "promote" } else { "graduate"
+        }
+    }
+    
+    let target = if $mode == "promote" { $config.stable_branch } else { $config.rolling_branch }
+    let mode_label = if $mode == "promote" { "Promote" } else { "Graduate" }
+    
+    # Validate quasi-roll flags
+    if ($quasi or $all) and $mode != "promote" {
+        print $"(ansi red)Error:(ansi reset) --quasi and --all flags are only valid in promote mode"
+        print "  Quasi-rolls are already on ($config.rolling_branch) — they can only be promoted to ($config.stable_branch)"
+        return
+    }
+    
+    print ""
+    print $"=== Roll Flow: ($mode_label) ==="
+    print $"  Current:  (ansi cyan)($current)(ansi reset)"
+    print $"  Target:   (ansi cyan)($target)(ansi reset)"
+    if $dry_run { print $"(ansi yellow)  DRY RUN - no changes will be made(ansi reset)" }
+    print ""
+    
+    # ── Phase B: Gather Candidates ──────────────────────────────────
+    
+    # Get all unique roll branches (local + remote)
+    let all_rolls = try {
+        let local = (do -i { ^git branch --list $"($config.roll_prefix)*" }
+            | lines
+            | each { |line| $line | str trim | str replace '* ' '' })
+        let remote = (do -i { ^git branch -r }
+            | lines
+            | each { |line| $line | str trim }
+            | where { |b| ($b | str starts-with $"origin/($config.roll_prefix)") }
+            | each { |b| $b | str replace 'origin/' '' })
+        ($local | append $remote | uniq | sort)
+    } catch { [] }
+    
+    if ($all_rolls | is-empty) {
+        print $"(ansi yellow)No roll branches found.(ansi reset)"
+        return
+    }
+    
+    # Filter based on mode
+    let candidates = if $mode == "promote" {
+        $all_rolls | where { |b| (check-roll-promotion-ready $b).ready }
+    } else {
+        # For graduate mode: include ungraduated rolls plus graduated-but-diverged rolls
+        # (diverged rolls have new commits that need to be re-merged)
+        $all_rolls | where { |b| not (check-roll-graduated $b) or (check-roll-diverged $b) }
+    }
+    
+    if ($candidates | is-empty) {
+        let mode_down = ($mode_label | str downcase)
+        print $"(ansi yellow)No candidates for ($mode_down).(ansi reset)"
+        if $mode == "promote" {
+            print "  (no verified, graduated rolls ready)"
+        } else {
+            print "  (all rolls already up to date)"
+        }
+        return
+    }
+    
+    # ── Phase C: Selection ──────────────────────────────────────────
+    
+    # Resolve selections: if targets given, use them; otherwise interactive
+    let selected_rolls = if not ($targets | is-empty) {
+        $targets | each {|t|
+            if ($t | str starts-with $config.roll_prefix) {
+                if $t in $candidates { $t } else { null }
+        } else {
+            let idx = (try { $t | into int } catch { null })
+            if $idx != null and $idx >= 0 and $idx < ($candidates | length) {
+                $candidates | get $idx
+            } else { null }
+            }
+        } | where { |b| $b != null }
+    } else {
+        # Build and show selection table
+        print $"Available candidates:"
+        print ""
+        
+        # Use enumerate for 0-based index; # column and input parsing both use 0-based
+        let table_data = ($candidates | enumerate | each {|item|
+            let roll = $item.item
+            let scope = (detect-roll-scope $roll)
+            let verification = (check-roll-verification $roll)
+            let git_status = (get-roll-git-status $roll)
+            let block_status = (check-roll-blocked $roll)
+            
+            # Format git status indicator
+            let dev_status = match $git_status {
+                "merged" => "✓",
+                "ahead" => "↑",
+                "behind" => "↓",
+                "diverged" => "⚠",
+                "even" => "=",
+                _ => "?"
+            }
+            
+            # Format blocked status indicator
+            let blk_status = if $block_status.blocked {
+                "🔒"
+            } else {
+                ""
+            }
+            
+            mut s = ""
+            if $scope.nixos { $s = ($s + "N") } else { $s = ($s + "-") }
+            if $scope.home { $s = ($s + "H") } else { $s = ($s + "-") }
+            if $scope.flake { $s = ($s + "F") } else { $s = ($s + "-") }
+            if $scope.docs { $s = ($s + "D") } else { $s = ($s + "-") }
+            
+            let loc = (get-branch-location $roll)
+            
+            let is_diverged = if (check-roll-graduated $roll) {
+                (check-roll-diverged $roll)
+            } else { false }
+            
+            mut rec = { roll: ($roll | str substring 0..36), loc: $loc, dev: $dev_status, blk: $blk_status, scope: $s }
+            
+            for host in (get-active-hosts) {
+                let info = ($verification | get $host)
+                # For diverged rolls, verification is stale — show ✗ instead of old data
+                let nixos_mark = if $is_diverged {
+                    if $info.required.nixos { "✗" } else { "—" }
+                } else if $info.required.nixos {
+                    if $info.nixos { "✓" } else { "⌛" }
+                } else { "—" }
+                let home_mark = if $is_diverged {
+                    if $info.required.home { "✗" } else { "—" }
+                } else if $info.required.home {
+                    if $info.home { "✓" } else { "⌛" }
+                } else { "—" }
+                let flake_mark = if $is_diverged {
+                    if $info.required.flake { "✗" } else { "—" }
+                } else if $info.required.flake {
+                    if $info.flake { "✓" } else { "⌛" }
+                } else { "—" }
+                let docs_mark = if $is_diverged {
+                    if $info.required.docs { "✗" } else { "—" }
+                } else if $info.required.docs {
+                    if $info.docs { "✓" } else { "⌛" }
+                } else { "—" }
+                let mark = $"($nixos_mark)($home_mark)($flake_mark)($docs_mark)"
+                $rec = ($rec | insert $host $mark)
+            }
+            $rec
+        })
+        
+        $table_data | table --width 160 | to text | print
+        print ""
+        
+        let input_str = (try {
+            let mode_down = ($mode_label | str downcase)
+            input $"Select rolls to ($mode_down) (numbers, ranges like 0-2, or 'all'): "
+        } catch { "" })
+        
+        let input_trimmed = ($input_str | str trim | str downcase)
+        
+        let selected_list = if $input_trimmed == "all" {
+            $candidates
+        } else if ($input_trimmed | is-empty) {
+            # Auto-select:
+            #  - graduate mode: prefer current roll, else first candidate (single-roll default)
+            #  - promote mode: default to ALL candidates (batch operation)
+            let current_in_candidates = if ($current_roll != null) {
+                $candidates | where {|c| $c == $current_roll}
+            } else { [] }
+            if ($current_in_candidates | length) > 0 {
+                [$current_roll]
+            } else if $mode == "promote" {
+                $candidates
+            } else if ($candidates | length) >= 1 {
+                [($candidates | get 0)]
+            } else { [] }
+        } else {
+            # Parse comma-separated numbers and ranges (0-based, matching the # column)
+            $input_trimmed | split row "," | each {|part|
+                let trimmed = ($part | str trim)
+                let range = ($trimmed | split row "-")
+                if ($range | length) == 2 {
+                    let start = (try { $range | get 0 | into int } catch { null })
+                    let end = (try { $range | get 1 | into int } catch { null })
+                    if $start != null and $end != null and $start >= 0 and $end >= $start {
+                        $start..$end | each {|n|
+                            if $n >= 0 and $n < ($candidates | length) { $candidates | get $n } else { null }
+                        }
+                    } else { [] }
+                } else {
+                    let n = (try { $trimmed | into int } catch { null })
+                    if $n != null and $n >= 0 and $n < ($candidates | length) {
+                        [($candidates | get $n)]
+                    } else { [] }
+                }
+            } | flatten | uniq
+        }
+        
+        $selected_list
+    }
+    
+    if ($selected_rolls | is-empty) {
+        print $"(ansi yellow)No rolls selected.(ansi reset)"
+        return
+    }
+    
+    # Resolve dependencies to build ordered merge queue
+    print ""
+    print "Analyzing dependencies..."
+    mut ordered = []
+    for roll in $selected_rolls {
+        let with_deps = (resolve-roll-dependencies $roll --basic)
+        for r in $with_deps {
+            # For graduate mode: skip already-graduated rolls unless diverged (new commits to merge)
+            # For promote mode: include all rolls (they all need to go to main)
+            if $mode == "graduate" and (check-roll-graduated $r) and not (check-roll-diverged $r) {
+                continue
+            }
+            if not ($r in $ordered) and ($r in $all_rolls) {
+                $ordered = ($ordered | append $r)
+            }
+        }
+    }
+    
+    let all_valid = ($ordered | all {|r| $r in $all_rolls })
+    if not $all_valid {
+        print $"(ansi red)Error: dependency resolution found invalid rolls(ansi reset)"
+        return
+    }
+    
+    let num_ordered = ($ordered | length)
+    print $"  Resolved ($num_ordered) rolls in dependency order"
+    
+    # Show merge plan
+    print ""
+    print "Merge plan:"
+    for roll in $ordered {
+        print $"  -> (ansi cyan)($roll)(ansi reset) -> ($target)"
+    }
+    print ""
+    
+    # ── Phase D: Pre-Merge Checks ───────────────────────────────────
+    
+    print $"(ansi cyan)Pre-merge checks:(ansi reset)"
+    mut checks_passed = true
+    
+    # Check 1: Uncommitted changes (skipped with --force)
+    if not $force {
+        let status_raw = (do -i { ^git status --porcelain } | complete)
+        let has_uncommitted = ($status_raw.exit_code == 0 and ($status_raw.stdout | str trim | is-not-empty))
+        
+        if $has_uncommitted {
+            print $"  (ansi red)✗ Uncommitted changes detected. Commit or stash first, or use --force.(ansi reset)"
+            $checks_passed = false
+        } else {
+            print $"  (ansi green)✓ No uncommitted changes(ansi reset)"
+        }
+    } else {
+        print $"  (ansi yellow)✓ Uncommitted changes check skipped (--force)(ansi reset)"
+    }
+    
+    # Check 2: Dependency graduation check (for graduate mode)
+    # A dependency is satisfied if it's either already graduated OR will be
+    # graduated earlier in this same batch (i.e. appears before the roll in $ordered).
+    if $mode == "graduate" and not $force {
+        mut all_deps_graduated = true
+        for roll in $ordered {
+            let roll_idx = ($ordered | enumerate | where {|x| $x.item == $roll} | get 0.index)
+            let deps = (detect-roll-dependencies $roll --basic)
+            for dep in $deps {
+                let dep_in_batch = ($ordered | enumerate
+                    | where {|x| $x.item == $dep and $x.index < $roll_idx}
+                    | is-not-empty)
+                if not (check-roll-graduated $dep) and not $dep_in_batch {
+                    print $"  (ansi red)✗ ($roll) - dependency ($dep) not yet graduated and not in this batch(ansi reset)"
+                    $all_deps_graduated = false
+                    $checks_passed = false
+                }
+            }
+        }
+        if $all_deps_graduated {
+            print $"  (ansi green)✓ All dependencies satisfied [graduated or queued in batch](ansi reset)"
+        }
+    }
+    
+    # Check 3: Verification (only required for promote mode, unless --force)
+    if $mode == "promote" and not $force {
+        for roll in $ordered {
+            let verification = (check-roll-verification $roll)
+            let all_verified = ($verification | values | all {|v| $v.verified})
+            if not $all_verified {
+                print $"  (ansi red)✗ ($roll) - not fully verified(ansi reset)"
+                let unverified = ($verification | items {|h, i| if not $i.verified { $h } else { null }} | where {|v| $v != null})
+                for host in $unverified {
+                    print $"      .. ($host)"
+                }
+                $checks_passed = false
+            } else {
+                print $"  (ansi green)✓ ($roll) - all hosts verified(ansi reset)"
+            }
+        }
+    } else if $mode == "graduate" {
+        print $"  (ansi cyan)ℹ Verification not required for graduation to ($config.rolling_branch)(ansi reset)"
+    } else {
+        print $"  (ansi yellow)⚠ Verification skipped (--force)(ansi reset)"
+    }
+    
+    # Check 4: For promote mode, check divergence
+    if $mode == "promote" and not $force {
+        for roll in $ordered {
+            if (check-roll-diverged $roll) {
+                print $"  (ansi red)✗ ($roll) - diverged! Branch has commits after graduation(ansi reset)"
+                $checks_passed = false
+            }
+        }
+    }
+    
+    # Check 5: Flake check on each roll branch before merging
+    # For graduate mode: test each roll individually
+    # For promote mode: test develop (which contains all merged rolls)
+    if not $force {
+        if $mode == "graduate" {
+            for roll in $ordered {
+                let flake_result = (run-flake-check $roll $roll)
+                if $flake_result.passed {
+                    print $"  (ansi green)✓ ($roll) - flake check passed(ansi reset)"
+                } else {
+                    print $"  (ansi red)✗ ($roll) - flake check FAILED(ansi reset)"
+                    print $"      ($flake_result.output)"
+                    $checks_passed = false
+                }
+            }
+        } else if $mode == "promote" {
+            # For promote, test develop (which has all merged rolls integrated)
+            let flake_result = (run-flake-check $config.rolling_branch $config.rolling_branch)
+            if $flake_result.passed {
+                print $"  (ansi green)✓ ($config.rolling_branch) - flake check passed(ansi reset)"
+            } else {
+                print $"  (ansi red)✗ ($config.rolling_branch) - flake check FAILED(ansi reset)"
+                print $"      ($flake_result.output)"
+                $checks_passed = false
+            }
+        }
+    } else {
+        print $"  (ansi yellow)⚠ Flake check skipped (--force)(ansi reset)"
+    }
+    
+    if not $checks_passed {
+        print ""
+        print $"(ansi red)Pre-merge checks failed.(ansi reset)"
+        print "  Fix the issues above, or use --force to skip checks."
+        return
+    }
+    
+    # ── Phase E: Confirmation ───────────────────────────────────────
+    
+    print ""
+    let mode_down = ($mode_label | str downcase)
+    let num_ordered2 = ($ordered | length)
+    print $"Ready to ($mode_down) ($num_ordered2) rolls to (ansi cyan)($target)(ansi reset)"
+    if $mode == "promote" {
+        print $"  (ansi yellow)Note:(ansi reset) After promotion, ($config.stable_branch) will be merged into ($config.rolling_branch)."
+    }
+    
+    let confirm = (try {
+        input "Proceed? (y/N): "
+    } catch { "n" })
+    
+    if ($confirm | str trim | str downcase) != "y" {
+        print "Aborted."
+        return
+    }
+    
+    # ── Phase F: Execute Merges (unless dry-run) ────────────────────
+    
+    if $dry_run {
+        print ""
+        print $"(ansi yellow)DRY RUN - no changes made(ansi reset)"
+        for roll in $ordered {
+            print $"  Would merge ($roll) -> ($target)"
+        }
+        if $mode == "promote" {
+            print $"  Would merge ($config.stable_branch) into ($config.rolling_branch)"
+        }
+        print ""
+        return
+    }
+    
+    print ""
+    let mode_down2 = ($mode_label | str downcase)
+    print $"($mode_down2) rolls..."
+    
+    let orig_branch = $current
+    let remote_url = (try {
+        do -i { ^git remote get-url origin } | str trim
+    } catch { "" })
+    let has_remote = ($remote_url | is-not-empty)
+    
+    mut merged_count = 0
+    mut failed_count = 0
+    
+    # Checkout target branch
+    let co = (do -i { ^git checkout $target } | complete)
+    if $co.exit_code != 0 {
+        print $"  (ansi red)✗ Failed to checkout ($target)(ansi reset)"
+        print $"    ($co.stderr | str trim)"
+        return
+    }
+    print $"  V Checked out (ansi cyan)($target)(ansi reset)"
+    
+    # Pull latest
+    do -i { ^git pull } | complete | ignore
+    
+    for roll in $ordered {
+        let merge_msg = if $mode == "promote" {
+            $"Promote ($roll) to ($config.stable_branch)"
+        } else {
+            $"Merge branch '($roll)'"
+        }
+        
+        print $"  Merging (ansi cyan)($roll)(ansi reset)..."
+
+        # Resolve the ref to merge — falls back to origin/$roll for remote-only branches
+        let roll_ref = (resolve-roll-ref $roll)
+        if ($roll_ref == null) {
+            print $"    (ansi red)✗ Could not resolve ref for ($roll)(ansi reset)"
+            $failed_count = $failed_count + 1
+            break
+        }
+
+        # Step 1: Merge into working tree (no commit yet)
+        let merge = (do -i { ^git merge --no-ff --no-commit $roll_ref } | complete)
+        
+        if $merge.exit_code != 0 {
+            print $"    (ansi red)✗ Merge failed - check for conflicts(ansi reset)"
+            print $"      ($merge.stderr | str trim)"
+            do -i { ^git merge --abort } | complete | ignore
+            $failed_count = $failed_count + 1
+            break
+        }
+        
+        print $"    (ansi green)✓ Merge prepared \(working tree\)(ansi reset)"
+        
+        # Step 2: Pre-commit flake check on the merged working tree
+        # This catches issues before the merge commit is finalized
+        mut do_commit = true
+        if not $force {
+            print $"    Running (ansi yellow)nix flake check(ansi reset) on merged tree..."
+            let post_check = (try {
+                nix flake check --keep-going --show-trace out+err>| complete
+            } catch {
+                { exit_code: 1, stderr: "nix flake check command failed to execute" }
+            })
+            
+            if $post_check.exit_code == 0 {
+                print $"      (ansi green)✓ Flake check passed(ansi reset)"
+            } else {
+                print $"      (ansi red)✗ Pre-commit flake check FAILED!(ansi reset)"
+                let err_lines = ($post_check.stderr | lines | where {|l| ($l | str contains "error") or ($l | str contains "Error") })
+                let summary = if not ($err_lines | is-empty) {
+                    $err_lines | first 5 | str join "\n      "
+                } else {
+                    $post_check.stderr | lines | last 10 | str join "\n      "
+                }
+                print $"      ($summary)"
+                print ""
+                let abort_choice = (try { input $"    Abort this merge? (Y/n): " } catch { "y" })
+                if ($abort_choice | str trim | str downcase) != "n" {
+                    do -i { ^git merge --abort } | complete | ignore
+                    print $"      (ansi yellow)✓ Merge aborted - ($roll) was NOT merged into ($target)(ansi reset)"
+                    $do_commit = false
+                    $failed_count = $failed_count + 1
+                    break
+                } else {
+                    print $"      (ansi yellow)⚠ Committing with failed flake check (user choice)(ansi reset)"
+                }
+            }
+        }
+        
+        if $do_commit {
+            # Step 3: Finalize the merge commit
+            let commit = (do -i { ^git commit -m $merge_msg } | complete)
+            if $commit.exit_code == 0 {
+                print $"    (ansi green)✓ Merged successfully(ansi reset)"
+                $merged_count = $merged_count + 1
+            } else {
+                print $"    (ansi red)✗ Commit failed after successful merge(ansi reset)"
+                print $"      ($commit.stderr | str trim)"
+                $failed_count = $failed_count + 1
+                break
+            }
+            
+            # Update metadata file
+            let roll_num = try {
+                $roll | str replace $config.roll_prefix '' | split row '-' | get 0
+            } catch { null }
+            if $roll_num != null {
+                let metadata_file = $"($env.HOME)/.config/roll-flow/rolls/($roll_num).nuon"
+                if ($metadata_file | path exists) {
+                    let metadata = (open $metadata_file)
+                    let new_status = if $mode == "promote" { "promoted" } else { "graduated" }
+                    let updated = ($metadata
+                        | upsert status $new_status
+                        | upsert $new_status (date now | format date "%Y-%m-%d %H:%M:%S"))
+                    $updated | save -f $metadata_file
+                }
+            }
+            
+            # Push after each merge (incremental safety)
+            if $has_remote {
+                let push_res = (do -i { ^git push } | complete)
+                if $push_res.exit_code == 0 {
+                    print $"    (ansi green)✓ Pushed to remote(ansi reset)"
+                } else {
+                    print $"    (ansi yellow)⚠ Push failed - may retry later(ansi reset)"
+                }
+            }
+        }   # end if $do_commit
+    }       # end for roll in $ordered
+    
+    # Tag for promote mode
+    if $mode == "promote" and $merged_count > 0 and $failed_count == 0 {
+        let tag = $"stable-(date now | format date '%Y%m%d')"
+        let ordered_str = ($ordered | str join ', ')
+        let tag_msg = $"Promoted ($merged_count) rolls: ($ordered_str)"
+        let tag_result = (do -i { ^git tag -a $tag -m $tag_msg } | complete)
+        if $tag_result.exit_code == 0 {
+            print $"  V Tagged as (ansi cyan)($tag)(ansi reset)"
+        }
+        if $has_remote {
+            do -i { ^git push origin $tag } | complete | ignore
+            print $"    V Tag pushed"
+        }
+    }
+    
+    # Stay on the target branch after the merge loop (we'll handle the final
+    # checkout below after reintegration runs).
+
+    # ── Phase G: Post-Merge Cleanup ─────────────────────────────────
+    
+    if $merged_count > 0 {
+        let action = if $mode == "promote" { "promoted" } else { "graduated" }
+
+        print ""
+        print $"(ansi cyan)Post-($mode_down2) cleanup:(ansi reset)"
+        print $"($action | str capitalize) rolls:"
+        for roll in $ordered {
+            print $"  - (ansi cyan)($roll)(ansi reset)"
+        }
+        print ""
+        print $"Delete ($action) roll branches?"
+        print $"  (ansi cyan)b(ansi reset)oth     - local + remote"
+        print $"  (ansi cyan)l(ansi reset)ocal    - local only"
+        if $has_remote {
+            print $"  (ansi cyan)r(ansi reset)emote   - remote only"
+        }
+        print $"  (ansi cyan)n(ansi reset)one     - keep all [default]"
+        let choice = (try { input "Choice [n]: " } catch { "n" })
+        let c = ($choice | str trim | str downcase)
+
+        let del_local = ($c == "b" or $c == "l")
+        let del_remote = ($c == "b" or $c == "r") and $has_remote
+
+        if $del_local or $del_remote {
+            for roll in $ordered {
+                if $del_local {
+                    let local_exists = (do -i { ^git rev-parse --verify --quiet $roll } | complete)
+                    if $local_exists.exit_code == 0 {
+                        let res = (do -i { ^git branch -d $roll } | complete)
+                        if $res.exit_code == 0 {
+                            print $"  (ansi green)✓(ansi reset) Deleted local ($roll)"
+                        } else {
+                            print $"  (ansi yellow)⚠(ansi reset) Could not delete local ($roll) - not fully merged?"
+                            print $"    ($res.stderr | str trim)"
+                        }
+                    }
+                }
+                if $del_remote {
+                    let remote_check = (do -i { ^git ls-remote --heads origin $roll } | complete)
+                    if $remote_check.exit_code == 0 and ($remote_check.stdout | str trim | is-not-empty) {
+                        let res = (do -i { ^git push origin --delete $roll } | complete)
+                        if $res.exit_code == 0 {
+                            print $"  (ansi green)✓(ansi reset) Deleted remote ($roll)"
+                        } else {
+                            print $"  (ansi yellow)⚠(ansi reset) Could not delete remote ($roll)"
+                            print $"    ($res.stderr | str trim)"
+                        }
+                    }
+                }
+            }
+        } else {
+            print "  Skipping branch deletion"
+        }
+        
+        # Reintegrate develop after promotion (merge main back into develop)
+        if $mode == "promote" and $failed_count == 0 {
+            print ""
+            print "Reintegrating rolling branch..."
+            let dev_co = (do -i { ^git checkout $config.rolling_branch } | complete)
+            if $dev_co.exit_code == 0 {
+                do -i { ^git pull } | complete | ignore
+                let merge_msg = $"Sync ($config.rolling_branch) with ($config.stable_branch) after promotion"
+                let merge = (do -i { ^git merge --no-ff $config.stable_branch -m $merge_msg } | complete)
+                if $merge.exit_code == 0 {
+                    print $"  V ($config.stable_branch) merged into ($config.rolling_branch)(ansi reset)"
+                    if $has_remote {
+                        let push_dev = (do -i { ^git push } | complete)
+                        if $push_dev.exit_code == 0 {
+                            print $"  V ($config.rolling_branch) pushed(ansi reset)"
+                        } else {
+                            print $"  W ($config.rolling_branch) push failed(ansi reset)"
+                        }
+                    }
+                } else {
+                    print $"  (ansi red)✗ Merge failed - may need manual resolution(ansi reset)"
+                    print $"    ($merge.stderr | str trim)"
+                }
+            }
+        }
+    }
+
+    # Final checkout: leave the user on the target branch (develop for graduate,
+    # main for promote). Skip if there were failures so the user can investigate
+    # from their original location.
+    if $failed_count == 0 {
+        do -i { ^git checkout $target } | complete | ignore
+    } else {
+        do -i { ^git checkout $orig_branch } | complete | ignore
+    }
+
+    # ── Phase H: Summary ────────────────────────────────────────────
+    
+    print ""
+    print "=== Summary ==="
+    print $"  Action:    ($mode_label)"
+    print $"  Target:    (ansi cyan)($target)(ansi reset)"
+    if $merged_count > 0 { print $"  Merged:    ($merged_count) rolls" }
+    if $failed_count > 0 { print $"  Failed:    ($failed_count) rolls" }
+    if $dry_run { print $"  (ansi yellow)DRY RUN - no changes made(ansi reset)" }
+    if $merged_count > 0 and $failed_count == 0 {
+        print ""
+        print $"(ansi green)✓ ($mode_label) complete!(ansi reset)"
+    } else if $failed_count > 0 {
+        print ""
+        print $"(ansi yellow)($mode_label) completed with failures.(ansi reset)"
+        print "  Check the output above and resolve any conflicts."
+    }
+}
+
+# Promote rolling to main
+# Helper: Build list of rolls with dependencies (recursive)
+def resolve-roll-dependencies [
+    roll_name: string
+    --basic               # Only Methods 1-3 deps (exclude promotion ordering)
+    --seen: list = []     # Already processed rolls
+] {
+    let config = get-config
+    
+    mut result = []
+    
+    # Skip if already seen
+    if ($roll_name in $seen) {
+        return []
+    }
+    
+    # Get dependencies
+    let deps = (if $basic {
+        detect-roll-dependencies $roll_name --basic
+    } else {
+        detect-roll-dependencies $roll_name
+    })
+    
+    # Process dependencies first (depth-first)
+    for dep in $deps {
+        let dep_result = (if $basic {
+            resolve-roll-dependencies $dep --basic --seen ($seen | append $roll_name | append $result)
+        } else {
+            resolve-roll-dependencies $dep --seen ($seen | append $roll_name | append $result)
+        })
+        $result = ($result | append $dep_result)
+    }
+    
+    # Add this roll if not already in result
+    if not ($roll_name in $result) {
+        $result = ($result | append $roll_name)
+    }
+    
+    $result
+}
+
+# Compatibility wrapper: delegates to 'graduate --promote'
+# (the old promote behavior is now part of the interactive graduate command)
+def "main promote" [
+    ...roll_numbers: int       # Roll numbers (ignored - use 'graduate --promote' for fine control)
+    --force(-f)                # Skip verification checks
+] {
+    print $"(ansi yellow)Note:(ansi reset) 'rf promote' is now 'rf graduate --promote'"
+    print $"(ansi yellow)Note:(ansi reset) Roll numbers provided will be ignored; using interactive selection."
+    print ""
+    main graduate --promote --force=($force)
+}
+
+# Update ungraduated local roll branches by merging the stable branch into each
+def "main update" [
+    --force(-f)                # Skip confirmation prompt
+    --dry-run                  # Show what would be updated without making changes
+] {
+    let config = get-config
+    let orig_branch = (git branch --show-current | str trim)
+
+    print "=== Roll Flow: Update ==="
+    print $"  Source: (ansi cyan)($config.stable_branch)(ansi reset)"
+    print ""
+
+    # Block on uncommitted changes — checking out branches would lose work
+    let status_raw = (do -i { ^git status --porcelain } | complete)
+    let has_uncommitted = ($status_raw.exit_code == 0 and ($status_raw.stdout | str trim | is-not-empty))
+    if $has_uncommitted {
+        print $"(ansi red)✗ Uncommitted changes detected. Commit or stash first.(ansi reset)"
+        return
+    }
+
+    # Detect remote
+    let remote_url = (do -i { ^git remote get-url origin } | complete | get stdout | str trim)
+    let has_remote = ($remote_url | is-not-empty)
+
+    # Fetch latest stable so the merge picks up the newest commits
+    if $has_remote {
+        print "Fetching latest from origin..."
+        do -i { ^git fetch origin } | complete | ignore
+        # Fast-forward the local stable branch if it tracks origin
+        do -i {
+            ^git fetch origin $"($config.stable_branch):($config.stable_branch)"
+        } | complete | ignore
+    }
+
+    # Find ungraduated local roll branches
+    let local_rolls = (
+        do -i { ^git branch --list $"($config.roll_prefix)*" } | complete
+        | if $in.exit_code == 0 {
+            $in.stdout | lines
+            | each {|l| $l | str trim | str replace '* ' ''}
+            | where {|l| $l | is-not-empty}
+        } else { [] }
+    )
+
+    let candidates = ($local_rolls | where {|r| not (check-roll-graduated $r)})
+
+    if ($candidates | is-empty) {
+        print $"(ansi yellow)No ungraduated local rolls to update.(ansi reset)"
+        return
+    }
+
+    print "Rolls to update:"
+    for r in $candidates {
+        print $"  - (ansi cyan)($r)(ansi reset)"
+    }
+    print ""
+
+    if $dry_run {
+        print ""
+        print $"(ansi yellow)DRY RUN - no changes made(ansi reset)"
+        for r in $candidates {
+            print $"  Would merge ($config.stable_branch) into ($r)"
+        }
+        return
+    }
+
+    if not $force {
+        let confirm = (try { input "Proceed? (Y/n): " } catch { "n" })
+        if ($confirm | str trim | str downcase) == "n" {
+            print "Aborted."
+            return
+        }
+    }
+
+    mut updated = 0
+    mut already = 0
+    mut failed = 0
+    mut conflict_branch = ""
+
+    for roll in $candidates {
+        print ""
+        print $"Updating (ansi cyan)($roll)(ansi reset)..."
+
+        let co = (do -i { ^git checkout $roll } | complete)
+        if $co.exit_code != 0 {
+            print $"  (ansi red)✗ Could not checkout ($roll)(ansi reset)"
+            print $"    ($co.stderr | str trim)"
+            $failed = $failed + 1
+            continue
+        }
+
+        # If stable is already an ancestor of this roll, nothing to merge
+        let is_anc = (do -i {
+            ^git merge-base --is-ancestor $config.stable_branch $roll
+        } | complete)
+        if $is_anc.exit_code == 0 {
+            print $"  (ansi green)✓ Already up-to-date with ($config.stable_branch)(ansi reset)"
+            $already = $already + 1
+            continue
+        }
+
+        let merge_msg = $"Merge ($config.stable_branch) into ($roll)"
+        let merge = (do -i {
+            ^git merge --no-ff $config.stable_branch -m $merge_msg
+        } | complete)
+        if $merge.exit_code == 0 {
+            print $"  (ansi green)✓ Merged(ansi reset)"
+            $updated = $updated + 1
+
+            if $has_remote {
+                let push = (do -i { ^git push } | complete)
+                if $push.exit_code == 0 {
+                    print $"  (ansi green)✓ Pushed(ansi reset)"
+                } else {
+                    print $"  (ansi yellow)⚠ Push failed - may need manual push(ansi reset)"
+                }
+            }
+        } else {
+            print $"  (ansi red)✗ Merge failed - resolve conflicts manually(ansi reset)"
+            print $"    ($merge.stderr | str trim)"
+            $failed = $failed + 1
+            $conflict_branch = $roll
+            break
+        }
+    }
+
+    print ""
+    print "=== Summary ==="
+    if $updated > 0 { print $"  Updated:            ($updated) rolls" }
+    if $already > 0 { print $"  Already up-to-date: ($already) rolls" }
+    if $failed > 0  { print $"  Failed:             ($failed) rolls" }
+
+    if $failed == 0 {
+        do -i { ^git checkout $orig_branch } | complete | ignore
+        print $"  Returned to (ansi cyan)($orig_branch)(ansi reset)"
+    } else {
+        print $"  Left on (ansi yellow)($conflict_branch)(ansi reset) for conflict resolution"
+    }
+}
+
+# ── File Tree Rendering ────────────────────────────────────────────
+
+def render-file-tree [
+    files: list
+    attr: record
+    own_files: list
+] {
+    let sorted = ($files | sort)
+    mut prev_dir = ""
+    let roll_prefix = (get-config).roll_prefix
+    
+    # Determine origin tag and color for a file
+    # Color: 0=new(green), 1=roll/1-2(yellow), 2=roll/3-4(blue),
+    #        3=roll/5-6(cyan), 4=roll/7+(purple), 5=unknown(dimmed),
+    #        6=quasi-roll (bold/default)
+    let get_tag = {|f|
+        if $f in $own_files {
+            {label: "new", color: 0}
+        } else if $f in $attr {
+            let origins = ($attr | get $f)
+            if ($origins | is-not-empty) {
+                let nums = ($origins | each {|o|
+                    try { $o | str replace $roll_prefix "" | split row "-" | get 0 | into int } catch { null }
+                } | where {|x| $x != null} | sort)
+                let quasi = ($origins | where {|o|
+                    ($o | str starts-with "q") and ($o | str length) >= 2
+                } | sort)
+                mut label_parts = []
+                if ($nums | is-not-empty) { $label_parts = ($label_parts | append ($nums | each {|n| $n | into string} | str join ",")) }
+                if ($quasi | is-not-empty) { $label_parts = ($label_parts | append ($quasi | str join ",")) }
+                let label = ($label_parts | str join ",")
+                let max = (if ($nums | is-not-empty) { $nums | last } else { 0 })
+                let color_idx = if ($nums | is-empty) and ($quasi | is-not-empty) {
+                    6  # quasi-roll only (no real roll origins)
+                } else if $max <= 2 { 1 } else if $max <= 4 { 2 } else if $max <= 6 { 3 } else { 4 }
+                {label: $label, color: $color_idx}
+            } else {
+                {label: "?", color: 5}
+            }
+        } else {
+            {label: "?", color: 5}
+        }
+    }
+    
+    for i in 0..<($sorted | length) {
+        let f = ($sorted | get $i)
+        let dir = ($f | path dirname)
+        let fname = ($f | path basename)
+        
+        # Print directory header when entering a new directory
+        if $dir != $prev_dir and $dir != "." {
+            print $"  (ansi default_bold)($dir)/(ansi reset)"
+            $prev_dir = $dir
+        }
+        
+        # File line (2-space indent, tag right-aligned)
+        let tag = (do $get_tag $f)
+        let color_idx = $tag.color
+        
+        if $color_idx == 0 {
+            print $"    (ansi green)($fname)(ansi reset)   ($tag.label)"
+        } else if $color_idx == 5 {
+            print $"    (ansi default_dimmed)($fname)(ansi reset)   ?"
+        } else if $color_idx == 6 {
+            print $"    (ansi default_bold)($fname)(ansi reset)   ($tag.label)"
+        } else {
+            let c = ["" $"(ansi yellow_bold)" $"(ansi blue_bold)" $"(ansi cyan_bold)" $"(ansi purple_bold)"] | get $color_idx
+            print $"    ($c)($fname)(ansi reset)   ($tag.label)"
+        }
+    }
+}
+
+# ── Roll Summary Table (shared by status and list) ────────────────
+
+def show-roll-summary-table [
+    config: record
+    current_roll: any           # Can be string (roll name) or null (on main/develop)
+    all_branches: list
+    --deps                      # Show deps column (for rf list)
+] {
+    if ($all_branches | is-empty) {
+        print "  (no rolls found)"
+        return
+    }
+    
+    # Build structured records for each roll with per-host verification columns
+    let table_records = ($all_branches | each {|roll_branch|
+        let is_current = ($roll_branch == $current_roll)
+        let scope = (detect-roll-scope $roll_branch)
+        let verification = (check-roll-verification $roll_branch)
+        let git_status = (get-roll-git-status $roll_branch)
+        let block_status = (check-roll-blocked $roll_branch)
+        
+        # Format git status indicator
+        let dev_status = match $git_status {
+            "merged" => "✓",
+            "ahead" => "↑",
+            "behind" => "↓",
+            "diverged" => "⚠",
+            "even" => "=",
+            _ => "?"
+        }
+        
+        # Format blocked status indicator
+        let blk_status = if $block_status.blocked {
+            "🔒"
+        } else {
+            ""
+        }
+        
+        # Build scope text code (N= NixOS, H= Home, F= Flake, D= Docs)
+        mut s = ""
+        if $scope.nixos { $s = ($s + "N") } else { $s = ($s + "-") }
+        if $scope.home { $s = ($s + "H") } else { $s = ($s + "-") }
+        if $scope.flake { $s = ($s + "F") } else { $s = ($s + "-") }
+        if $scope.docs { $s = ($s + "D") } else { $s = ($s + "-") }
+        
+        # Check branch location (local / remote / both)
+        let loc = (get-branch-location $roll_branch)
+        
+        # Check if graduated and diverged (verification is stale)
+        let is_diverged = if (check-roll-graduated $roll_branch) {
+            (check-roll-diverged $roll_branch)
+        } else { false }
+        
+        # Build deps string (roll numbers only, sorted numerically) if --deps flag is set
+        let deps_str = if $deps {
+            let roll_deps = (detect-roll-dependencies $roll_branch --basic)
+            if ($roll_deps | is-not-empty) {
+                ($roll_deps | each {|d|
+                    try { $d | str replace $config.roll_prefix '' | split row '-' | get 0 | into int } catch { null }
+                } | where {|x| $x != null} | sort | each {|n| $n | into string} | str join ",")
+            } else { "" }
+        } else { "" }
+        
+        # Start with common columns
+        mut record = {
+            roll: $roll_branch
+            cur: (if $is_current { ">" } else { "" })
+            loc: $loc
+            dev: $dev_status
+            blk: $blk_status
+        }
+        
+        # Add deps column if flag is set
+        if $deps {
+            $record = ($record | insert deps $deps_str)
+        }
+        
+        $record = ($record | insert scope $s)
+        
+        # Add per-host columns dynamically (only active hosts)
+        for host in (get-active-hosts) {
+            let info = ($verification | get $host)
+            # For diverged rolls, verification is stale — show ✗ instead of old data
+            let nixos_mark = if $is_diverged {
+                if $info.required.nixos { "✗" } else { "—" }
+            } else if $info.required.nixos {
+                if $info.nixos { "✓" } else { "⌛" }
+            } else { "—" }
+            let home_mark = if $is_diverged {
+                if $info.required.home { "✗" } else { "—" }
+            } else if $info.required.home {
+                if $info.home { "✓" } else { "⌛" }
+            } else { "—" }
+            let flake_mark = if $is_diverged {
+                if $info.required.flake { "✗" } else { "—" }
+            } else if $info.required.flake {
+                if $info.flake { "✓" } else { "⌛" }
+            } else { "—" }
+            let docs_mark = if $is_diverged {
+                if $info.required.docs { "✗" } else { "—" }
+            } else if $info.required.docs {
+                if $info.docs { "✓" } else { "⌛" }
+            } else { "—" }
+            let mark = $"($nixos_mark)($home_mark)($flake_mark)($docs_mark)"
+            $record = ($record | insert $host $mark)
+        }
+        
+        $record
+    })
+    
+    # Let Nushell's native table formatter handle the rendering
+    # Truncate roll names to keep table readable
+    $table_records | each {|row|
+        $row | merge {$"roll": ($row.roll | str substring 0..36)}
+    } | table --width 150 | to text | print
+    print ""
+    
+    # Legend for columns
+    print $"(ansi default_dimmed)scope codes: N=NixOS H=Home-manager F=Flake D=Docs \(e.g. NHFD=all four scopes\)(ansi reset)"
+    print $"(ansi default_dimmed)dev: ✓=merged, ↑=ahead, ⚠=diverged, ↓=behind | blk: 🔒=blocked by deps | loc: B=both, L=local, R=remote(ansi reset)"
+    print $"(ansi default_dimmed)verification: ✓=done ⌛=pending —=n/a ✗=stale \(diverged\) | 4 chars: N\(ixOS\) H\(ome\) F\(lake\) D\(ocs\) \(e.g. ✓✓⌛✓=NixOS+Home+Docs ok, Flake pending\)(ansi reset)"
+}
+
+# Show current status
+def "main status" [] {
+    let config = get-config
+    let current_branch = (git branch --show-current | str trim)
+    let current_roll = get-current-roll
+    
+    # ── Summary Header ──────────────────────────────────────────────
+    print "=== Roll Flow Status ==="
+    print $"Current: (ansi cyan)($current_branch)(ansi reset)  |  Rolling: ($config.rolling_branch)  |  Stable: ($config.stable_branch)"
+    if ($current_roll != null) {
+        let is_graduated = (check-roll-graduated $current_roll)
+        if $is_graduated {
+            let is_diverged = (check-roll-diverged $current_roll)
+            if $is_diverged {
+                print $"✓ On roll: (ansi green)($current_roll)(ansi reset) (ansi red)[DIVERGED from ($config.rolling_branch)](ansi reset)"
+            } else {
+                print $"✓ On roll: (ansi green)($current_roll)(ansi reset) (ansi cyan)[merged to ($config.rolling_branch)](ansi reset)"
+            }
+        } else {
+            print $"✓ On roll: (ansi green)($current_roll)(ansi reset) (ansi yellow)[not yet merged](ansi reset)"
+        }
+    }
+    print ""
+    
+    # Gather all roll branches (used by both pre/post prompt sections)
+    let local_rolls = try {
+        git branch --list $"($config.roll_prefix)*"
+        | lines
+        | each { |line| $line | str trim | str replace '* ' '' }
+    } catch { [] }
+    
+    let remote_rolls = try {
+        let branches = (bash -c "git branch -r 2>/dev/null" | lines)
+        $branches
+        | each { |line| $line | str trim }
+        | where { |branch| ($branch | str starts-with $"origin/($config.roll_prefix)") }
+        | each { |branch| $branch | str replace 'origin/' '' }
+    } catch { [] }
+    
+    let all_roll_branches = ($local_rolls | append $remote_rolls | uniq | sort)
+    
+    # ── On main/develop: show table at top before prompt ──────────
+    let on_roll = ($current_roll != null)
+    let on_main_dev = not $on_roll and (($current_branch == $config.stable_branch) or ($current_branch == $config.rolling_branch))
+    
+    if $on_main_dev {
+        show-roll-summary-table $config $current_roll $all_roll_branches
+        
+        # ── Quasi-Rolls Section (direct-to-develop commits) ──────────
+        let quasi_rolls = (detect-quasi-rolls)
+        if not ($quasi_rolls | is-empty) {
+            print ""
+            print $"=== Quasi-Rolls: (ansi yellow)($quasi_rolls | length) direct-to-($config.rolling_branch) commit group\(s\) ==="
+            print ""
+            
+            for qr in $quasi_rolls {
+                let promoted = (check-quasi-roll-promoted $qr.id)
+                let status = if $promoted { $"(ansi green)promoted(ansi reset)" } else { $"(ansi yellow)pending(ansi reset)" }
+                print $"  ($qr.id): ($qr.theme) — (ansi cyan)($qr.count) commit\(s\)(ansi reset) after ($qr.after_merge) — ($status)"
+            }
+            print ""
+        }
+    }
+    
+    # ── Current Roll Details (always visible) ──────────────────────
+    if ($current_roll != null) {
+        let scope = (detect-roll-scope $current_roll)
+        mut scope_codes = []
+        if $scope.nixos { $scope_codes = ($scope_codes | append "N") } else { $scope_codes = ($scope_codes | append "-") }
+        if $scope.home { $scope_codes = ($scope_codes | append "H") } else { $scope_codes = ($scope_codes | append "-") }
+        if $scope.flake { $scope_codes = ($scope_codes | append "F") } else { $scope_codes = ($scope_codes | append "-") }
+        if $scope.docs { $scope_codes = ($scope_codes | append "D") } else { $scope_codes = ($scope_codes | append "-") }
+        let scope_str = ($scope_codes | str join "")
+        
+        # Compute files_info once (with attribution) for both count and file tree
+        let files_info = (get-roll-files $current_roll)
+        print $"  Scope: (ansi cyan)($scope_str)(ansi reset)  Files: ($scope.files_count)   \(($files_info.count_own) own + ($files_info.count_inherited) from prior rolls\)"
+        print ""
+        
+        print $"=== Current Roll: (ansi green)($current_roll)(ansi reset) ==="
+        
+        # File tree
+        if ($scope.files_count) > 0 {
+            print ""
+            render-file-tree $files_info.total $files_info.attr $files_info.own
+            print ""
+            print $"  Color legend: (ansi green)green(ansi reset)=new  (ansi yellow_bold)yellow(ansi reset)=roll/1-2  (ansi blue_bold)blue(ansi reset)=roll/3-4  (ansi cyan_bold)cyan(ansi reset)=roll/5-6  (ansi purple_bold)purple(ansi reset)=roll/7+  (ansi default_bold)bold(ansi reset)=quasi-roll"
+        }
+        
+        # Roll metadata
+        let roll_num = ($current_roll | str replace 'roll/' '' | split row '-' | get 0)
+        let metadata_file = $"($env.HOME)/.config/roll-flow/rolls/($roll_num).nuon"
+        if ($metadata_file | path exists) {
+            let metadata = (open $metadata_file)
+            print $"  Theme: (ansi cyan)($metadata.theme)(ansi reset)  Started: ($metadata.started)"
+        }
+        
+        # Verification summary
+        print ""
+        print "  Verification:"
+        let verification = (check-roll-verification $current_roll)
+        let cur_is_diverged = if (check-roll-graduated $current_roll) {
+            (check-roll-diverged $current_roll)
+        } else { false }
+        let verif_records = ((get-active-hosts) | each {|host|
+            let info = ($verification | get $host)
+            # For diverged rolls, verification is stale — show ✗ instead of old data
+            let nixos_mark = if $cur_is_diverged {
+                if $info.required.nixos { "✗" } else { "—" }
+            } else if $info.required.nixos {
+                if $info.nixos { "✓" } else { "⌛" }
+            } else { "—" }
+            let home_mark = if $cur_is_diverged {
+                if $info.required.home { "✗" } else { "—" }
+            } else if $info.required.home {
+                if $info.home { "✓" } else { "⌛" }
+            } else { "—" }
+            let flake_mark = if $cur_is_diverged {
+                if $info.required.flake { "✗" } else { "—" }
+            } else if $info.required.flake {
+                if $info.flake { "✓" } else { "⌛" }
+            } else { "—" }
+            let docs_mark = if $cur_is_diverged {
+                if $info.required.docs { "✗" } else { "—" }
+            } else if $info.required.docs {
+                if $info.docs { "✓" } else { "⌛" }
+            } else { "—" }
+            let marks = $"N:($nixos_mark) H:($home_mark) F:($flake_mark) D:($docs_mark)"
+            let status = if $cur_is_diverged { "✗" } else if $info.verified { "ok" } else { ".." }
+            { host: $host, status: $status, detail: $marks }
+        })
+        $verif_records | table -e | lines | each {|line| print $"  ($line)" }
+        
+        # Dependencies (basic — merge-blocking deps only)
+        let deps = (detect-roll-dependencies $current_roll --basic)
+        let block_info = (check-roll-blocked $current_roll)
+        
+        if not ($deps | is-empty) {
+            print ""
+            print $"  Depends on: (ansi yellow)($deps | str join ', ')(ansi reset)"
+            
+            # Show blocking status if applicable
+            if $block_info.blocked {
+                print $"  (ansi red)🔒 BLOCKED(ansi reset) - Ungraduated dependencies: (ansi red)($block_info.ungraduated_deps | str join ', ')(ansi reset)"
+            }
+        }
+        print ""
+    } else {
+        print "  ℹ not on a roll branch"
+        print ""
+    }
+    
+    # ── Detail Prompt ───────────────────────────────────────────────
+    # Gracefully handle non-interactive contexts (piped through nix run)
+    let show_details = (try {
+        input "Show full details? (y/N): "
+    } catch {
+        ""
+    })
+    print ""
+    
+    if ($show_details | str trim | str downcase) != "y" {
+        return
+    }
+    
+    # ── All Rolls Table (behind prompt, directly above Merge Queue) ─
+    print "=== All Rolls ==="
+    show-roll-summary-table $config $current_roll $all_roll_branches
+    print ""
+    
+    # ── Develop / Non-Roll Branch Status ──────────────────────────
+    let is_non_roll = ($current_branch != $config.rolling_branch) and (not ($current_branch | str starts-with "roll/"))
+    if $is_non_roll {
+        # Non-roll, non-develop branch
+        print ""
+        print $"=== Branch: (ansi yellow)($current_branch)(ansi reset) ==="
+        let scope = (detect-roll-scope $current_branch)
+        if ($scope.files_count) > 0 {
+            print $"  Changed files (vs main): ($scope.files_count)"
+            for row in [ [cat, label, files]; ['N', '  NixOS: ', $scope.nixos_files], ['H', '  Home:  ', $scope.home_files], ['F', '  Flake: ', $scope.flake_files], ['D', '  Docs:  ', $scope.docs_files], ['O', '  Other: ', $scope.other_files] ] {
+                let files = $row.files
+                if ($files | is-empty) { continue }
+                for f in $files {
+                    print $"  ($row.label)(ansi default_dimmed)($f)(ansi reset)"
+                }
+            }
+        } else {
+            print "  (no changes vs main)"
+        }
+    }
+    
+    # ── Roll Queue / Merge Queue Status ───────────────────────────
+    let merged_rolls = ($all_roll_branches | where {|r| check-roll-graduated $r})
+    if not ($merged_rolls | is-empty) {
+        let unverified_merged = ($merged_rolls | where {|r|
+            # Check if diverged - if so, verification is stale and doesn't count
+            let is_diverged = (check-roll-diverged $r)
+            if $is_diverged {
+                true  # Diverged rolls are always "unverified" (stale verification)
+            } else {
+                let v = (check-roll-verification $r)
+                not ($v | values | all {|x| $x.verified})
+            }
+        })
+        let num_unverified = ($unverified_merged | length)
+        if $num_unverified > 0 {
+            print ""
+            print $"=== Merge Queue: (ansi yellow)($num_unverified) merged roll\(s\) still need verification for promotion ==="
+            for r in $unverified_merged {
+                let is_diverged = (check-roll-diverged $r)
+                let v = (check-roll-verification $r)
+                let host_summary = ((get-active-hosts) | each {|h|
+                    let info = ($v | get $h)
+                    # Show ✗ for diverged (stale verification), otherwise show actual status
+                    if $is_diverged {
+                        $"(ansi red)($h):✗(ansi reset)"
+                    } else if $info.verified {
+                        $"(ansi green)($h):✓(ansi reset)"
+                    } else {
+                        $"(ansi red)($h):⌛(ansi reset)"
+                    }
+                } | str join " ")
+                let div_marker = if $is_diverged { $" (ansi red)[DIVERGED](ansi reset)" } else { "" }
+                print $"  (ansi cyan)($r)(ansi reset) — ($host_summary)($div_marker)"
+            }
+        }
+    }
+    print ""
+}
+
+# Test build on all hosts
+# - Runs nix flake check first (shared evaluation: passes once = passes for all)
+# - Then builds homeConfigurations on each configured host
+# - Records results with a structured commit (like rebuild/home commands do)
+# - The commit is written to the current branch and can be read by check-roll-verification
+def "main test-all" [] {
+    let config = get-config
+    let current_branch = (git branch --show-current | str trim)
+    let current_roll = get-current-roll
+    
+    print "=== Test All ==="
+    print $"Branch: (ansi cyan)($current_branch)(ansi reset)"
+    print ""
+    
+    # Detect scope of changes on this branch
+    let scope = (detect-roll-scope $current_branch)
+    mut scope_codes = []
+    if $scope.nixos { $scope_codes = ($scope_codes | append "N") } else { $scope_codes = ($scope_codes | append "-") }
+    if $scope.home { $scope_codes = ($scope_codes | append "H") } else { $scope_codes = ($scope_codes | append "-") }
+    if $scope.flake { $scope_codes = ($scope_codes | append "F") } else { $scope_codes = ($scope_codes | append "-") }
+    if $scope.docs { $scope_codes = ($scope_codes | append "D") } else { $scope_codes = ($scope_codes | append "-") }
+    let scope_str = ($scope_codes | str join "")
+    let changed_files = ($scope.files | str join ", ")
+    
+    let flake_result = {
+        passed: false,
+        details: ""
+    }
+    
+    # Step 1: Run nix flake check (evaluation is shared across hosts)
+    print $"Running (ansi yellow)nix flake check(ansi reset) to validate Nix syntax..."
+    print ""
+    
+    let flake_check_result = (try {
+        nix flake check --keep-going --show-trace out+err>| complete
+    } catch {
+        { exit_code: 1, stderr: "nix flake check command failed to execute" }
+    })
+    
+    if $flake_check_result.exit_code == 0 {
+        print $"  ✓ (ansi green)nix flake check passed(ansi reset)"
+        print ""
+    } else {
+        print $"  ✗ (ansi red)nix flake check FAILED(ansi reset)"
+        print ""
+        let stderr_str = ($flake_check_result.stderr | str trim)
+        if not ($stderr_str | is-empty) {
+            let error_lines = ($stderr_str | lines | where {|line|
+                ($line | str contains "error") or ($line | str contains "Error")
+            })
+            if not ($error_lines | is-empty) {
+                print "Key errors:"
+                for line in $error_lines {
+                    print $"  (ansi red)($line)(ansi reset)"
+                }
+            } else {
+                let all_lines = ($stderr_str | lines)
+                let tail_count = (if ($all_lines | length) > 15 { 15 } else { $all_lines | length })
+                let last_lines = ($all_lines | last $tail_count)
+                print "Last output lines:"
+                for line in $last_lines {
+                    print $"  ($line)"
+                }
+            }
+        }
+        print ""
+        print $"(ansi red)Aborting: Flake check must pass before builds can proceed(ansi reset)"
+        
+        # Record the failure with a structured commit for audit trail
+        print ""
+        print "Recording test-all result..."
+        let timestamp = (date now | format date "%Y-%m-%d %H:%M:%S")
+        let commit_lines = [
+            ("test(" + $current_branch + "): flake=fail"),
+            "",
+            "Host-Results:",
+            $"  (no hosts built — flake check failed)",
+            "Flake-Check: fail",
+            $"Scope: ($scope_str)",
+            $"Changed-Files: ($changed_files)",
+            $"Branch: ($current_branch)",
+            $"Timestamp: ($timestamp)",
+            "",
+            "Command: roll-flow test-all",
+            "",
+            "Details:",
+            ($flake_check_result.stderr | lines | first 20 | str join "\n"),
+        ]
+        let commit_msg = ($commit_lines | str join "\n")
+        try {
+            git add -A out+err>| ignore
+            git commit --allow-empty -m $commit_msg out+err>| ignore
+            print $"  ✓ Commit created: (ansi yellow)test-all FAILED(ansi reset)"
+        } catch {
+            print $"  - Could not create commit"
+        }
+        return
+    }
+    
+    # Step 2: Build on all configured hosts
+    # Use immutable lists to track results (prevents mut-variable capture issues in closures)
+    print "Building on all configured hosts..."
+    print ""
+    
+    mut host_status_icons = []
+    mut host_detail_parts = []
+    mut failures_exist = false
+    
+    for host in (get-active-hosts) {
+        print $"Building for (ansi cyan)($host)(ansi reset)..."
+        
+        let build_result = (try {
+            nix build $".#homeConfigurations.\"($config.username)@($host)\".activationPackage" --show-trace out+err>| complete
+        } catch {
+            { exit_code: 1, stderr: "Build command failed to execute" }
+        })
+        
+        if $build_result.exit_code == 0 {
+            print $"  ✓ (ansi green)($host) build succeeded(ansi reset)"
+            $host_status_icons = ($host_status_icons | append $"($host) ✓")
+            $host_detail_parts = ($host_detail_parts | append $"  ($host): PASSED")
+        } else {
+            print $"  ✗ (ansi red)($host) build FAILED(ansi reset)"
+            $failures_exist = true
+            let error_summary = ($build_result.stderr
+                | lines
+                | where {|line| ($line | str contains "error") or ($line | str contains "Error") }
+                | first 5
+                | str join "\n"
+            )
+            $host_status_icons = ($host_status_icons | append $"($host) ✗")
+            $host_detail_parts = ($host_detail_parts | append $"  ($host): FAILED")
+            $host_detail_parts = ($host_detail_parts | append $"    Errors: ($error_summary)")
+        }
+        
+        print ""
+    }
+    
+    # Step 3: Record results with a commit (--allow-empty creates a log entry even with no changes)
+    # Freeze mutable lists to immutable variables for use in closures
+    let frozen_status_icons = $host_status_icons
+    let frozen_detail_parts = $host_detail_parts
+    
+    print "Recording test-all results..."
+    
+    let timestamp = (date now | format date "%Y-%m-%d %H:%M:%S")
+    let host_results_str = ($frozen_status_icons | str join ", ")
+    let host_results_lines = ($frozen_detail_parts | str join "\n")
+    # Build a parseable host-results map for the commit header
+    let host_results_map = ($frozen_status_icons | each {|icon|
+        let parts = ($icon | split row " ")
+        $"($parts.0)=($parts.1)"
+    } | str join " ")
+    
+    let commit_lines = [
+        ("test(" + $current_branch + "): flake=pass " + $host_results_map),
+        "",
+        "Host-Results:",
+        $host_results_lines,
+        $"Flake-Check: pass",
+        $"Scope: ($scope_str)",
+        $"Changed-Files: ($changed_files)",
+        $"Branch: ($current_branch)",
+        $"Timestamp: ($timestamp)",
+        "",
+        "Command: roll-flow test-all"
+    ]
+    let commit_msg = ($commit_lines | str join "\n")
+    
+    try {
+        git add -A out+err>| ignore
+        git commit --allow-empty -m $commit_msg out+err>| ignore
+        print $"  ✓ Commit created: (ansi cyan)test-all — ($host_results_str)(ansi reset)"
+    } catch {
+        let err = $env.LAST_EXIT_CODE
+        print $"  - Could not create commit (exit: ($err))"
+    }
+    
+    # Final summary
+    print ""
+    print "=== Test-All Summary ==="
+    print $"  Branch:    ($current_branch)"
+    print $"  Scope:     (ansi cyan)($scope_str)(ansi reset)  Files: ($scope.files_count)"
+    print $"  Flake:     (ansi green)✓ PASSED(ansi reset)"
+    for result in $frozen_status_icons {
+        if ($result | str contains "✗") {
+            print $"  (ansi red)($result)(ansi reset)"
+        } else {
+            print $"  (ansi green)($result)(ansi reset)"
+        }
+    }
+    if $failures_exist {
+        print ""
+        print $"(ansi yellow)⚠ Some builds failed — check output above for details(ansi reset)"
+    }
+    print ""
+    print $"(ansi green)✓ test-all complete(ansi reset)"
+}
+
+# List all rolls with drill-down details
+def "main list" [] {
+    let config = get-config
+    let current_branch = (git branch --show-current | str trim)
+    let current_roll = get-current-roll
+    
+    print "=== Roll Catalog ==="
+    print ""
+    
+    # Get all roll branches (local and remote)
+    let local_rolls = try {
+        git branch --list $"($config.roll_prefix)*"
+        | lines
+        | each { |line| $line | str trim | str replace '* ' '' }
+    } catch { [] }
+    
+    let remote_rolls = try {
+        git branch -r
+        | lines
+        | each { |line| $line | str trim }
+        | where { |branch| $branch =~ $"origin/($config.roll_prefix)" }
+        | each { |branch| $branch | str replace 'origin/' '' }
+    } catch { [] }
+    
+    let all_roll_branches = ($local_rolls | append $remote_rolls | uniq | sort)
+    
+    if ($all_roll_branches | is-empty) {
+        print "  No rolls found"
+        return
+    }
+    
+    # Show the summary table with deps column
+    show-roll-summary-table $config $current_roll $all_roll_branches --deps
+    
+    # Show quasi-rolls if any
+    let quasi_rolls = (detect-quasi-rolls)
+    if not ($quasi_rolls | is-empty) {
+        print ""
+        print $"=== Quasi-Rolls: (ansi yellow)($quasi_rolls | length) direct-to-($config.rolling_branch) commit group\(s\) ==="
+        print ""
+        
+        for qr in $quasi_rolls {
+            let promoted = (check-quasi-roll-promoted $qr.id)
+            let status = if $promoted { $"(ansi green)promoted(ansi reset)" } else { $"(ansi yellow)pending(ansi reset)" }
+            print $"  ($qr.id): ($qr.theme) — (ansi cyan)($qr.count) commit\(s\)(ansi reset) after ($qr.after_merge) — ($status)"
+        }
+        print ""
+    }
+    
+    # Interactive drill-down
+    if not (is-terminal --stdin) {
+        return
+    }
+    
+    loop {
+        print $"(ansi default_dimmed)Inspect roll number \(or press Enter to quit\):(ansi reset) "
+        let sel = (input | str trim)
+        
+        if ($sel | is-empty) {
+            break
+        }
+        
+        let req_num = (try { $sel | into int } catch {
+            print $"  (ansi red)Invalid number: ($sel)(ansi reset)"
+            continue
+        })
+        
+        # Find roll by number (match roll/N- prefix)
+        let config_local = (get-config)
+        let match = ($all_roll_branches | where {|b|
+            try {
+                let n = ($b | str replace $config_local.roll_prefix "" | split row "-" | get 0 | into int)
+                $n == $req_num
+            } catch { false }
+        })
+        
+        if ($match | is-empty) {
+            print $"  (ansi red)No roll #($req_num) found(ansi reset)"
+            continue
+        }
+        
+        let roll_branch = ($match | get 0)
+        let is_current = ($roll_branch == $current_roll)
+        
+        print ""
+        print $"  === (ansi cyan)($roll_branch)(ansi reset) ==="
+        if $is_current { print $"  (ansi green)← current branch(ansi reset)" }
+        print ""
+        
+        # Scope
+        let scope = (detect-roll-scope $roll_branch)
+        mut s = ""
+        if $scope.nixos { $s = ($s + "N") } else { $s = ($s + "-") }
+        if $scope.home { $s = ($s + "H") } else { $s = ($s + "-") }
+        if $scope.flake { $s = ($s + "F") } else { $s = ($s + "-") }
+        if $scope.docs { $s = ($s + "D") } else { $s = ($s + "-") }
+        print $"  Scope: (ansi cyan)($s)(ansi reset)  Files: ($scope.files_count)"
+        
+        # File attribution
+        mut files_info = (get-roll-files $roll_branch --skip-attr)
+        print $"  Files: ($files_info.count_total) total  \(($files_info.count_own) unique + ($files_info.count_inherited) inherited\)"
+        
+        if ($files_info.count_inherited) > 0 {
+            print $"  (ansi default_dimmed)Tracing inherited files to origin rolls...(ansi reset)"
+            $files_info = (get-roll-files $roll_branch)
+            
+            # Color legend
+            print ""
+            print $"  (ansi green)■ new to this roll(ansi reset)  (ansi yellow_bold)■ roll/1-2(ansi reset)  (ansi blue_bold)■ roll/3-4(ansi reset)  (ansi cyan_bold)■ roll/5-6(ansi reset)  (ansi purple_bold)■ roll/7+(ansi reset)  (ansi default_bold)■ quasi-roll(ansi reset)"
+        }
+        
+        print ""
+        render-file-tree $files_info.total $files_info.attr $files_info.own
+        
+        # Verification
+        print ""
+        let promo_status = (check-roll-promotion-ready $roll_branch)
+        let is_graduated = (check-roll-graduated $roll_branch)
+        let is_diverged = if $is_graduated { (check-roll-diverged $roll_branch) } else { false }
+        let verification = (check-roll-verification $roll_branch)
+        let active_hosts = (get-active-hosts)
+        
+        if $is_graduated {
+            if $is_diverged {
+                print $"  Graduated: (ansi red)! Diverged(ansi reset)"
+            } else {
+                print $"  Graduated: (ansi green)✓ Merged to ($config.rolling_branch)(ansi reset)"
+            }
+        } else {
+            print $"  Graduated: (ansi yellow).. Not merged(ansi reset)"
+        }
+        
+        if $promo_status.ready {
+            print $"  Promotion: (ansi green)Ready(ansi reset)"
+        } else if not $promo_status.fully_verified {
+            print $"  Promotion: (ansi red)FAIL Needs verification(ansi reset)"
+        } else if not $promo_status.graduated {
+            print $"  Promotion: (ansi yellow).. Needs graduation first(ansi reset)"
+        }
+        
+        # Per-host verification
+        for host in $active_hosts {
+            let info = ($verification | get $host)
+            mut parts = [$"  ($host):"]
+            if $info.verified {
+                if $info.required.nixos { $parts = ($parts | append "N:✓") }
+                if $info.required.home { $parts = ($parts | append "H:✓") }
+                if (not $info.required.nixos) and (not $info.required.home) {
+                    $parts = ($parts | append "auto")
+                }
+                print $"($parts | str join ' ') (ansi green)verified(ansi reset)"
+            } else {
+                if $info.required.nixos { $parts = ($parts | append $"N:(ansi yellow)⌛(ansi reset)") }
+                if $info.required.home { $parts = ($parts | append $"H:(ansi yellow)⌛(ansi reset)") }
+                print $"($parts | str join ' ') (ansi yellow)pending(ansi reset)"
+            }
+        }
+        
+        # Dependencies (basic — merge-blocking deps only)
+        let deps = (detect-roll-dependencies $roll_branch --basic)
+        if ($deps | is-not-empty) {
+            print $"  Depends on: (ansi yellow)($deps | str join ', ')(ansi reset)"
+        }
+        
+        # Dependents
+        let dependents = (find-roll-dependents $roll_branch)
+        if ($dependents | is-not-empty) {
+            print $"  Depended by: (ansi cyan)($dependents | str join ', ')(ansi reset)"
+        }
+        
+        print ""
+        print $"  (ansi default_dimmed)---(ansi reset)"
+    }
+}
