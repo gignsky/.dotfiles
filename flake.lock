@@ -904,7 +904,7 @@
         "nixos-hardware": "nixos-hardware",
         "nixos-wsl": "nixos-wsl",
         "nixpkgs": [
-          "gigpkgs"
+          "nixpkgs-stable"
         ],
         "nixpkgs-stable": [
           "gigpkgs",
