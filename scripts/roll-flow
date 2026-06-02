@@ -640,29 +640,40 @@ def attribute-files [
     inherited_files: list
 ] {
     let config = get-config
-    
-    # Collect file sets from all other rolls (local + remote)
+
+    # Only lower-numbered rolls can be the origin of a file inherited by this roll.
+    # A file is "inherited" because an earlier roll already changed it and the change
+    # is present in this roll's baseline. Higher-numbered rolls are irrelevant.
+    let roll_num = try {
+        $roll_branch | str replace $config.roll_prefix '' | split row '-' | get 0 | into int
+    } catch { null }
+
+    # Collect file sets from all other rolls (local + remote), filtered to lower-numbered only
     let local = (do -i { ^git branch --list $"($config.roll_prefix)*" } | lines | each {|l| $l | str trim | str replace '* ' '' })
     let remote = (do -i { ^git branch -r } | lines | each {|l| $l | str trim } | where {|b| ($b | str starts-with $"origin/($config.roll_prefix)") } | each {|b| $b | str replace 'origin/' '' })
-    let all = ($local | append $remote | uniq | sort)
-    
+    let all = ($local | append $remote | uniq | sort | where {|r|
+        if $r == $roll_branch { false } else {
+            let other_num = try {
+                $r | str replace $config.roll_prefix '' | split row '-' | get 0 | into int
+            } catch { null }
+            # Include only lower-numbered rolls (the ones that could actually be origins)
+            ($other_num != null) and ($roll_num != null) and ($other_num < $roll_num)
+        }
+    })
+
     mut map = {}
-    
+
     for r in $all {
-        if $r == $roll_branch { continue }
-        
         let resolved = (resolve-roll-ref $r)
         if $resolved == null { continue }
-        
+
         let is_grad = (check-roll-graduated $r)
         let r_files = if $is_grad {
-            let merge = (do -i { ^git log $config.rolling_branch --oneline --grep=$"Merge branch '($r)'" -1 } | complete)
-            if $merge.exit_code == 0 and ($merge.stdout | str trim | is-not-empty) {
-                let mc = ($merge.stdout | str trim | split row ' ' | get 0)
-                let mc1 = $"($mc)^1"
-                let mc2 = $"($mc)^2"
+            # Use get-roll-merge-commit to handle both "Merge branch" and "Graduate" formats
+            let mc = (get-roll-merge-commit $config.rolling_branch $r)
+            if ($mc | is-not-empty) {
                 # Try two-parent merge first, fall back to squash merge
-                let diff = (do -i { ^git diff --name-only $mc1 $mc2 } | complete)
+                let diff = (do -i { ^git diff --name-only $"($mc)^1" $"($mc)^2" } | complete)
                 if $diff.exit_code == 0 and ($diff.stdout | str trim | is-not-empty) {
                     $diff.stdout | lines
                 } else {
@@ -676,7 +687,7 @@ def attribute-files [
             let diff = (do -i { ^git diff --name-only $dep_ref } | complete)
             if $diff.exit_code == 0 { $diff.stdout | lines } else { [] }
         }
-        
+
         # Check inherited files against this roll's files
         for f in $inherited_files {
             if $f in $r_files {
