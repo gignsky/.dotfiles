@@ -41,7 +41,7 @@ def "main init" [
     --stable-branch(-s): string = "main"      # Name of the stable branch
     --roll-prefix(-p): string = "roll/"       # Prefix for roll branches
     --username(-u): string = "gig"            # Username for homeConfigurations
-    --hosts(-h): list<string> = ["ganoslal", "merlin", "wsl@merlins-windows", "wsl@ganoslals-windows"]  # List of hosts to test
+    --hosts(-h): list<string> = ["ganoslal", "merlin", "wsl"]  # List of hosts to test
 ] {
     let config_dir = $"($env.HOME)/.config/roll-flow"
     mkdir $config_dir
@@ -79,27 +79,10 @@ def get-config [] {
 def get-next-roll-number [] {
     let config = get-config
     
-    # Get local roll branches
-    let local_rolls = (git branch --list $"($config.roll_prefix)*" 
+    let rolls = (git branch --list $"($config.roll_prefix)*" 
         | lines 
-        | each { |line| 
-            $line 
-            | str trim 
-            | str replace '* ' ''
-        }
-    )
-    
-    # Get remote roll branches
-    let remote_rolls = (git branch -r 
-        | lines
-        | each { |line| $line | str trim }
-        | where { |branch| $branch =~ $"origin/($config.roll_prefix)" }
-        | each { |branch| $branch | str replace 'origin/' '' }
-    )
-    
-    # Combine and extract numbers
-    let rolls = ($local_rolls | append $remote_rolls
-        | uniq
+        | each { |line| $line | str trim | str replace '* ' '' }
+        | where { |branch| $branch =~ $"^($config.roll_prefix)" }
         | each { |branch| 
             $branch 
             | str replace $config.roll_prefix '' 
@@ -160,9 +143,6 @@ def check-roll-verification [
         
         for host in $config.hosts {
             # Check in rolling branch for rebuilds after the branch point
-            # Handle WSL hosts which use wsl@hostname format
-            let is_wsl_host = ($host | str starts-with "wsl@")
-            
             let nixos_rebuild = try {
                 git log $config.rolling_branch --oneline --grep=$"^($host): generation" $"($branch_point)..($config.rolling_branch)" -1 
                 | str trim
@@ -187,9 +167,6 @@ def check-roll-verification [
         mut host_status = {}
         
         for host in $config.hosts {
-            # Handle WSL hosts which use wsl@hostname format
-            let is_wsl_host = ($host | str starts-with "wsl@")
-            
             let nixos_rebuild = try {
                 git log $config.rolling_branch --oneline --grep=$"^($host): generation" $"($roll_merge)..HEAD" -1 
                 | str trim
@@ -356,15 +333,30 @@ def "main promote" [] {
         for host in $config.hosts {
             print $"Checking (ansi cyan)($host)(ansi reset)..."
             
-            # Check for NixOS rebuild (format: "hostname: generation N" or "wsl@hostname: generation N")
+            # Check for NixOS rebuild (format: "hostname: generation N")
             let nixos_rebuild = (git log $config.rolling_branch --oneline --grep=$"^($host): generation" $"($latest_roll_merge)..HEAD" -1 | str trim)
             
-            # Check for home-manager rebuild (format: "gig@hostname:" or "gig@wsl@hostname:")
+            # Check for home-manager rebuild (format: "gig@hostname: YYYY-MM-DD HH:MM : id N")
             let home_rebuild = (git log $config.rolling_branch --oneline --grep=$"^($config.username)@($host):" $"($latest_roll_merge)..HEAD" -1 | str trim)
+            
+            # Also check for WSL instances on physical hosts (wsl@hostname format)
+            let wsl_nixos = if ($host != "wsl") {
+                (git log $config.rolling_branch --oneline --grep=$"^wsl@($host): generation" $"($latest_roll_merge)..HEAD" -1 | str trim)
+            } else {
+                ""
+            }
+            
+            let wsl_home = if ($host != "wsl") {
+                (git log $config.rolling_branch --oneline --grep=$"^($config.username)@wsl@($host):" $"($latest_roll_merge)..HEAD" -1 | str trim)
+            } else {
+                ""
+            }
             
             # Verify both NixOS and home-manager rebuilds exist
             let has_nixos = not ($nixos_rebuild | is-empty)
             let has_home = not ($home_rebuild | is-empty)
+            let has_wsl_nixos = if ($host != "wsl") { not ($wsl_nixos | is-empty) } else { true }
+            let has_wsl_home = if ($host != "wsl") { not ($wsl_home | is-empty) } else { true }
             
             if $has_nixos and $has_home {
                 print $"  ✓ NixOS: (ansi green)($nixos_rebuild)(ansi reset)"
@@ -377,6 +369,22 @@ def "main promote" [] {
                 if not $has_home {
                     print $"  ✗ (ansi red)Missing home-manager rebuild for ($host)(ansi reset)"
                     $all_verified = false
+                }
+            }
+            
+            # Check WSL instances if not the standalone wsl host
+            if ($host != "wsl") {
+                if $has_wsl_nixos and $has_wsl_home {
+                    print $"  ✓ WSL@($host) NixOS: (ansi green)($wsl_nixos)(ansi reset)"
+                    print $"  ✓ WSL@($host) Home:  (ansi green)($wsl_home)(ansi reset)"
+                } else if (not ($wsl_nixos | is-empty)) or (not ($wsl_home | is-empty)) {
+                    # Only warn if there's SOME WSL activity (meaning WSL instance exists)
+                    if not $has_wsl_nixos {
+                        print $"  ⚠️  (ansi yellow)WSL instance exists but missing NixOS rebuild for wsl@($host)(ansi reset)"
+                    }
+                    if not $has_wsl_home {
+                        print $"  ⚠️  (ansi yellow)WSL instance exists but missing home-manager rebuild for wsl@($host)(ansi reset)"
+                    }
                 }
             }
             
@@ -531,69 +539,25 @@ def "main test-all" [] {
 # List all rolls
 def "main list" [] {
     let config = get-config
-    let current_branch = (git branch --show-current | str trim)
     
     print "=== All Rolls ==="
     print ""
     
-    # Get local branches
-    let local_branches = (git branch --list $"($config.roll_prefix)*"
-        | lines
-        | each { |line| 
-            let cleaned = ($line | str trim | str replace '* ' '')
-            let is_current = ($line | str starts-with '*')
-            
-            {
-                branch: $cleaned,
-                is_local: true,
-                is_remote: false,
-                is_current: $is_current
-            }
-        }
-    )
-    
-    # Get remote branches
-    let remote_branches = (git branch -r
-        | lines
-        | each { |line| $line | str trim }
-        | where { |branch| $branch =~ $"origin/($config.roll_prefix)" }
-        | each { |branch| 
-            let cleaned = ($branch | str replace 'origin/' '')
-            {
-                branch: $cleaned,
-                is_local: false,
-                is_remote: true,
-                is_current: false
-            }
-        }
-    )
-    
-    # Combine all branches
-    let all_branches = ($local_branches | append $remote_branches)
-    
-    # Group by branch name to detect local vs remote-only
-    let unique_branches = ($all_branches | get branch | uniq | sort)
-    
-    for branch in $unique_branches {
-        let branch_entries = ($all_branches | where branch == $branch)
-        let has_local = ($branch_entries | any {|entry| $entry.is_local})
-        let has_remote = ($branch_entries | any {|entry| $entry.is_remote})
-        let is_current = ($branch_entries | any {|entry| $entry.is_current})
+    git branch --list $"($config.roll_prefix)*"
+    | lines
+    | each { |line| 
+        let branch = ($line | str trim | str replace '* ' '')
+        let is_current = ($line | str starts-with '*')
         
         # Get verification status
         let verification = (check-roll-verification $branch)
         let verified_hosts = ($verification | items {|key, val| if $val { $key } else { null }} | where {|v| $v != null})
         let unverified_hosts = ($verification | items {|key, val| if not $val { $key } else { null }} | where {|v| $v != null})
         
-        # Format branch display with location indicator
         if $is_current {
             print $"  → (ansi green)($branch)(ansi reset) \(current\)"
-        } else if $has_local and $has_remote {
-            print $"    ($branch) \(local + remote\)"
-        } else if $has_local {
-            print $"    ($branch) \(local only\)"
-        } else if $has_remote {
-            print $"    (ansi cyan)($branch)(ansi reset) \(remote only\)"
+        } else {
+            print $"    ($branch)"
         }
         
         # Show host verification with symbols
@@ -605,5 +569,5 @@ def "main list" [] {
             let hosts_str = ($unverified_hosts | str join ", ")
             print $"      ⏳ ($hosts_str)"
         }
-    }
+    } | ignore
 }
