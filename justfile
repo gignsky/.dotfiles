@@ -80,6 +80,7 @@ clean:
   rm -rfv ~/.cache/nvf/
   rm -rfv ~/.cache/starship/
   rm -rfv ~/.config/zsh/zplug
+  rm -rfv ~/.config/roll-flow
   rm -rfv result
   rm -rfv ~/.local/share/nvf/themery/state.json
   
@@ -446,3 +447,37 @@ package-script:
 # Check hardware configuration synchronization
 check-hardware:
 	nix run .#check-hardware-config
+
+# === Roll Flow Commands ===
+
+# Initialize roll-flow workflow system
+roll-init *args:
+	nix run .#roll-flow -- init {{args}}
+
+# Start a new roll branch with a theme
+roll-start theme:
+	nix run .#roll-flow -- start {{theme}}
+
+# Integrate a feature branch into the current roll
+roll-integrate branch:
+	nix run .#roll-flow -- integrate {{branch}}
+
+# Graduate the current roll to rolling branch
+roll-graduate:
+	nix run .#roll-flow -- graduate
+
+# Promote rolling branch to main (stable)
+roll-promote:
+	nix run .#roll-flow -- promote
+
+# Show current roll flow status
+roll-status:
+	nix run .#roll-flow -- status
+
+# Test builds on all configured hosts
+roll-test-all:
+	nix run .#roll-flow -- test-all
+
+# List all roll branches
+roll-list:
+	nix run .#roll-flow -- list
