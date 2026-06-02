@@ -686,6 +686,5 @@ rec {
     pre-commit-flake-check
     run-iso-vm
     package-script
-    roll-flow
     ;
 }

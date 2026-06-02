@@ -150,51 +150,6 @@ let
       ];
       description = "Interactive script packager with fzf selection and OpenCode test generation";
     };
-
-    # Roll Flow workflow manager for NixOS multi-host configurations
-    roll-flow =
-      pkgs.writeShellScriptBin "roll-flow" ''
-        # Auto-generated wrapper for roll-flow (Nushell script)
-
-        # Make dependencies available in PATH
-        export PATH="${
-          pkgs.lib.makeBinPath (
-            with pkgs;
-            [
-              nushell
-              git
-              nix
-            ]
-          )
-        }:$PATH"
-
-        # Execute the roll-flow Nushell script with all arguments
-        exec ${pkgs.nushell}/bin/nu "${../scripts/roll-flow}" "$@"
-      ''
-      // {
-        meta = {
-          description = "Git workflow manager for NixOS multi-host dotfiles (Roll Flow system)";
-        };
-        passthru = {
-          scriptPath = ../scripts/roll-flow;
-          dependencies = with pkgs; [
-            nushell
-            git
-            nix
-          ];
-          # Basic test that the script can be executed
-          tests.basic =
-            pkgs.runCommand "roll-flow-test"
-              {
-                buildInputs = with pkgs; [ nushell ];
-              }
-              ''
-                # Test that the script is executable and has valid nushell syntax
-                ${pkgs.nushell}/bin/nu -c "nu-check ${../scripts/roll-flow}" || exit 1
-                echo "Roll-flow Nushell syntax check passed" > $out
-              '';
-        };
-      };
   };
 
 in
