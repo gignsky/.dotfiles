@@ -856,7 +856,8 @@ def detect-quasi-rolls [] {
     let stable = $config.stable_branch
     
     # Get all roll merge commits on rolling branch (newest first from git log)
-    let merge_result = (do -i { ^git log $rolling --oneline --grep=$"Merge branch '($roll_prefix)'" } | complete)
+    # Use regex pattern instead of quoted string to avoid Nushell quoting issues
+    let merge_result = (do -i { ^git log $rolling --oneline --grep=$"Merge branch .($roll_prefix)" } | complete)
     if $merge_result.exit_code != 0 { return [] }
     
     let merge_lines = ($merge_result.stdout | lines | each {|l| $l | str trim} | where {|l| ($l | is-not-empty)})
