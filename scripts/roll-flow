@@ -2080,21 +2080,26 @@ def "main graduate" [
     }
     
     # Check 2: Dependency graduation check (for graduate mode)
-    # Ensure all dependencies are already merged to rolling before allowing graduation
+    # A dependency is satisfied if it's either already graduated OR will be
+    # graduated earlier in this same batch (i.e. appears before the roll in $ordered).
     if $mode == "graduate" and not $force {
         mut all_deps_graduated = true
         for roll in $ordered {
+            let roll_idx = ($ordered | enumerate | where {|x| $x.item == $roll} | get 0.index)
             let deps = (detect-roll-dependencies $roll --basic)
             for dep in $deps {
-                if not (check-roll-graduated $dep) {
-                    print $"  (ansi red)✗ ($roll) - dependency ($dep) not yet graduated(ansi reset)"
+                let dep_in_batch = ($ordered | enumerate
+                    | where {|x| $x.item == $dep and $x.index < $roll_idx}
+                    | is-not-empty)
+                if not (check-roll-graduated $dep) and not $dep_in_batch {
+                    print $"  (ansi red)✗ ($roll) - dependency ($dep) not yet graduated and not in this batch(ansi reset)"
                     $all_deps_graduated = false
                     $checks_passed = false
                 }
             }
         }
         if $all_deps_graduated {
-            print $"  (ansi green)✓ All dependencies already graduated(ansi reset)"
+            print $"  (ansi green)✓ All dependencies satisfied (graduated or queued in this batch)(ansi reset)"
         }
     }
     
