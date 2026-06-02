@@ -424,35 +424,56 @@ def check-roll-diverged [
     
     # Find what the roll branch looked like at merge time (second parent of merge commit)
     let merged_tip = $"($merge_commit)^2"
-    
-    # Check if roll branch HEAD differs from the merged tip
-    # Use complete to capture stdout/stderr and check exit code
-    # NOTE: out+err>| complete required to suppress stderr for remote-only branches
-    let rev_result = try {
-        git rev-parse $roll_branch out+err>| complete
-    } catch {
-        return false  # Branch doesn't exist
+
+    # Validate that ^2 actually exists (squash/linear merges have no second parent)
+    let merged_tip_check = try {
+        git rev-parse $merged_tip out+err>| complete
+    } catch { {exit_code: 1, stdout: ""} }
+    if $merged_tip_check.exit_code != 0 {
+        # Squash or linear Graduate — no ^2 parent. Can't compare commit hashes,
+        # so conservatively report not-diverged.
+        return false
     }
-    
+    let merged_tip_hash = ($merged_tip_check.stdout | str trim)
+
+    # Resolve the branch ref — prefer local, fall back to remote tracking ref
+    let roll_ref = (resolve-roll-ref $roll_branch)
+    if ($roll_ref == null) {
+        return false  # Branch doesn't exist locally or remotely
+    }
+    let is_remote_only = ($roll_ref != $roll_branch)
+
+    # Get the current tip of the roll branch (local or via remote ref)
+    let rev_result = try {
+        git rev-parse $roll_ref out+err>| complete
+    } catch {
+        return false
+    }
     if $rev_result.exit_code != 0 {
-        return false  # Branch doesn't exist
+        return false
     }
     let roll_head = ($rev_result.stdout | str trim)
-    
-    # If the roll branch HEAD doesn't match what was merged, it has diverged
-    # Also check if rolling has commits beyond the merge that aren't on the roll branch
+
+    # If the roll branch HEAD doesn't match what was merged, it has diverged.
+    # Also check if the merged tip is still reachable from the roll branch
+    # (catches force-pushes or hard-resets that dropped the graduation commit).
+    # Use 'git branch -r' for remote-only branches.
     let on_branch = try {
-        git branch --list $roll_branch --contains $merged_tip err>| ignore | lines | str trim | length
+        if $is_remote_only {
+            git branch -r --list $"origin/($roll_branch)" --contains $merged_tip err>| ignore | lines | str trim | length
+        } else {
+            git branch --list $roll_branch --contains $merged_tip err>| ignore | lines | str trim | length
+        }
     } catch {
         0
     }
-    
+
     # Roll is diverged if:
     # 1. The roll branch has moved since merge OR
     # 2. The merge tip isn't reachable from current roll branch
-    let roll_moved = ($roll_head != $merged_tip)
+    let roll_moved = ($roll_head != $merged_tip_hash)
     let rolled_back = ($on_branch == 0)
-    
+
     $roll_moved or $rolled_back
 }
 
@@ -999,12 +1020,14 @@ def check-quasi-roll-verification [
         } else { true }
         
         let nixos_verified = if $needs_nixos {
-            let nixos_rebuild = (do -i { ^git log $range --oneline --grep=$"^($host): generation" -1 } | complete)
+            # Pattern uses [^:]* to match optional @machine suffix (e.g. wsl@merlins-windows)
+            let nixos_rebuild = (do -i { ^git log $range --oneline --grep=$"^($host)[^:]*: generation" -1 } | complete)
             ($nixos_rebuild.exit_code == 0) and ($nixos_rebuild.stdout | str trim | is-not-empty)
         } else { true }
-        
+
         let home_verified = if $needs_home {
-            let home_rebuild = (do -i { ^git log $range --oneline --grep=$"^($config.username)@($host):" -1 } | complete)
+            # Pattern uses [^:]* to match optional @machine suffix (e.g. gig@wsl@merlins-windows)
+            let home_rebuild = (do -i { ^git log $range --oneline --grep=$"^($config.username)@($host)[^:]*:" -1 } | complete)
             ($home_rebuild.exit_code == 0) and ($home_rebuild.stdout | str trim | is-not-empty)
         } else { true }
         
@@ -1379,16 +1402,10 @@ def check-roll-verification [
     }
     
     # Source 2: Fall back to rolling rebuild commit check
-    
-    # Find when this roll was merged to rolling
-    let roll_merge = try {
-        git log $config.rolling_branch --oneline --grep=$"Merge branch '($roll_branch)'" -1 
-        | str trim 
-        | split row ' ' 
-        | get 0?
-    } catch {
-        ""
-    }
+
+    # Find when this roll was merged to rolling.
+    # get-roll-merge-commit handles both "Merge branch '...'" and "Graduate ..." formats.
+    let roll_merge = (get-roll-merge-commit $config.rolling_branch $roll_branch)
     
     # Helper: determine if a flake check has been recorded since a given ref
     # Returns true if a commit with "Flake-Check: pass" exists in the range
@@ -1458,7 +1475,8 @@ def check-roll-verification [
             
             let nixos_verified = if $needs_nixos {
                 let nixos_rebuild = try {
-                    git log $config.rolling_branch --oneline --grep=$"^($host): generation" $"($branch_point)..($config.rolling_branch)" -1 
+                    # Pattern uses [^:]* to match optional @machine suffix (e.g. wsl@merlins-windows)
+                    git log $config.rolling_branch --oneline --grep=$"^($host)[^:]*: generation" $"($branch_point)..($config.rolling_branch)" -1
                     | str trim
                 } catch {
                     ""
@@ -1467,10 +1485,11 @@ def check-roll-verification [
             } else {
                 true  # Not needed
             }
-            
+
             let home_verified = if $needs_home {
                 let home_rebuild = try {
-                    git log $config.rolling_branch --oneline --grep=$"^($config.username)@($host):" $"($branch_point)..($config.rolling_branch)" -1 
+                    # Pattern uses [^:]* to match optional @machine suffix (e.g. gig@wsl@merlins-windows)
+                    git log $config.rolling_branch --oneline --grep=$"^($config.username)@($host)[^:]*:" $"($branch_point)..($config.rolling_branch)" -1
                     | str trim
                 } catch {
                     ""
@@ -1479,7 +1498,7 @@ def check-roll-verification [
             } else {
                 true
             }
-            
+
             let host_verified = ($nixos_verified and $home_verified and $flake_verified and $docs_verified)
             $host_status = ($host_status | insert $host {
                 verified: $host_verified,
@@ -1490,7 +1509,7 @@ def check-roll-verification [
                 required: { nixos: $needs_nixos, home: $needs_home, flake: $needs_flake, docs: $scope.docs }
             })
         }
-        
+
         $host_status
     } else {
         # Roll has been merged - check for rebuilds after the merge
@@ -1532,7 +1551,8 @@ def check-roll-verification [
             
             let nixos_verified = if $needs_nixos {
                 let nixos_rebuild = try {
-                    git log $config.rolling_branch --oneline --grep=$"^($host): generation" $"($roll_merge)..HEAD" -1 
+                    # Pattern uses [^:]* to match optional @machine suffix (e.g. wsl@merlins-windows)
+                    git log $config.rolling_branch --oneline --grep=$"^($host)[^:]*: generation" $"($roll_merge)..HEAD" -1
                     | str trim
                 } catch {
                     ""
@@ -1541,10 +1561,11 @@ def check-roll-verification [
             } else {
                 true
             }
-            
+
             let home_verified = if $needs_home {
                 let home_rebuild = try {
-                    git log $config.rolling_branch --oneline --grep=$"^($config.username)@($host):" $"($roll_merge)..HEAD" -1 
+                    # Pattern uses [^:]* to match optional @machine suffix (e.g. gig@wsl@merlins-windows)
+                    git log $config.rolling_branch --oneline --grep=$"^($config.username)@($host)[^:]*:" $"($roll_merge)..HEAD" -1
                     | str trim
                 } catch {
                     ""
