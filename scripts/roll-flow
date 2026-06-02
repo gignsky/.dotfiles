@@ -1980,13 +1980,16 @@ def "main graduate" [
         let selected_list = if $input_trimmed == "all" {
             $candidates
         } else if ($input_trimmed | is-empty) {
-            # Auto-select: prefer the current roll branch if it's a candidate,
-            # otherwise fall back to the first candidate in the list.
+            # Auto-select:
+            #  - graduate mode: prefer current roll, else first candidate (single-roll default)
+            #  - promote mode: default to ALL candidates (batch operation)
             let current_in_candidates = if ($current_roll != null) {
                 $candidates | where {|c| $c == $current_roll}
             } else { [] }
             if ($current_in_candidates | length) > 0 {
                 [$current_roll]
+            } else if $mode == "promote" {
+                $candidates
             } else if ($candidates | length) >= 1 {
                 [($candidates | get 0)]
             } else { [] }
@@ -2170,7 +2173,7 @@ def "main graduate" [
     let num_ordered2 = ($ordered | length)
     print $"Ready to ($mode_down) ($num_ordered2) rolls to (ansi cyan)($target)(ansi reset)"
     if $mode == "promote" {
-        print $"  (ansi yellow)Note:(ansi reset) After promotion, ($config.rolling_branch) will be rebased onto ($config.stable_branch)."
+        print $"  (ansi yellow)Note:(ansi reset) After promotion, ($config.stable_branch) will be merged into ($config.rolling_branch)."
     }
     
     let confirm = (try {
@@ -2191,7 +2194,7 @@ def "main graduate" [
             print $"  Would merge ($roll) -> ($target)"
         }
         if $mode == "promote" {
-            print $"  Would rebase ($config.rolling_branch) onto ($config.stable_branch)"
+            print $"  Would merge ($config.stable_branch) into ($config.rolling_branch)"
         }
         print ""
         return
@@ -2230,9 +2233,17 @@ def "main graduate" [
         }
         
         print $"  Merging (ansi cyan)($roll)(ansi reset)..."
-        
+
+        # Resolve the ref to merge — falls back to origin/$roll for remote-only branches
+        let roll_ref = (resolve-roll-ref $roll)
+        if ($roll_ref == null) {
+            print $"    (ansi red)✗ Could not resolve ref for ($roll)(ansi reset)"
+            $failed_count = $failed_count + 1
+            break
+        }
+
         # Step 1: Merge into working tree (no commit yet)
-        let merge = (do -i { ^git merge --no-ff --no-commit $roll } | complete)
+        let merge = (do -i { ^git merge --no-ff --no-commit $roll_ref } | complete)
         
         if $merge.exit_code != 0 {
             print $"    (ansi red)✗ Merge failed - check for conflicts(ansi reset)"
@@ -2370,27 +2381,28 @@ def "main graduate" [
             }
         }
         
-        # Reintegrate develop after promotion
+        # Reintegrate develop after promotion (merge main back into develop)
         if $mode == "promote" and $failed_count == 0 {
             print ""
             print "Reintegrating rolling branch..."
             let dev_co = (do -i { ^git checkout $config.rolling_branch } | complete)
             if $dev_co.exit_code == 0 {
                 do -i { ^git pull } | complete | ignore
-                let rebase = (do -i { ^git rebase $config.stable_branch } | complete)
-                if $rebase.exit_code == 0 {
-                    print $"  V ($config.rolling_branch) rebased onto ($config.stable_branch)(ansi reset)"
+                let merge_msg = $"Sync ($config.rolling_branch) with ($config.stable_branch) after promotion"
+                let merge = (do -i { ^git merge --no-ff $config.stable_branch -m $merge_msg } | complete)
+                if $merge.exit_code == 0 {
+                    print $"  V ($config.stable_branch) merged into ($config.rolling_branch)(ansi reset)"
                     if $has_remote {
                         let push_dev = (do -i { ^git push } | complete)
                         if $push_dev.exit_code == 0 {
                             print $"  V ($config.rolling_branch) pushed(ansi reset)"
                         } else {
-                            print $"  W ($config.rolling_branch) push failed - may need --force(ansi reset)"
+                            print $"  W ($config.rolling_branch) push failed(ansi reset)"
                         }
                     }
                 } else {
-                    print $"  (ansi red)✗ Rebase failed - may need manual resolution(ansi reset)"
-                    print $"    ($rebase.stderr | str trim)"
+                    print $"  (ansi red)✗ Merge failed - may need manual resolution(ansi reset)"
+                    print $"    ($merge.stderr | str trim)"
                 }
                 do -i { ^git checkout $orig_branch } | complete | ignore
             }
