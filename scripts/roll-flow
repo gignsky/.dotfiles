@@ -2559,12 +2559,13 @@ def "main status" [] {
     
     let all_roll_branches = ($local_rolls | append $remote_rolls | uniq | sort)
     
-    # ── On main/develop: simple indicator before prompt ──────────
+    # ── On main/develop: show table at top before prompt ──────────
     let on_roll = ($current_roll != null)
     let on_main_dev = not $on_roll and (($current_branch == $config.stable_branch) or ($current_branch == $config.rolling_branch))
     
     if $on_main_dev {
-        print "  (on main/develop — use 'rf list' to see all rolls)" 
+        print "=== All Rolls ==="
+        show-roll-summary-table $config $current_roll $all_roll_branches
         print ""
     }
     
