@@ -2162,6 +2162,7 @@ def show-roll-summary-table [
     config: record
     current_roll: string
     all_branches: list
+    --deps
 ] {
     if ($all_branches | is-empty) {
         print "  (no rolls found)"
@@ -2194,10 +2195,21 @@ def show-roll-summary-table [
             "active"
         }
         
+        # Build deps string (roll numbers only) if --deps flag is set
+        let deps_str = if $deps {
+            let deps = (detect-roll-dependencies $roll_branch)
+            if ($deps | is-not-empty) {
+                ($deps | each {|d|
+                    try { $d | str replace $config.roll_prefix '' | split row '-' | get 0 } catch { null }
+                } | where {|x| $x != null} | str join ",")
+            } else { "" }
+        } else { "" }
+        
         {
-            roll: ($roll_branch | str substring 0..40)
+            roll: ($roll_branch | str substring 0..35)
             cur: (if $is_current { ">" } else { "" })
             loc: (get-branch-location $roll_branch)
+            deps: $deps_str
             scope: $s
             files: $scope.files_count
             verified: (if $is_diverged { "✗" } else { $"($verified_count)/($total)" })
@@ -2610,13 +2622,13 @@ def "main test-all" [] {
     print $"(ansi green)✓ test-all complete(ansi reset)"
 }
 
-# List all rolls with detailed status
+# List all rolls with drill-down details
 def "main list" [] {
     let config = get-config
     let current_branch = (git branch --show-current | str trim)
     let current_roll = get-current-roll
     
-    print "=== All Rolls ==="
+    print "=== Roll Catalog ==="
     print ""
     
     # Get all roll branches (local and remote)
@@ -2624,9 +2636,7 @@ def "main list" [] {
         git branch --list $"($config.roll_prefix)*"
         | lines
         | each { |line| $line | str trim | str replace '* ' '' }
-    } catch {
-        []
-    }
+    } catch { [] }
     
     let remote_rolls = try {
         git branch -r
@@ -2634,161 +2644,131 @@ def "main list" [] {
         | each { |line| $line | str trim }
         | where { |branch| $branch =~ $"origin/($config.roll_prefix)" }
         | each { |branch| $branch | str replace 'origin/' '' }
-    } catch {
-        []
-    }
+    } catch { [] }
     
     let all_roll_branches = ($local_rolls | append $remote_rolls | uniq | sort)
     
     if ($all_roll_branches | is-empty) {
         print "  No rolls found"
-    } else {
-        for roll_branch in $all_roll_branches {
-            # Check if it's the current roll
-            let is_current = ($roll_branch == $current_roll)
-            
-            # Get metadata if available
-            let roll_num = try {
-                $roll_branch | str replace $config.roll_prefix '' | split row '-' | get 0
-            } catch {
-                null
-            }
-            
-            let metadata_file = if ($roll_num != null) {
-                $"($env.HOME)/.config/roll-flow/rolls/($roll_num).nuon"
-            } else {
-                null
-            }
-            
-            let has_metadata = ($metadata_file != null) and ($metadata_file | path exists)
-            
-            # Get verification status
-            let verification = (check-roll-verification $roll_branch)
-            let verified_count = ($verification | values | where {|v| $v.verified == true} | length)
-            let total_hosts = ((get-active-hosts) | length)
-            
-            # Get scope
-            let scope = (detect-roll-scope $roll_branch)
-            
-            # Check for divergence if graduated
-            let is_diverged = if (check-roll-graduated $roll_branch) {
-                (check-roll-diverged $roll_branch)
-            } else {
-                false
-            }
-            
-            # Display roll header
-            if $is_current {
-                print $"  > (ansi green)($roll_branch)(ansi reset) (ansi default_dimmed)\(current\)(ansi reset)"
-            } else {
-                print $"    ($roll_branch)"
-            }
-            
-            # Show divergence warning
-            if $is_diverged {
-                print $"      (ansi red)⚠ Diverged — branch has commits after graduation(ansi reset)"
-            }
-            
-            # Show scope icons
-            mut scope_icons = []
-            if $scope.nixos { $scope_icons = ($scope_icons | append "N") } else { $scope_icons = ($scope_icons | append "-") }
-            if $scope.home { $scope_icons = ($scope_icons | append "H") } else { $scope_icons = ($scope_icons | append "-") }
-            if $scope.flake { $scope_icons = ($scope_icons | append "F") } else { $scope_icons = ($scope_icons | append "-") }
-            if $scope.docs { $scope_icons = ($scope_icons | append "D") } else { $scope_icons = ($scope_icons | append "-") }
-            
-            print $"      Scope: ($scope_icons | str join ' ')"
-            
-            # Show verification requirements
-            let requirements = (get-verification-requirements $roll_branch)
-            if $requirements.check_type != "none" {
-                let req_color = match $requirements.check_type {
-                    "full" => "yellow",
-                    "light" => "cyan",
-                    "docs" => "green",
-                    _ => "default"
-                }
-                print $"      Requires: (ansi ($req_color))($requirements.description)(ansi reset)"
-            }
-            
-            # Show per-host verification status
-            if $total_hosts > 0 {
-                for host in (get-active-hosts) {
-                    let info = ($verification | get $host)
-                    if $info.verified {
-                        mut type_marks = []
-                        if $info.required.nixos { $type_marks = ($type_marks | append "N:ok") }
-                        if $info.required.home { $type_marks = ($type_marks | append "H:ok") }
-                        if (not $info.required.nixos) and (not $info.required.home) {
-                            $type_marks = ($type_marks | append "auto")
-                        }
-                        print $"      ok (ansi green)($host)(ansi reset) ($type_marks | str join ' ')"
-                    } else {
-                        mut missing = []
-                        if $info.required.nixos and (not $info.nixos) {
-                            $missing = ($missing | append "N:..")
-                        }
-                        if $info.required.home and (not $info.home) {
-                            $missing = ($missing | append "H:..")
-                        }
-                        if ($missing | is-empty) {
-                            print $"      .. (ansi yellow)($host)(ansi reset) pending"
-                        } else {
-                            print $"      .. (ansi yellow)($host)(ansi reset) needs ($missing | str join ' ')"
-                        }
-                    }
-                }
-            }
-            
-            # Show graduation and promotion status
-            let promo_status = (check-roll-promotion-ready $roll_branch)
-            
-            if $promo_status.graduated {
-                if $is_diverged {
-                    print $"      Graduated: (ansi red)! Diverged! Branch has commits after graduation(ansi reset)"
-                } else {
-                    print $"      Graduated: (ansi green)ok Merged to ($config.rolling_branch)(ansi reset)"
-                }
-            } else if not $promo_status.docs_only {
-                print $"      Graduated: (ansi yellow).. Not yet merged to ($config.rolling_branch)(ansi reset)"
-            }
-            
-            if $promo_status.ready {
-                if $is_diverged {
-                    print $"      Promotion: (ansi red)FAIL Diverged - re-integrate first(ansi reset)"
-                } else {
-                    print $"      Promotion: (ansi green)ok Ready to promote to ($config.stable_branch)(ansi reset)"
-                }
-            } else if $promo_status.fully_verified and not $promo_status.graduated and not $promo_status.docs_only {
-                print $"      Promotion: (ansi yellow).. Needs graduation first(ansi reset)"
-            } else if not $promo_status.fully_verified {
-                print $"      Promotion: (ansi red)FAIL Needs verification(ansi reset)"
-            }
-            
-            # Show dependencies and dependents
-            let dependencies = (detect-roll-dependencies $roll_branch)
-            let dependents = (find-roll-dependents $roll_branch)
-            
-            if not ($dependencies | is-empty) {
-                    print $"      Dependencies: (ansi yellow)-> ($dependencies | str join ', ')(ansi reset)"
-            }
-            
-            if not ($dependents | is-empty) {
-                print $"      Depended on by: (ansi cyan)<- ($dependents | str join ', ')(ansi reset)"
-            }
-            
-            # Show metadata if available
-            if $has_metadata {
-                let metadata = (open $metadata_file)
-                
-                if ($metadata | get depends_on? | is-not-empty) and not ($metadata.depends_on | is-empty) {
-                    let manual_deps = ($metadata.depends_on | where {|dep| not ($dep in $dependencies)})
-                    if not ($manual_deps | is-empty) {
-                        print $"      Manual deps: (ansi magenta)($manual_deps | str join ', ')(ansi reset)"
-                    }
-                }
-            }
-            
-            print ""
+        return
+    }
+    
+    # Show the summary table with deps column
+    show-roll-summary-table $config $current_roll $all_roll_branches --deps
+    
+    # Interactive drill-down
+    if not (is-terminal --stdin) {
+        return
+    }
+    
+    loop {
+        print $"(ansi default_dimmed)Inspect roll # (or press Enter to quit):(ansi reset) "
+        let sel = (input | str trim)
+        
+        if ($sel | is-empty) {
+            break
         }
+        
+        let idx = (try { $sel | into int } catch {
+            print $"  (ansi red)Invalid number: ($sel)(ansi reset)"
+            continue
+        })
+        
+        if $idx < 0 or $idx >= ($all_roll_branches | length) {
+            print $"  (ansi red)Number out of range \(0-($all_roll_branches | length) - 1\)(ansi reset)"
+            continue
+        }
+        
+        let roll_branch = ($all_roll_branches | get $idx)
+        let is_current = ($roll_branch == $current_roll)
+        
+        print ""
+        print $"  === (ansi cyan)($roll_branch)(ansi reset) ==="
+        if $is_current { print $"  (ansi green)← current branch(ansi reset)" }
+        print ""
+        
+        # Scope
+        let scope = (detect-roll-scope $roll_branch)
+        mut s = ""
+        if $scope.nixos { $s = ($s + "N") } else { $s = ($s + "-") }
+        if $scope.home { $s = ($s + "H") } else { $s = ($s + "-") }
+        if $scope.flake { $s = ($s + "F") } else { $s = ($s + "-") }
+        if $scope.docs { $s = ($s + "D") } else { $s = ($s + "-") }
+        print $"  Scope: (ansi cyan)($s)(ansi reset)  Files: ($scope.files_count)"
+        
+        # File attribution
+        let files_info = (get-roll-files $roll_branch --skip-attr)
+        print $"  Files: ($files_info.count_total) total  \(($files_info.count_own) unique + ($files_info.count_inherited) inherited\)"
+        
+        if ($files_info.count_inherited) > 0 {
+            print $"  (ansi default_dimmed)Tracing inherited files to origin rolls...(ansi reset)"
+            let files_info = (get-roll-files $roll_branch)
+            
+            # Color legend
+            print ""
+            print "  (ansi green)■ new to this roll(ansi reset)  (ansi yellow_bold)■ roll/1-2(ansi reset)  (ansi blue_bold)■ roll/3-4(ansi reset)  (ansi cyan_bold)■ roll/5-6(ansi reset)  (ansi purple_bold)■ roll/7+(ansi reset)"
+        }
+        
+        print ""
+        render-file-tree $files_info.total $files_info.attr $files_info.own
+        
+        # Verification
+        print ""
+        let promo_status = (check-roll-promotion-ready $roll_branch)
+        let is_graduated = (check-roll-graduated $roll_branch)
+        let is_diverged = if $is_graduated { (check-roll-diverged $roll_branch) } else { false }
+        let verification = (check-roll-verification $roll_branch)
+        let active_hosts = (get-active-hosts)
+        
+        if $is_graduated {
+            if $is_diverged {
+                print $"  Graduated: (ansi red)! Diverged(ansi reset)"
+            } else {
+                print $"  Graduated: (ansi green)✓ Merged to ($config.rolling_branch)(ansi reset)"
+            }
+        } else {
+            print $"  Graduated: (ansi yellow).. Not merged(ansi reset)"
+        }
+        
+        if $promo_status.ready {
+            print $"  Promotion: (ansi green)Ready(ansi reset)"
+        } else if not $promo_status.fully_verified {
+            print $"  Promotion: (ansi red)FAIL Needs verification(ansi reset)"
+        } else if not $promo_status.graduated {
+            print $"  Promotion: (ansi yellow).. Needs graduation first(ansi reset)"
+        }
+        
+        # Per-host verification
+        for host in $active_hosts {
+            let info = ($verification | get $host)
+            mut parts = [$"  ($host):"]
+            if $info.verified {
+                if $info.required.nixos { $parts = ($parts | append "N:✓") }
+                if $info.required.home { $parts = ($parts | append "H:✓") }
+                if (not $info.required.nixos) and (not $info.required.home) {
+                    $parts = ($parts | append "auto")
+                }
+                print $"($parts | str join ' ') (ansi green)verified(ansi reset)"
+            } else {
+                if $info.required.nixos { $parts = ($parts | append $"N:(ansi yellow)⌛(ansi reset)") }
+                if $info.required.home { $parts = ($parts | append $"H:(ansi yellow)⌛(ansi reset)") }
+                print $"($parts | str join ' ') (ansi yellow)pending(ansi reset)"
+            }
+        }
+        
+        # Dependencies
+        let deps = (detect-roll-dependencies $roll_branch)
+        if ($deps | is-not-empty) {
+            print $"  Depends on: (ansi yellow)($deps | str join ', ')(ansi reset)"
+        }
+        
+        # Dependents
+        let dependents = (find-roll-dependents $roll_branch)
+        if ($dependents | is-not-empty) {
+            print $"  Depended by: (ansi cyan)($dependents | str join ', ')(ansi reset)"
+        }
+        
+        print ""
+        print "  (ansi default_dimmed)---(ansi reset)"
     }
 }
