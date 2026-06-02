@@ -18,7 +18,7 @@
 
   home.packages = with pkgs; [
     # ytmdesktop
-    youtube-music
+    pear-desktop
     steam
     plex-desktop
     remmina

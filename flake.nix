@@ -15,10 +15,6 @@
       url = "github:nix-community/home-manager/release-26.05";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    unstable-home-manager = {
-      url = "github:nix-community/home-manager";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
-    };
 
     # wsl stuff
     nixos-wsl = {
@@ -42,11 +38,6 @@
       url = "github:mic92/sops-nix/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    # Unneeded after moving to stable 26.05
-    # unstable-sops = {
-    #   url = "github:mic92/sops-nix/master";
-    #   inputs.nixpkgs.follows = "nixpkgs-unstable";
-    # };
 
     # Pre-commit hooks for managing Git hooks declaratively
     pre-commit-hooks = {
