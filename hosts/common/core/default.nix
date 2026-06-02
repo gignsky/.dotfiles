@@ -1,4 +1,9 @@
-{ configLib, pkgs, inputs, ... }:
+{
+  configLib,
+  pkgs,
+  inputs,
+  ...
+}:
 
 {
   imports = configLib.scanPaths ./.;
