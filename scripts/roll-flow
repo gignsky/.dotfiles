@@ -2260,6 +2260,21 @@ def "main status" [] {
         print ""
     }
     
+    # ── Current Roll Scope Summary (always visible) ───────────────
+    if ($current_roll != null) {
+        let scope = (detect-roll-scope $current_roll)
+        mut scope_codes = []
+        if $scope.nixos { $scope_codes = ($scope_codes | append "N") } else { $scope_codes = ($scope_codes | append "-") }
+        if $scope.home { $scope_codes = ($scope_codes | append "H") } else { $scope_codes = ($scope_codes | append "-") }
+        if $scope.flake { $scope_codes = ($scope_codes | append "F") } else { $scope_codes = ($scope_codes | append "-") }
+        if $scope.docs { $scope_codes = ($scope_codes | append "D") } else { $scope_codes = ($scope_codes | append "-") }
+        let scope_str = ($scope_codes | str join "")
+        
+        let files_info = (get-roll-files $current_roll --skip-attr)
+        print $"  Scope: (ansi cyan)($scope_str)(ansi reset)  Files: ($scope.files_count)   \(($files_info.count_own) own + ($files_info.count_inherited) from prior rolls\)"
+        print ""
+    }
+    
     # ── Detail Prompt ───────────────────────────────────────────────
     # Gracefully handle non-interactive contexts (piped through nix run)
     let show_details = (try {
@@ -2286,21 +2301,8 @@ def "main status" [] {
         let scope = (detect-roll-scope $current_roll)
         print $"=== Current Roll: (ansi green)($current_roll)(ansi reset) ==="
         
-        # Scope summary line
-        mut scope_codes = []
-        if $scope.nixos { $scope_codes = ($scope_codes | append "N") } else { $scope_codes = ($scope_codes | append "-") }
-        if $scope.home { $scope_codes = ($scope_codes | append "H") } else { $scope_codes = ($scope_codes | append "-") }
-        if $scope.flake { $scope_codes = ($scope_codes | append "F") } else { $scope_codes = ($scope_codes | append "-") }
-        if $scope.docs { $scope_codes = ($scope_codes | append "D") } else { $scope_codes = ($scope_codes | append "-") }
-        
-        let scope_str = ($scope_codes | str join "")
-        
-        # Get file attribution via multi-diff
+        # File tree
         let files_info = (get-roll-files $current_roll)
-        
-        print $"  Scope: (ansi cyan)($scope_str)(ansi reset)  Files: ($scope.files_count)   \(($files_info.count_own) own + ($files_info.count_inherited) from prior rolls\)"
-        
-        # Show files with attribution (tree format + colors)
         if ($scope.files_count) > 0 {
             print ""
             render-file-tree $files_info.total $files_info.attr $files_info.own
