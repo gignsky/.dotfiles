@@ -16,36 +16,6 @@ This repository operates under **Lord Gig's Realm** organizational structure. Al
   - Rebuild command behavior and automatic host detection
   - Essential for proper operation in WSL environments
 
-## Git Workflow: Roll Flow System
-
-This repository uses **Roll Flow**, a git workflow designed specifically for multi-host NixOS configurations. It provides structured management of changes across multiple systems while maintaining stability.
-
-### Core Concepts
-- **`main`** - Verified stable state for ALL hosts
-- **`rolling`** - Integration branch (continuous, like nixos-unstable)
-- **`roll/N-MMDD-theme`** - Numbered batches of themed changes
-- **Feature branches** - Individual features or fixes
-
-### Quick Commands
-```bash
-just roll-start <theme>        # Start new roll batch
-just roll-integrate <branch>   # Add feature to current roll
-just roll-graduate             # Move roll → rolling (tested on some hosts)
-just roll-promote              # Move rolling → main (verified on ALL hosts)
-just roll-status               # Check current state
-```
-
-### Documentation
-- **Full Guide**: [docs/guides/ROLL-FLOW-WORKFLOW.md](docs/guides/ROLL-FLOW-WORKFLOW.md)
-- **Quick Reference**: [docs/guides/ROLL-FLOW-QUICKREF.md](docs/guides/ROLL-FLOW-QUICKREF.md)
-- **Tool**: Nix package `roll-flow` (source: `scripts/roll-flow`, packaged via `pkgs/scripts.nix`)
-
-### Integration with Fleet Protocols
-- All roll commits follow fleet git standards (see commit protocol below)
-- Major rolls should have corresponding quest reports
-- Use `.tmp-oc-logs/` for research during roll development
-- Archive logs to annex before graduating rolls to main
-
 ## Fleet Operations & Quest Protocols
 
 ### Expedition of Consultation Requirements
