@@ -2177,8 +2177,10 @@ def show-roll-summary-table [
             (check-roll-diverged $roll_branch)
         } else { false }
         
-        let status_str = if $promo_status.ready {
-            if $is_diverged { "!DIV" } else { "PROMOTE" }
+        let status_str = if $is_diverged {
+            "DIVERGED"
+        } else if $promo_status.ready {
+            "PROMOTE"
         } else if (check-roll-graduated $roll_branch) {
             "merged"
         } else {
@@ -2209,7 +2211,7 @@ def show-roll-summary-table [
     
     $records | table -e | lines | each {|line| print $"  ($line)" }
     print ""
-    print $"(ansi default_dimmed)scope: NHFD codes  verified: N/M hosts done  status: merged/active/PROMOTE/DIV(ansi reset)"
+    print $"(ansi default_dimmed)scope: NHFD codes  verified: ✓/N/M or ✗ \(diverged\)  status: merged/active/PROMOTE/DIVERGED(ansi reset)"
 }
 
 # Show current status
