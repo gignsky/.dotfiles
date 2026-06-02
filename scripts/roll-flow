@@ -1137,44 +1137,40 @@ def detect-roll-dependencies [
     let is_graduated = (check-roll-graduated $roll_branch)
     
     if (not $is_graduated) and ($resolved != null) {
-        let mb_result = try {
-            git merge-base $config.rolling_branch $resolved | complete
-        } catch { null }
-        
-        let merge_base = if ($mb_result == null) or ($mb_result.exit_code != 0) {
-            null
-        } else {
-            $mb_result.stdout | str trim
-        }
-        
-        if ($merge_base != null) {
-            # Check if any other rolls contain this merge base
-            let all_rolls = try {
-                git branch --list $"($config.roll_prefix)*" 
-                | lines 
-                | each { |line| $line | str trim | str replace '* ' '' }
-            } catch { [] }
-            
-            for other_roll in $all_rolls {
-                if $other_roll == $roll_branch { continue }
-                
-                # Only consider earlier-numbered rolls (prevent circular deps)
-                let other_num = try {
-                    $other_roll | str replace $config.roll_prefix '' | split row '-' | get 0 | into int
-                } catch { null }
-                if ($other_num == null) or ($roll_num != null and $other_num >= $roll_num) {
-                    continue
-                }
-                
-                # Check if merge_base is within other_roll's history
-                let is_ancestor = try {
-                    let result = (do -i { ^git merge-base --is-ancestor $merge_base $other_roll } | complete)
-                    $result.exit_code == 0
-                } catch { false }
-                
-                if $is_ancestor and not ($dependencies | any {|d| $d == $other_roll}) {
-                    $dependencies = ($dependencies | append $other_roll)
-                }
+        # Check if any lower-numbered unmerged roll's tip is an ancestor of this roll.
+        # That means this roll was branched from (or includes commits from) that other roll,
+        # so merging this roll to develop would implicitly bring that other roll's commits along.
+        # NOTE: we use the resolved tip of other_roll, not merge_base, to avoid false positives
+        # from shared develop ancestors.
+        let all_rolls = try {
+            git branch --list $"($config.roll_prefix)*"
+            | lines
+            | each { |line| $line | str trim | str replace '* ' '' }
+        } catch { [] }
+
+        for other_roll in $all_rolls {
+            if $other_roll == $roll_branch { continue }
+
+            # Only consider earlier-numbered rolls (prevent circular deps)
+            let other_num = try {
+                $other_roll | str replace $config.roll_prefix '' | split row '-' | get 0 | into int
+            } catch { null }
+            if ($other_num == null) or ($roll_num != null and $other_num >= $roll_num) {
+                continue
+            }
+
+            # Skip already-graduated rolls (their commits are already in rolling, not a concern)
+            if (check-roll-graduated $other_roll) { continue }
+
+            let other_resolved = (resolve-roll-ref $other_roll)
+            if ($other_resolved == null) { continue }
+
+            # Is other_roll's tip an ancestor of this roll?
+            # If yes, this roll's history contains other_roll's commits — a real git dependency.
+            let is_ancestor = (do -i { ^git merge-base --is-ancestor $other_resolved $resolved } | complete)
+
+            if $is_ancestor.exit_code == 0 and not ($dependencies | any {|d| $d == $other_roll}) {
+                $dependencies = ($dependencies | append $other_roll)
             }
         }
     }
@@ -1929,10 +1925,14 @@ def "main graduate" [
         let selected_list = if $input_trimmed == "all" {
             $candidates
         } else if ($input_trimmed | is-empty) {
-            # Auto-select the first candidate on empty input.
-            # Graduated-but-diverged rolls are in the candidate list (line 1400),
-            # so auto-selecting works correctly for re-graduation too.
-            if ($candidates | length) >= 1 {
+            # Auto-select: prefer the current roll branch if it's a candidate,
+            # otherwise fall back to the first candidate in the list.
+            let current_in_candidates = if ($current_roll != null) {
+                $candidates | where {|c| $c == $current_roll}
+            } else { [] }
+            if ($current_in_candidates | length) > 0 {
+                [$current_roll]
+            } else if ($candidates | length) >= 1 {
                 [($candidates | get 0)]
             } else { [] }
         } else {
