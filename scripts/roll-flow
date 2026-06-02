@@ -2353,32 +2353,57 @@ def "main graduate" [
     # ── Phase G: Post-Merge Cleanup ─────────────────────────────────
     
     if $merged_count > 0 {
+        let action = if $mode == "promote" { "promoted" } else { "graduated" }
+
         print ""
-        print "Post-merge cleanup:"
-        
+        print $"(ansi cyan)Post-($mode_down2) cleanup:(ansi reset)"
+        print $"($action | str capitalize) rolls:"
         for roll in $ordered {
-            let del = (try { input $"Delete '($roll)' branch? (y/N): " } catch { "n" })
-            if ($del | str trim | str downcase) == "y" {
-                let del_res = (do -i { ^git branch -d $roll } | complete)
-                if $del_res.exit_code == 0 {
-                    print $"  ✓ Deleted ($roll)"
-                    # Remote deletion
-                    if $has_remote {
-                        let remote_branches = (do -i { ^git branch -r } | lines | each {|l| $l | str trim })
-                        let remote_pattern = $"origin/($roll)"
-                        if ($remote_branches | any {|b| $b == $remote_pattern }) {
-                            let del_remote = (try { input $"  Delete remote '($roll)' too? (y/N): " } catch { "n" })
-                            if ($del_remote | str trim | str downcase) == "y" {
-                                do -i { ^git push origin --delete $roll } | complete | ignore
-                                print $"    V Remote ($roll) deleted"
-                            }
+            print $"  - (ansi cyan)($roll)(ansi reset)"
+        }
+        print ""
+        print $"Delete ($action) roll branches?"
+        print $"  (ansi cyan)b(ansi reset)oth     - local + remote"
+        print $"  (ansi cyan)l(ansi reset)ocal    - local only"
+        if $has_remote {
+            print $"  (ansi cyan)r(ansi reset)emote   - remote only"
+        }
+        print $"  (ansi cyan)n(ansi reset)one     - keep all (default)"
+        let choice = (try { input "Choice [n]: " } catch { "n" })
+        let c = ($choice | str trim | str downcase)
+
+        let del_local = ($c == "b" or $c == "l")
+        let del_remote = ($c == "b" or $c == "r") and $has_remote
+
+        if $del_local or $del_remote {
+            for roll in $ordered {
+                if $del_local {
+                    let local_exists = (do -i { ^git rev-parse --verify --quiet $roll } | complete)
+                    if $local_exists.exit_code == 0 {
+                        let res = (do -i { ^git branch -d $roll } | complete)
+                        if $res.exit_code == 0 {
+                            print $"  (ansi green)✓(ansi reset) Deleted local ($roll)"
+                        } else {
+                            print $"  (ansi yellow)⚠(ansi reset) Could not delete local ($roll) - not fully merged?"
+                            print $"    ($res.stderr | str trim)"
                         }
                     }
-                } else {
-                    print $"  ⚠ Could not delete ($roll) - not fully merged?"
-                    print $"    ($del_res.stderr | str trim)"
+                }
+                if $del_remote {
+                    let remote_check = (do -i { ^git ls-remote --heads origin $roll } | complete)
+                    if $remote_check.exit_code == 0 and ($remote_check.stdout | str trim | is-not-empty) {
+                        let res = (do -i { ^git push origin --delete $roll } | complete)
+                        if $res.exit_code == 0 {
+                            print $"  (ansi green)✓(ansi reset) Deleted remote ($roll)"
+                        } else {
+                            print $"  (ansi yellow)⚠(ansi reset) Could not delete remote ($roll)"
+                            print $"    ($res.stderr | str trim)"
+                        }
+                    }
                 }
             }
+        } else {
+            print "  Skipping branch deletion"
         }
         
         # Reintegrate develop after promotion (merge main back into develop)
