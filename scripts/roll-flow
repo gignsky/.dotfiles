@@ -2590,7 +2590,12 @@ def "main status" [] {
     if ($current_roll != null) {
         let is_graduated = (check-roll-graduated $current_roll)
         if $is_graduated {
-            print $"✓ On roll: (ansi green)($current_roll)(ansi reset) (ansi cyan)[merged to ($config.rolling_branch)](ansi reset)"
+            let is_diverged = (check-roll-diverged $current_roll)
+            if $is_diverged {
+                print $"✓ On roll: (ansi green)($current_roll)(ansi reset) (ansi red)[DIVERGED from ($config.rolling_branch)](ansi reset)"
+            } else {
+                print $"✓ On roll: (ansi green)($current_roll)(ansi reset) (ansi cyan)[merged to ($config.rolling_branch)](ansi reset)"
+            }
         } else {
             print $"✓ On roll: (ansi green)($current_roll)(ansi reset) (ansi yellow)[not yet merged](ansi reset)"
         }
