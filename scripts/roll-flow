@@ -2567,6 +2567,47 @@ def "main status" [] {
         print "=== All Rolls ==="
         show-roll-summary-table $config $current_roll $all_roll_branches
         print ""
+        
+        # Show detailed per-roll, per-host verification table
+        print "=== Detailed Verification Status ==="
+        for roll in $all_roll_branches {
+            let verification = (check-roll-verification $roll)
+            let is_graduated = (check-roll-graduated $roll)
+            let is_diverged = if $is_graduated {
+                (check-roll-diverged $roll)
+            } else { false }
+            
+            let verif_records = ((get-active-hosts) | each {|host|
+                let info = ($verification | get $host)
+                let nixos_mark = if $is_diverged {
+                    if $info.required.nixos { "✗" } else { "—" }
+                } else if $info.required.nixos {
+                    if $info.nixos { "✓" } else { "⌛" }
+                } else { "—" }
+                let home_mark = if $is_diverged {
+                    if $info.required.home { "✗" } else { "—" }
+                } else if $info.required.home {
+                    if $info.home { "✓" } else { "⌛" }
+                } else { "—" }
+                let flake_mark = if $is_diverged {
+                    if $info.required.flake { "✗" } else { "—" }
+                } else if $info.required.flake {
+                    if $info.flake { "✓" } else { "⌛" }
+                } else { "—" }
+                let docs_mark = if $is_diverged {
+                    if $info.required.docs { "✗" } else { "—" }
+                } else if $info.required.docs {
+                    if $info.docs { "✓" } else { "⌛" }
+                } else { "—" }
+                let marks = $"N:($nixos_mark) H:($home_mark) F:($flake_mark) D:($docs_mark)"
+                let status = if $is_diverged { "✗" } else if $info.verified { "ok" } else { ".." }
+                { host: $host, status: $status, detail: $marks }
+            })
+            
+            print $"  (ansi cyan)($roll)(ansi reset)"
+            $verif_records | table -e | lines | each {|line| print $"    ($line)" }
+        }
+        print ""
     }
     
     # ── Current Roll Details (always visible) ──────────────────────
