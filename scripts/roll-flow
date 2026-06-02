@@ -2534,8 +2534,8 @@ def show-roll-summary-table [
         
         $record = ($record | insert scope $s)
         
-        # Add per-host columns dynamically
-        for host in $config.hosts {
+        # Add per-host columns dynamically (only active hosts)
+        for host in (get-active-hosts) {
             let info = ($verification | get $host)
             # For diverged rolls, verification is stale — show ✗ instead of old data
             let nixos_mark = if $is_diverged {
