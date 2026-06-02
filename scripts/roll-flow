@@ -471,14 +471,14 @@ def check-roll-promotion-ready [
     
     # Check scope - docs-only rolls don't need graduation
     let scope = (detect-roll-scope $roll_branch)
-    let docs_only = $scope.docs and (not $scope.nixos) and (not $scope.home) and (not $scope.flake)
+    let docs_only = $scope.docs && (not $scope.nixos) && (not $scope.home) && (not $scope.flake)
     
     {
         graduated: $graduated,
         diverged: $diverged,
         fully_verified: $fully_verified,
         docs_only: $docs_only,
-        ready: ($fully_verified and ($graduated or $docs_only) and (not $diverged))
+        ready: ($fully_verified && ($graduated or $docs_only) && (not $diverged))
     }
 }
 
@@ -502,14 +502,14 @@ def get-verification-requirements [
         $check_type = "full"
     }
     
-    if $scope.flake and (not $scope.nixos) and (not $scope.home) {
+    if $scope.flake && (not $scope.nixos) && (not $scope.home) {
         $requirements = ($requirements | append "Flake check (any host)")
         if $check_type == "none" {
             $check_type = "light"
         }
     }
     
-    if $scope.docs and (not $scope.nixos) and (not $scope.home) and (not $scope.flake) {
+    if $scope.docs && (not $scope.nixos) && (not $scope.home) && (not $scope.flake) {
         $requirements = ($requirements | append "No rebuild required (docs-only)")
         $check_type = "docs"
     }
@@ -602,7 +602,7 @@ def get-roll-files [
         attr: {}
     }
     
-    if not $skip_attr and ($inherited | is-not-empty) {
+    if not $skip_attr && ($inherited | is-not-empty) {
         $result = ($result | merge {attr: (attribute-files $roll_branch $inherited)})
     }
     
@@ -633,13 +633,13 @@ def attribute-files [
         let is_grad = (check-roll-graduated $r)
         let r_files = if $is_grad {
             let merge = (do -i { ^git log $config.rolling_branch --oneline --grep=$"Merge branch '($r)'" -1 } | complete)
-            if $merge.exit_code == 0 and ($merge.stdout | str trim | is-not-empty) {
+            if $merge.exit_code == 0 && ($merge.stdout | str trim | is-not-empty) {
                 let mc = ($merge.stdout | str trim | split row ' ' | get 0)
                 let mc1 = $"($mc)^1"
                 let mc2 = $"($mc)^2"
                 # Try two-parent merge first, fall back to squash merge
                 let diff = (do -i { ^git diff --name-only $mc1 $mc2 } | complete)
-                if $diff.exit_code == 0 and ($diff.stdout | str trim | is-not-empty) {
+                if $diff.exit_code == 0 && ($diff.stdout | str trim | is-not-empty) {
                     $diff.stdout | lines
                 } else {
                     # Squash merge: diff against single parent
@@ -908,9 +908,9 @@ def detect-quasi-rolls [] {
             {hash: ($parts | get 0), msg: ($parts | skip 1 | str join ' ')}
         } | where {|c|
             (not ($c.msg | str starts-with "test("))
-            and (not ($c.msg | str contains "generation"))
-            and (not ($c.msg | str contains "gig@"))
-            and (not ($c.msg | str starts-with "Flake-Check:"))
+            && (not ($c.msg | str contains "generation"))
+            && (not ($c.msg | str contains "gig@"))
+            && (not ($c.msg | str starts-with "Flake-Check:"))
         })
         
         if ($commits | is-empty) { continue }
@@ -977,7 +977,7 @@ def check-quasi-roll-verification [
     
     # Detect scope (which hosts need verification)
     let scope = {
-        nixos: ($qr.files | any {|f| $f | str starts-with "hosts/" and ($f | str ends-with ".nix")})
+        nixos: ($qr.files | any {|f| $f | str starts-with "hosts/" && ($f | str ends-with ".nix")})
         home: ($qr.files | any {|f| $f | str starts-with "home/"})
         flake: ($qr.files | any {|f| $f == "flake.nix" or $f == "flake.lock"})
         docs: ($qr.files | any {|f| $f | str starts-with "docs/" or ($f | str ends-with ".md")})
@@ -995,17 +995,17 @@ def check-quasi-roll-verification [
         
         let flake_verified = if $needs_flake {
             let flake_check = (do -i { ^git log $range --oneline --grep="test(" -1 } | complete)
-            ($flake_check.exit_code == 0) and ($flake_check.stdout | str trim | is-not-empty)
+            ($flake_check.exit_code == 0) && ($flake_check.stdout | str trim | is-not-empty)
         } else { true }
         
         let nixos_verified = if $needs_nixos {
             let nixos_rebuild = (do -i { ^git log $range --oneline --grep=$"^($host): generation" -1 } | complete)
-            ($nixos_rebuild.exit_code == 0) and ($nixos_rebuild.stdout | str trim | is-not-empty)
+            ($nixos_rebuild.exit_code == 0) && ($nixos_rebuild.stdout | str trim | is-not-empty)
         } else { true }
         
         let home_verified = if $needs_home {
             let home_rebuild = (do -i { ^git log $range --oneline --grep=$"^($config.username)@($host):" -1 } | complete)
-            ($home_rebuild.exit_code == 0) and ($home_rebuild.stdout | str trim | is-not-empty)
+            ($home_rebuild.exit_code == 0) && ($home_rebuild.stdout | str trim | is-not-empty)
         } else { true }
         
         let host_verified = ($nixos_verified and $home_verified and $flake_verified)
@@ -1042,7 +1042,7 @@ def detect-quasi-roll-dependencies [
         if $other_qr.id == $quasi_id { break }  # Only consider earlier quasi-rolls
         
         let overlap = ($qr_files | where {|f| $f in $other_qr.files})
-        if ($overlap | is-not-empty) and ($other_qr.id not-in $quasi_deps) {
+        if ($overlap | is-not-empty) && ($other_qr.id not-in $quasi_deps) {
             $quasi_deps = ($quasi_deps | append $other_qr.id)
         }
     }
@@ -1061,7 +1061,7 @@ def detect-quasi-roll-dependencies [
         if $roll_files.exit_code != 0 { continue }
         
         let overlap = ($qr_files | where {|f| $f in ($roll_files.stdout | lines)})
-        if ($overlap | is-not-empty) and ($roll not-in $roll_deps) {
+        if ($overlap | is-not-empty) && ($roll not-in $roll_deps) {
             $roll_deps = ($roll_deps | append $roll)
         }
     }
@@ -1104,7 +1104,7 @@ def detect-roll-dependencies [
     # If an unmerged roll was branched from another roll (not from rolling), it depends on that roll
     let is_graduated = (check-roll-graduated $roll_branch)
     
-    if (not $is_graduated) and ($resolved != null) {
+    if (not $is_graduated) && ($resolved != null) {
         let mb_result = try {
             git merge-base $config.rolling_branch $resolved | complete
         } catch { null }
@@ -1188,7 +1188,7 @@ def detect-roll-dependencies [
                     $other_roll | str replace $config.roll_prefix '' | split row '-' | get 0 | into int
                 } catch { null }
                 
-                if ($other_num != null) and ($roll_num != null) and ($other_num < $roll_num) {
+                if ($other_num != null) && ($roll_num != null) && ($other_num < $roll_num) {
                     $dependencies = ($dependencies | append $other_roll)
                 }
             }
@@ -1201,7 +1201,7 @@ def detect-roll-dependencies [
     # this roll's baseline includes that roll's changes. This creates a transitive
     # ordering constraint — this roll cannot be promoted to main without the prior
     # roll being promoted first, since main doesn't have those changes yet.
-    if (not $basic) and ($roll_num != null) {
+    if (not $basic) && ($roll_num != null) {
         # Gather ALL roll branches (local + remote)
         let local_branches = try {
             git branch --list $"($config.roll_prefix)*" 
@@ -1225,7 +1225,7 @@ def detect-roll-dependencies [
             } catch { null }
             
             # Only lower-numbered, graduated rolls
-            if ($other_num != null) and ($other_num < $roll_num) and ($grad_map | get $r) {
+            if ($other_num != null) && ($other_num < $roll_num) && ($grad_map | get $r) {
                 if not ($dependencies | any {|d| $d == $r}) {
                     $dependencies = ($dependencies | append $r)
                 }
@@ -1305,7 +1305,7 @@ def check-roll-verification [
     # Try source 1: Look for test-all commit on the roll branch
     # Format: "test(roll/N-theme): flake=pass host=✓ ..."
     let resolved = (resolve-roll-ref $roll_branch)
-    let test_commit = if ($resolved != null) and ($resolved != "") {
+    let test_commit = if ($resolved != null) && ($resolved != "") {
         let raw = try {
             ^git log $resolved --oneline --grep=$"^test\(($roll_branch)\):" -1
         } catch { "" }
@@ -1434,7 +1434,7 @@ def check-roll-verification [
             let needs_flake = $scope.flake
             
             # If nothing at all changed (auto-detect case), skip entirely
-            if (not $needs_nixos) and (not $needs_home) and (not $needs_flake) and (not $scope.docs) {
+            if (not $needs_nixos) && (not $needs_home) && (not $needs_flake) && (not $scope.docs) {
                 $host_status = ($host_status | insert $host {
                     verified: true,
                     nixos: true,
@@ -1501,7 +1501,7 @@ def check-roll-verification [
             let needs_home = $scope.home
             
             # If nothing at all changed, skip entirely
-            if (not $needs_nixos) and (not $needs_home) and (not $scope.flake) and (not $scope.docs) {
+            if (not $needs_nixos) && (not $needs_home) && (not $scope.flake) && (not $scope.docs) {
                 $host_status = ($host_status | insert $host {
                     verified: true,
                     nixos: true,
@@ -1713,7 +1713,7 @@ def "main graduate" [
     let on_rolling = ($current == $config.rolling_branch)
     let on_stable = ($current == $config.stable_branch)
     let on_roll = ($current_roll != null)
-    let on_graduated_roll = ($on_roll and (check-roll-graduated $current_roll))
+    let on_graduated_roll = ($on_roll && (check-roll-graduated $current_roll))
     
     let mode = if $promote or $on_rolling or $on_stable {
         "promote"
@@ -1944,10 +1944,10 @@ def "main graduate" [
         for r in $with_deps {
             # For graduate mode: skip already-graduated rolls unless diverged (new commits to merge)
             # For promote mode: include all rolls (they all need to go to main)
-            if $mode == "graduate" and (check-roll-graduated $r) and not (check-roll-diverged $r) {
+            if $mode == "graduate" && (check-roll-graduated $r) and not (check-roll-diverged $r) {
                 continue
             }
-            if not ($r in $ordered) and ($r in $all_rolls) {
+            if not ($r in $ordered) && ($r in $all_rolls) {
                 $ordered = ($ordered | append $r)
             }
         }
@@ -1978,7 +1978,7 @@ def "main graduate" [
     # Check 1: Uncommitted changes (skipped with --force)
     if not $force {
         let status_raw = (do -i { ^git status --porcelain } | complete)
-        let has_uncommitted = ($status_raw.exit_code == 0 and ($status_raw.stdout | str trim | is-not-empty))
+        let has_uncommitted = ($status_raw.exit_code == 0 && ($status_raw.stdout | str trim | is-not-empty))
         
         if $has_uncommitted {
             print $"  (ansi red)✗ Uncommitted changes detected. Commit or stash first, or use --force.(ansi reset)"
@@ -2409,14 +2409,14 @@ def render-file-tree [
                     try { $o | str replace $roll_prefix "" | split row "-" | get 0 | into int } catch { null }
                 } | where {|x| $x != null} | sort)
                 let quasi = ($origins | where {|o|
-                    ($o | str starts-with "q") and ($o | str length) >= 2
+                    ($o | str starts-with "q") && ($o | str length) >= 2
                 } | sort)
                 mut label_parts = []
                 if ($nums | is-not-empty) { $label_parts = ($label_parts | append ($nums | each {|n| $n | into string} | str join ",")) }
                 if ($quasi | is-not-empty) { $label_parts = ($label_parts | append ($quasi | str join ",")) }
                 let label = ($label_parts | str join ",")
                 let max = (if ($nums | is-not-empty) { $nums | last } else { 0 })
-                let color_idx = if ($nums | is-empty) and ($quasi | is-not-empty) {
+                let color_idx = if ($nums | is-empty) && ($quasi | is-not-empty) {
                     6  # quasi-roll only (no real roll origins)
                 } else if $max <= 2 { 1 } else if $max <= 4 { 2 } else if $max <= 6 { 3 } else { 4 }
                 {label: $label, color: $color_idx}
@@ -2622,7 +2622,7 @@ def "main status" [] {
     
     # ── On main/develop: show table at top before prompt ──────────
     let on_roll = ($current_roll != null)
-    let on_main_dev = not $on_roll and (($current_branch == $config.stable_branch) or ($current_branch == $config.rolling_branch))
+    let on_main_dev = not $on_roll && (($current_branch == $config.stable_branch) or ($current_branch == $config.rolling_branch))
     
     if $on_main_dev {
         show-roll-summary-table $config $current_roll $all_roll_branches
@@ -2750,7 +2750,7 @@ def "main status" [] {
     print ""
     
     # ── Develop / Non-Roll Branch Status ──────────────────────────
-    let is_non_roll = ($current_branch != $config.rolling_branch) and (not ($current_branch | str starts-with "roll/"))
+    let is_non_roll = ($current_branch != $config.rolling_branch) && (not ($current_branch | str starts-with "roll/"))
     if $is_non_roll {
         # Non-roll, non-develop branch
         print ""
@@ -3140,7 +3140,7 @@ def "main list" [] {
             if $info.verified {
                 if $info.required.nixos { $parts = ($parts | append "N:✓") }
                 if $info.required.home { $parts = ($parts | append "H:✓") }
-                if (not $info.required.nixos) and (not $info.required.home) {
+                if (not $info.required.nixos) && (not $info.required.home) {
                     $parts = ($parts | append "auto")
                 }
                 print $"($parts | str join ' ') (ansi green)verified(ansi reset)"
