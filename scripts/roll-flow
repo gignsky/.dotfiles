@@ -950,7 +950,7 @@ def check-quasi-roll-promoted [
     # Check if all commits in this quasi-roll exist on main
     let all_on_main = ($qr.commits | all {|c|
         let check = (do -i { ^git branch $config.stable_branch --contains $c.hash } | complete)
-        $check.exit_code == 0
+        $check.exit_code == 0 and ($check.stdout | str trim | is-not-empty)
     })
     
     $all_on_main
@@ -3038,6 +3038,21 @@ def "main list" [] {
     
     # Show the summary table with deps column
     show-roll-summary-table $config $current_roll $all_roll_branches --deps
+    
+    # Show quasi-rolls if any
+    let quasi_rolls = (detect-quasi-rolls)
+    if not ($quasi_rolls | is-empty) {
+        print ""
+        print $"=== Quasi-Rolls: (ansi yellow)($quasi_rolls | length) direct-to-($config.rolling_branch) commit group\(s\) ==="
+        print ""
+        
+        for qr in $quasi_rolls {
+            let promoted = (check-quasi-roll-promoted $qr.id)
+            let status = if $promoted { $"(ansi green)promoted(ansi reset)" } else { $"(ansi yellow)pending(ansi reset)" }
+            print $"  ($qr.id): ($qr.theme) — (ansi cyan)($qr.count) commit\(s\)(ansi reset) after ($qr.after_merge) — ($status)"
+        }
+        print ""
+    }
     
     # Interactive drill-down
     if not (is-terminal --stdin) {
