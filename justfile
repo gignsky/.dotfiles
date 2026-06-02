@@ -80,6 +80,7 @@ clean:
   rm -rfv ~/.cache/nvf/
   rm -rfv ~/.cache/starship/
   rm -rfv ~/.config/zsh/zplug
+  rm -rfv ~/.config/roll-flow
   rm -rfv result
   rm -rfv ~/.local/share/nvf/themery/state.json
   
