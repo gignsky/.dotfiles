@@ -2665,9 +2665,10 @@ def "main list" [] {
         })
         
         # Find roll by number (match roll/N- prefix)
+        let config_local = (get-config)
         let match = ($all_roll_branches | where {|b|
             try {
-                let n = ($b | str replace $"(get-config).roll_prefix" "" | split row "-" | get 0 | into int)
+                let n = ($b | str replace $config_local.roll_prefix "" | split row "-" | get 0 | into int)
                 $n == $req_num
             } catch { false }
         })
