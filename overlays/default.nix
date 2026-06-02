@@ -7,13 +7,6 @@
   # This one brings our custom packages from the 'pkgs' directory
   additions = final: _prev: import ../pkgs { pkgs = final; };
 
-  gigpkgs_packages = final: _prev: {
-    gig = import inputs.gigpkgs {
-      inherit (final.stdenv.hostPlatform) system;
-      config.allowUnfree = true;
-    };
-  };
-
   # # This one contains whatever you want to overlay
   # # You can change versions, add patches, set compilation flags, anything really.
   # # https://wiki.nixos.org/wiki/Overlays

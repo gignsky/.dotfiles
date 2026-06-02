@@ -155,8 +155,8 @@
           configLib
           ;
       };
-      customPkgs = import ./pkgs { pkgs = nixpkgs.legacyPackages.${system}; };
-      pkgs = nixpkgs.legacyPackages.${system} // customPkgs;
+      customPkgs = import ./pkgs { pkgs = inputs.gigpkgs.legacyPackages.${system}; };
+      pkgs = inputs.gigpkgs.legacyPackages.${system} // customPkgs;
     in
     {
       # NixOS configuration entrypoint
