@@ -1175,22 +1175,24 @@ def detect-roll-dependencies [
         }
     }
 
-    # Method 2b: Explicit merge-from detection
-    # If this roll has a merge commit that pulled in another roll's commits, that roll is a
-    # real dependency regardless of roll-number ordering (e.g. roll/5 merged roll/9 → roll/5
-    # depends on roll/9). Uses the ^2 parent of each merge commit to identify the source branch.
+    # Method 2b: Explicit merge-from detection (via merge commit subject parsing)
+    # Parses default "Merge branch 'X' into Y" messages and registers X as a dependency
+    # if X matches a known roll branch name. This applies regardless of roll-number ordering
+    # (e.g. roll/5 merged roll/9 → roll/5 depends on roll/9). Ancestry-based checks were
+    # too permissive — a merge of a non-roll branch could coincidentally share history with
+    # other rolls and produce false positives. Subject parsing is precise.
     if ($resolved != null) {
-        let merge_hashes_result = (do -i {
-            ^git log --merges --format='%H' $"($config.rolling_branch)..($resolved)"
+        let merge_subjects_result = (do -i {
+            ^git log --merges --format='%s' $"($config.rolling_branch)..($resolved)"
         } | complete)
 
-        if $merge_hashes_result.exit_code == 0 {
-            let merge_hashes = (
-                $merge_hashes_result.stdout
+        if $merge_subjects_result.exit_code == 0 {
+            let merge_subjects = (
+                $merge_subjects_result.stdout
                 | lines
                 | where {|l| ($l | str trim | is-not-empty)}
             )
-            let all_rolls_local = (
+            let local_rolls = (
                 do -i { ^git branch --list $"($config.roll_prefix)*" } | complete
                 | if $in.exit_code == 0 {
                     $in.stdout | lines
@@ -1198,26 +1200,24 @@ def detect-roll-dependencies [
                     | where {|l| $l | is-not-empty}
                 } else { [] }
             )
+            let remote_rolls = (
+                do -i { ^git branch -r } | complete
+                | if $in.exit_code == 0 {
+                    $in.stdout | lines | each {|l| $l | str trim}
+                    | where {|l| $l | str starts-with $"origin/($config.roll_prefix)"}
+                    | each {|l| $l | str replace 'origin/' ''}
+                } else { [] }
+            )
+            let known_rolls = ($local_rolls | append $remote_rolls | uniq)
 
-            for merge_hash in $merge_hashes {
-                let p2_result = (do -i { ^git rev-parse $"($merge_hash)^2" } | complete)
-                if $p2_result.exit_code != 0 { continue }
-                let p2_hash = ($p2_result.stdout | str trim)
-
-                for other_roll in $all_rolls_local {
-                    if $other_roll == $roll_branch { continue }
-                    if ($dependencies | any {|d| $d == $other_roll}) { continue }
-
-                    let other_resolved = (resolve-roll-ref $other_roll)
-                    if ($other_resolved == null) { continue }
-
-                    # Is p2 an ancestor of (or identical to) other_roll's current tip?
-                    # If yes, this merge brought in other_roll's commits.
-                    let is_anc = (do -i {
-                        ^git merge-base --is-ancestor $p2_hash $other_resolved
-                    } | complete)
-                    if $is_anc.exit_code == 0 {
-                        $dependencies = ($dependencies | append $other_roll)
+            for subject in $merge_subjects {
+                let match = ($subject | parse --regex "^Merge branch '(?P<branch>[^']+)'")
+                if ($match | length) > 0 {
+                    let merged_branch = ($match | get 0 | get branch)
+                    if ($merged_branch in $known_rolls) and ($merged_branch != $roll_branch) {
+                        if not ($dependencies | any {|d| $d == $merged_branch}) {
+                            $dependencies = ($dependencies | append $merged_branch)
+                        }
                     }
                 }
             }
