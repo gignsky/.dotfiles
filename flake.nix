@@ -138,6 +138,8 @@
     let
       inherit (self) outputs;
       lib = inputs.gigpkgs.lib;
+      # HM-aware lib: gigpkgs lib (scanPaths etc.) + lib.hm so HM modules get both
+      hmLib = lib.extend (_: _: { hm = inputs.home-manager.lib.hm; });
       system = "x86_64-linux";
       # forAllSystems = nixpkgs.lib.genAttrs [
       #   "x86_64-linux"
@@ -254,6 +256,7 @@
               configLib
               system
               ;
+            lib = hmLib;
             overlays = import ./overlays { inherit inputs; };
             hostname = "wsl";
             # flakeRoot = self;
@@ -275,6 +278,7 @@
               configLib
               system
               ;
+            lib = hmLib;
             overlays = import ./overlays { inherit inputs; };
             hostname = "spacedock";
             # flakeRoot = self;
@@ -293,6 +297,7 @@
               configLib
               system
               ;
+            lib = hmLib;
             overlays = import ./overlays { inherit inputs; };
             hostname = "merlin";
           };
@@ -310,6 +315,7 @@
               configLib
               system
               ;
+            lib = hmLib;
             overlays = import ./overlays { inherit inputs; };
             hostname = "ganoslal";
           };
