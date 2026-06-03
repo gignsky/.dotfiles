@@ -4,17 +4,16 @@
   inputs = {
     #################### Official NixOS and HM Package Sources ####################
     # Stable
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+    # nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+    gigpkgs.url = "github:gignsky/gigpkgs";
+    nixpkgs.follows = "gigpkgs/nixos-stable";
     # Unstable
-    nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs-unstable.follows = "gigpkgs/nixos-unstable";
     # Local
     # nixpkgs-local.url = "git+file:///home/gig/local_repos/nixpkgs";
 
     # Home manager
-    home-manager = {
-      url = "github:nix-community/home-manager/release-26.05";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    home-manager.follows = "gigpkgs/home-manager";
 
     # wsl stuff
     nixos-wsl = {
@@ -155,15 +154,8 @@
           configLib
           ;
       };
-      customPkgs = import ./pkgs { inherit pkgs; };
-      pkgs =
-        import nixpkgs {
-          inherit system;
-          config = {
-            allowUnfree = true;
-          };
-        }
-        // customPkgs;
+      customPkgs = import ./pkgs { pkgs = inputs.gigpkgs.legacyPackages.${system}; };
+      pkgs = inputs.gigpkgs.legacyPackages.${system} // customPkgs;
     in
     {
       # NixOS configuration entrypoint
