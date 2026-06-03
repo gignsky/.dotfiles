@@ -302,11 +302,11 @@
         "pre-commit-hooks": "pre-commit-hooks"
       },
       "locked": {
-        "lastModified": 1780482064,
-        "narHash": "sha256-e+OQ7pThvlexPVIWx/fmDL4+Yg7FXwAOt0iX+Q5l3LI=",
+        "lastModified": 1780482362,
+        "narHash": "sha256-W0R/Ftd/CJUIDahkdsQVALpt8ZjlUsIAmAMo6C0sIKg=",
         "owner": "gignsky",
         "repo": "gigpkgs",
-        "rev": "22c0c1d96acc904541b1acff2edd6638ab11a520",
+        "rev": "63ffc3e2e030addd7f4a0053f4d5e5796c44ce97",
         "type": "github"
       },
       "original": {
