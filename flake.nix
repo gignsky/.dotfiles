@@ -262,7 +262,10 @@
             # flakeRoot = self;
           };
           # > Our main home-manager configuration file <
-          modules = [ ./home/gig/wsl.nix ];
+          modules = [
+            ./home/gig/wsl.nix
+            inputs.gigpkgs.homeModules.gigpkgs-news
+          ];
           # config = {
           #   isWSL = true;
           # };
@@ -284,7 +287,10 @@
             # flakeRoot = self;
           };
           # > Our main home-manager configuration file <
-          modules = [ ./home/gig/spacedock.nix ];
+          modules = [
+            ./home/gig/spacedock.nix
+            inputs.gigpkgs.homeModules.gigpkgs-news
+          ];
         };
 
         # merlin - unused with merlin having a wsl instance
@@ -302,7 +308,10 @@
             hostname = "merlin";
           };
           # > Our main home-manager configuration file <
-          modules = [ ./home/gig/merlin.nix ];
+          modules = [
+            ./home/gig/merlin.nix
+            inputs.gigpkgs.homeModules.gigpkgs-news
+          ];
         };
 
         # ganoslal - unused with ganoslal having a wsl instance
@@ -320,7 +329,10 @@
             hostname = "ganoslal";
           };
           # > Our main home-manager configuration file <
-          modules = [ ./home/gig/ganoslal.nix ];
+          modules = [
+            ./home/gig/ganoslal.nix
+            inputs.gigpkgs.homeModules.gigpkgs-news
+          ];
         };
       };
 
