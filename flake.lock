@@ -292,7 +292,7 @@
         "nixos-unstable": "nixos-unstable",
         "nixpkgs": [
           "gigpkgs",
-          "nixos-unstable"
+          "nixos-stable"
         ],
         "nixpkgs-master": [
           "gigpkgs",
@@ -302,11 +302,11 @@
         "pre-commit-hooks": "pre-commit-hooks"
       },
       "locked": {
-        "lastModified": 1780434003,
-        "narHash": "sha256-2fCOSUKhtjLQ0dqUXh+/gdrkBMHkI32ayeHkydutzig=",
+        "lastModified": 1780476085,
+        "narHash": "sha256-VZY3QqhIuMdnn7MXLS7F7If3QM0SIF29WCmxDLycGEo=",
         "owner": "gignsky",
         "repo": "gigpkgs",
-        "rev": "d14aa6e2d532975772ce045229a5cd82a5d4336a",
+        "rev": "9a5a38fc9fbb786a9c04fe8275d3f00d4f52ea21",
         "type": "github"
       },
       "original": {
@@ -566,11 +566,11 @@
     },
     "nixos-2605": {
       "locked": {
-        "lastModified": 1779971959,
-        "narHash": "sha256-R5nauXyqyfRUFiZycFFZdkF7wl6eaUpPLst35+2nJQY=",
+        "lastModified": 1780203844,
+        "narHash": "sha256-K5sT4jTpGs15ADhviMKNBH38REpPf5Q6mM1+N6cArVE=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "ec942ba042dad5ef097e2ef3a3effc034241f011",
+        "rev": "b51242d7d43689db2f3be91bd05d5b24fbb469c4",
         "type": "github"
       },
       "original": {
@@ -641,7 +641,8 @@
       "inputs": {
         "flake-compat": "flake-compat_4",
         "nixpkgs": [
-          "nixpkgs"
+          "gigpkgs",
+          "nixos-stable"
         ]
       },
       "locked": {
@@ -845,7 +846,8 @@
         "flake-compat": "flake-compat_5",
         "gitignore": "gitignore_2",
         "nixpkgs": [
-          "nixpkgs"
+          "gigpkgs",
+          "nixos-stable"
         ]
       },
       "locked": {
@@ -894,8 +896,7 @@
         "nixos-hardware": "nixos-hardware",
         "nixos-wsl": "nixos-wsl",
         "nixpkgs": [
-          "gigpkgs",
-          "nixos-stable"
+          "gigpkgs"
         ],
         "nixpkgs-unstable": [
           "gigpkgs",
@@ -972,7 +973,8 @@
     "sops-nix": {
       "inputs": {
         "nixpkgs": [
-          "nixpkgs"
+          "gigpkgs",
+          "nixos-stable"
         ]
       },
       "locked": {
@@ -1038,7 +1040,8 @@
     "treefmt-nix": {
       "inputs": {
         "nixpkgs": [
-          "nixpkgs"
+          "gigpkgs",
+          "nixos-stable"
         ]
       },
       "locked": {
@@ -1080,7 +1083,8 @@
       "inputs": {
         "flake-utils": "flake-utils",
         "nixpkgs": [
-          "nixpkgs"
+          "gigpkgs",
+          "nixos-stable"
         ]
       },
       "locked": {

@@ -27,7 +27,7 @@
     makemkv
     steam
     # anydesk
-    bambu-studio
+    # bambu-studio
     claude-desktop
   ];
 
