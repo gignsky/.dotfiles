@@ -84,7 +84,7 @@
     gigvim = {
       url = "github:gignsky/gigvim";
       inputs = {
-        gigdot.follows = ""; # Break circular dependency
+        gigpkgs.follows = "gigpkgs"; # Break circular dependency
       };
     };
 
