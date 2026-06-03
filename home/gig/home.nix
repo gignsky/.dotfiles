@@ -21,7 +21,7 @@
     ./common/optional/direnv.nix
     ./common/optional/bat.nix
     # direnvModule
-    inputs.gigpkgs.homeModules.gigpkgs-news
+    inputs.gigpkgs.homeModules.gignews
   ];
   nix = {
     package = lib.mkDefault pkgs.nix;
