@@ -7,9 +7,9 @@
     # nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     gigpkgs = {
       url = "github:gignsky/gigpkgs/scanPaths-init";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "gigpkgs/nixos-stable";
     };
-    nixpkgs.follows = "gigpkgs/nixos-stable";
+    nixpkgs.follows = "gigpkgs";
     # Unstable
     nixpkgs-unstable.follows = "gigpkgs/nixos-unstable";
     # Local
@@ -21,7 +21,7 @@
     # wsl stuff
     nixos-wsl = {
       url = "github:nix-community/NixOS-WSL/main";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "gigpkgs/nixos-stable";
     };
 
     # nixos-hardware, to fix hardware issues and firmware for specific machines
@@ -32,20 +32,20 @@
     # treefmt-nix.url = "github:numtide/treefmt-nix";
     treefmt-nix = {
       url = "github:numtide/treefmt-nix";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "gigpkgs/nixos-stable";
     };
 
     # Secrets management
     sops-nix = {
       url = "github:mic92/sops-nix/master";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "gigpkgs/nixos-stable";
     };
 
     # Pre-commit hooks for managing Git hooks declaratively
     pre-commit-hooks = {
       # url = "github:cachix/git-hooks.nix/46d55f0aeb1d567a78223e69729734f3dca25a85";
       url = "github:cachix/git-hooks.nix";
-      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.nixpkgs.follows = "gigpkgs/nixos-stable";
     };
 
     nixos-cli = {
@@ -113,7 +113,7 @@
     vscode-server = {
       url = "github:nix-community/nixos-vscode-server";
       inputs = {
-        nixpkgs.follows = "nixpkgs";
+        nixpkgs.follows = "gigpkgs/nixos-stable";
         # flake-utils.follows = "flake-utils";
       };
     };
@@ -137,7 +137,7 @@
     }@inputs:
     let
       inherit (self) outputs;
-      inherit (nixpkgs) lib;
+      lib = inputs.gigpkgs.lib;
       system = "x86_64-linux";
       # forAllSystems = nixpkgs.lib.genAttrs [
       #   "x86_64-linux"
@@ -155,6 +155,7 @@
           nixpkgs
           configVars
           configLib
+          lib
           ;
       };
       customPkgs = import ./pkgs { pkgs = inputs.gigpkgs.legacyPackages.${system}; };
