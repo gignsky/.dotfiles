@@ -302,15 +302,16 @@
         "pre-commit-hooks": "pre-commit-hooks"
       },
       "locked": {
-        "lastModified": 1780434003,
-        "narHash": "sha256-2fCOSUKhtjLQ0dqUXh+/gdrkBMHkI32ayeHkydutzig=",
+        "lastModified": 1780471233,
+        "narHash": "sha256-/eCgOXtCKfON7MBX4qR4h+T/tupmlNpZp9qG9vwEmU4=",
         "owner": "gignsky",
         "repo": "gigpkgs",
-        "rev": "d14aa6e2d532975772ce045229a5cd82a5d4336a",
+        "rev": "c1768b054a1717994b0bff1a1b48a8ec7a6c2165",
         "type": "github"
       },
       "original": {
         "owner": "gignsky",
+        "ref": "scanPaths-init",
         "repo": "gigpkgs",
         "type": "github"
       }
@@ -566,11 +567,11 @@
     },
     "nixos-2605": {
       "locked": {
-        "lastModified": 1779971959,
-        "narHash": "sha256-R5nauXyqyfRUFiZycFFZdkF7wl6eaUpPLst35+2nJQY=",
+        "lastModified": 1780203844,
+        "narHash": "sha256-K5sT4jTpGs15ADhviMKNBH38REpPf5Q6mM1+N6cArVE=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "ec942ba042dad5ef097e2ef3a3effc034241f011",
+        "rev": "b51242d7d43689db2f3be91bd05d5b24fbb469c4",
         "type": "github"
       },
       "original": {
