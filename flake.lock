@@ -291,7 +291,8 @@
         ],
         "nixos-unstable": "nixos-unstable",
         "nixpkgs": [
-          "nixpkgs"
+          "gigpkgs",
+          "nixos-stable"
         ],
         "nixpkgs-master": [
           "gigpkgs",
@@ -641,7 +642,8 @@
       "inputs": {
         "flake-compat": "flake-compat_4",
         "nixpkgs": [
-          "nixpkgs"
+          "gigpkgs",
+          "nixos-stable"
         ]
       },
       "locked": {
@@ -845,7 +847,8 @@
         "flake-compat": "flake-compat_5",
         "gitignore": "gitignore_2",
         "nixpkgs": [
-          "nixpkgs"
+          "gigpkgs",
+          "nixos-stable"
         ]
       },
       "locked": {
@@ -894,8 +897,7 @@
         "nixos-hardware": "nixos-hardware",
         "nixos-wsl": "nixos-wsl",
         "nixpkgs": [
-          "gigpkgs",
-          "nixos-stable"
+          "gigpkgs"
         ],
         "nixpkgs-unstable": [
           "gigpkgs",
@@ -972,7 +974,8 @@
     "sops-nix": {
       "inputs": {
         "nixpkgs": [
-          "nixpkgs"
+          "gigpkgs",
+          "nixos-stable"
         ]
       },
       "locked": {
@@ -1038,7 +1041,8 @@
     "treefmt-nix": {
       "inputs": {
         "nixpkgs": [
-          "nixpkgs"
+          "gigpkgs",
+          "nixos-stable"
         ]
       },
       "locked": {
@@ -1080,7 +1084,8 @@
       "inputs": {
         "flake-utils": "flake-utils",
         "nixpkgs": [
-          "nixpkgs"
+          "gigpkgs",
+          "nixos-stable"
         ]
       },
       "locked": {
