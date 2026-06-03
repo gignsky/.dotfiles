@@ -6,7 +6,7 @@
     # Stable
     # nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     gigpkgs = {
-      url = "github:gignsky/gigpkgs/scanPaths-init";
+      url = "github:gignsky/gigpkgs";
       inputs.nixpkgs.follows = "gigpkgs/nixos-stable";
     };
     nixpkgs.follows = "gigpkgs";
