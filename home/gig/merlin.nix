@@ -27,7 +27,7 @@
     makemkv
     steam
     # anydesk
-    bambu-studio
+    # bambu-studio
   ];
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
