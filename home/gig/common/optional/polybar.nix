@@ -191,7 +191,7 @@
       "module/battery" = {
         type = "internal/battery";
         battery = "BAT1";
-        adapter = "ACAD";
+        adapter = "AC1";
         full-at = 98;
 
         format-charging = "<animation-charging> <label-charging>";
