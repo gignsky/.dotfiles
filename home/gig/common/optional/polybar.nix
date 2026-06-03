@@ -35,8 +35,8 @@
 
         # Font configuration
         font-0 = "DejaVu Sans:size=11;2";
-        font-1 = "Font Awesome 6 Free:style=Solid:size=11;2";
-        font-2 = "Font Awesome 6 Brands:size=11;2";
+        font-1 = "Font Awesome 7 Free:style=Solid:size=11;2";
+        font-2 = "Font Awesome 7 Brands:size=11;2";
 
         # Module layout
         modules-left = "bspwm";
@@ -160,6 +160,8 @@
         interval = 3;
 
         format-connected = "<ramp-signal> <label-connected>";
+        format-connected-prefix = "WiFi: ";
+        format-connected-prefix-foreground = "#88C0D0";
         label-connected = "%essid%";
 
         format-disconnected = "";
@@ -169,7 +171,7 @@
         ramp-signal-2 = "";
         ramp-signal-3 = "";
         ramp-signal-4 = "";
-        ramp-signal-foreground = "#88C0D0";
+        ramp-signal-foreground = "#D8DEE9";
       };
 
       # Ethernet module
@@ -188,38 +190,39 @@
       # Battery module (for laptops)
       "module/battery" = {
         type = "internal/battery";
-        battery = "BAT0";
-        adapter = "ADP1";
+        battery = "BAT1";
+        adapter = "AC1";
         full-at = 98;
 
         format-charging = "<animation-charging> <label-charging>";
-        format-discharging = "<animation-discharging> <label-discharging>";
+        format-charging-prefix = "BAT: ";
+        format-charging-prefix-foreground = "#88C0D0";
+        label-charging = "%percentage%%";
+
+        format-discharging = "<ramp-capacity> <label-discharging>";
+        format-discharging-prefix = "BAT: ";
+        format-discharging-prefix-foreground = "#88C0D0";
+        label-discharging = "%percentage%%";
+
         format-full-prefix = "BAT: ";
         format-full-prefix-foreground = "#A3BE8C";
         format-full = "<label-full>";
+        label-full = "%percentage%%";
 
-        ramp-capacity-0 = "";
-        ramp-capacity-1 = "";
-        ramp-capacity-2 = "";
-        ramp-capacity-3 = "";
-        ramp-capacity-4 = "";
-        ramp-capacity-foreground = "#88C0D0";
+        ramp-capacity-0 = "!"; # Critical - below 10%
+        ramp-capacity-1 = "▂"; # Low - 10-25%
+        ramp-capacity-2 = "▄"; # Medium - 25-50%
+        ramp-capacity-3 = "▆"; # Good - 50-75%
+        ramp-capacity-4 = "█"; # Full - 75-100%
+        ramp-capacity-foreground = "#D8DEE9";
 
-        animation-charging-0 = "";
-        animation-charging-1 = "";
-        animation-charging-2 = "";
-        animation-charging-3 = "";
-        animation-charging-4 = "";
+        animation-charging-0 = "⚡"; # Charging bolt
+        animation-charging-1 = "⚡"; # Charging bolt
+        animation-charging-2 = "⚡"; # Charging bolt
+        animation-charging-3 = "⚡"; # Charging bolt
+        animation-charging-4 = "⚡"; # Charging bolt
         animation-charging-foreground = "#A3BE8C";
         animation-charging-framerate = 750;
-
-        animation-discharging-0 = "";
-        animation-discharging-1 = "";
-        animation-discharging-2 = "";
-        animation-discharging-3 = "";
-        animation-discharging-4 = "";
-        animation-discharging-foreground = "#BF616A";
-        animation-discharging-framerate = 750;
       };
 
       # Global WM settings

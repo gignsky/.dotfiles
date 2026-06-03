@@ -1,7 +1,7 @@
-{ configLib, ... }:
+{ lib, ... }:
 # let
 #   configLib = import (flakeRoot + /lib) { inherit lib; };
 # in
 {
-  imports = configLib.scanPaths ./.;
+  imports = lib.scanPaths ./.;
 }

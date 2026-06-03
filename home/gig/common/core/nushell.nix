@@ -2,6 +2,7 @@
   pkgs,
   inputs,
   outputs,
+  lib,
   configLib,
   ...
 }:
@@ -13,7 +14,7 @@ let
 
   # Utilizes the provided configLib.scanPaths function to read all .nu files
   # in the directory and concatenate their contents into a single string.
-  customNuFunctions = configLib.scanPathsNuShell nuResourcesPath;
+  customNuFunctions = lib.scanPathsNuShell nuResourcesPath;
 in
 {
   # overlays

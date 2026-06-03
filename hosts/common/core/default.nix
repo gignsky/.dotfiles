@@ -1,12 +1,12 @@
 {
-  configLib,
+  lib,
   pkgs,
   inputs,
   ...
 }:
 
 {
-  imports = configLib.scanPaths ./.;
+  imports = lib.scanPaths ./.;
   # ++ [ inputs.home-manager.nixosModules.home-manager ] # TODO: IMPORT THIS when home-manager is integrated as a module
   # ++ (builtins.attrValues outputs.nixosModules); # TODO: IMPORT THIS when implementing the modules subdirectory
 
