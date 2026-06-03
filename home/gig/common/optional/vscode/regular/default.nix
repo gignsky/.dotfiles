@@ -1,5 +1,5 @@
 { ... }:
 
 {
-  imports = configLib.scanPaths ./.;
+  imports = lib.scanPaths ./.;
 }
