@@ -1,6 +1,6 @@
 { inputs, ... }:
 {
   nix.registry = {
-    gigpgks.flake = inputs.gigpkgs;
+    nixpkgs.flake = inputs.nixpkgs;
   };
 }
