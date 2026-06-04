@@ -118,7 +118,7 @@ clean:
   fi
   
   # Quick results cleanup
-  nix run .#quick-results
+  nix run gigpkgs#quick-results
   
   # Post-clean failsafe logging
   @echo "✅ Smart clean complete - OpenCode history preserved, configuration reset for rebuild"
@@ -263,7 +263,7 @@ build *args:
 
 post-build:
 	@nix-shell -p lolcat --run 'echo "Build Finished." | lolcat 2> /dev/null'
-	nix run .#quick-results
+	nix run gigpkgs#quick-results
 
 #
 # test:
