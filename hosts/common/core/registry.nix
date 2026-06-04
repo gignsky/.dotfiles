@@ -46,8 +46,8 @@
 
         debugger-on-trace = true; # default: false
         debugger-on-warn = true; # default: false -- must be on for abort-on-warn to be enabled
-        diff-hook = pkgs.nix-diff;
-        run-diff-hook = true;
+        # diff-hook = pkgs.nix-diff;
+        # run-diff-hook = true;
 
         download-attempts = 10;
         eval-profiler = pkgs.flamegraph;
