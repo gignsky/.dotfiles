@@ -54,7 +54,6 @@ in
         overlay use ${inputs.git-aliases}/git-aliases.nu
 
         # Load roll-flow completions
-        use ${pkgs.roll-flow}/share/nu/completions/roll-flow.nu *
 
         # Direnv integration
         $env.config = ($env.config? | default {})
