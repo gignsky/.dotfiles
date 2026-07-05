@@ -504,8 +504,7 @@
             quick-results
             upjust
             locker
-            # roll-flow
-            # rf
+            roll-flow
             #necessary for bootstrapping
             ripgrep
             ;
