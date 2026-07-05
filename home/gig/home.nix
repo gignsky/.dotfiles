@@ -61,8 +61,8 @@
     man-db
     # shell packages defined in this repo
     supertree
-    locker
-    # quick-results
+    quick-results
+    fupdate
     upjust
     # cargo-update
 
