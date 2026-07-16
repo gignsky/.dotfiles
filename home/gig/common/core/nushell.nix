@@ -53,8 +53,6 @@ in
       extraConfig = ''
         overlay use ${inputs.git-aliases}/git-aliases.nu
 
-        # Load roll-flow completions
-
         # Direnv integration
         $env.config = ($env.config? | default {})
         $env.config.hooks = ($env.config.hooks? | default {})
