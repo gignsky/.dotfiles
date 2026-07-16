@@ -507,7 +507,6 @@
             roll-flow
             #necessary for bootstrapping
             ripgrep
-            gignews
             ;
         };
 
