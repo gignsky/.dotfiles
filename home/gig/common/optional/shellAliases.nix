@@ -32,6 +32,7 @@
   nb = "nix build";
   ndw = "nix develop .#windows -c nu";
   nfc = "nix flake check --print-build-logs";
+  nfc = "nix flake metadata";
   ns = "nix shell";
 
   # Agent calls directly
