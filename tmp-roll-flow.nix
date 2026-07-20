@@ -21,6 +21,7 @@ let
   # vars rather than hardcoding (gignsky/roll-flow#55). `vars/hosts.nix` is a
   # plain { <host> = <bool>; } map — exactly roll-flow's `host_active`.
   configVars = import (configLib.relativeToRoot "vars") { inherit lib; };
+  userNom = configVars.username;
   hostActive = import (configLib.relativeToRoot "vars/hosts.nix");
 in
 {
@@ -44,7 +45,7 @@ in
       rolling_branch = "rolling";
       stable_branch = "main";
       roll_prefix = "roll/";
-      username = configVars.username;
+      username = userNom;
       hosts = builtins.attrNames hostActive; # [ ganoslal merlin spacedock wsl ]
       host_active = hostActive; # verbatim from vars/hosts.nix
     };
