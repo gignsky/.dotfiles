@@ -25,8 +25,8 @@ in
     magic-wormhole
     wget
     screen
+    fastfetch
     # just
-    # neofetch
 
     # nixos-unstable packages
     unstable.just
