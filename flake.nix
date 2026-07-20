@@ -80,13 +80,6 @@
     #   };
     # };
 
-    gigvim = {
-      url = "github:gignsky/gigvim";
-      inputs = {
-        gigpkgs.follows = "gigpkgs"; # Break circular dependency
-      };
-    };
-
     # ccc = {
     #   url = "github:gignsky/credit-card-convenience";
     #   inputs = {
