@@ -26,7 +26,6 @@ in
     wget
     screen
     fastfetch
-    # just
 
     # nixos-unstable packages
     unstable.just
