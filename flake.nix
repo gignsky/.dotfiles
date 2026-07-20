@@ -40,8 +40,9 @@
     # Pre-commit hooks for managing Git hooks declaratively
     pre-commit-hooks = {
       # url = "github:cachix/git-hooks.nix/46d55f0aeb1d567a78223e69729734f3dca25a85";
-      url = "github:cachix/git-hooks.nix";
-      inputs.nixpkgs.follows = "nixpkgs";
+      follows = "nixpkgs/pre-commit-hooks";
+      # url = "github:cachix/git-hooks.nix";
+      # inputs.nixpkgs.follows = "nixpkgs";
     };
 
     nixos-cli = {
