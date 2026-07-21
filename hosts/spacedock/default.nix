@@ -37,13 +37,15 @@
     networkmanager.enable = true;
   };
 
-  # Bootloader — legacy BIOS (GRUB on the primary disk). Carried from
-  # dot-spacedock; adjust `device` if the disk differs after regeneration.
-  boot.loader.grub = {
-    enable = true;
-    device = "/dev/sda";
+  boot = {
+    # Bootloader — legacy BIOS (GRUB on the primary disk). Carried from
+    # dot-spacedock; adjust `device` if the disk differs after regeneration.
+    loader.grub = {
+      enable = true;
+      device = "/dev/sda";
+    };
+    kernelPackages = lib.mkDefault pkgs.linuxPackages_6_12;
   };
-  boot.kernelPackages = lib.mkDefault pkgs.linuxPackages_6_12;
 
   # gigpkgs container engine — the module is injected in flake.nix as
   # `inputs.nixpkgs.nixosModules.containers`. Provides the OCI runtime for
