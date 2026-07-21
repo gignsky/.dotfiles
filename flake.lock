@@ -323,7 +323,7 @@
       "inputs": {
         "nixpkgs": [
           "nixpkgs",
-          "nixos-stable"
+          "nixos-2605"
         ]
       },
       "locked": {
@@ -718,7 +718,7 @@
         "nixos-unstable": "nixos-unstable",
         "nixpkgs": [
           "nixpkgs",
-          "nixpkgs-master"
+          "nixos-2605"
         ],
         "nixpkgs-master": [
           "nixpkgs",
@@ -728,11 +728,11 @@
         "pre-commit-hooks": "pre-commit-hooks"
       },
       "locked": {
-        "lastModified": 1784588828,
-        "narHash": "sha256-6j0SexRfLXJspiBfyX/Cww+2OeXfJru6UnZKVNy9zIU=",
+        "lastModified": 1784603212,
+        "narHash": "sha256-+5RiQqaPxzHEOAha7LtEvxUHCMhfphfu6r5rXbjI3qQ=",
         "owner": "gignsky",
         "repo": "gigpkgs",
-        "rev": "3bc2d9c4d1de7b4bf333e071529d020f4b624f67",
+        "rev": "c7e641bf928251d9d15ba5f58b67dde7bd20aba1",
         "type": "github"
       },
       "original": {
