@@ -493,6 +493,7 @@
             locker
             #necessary for bootstrapping
             ripgrep
+            roll-flow
             ;
         };
 
