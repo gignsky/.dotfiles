@@ -100,13 +100,7 @@
     # Flake Utils (used internally by some other utilities and locked to this one version for sanities sake)
     # flake-utils.url = "github:numtide/flake-utils";
 
-    vscode-server = {
-      url = "github:nix-community/nixos-vscode-server";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        # flake-utils.follows = "flake-utils";
-      };
-    };
+    vscode-server.url = "github:nix-community/nixos-vscode-server";
 
     # flake-iter.url = "github:determinatesystems/flake-iter";
 
