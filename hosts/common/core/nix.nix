@@ -37,7 +37,6 @@ let
     "gigos-2605" = gigpkgsRef "gigos-26.05";
     "gigos-stable" = gigpkgsRef "gigos-stable";
     "gigpkgs-unstable" = gigpkgsRef "gigpkgs-unstable";
-    "gigpkgs-2605" = gigpkgsRef "gigpkgs-26.05";
     "gigpkgs-stable" = gigpkgsRef "gigpkgs-stable";
   };
 in
