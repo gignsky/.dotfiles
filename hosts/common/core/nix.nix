@@ -38,6 +38,7 @@ let
     "gigos-stable" = gigpkgsRef "gigos-stable";
     "gigpkgs-unstable" = gigpkgsRef "gigpkgs-unstable";
     "gigpkgs-stable" = gigpkgsRef "gigpkgs-stable";
+    "gigpkgs-master" = gigpkgsRef null;
   };
 in
 {
