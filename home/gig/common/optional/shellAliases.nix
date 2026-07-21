@@ -35,9 +35,9 @@
   nfm = "nix flake metadata";
   ns = "nix shell";
 
-  # Agent calls directly
-  data = "opencode run --agent data";
-  oc = "opencode";
+  # # Agent calls directly
+  # data = "opencode run --agent data";
+  # oc = "opencode";
 
   # Test alias for rebuild verification
   rebuild-test-verified = "echo 'Rebuild test successful on develop branch - Commander Data'";
