@@ -1,10 +1,11 @@
-config_version = 1
+config_version = 2
 repo_root = "/home/gig/.dotfiles"
 rolling_branch = "develop"
 stable_branch = "main"
 roll_prefix = "roll/"
 username = "gig"
 hosts = []
+mode = "assist"
 
 # Gates that must pass before a roll graduates to the rolling branch (develop).
 # Verify the flake evaluates/builds, then dry-build each ACTIVE host (system +
