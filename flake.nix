@@ -5,23 +5,19 @@
     #################### Official NixOS and HM Package Sources ####################
     # Stable
     # nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
-    gigpkgs = {
-      url = "github:gignsky/gigpkgs";
-      inputs.nixpkgs.follows = "gigpkgs/nixos-stable";
-    };
-    nixpkgs.follows = "gigpkgs";
+    nixpkgs.url = "github:gignsky/gigpkgs/gigos-2605";
     # Unstable
-    nixpkgs-unstable.follows = "gigpkgs/nixos-unstable";
+    nixpkgs-unstable.url = "github:gignsky/gigpkgs/gigos-unstable";
     # Local
     # nixpkgs-local.url = "git+file:///home/gig/local_repos/nixpkgs";
 
     # Home manager
-    home-manager.follows = "gigpkgs/home-manager";
+    home-manager.follows = "nixpkgs/home-manager";
 
     # wsl stuff
     nixos-wsl = {
       url = "github:nix-community/NixOS-WSL/main";
-      inputs.nixpkgs.follows = "gigpkgs/nixos-stable";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # nixos-hardware, to fix hardware issues and firmware for specific machines
@@ -32,20 +28,21 @@
     # treefmt-nix.url = "github:numtide/treefmt-nix";
     treefmt-nix = {
       url = "github:numtide/treefmt-nix";
-      inputs.nixpkgs.follows = "gigpkgs/nixos-stable";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # Secrets management
     sops-nix = {
       url = "github:mic92/sops-nix/master";
-      inputs.nixpkgs.follows = "gigpkgs/nixos-stable";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # Pre-commit hooks for managing Git hooks declaratively
     pre-commit-hooks = {
       # url = "github:cachix/git-hooks.nix/46d55f0aeb1d567a78223e69729734f3dca25a85";
-      url = "github:cachix/git-hooks.nix";
-      inputs.nixpkgs.follows = "gigpkgs/nixos-stable";
+      follows = "nixpkgs/pre-commit-hooks";
+      # url = "github:cachix/git-hooks.nix";
+      # inputs.nixpkgs.follows = "nixpkgs";
     };
 
     nixos-cli = {
@@ -84,13 +81,6 @@
     #   };
     # };
 
-    gigvim = {
-      url = "github:gignsky/gigvim";
-      inputs = {
-        gigpkgs.follows = "gigpkgs"; # Break circular dependency
-      };
-    };
-
     # ccc = {
     #   url = "github:gignsky/credit-card-convenience";
     #   inputs = {
@@ -110,13 +100,7 @@
     # Flake Utils (used internally by some other utilities and locked to this one version for sanities sake)
     # flake-utils.url = "github:numtide/flake-utils";
 
-    vscode-server = {
-      url = "github:nix-community/nixos-vscode-server";
-      inputs = {
-        nixpkgs.follows = "gigpkgs/nixos-stable";
-        # flake-utils.follows = "flake-utils";
-      };
-    };
+    vscode-server.url = "github:nix-community/nixos-vscode-server";
 
     # flake-iter.url = "github:determinatesystems/flake-iter";
 
@@ -137,8 +121,9 @@
     }@inputs:
     let
       inherit (self) outputs;
-      lib = inputs.gigpkgs.lib;
-      # HM-aware lib: gigpkgs lib (scanPaths etc.) + lib.hm so HM modules get both
+      # Switched from `inputs.gigpkgs.lib` to `inputs.nixpkgs.lib` with the swap to native `gigpkgs`
+      # as `nixpkgs` -- TODO remove this comment later should everything work out (07/20/2026)
+      lib = inputs.nixpkgs.lib;
       hmLib = lib.extend (_: _: { hm = inputs.home-manager.lib.hm; });
       system = "x86_64-linux";
       # forAllSystems = nixpkgs.lib.genAttrs [
@@ -160,8 +145,10 @@
           lib
           ;
       };
-      customPkgs = import ./pkgs { pkgs = inputs.gigpkgs.legacyPackages.${system}; };
-      pkgs = inputs.gigpkgs.legacyPackages.${system} // customPkgs;
+      # Switched from `inputs.gigpkgs.*` to `inputs.nixpkgs.*` with the swap to native `gigpkgs`
+      # as `nixpkgs` -- TODO remove this comment later should everything work out (07/20/2026)
+      customPkgs = import ./pkgs { pkgs = inputs.nixpkgs.legacyPackages.${system}; };
+      pkgs = inputs.nixpkgs.legacyPackages.${system} // customPkgs;
     in
     {
       # NixOS configuration entrypoint
@@ -504,9 +491,9 @@
             quick-results
             upjust
             locker
-            roll-flow
             #necessary for bootstrapping
             ripgrep
+            roll-flow
             ;
         };
 
