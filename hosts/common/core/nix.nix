@@ -34,7 +34,7 @@ let
   gigpkgsRegistry = {
     gigpkgs = gigpkgsRef null;
     "gigos-unstable" = gigpkgsRef "gigos-unstable";
-    "gigos-2605" = gigpkgsRef "gigos-26.05";
+    "gigos-2605" = gigpkgsRef "gigos-2605";
     "gigos-stable" = gigpkgsRef "gigos-stable";
     "gigpkgs-unstable" = gigpkgsRef "gigpkgs-unstable";
     "gigpkgs-stable" = gigpkgsRef "gigpkgs-stable";
