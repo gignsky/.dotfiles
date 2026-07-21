@@ -21,6 +21,8 @@
     ./common/optional/direnv.nix
     ./common/optional/bat.nix
     # direnvModule
+    # inputs.nixpkgs.homeManagerModules.gignews #TODO Remove if gignews still works with this
+    # missing
   ];
   nix = {
     package = lib.mkDefault pkgs.nix;
@@ -62,7 +64,8 @@
     supertree
     locker
     fupdate
-    # quick-results
+    quick-results
+    fupdate
     upjust
     # cargo-update
 
