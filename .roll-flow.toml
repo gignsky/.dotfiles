@@ -17,16 +17,20 @@ roll_to_rolling_gates = [
     "nix flake check --print-build-logs",
     "echo '----------- NIXOS REBUILD CHECK -------'",
     "just test-rebuild wsl",
+    "just test-rebuild spacedock",
     "echo '----------- HM REBUILD CHECK ----------'",
-    "just test-home wsl"
+    "just test-home wsl",
+    "just test-home spacedock"
 ]
 rolling_to_main_gates = [
     "echo '----------- NIX FLAKE CHECK -----------'",
     "nix flake check --print-build-logs",
     "echo '----------- NIXOS REBUILD CHECK -------'",
     "just test-rebuild wsl",
+    "just test-rebuild spacedock",
     "echo '----------- HM REBUILD CHECK ----------'",
-    "just test-home wsl"
+    "just test-home wsl",
+    "just test-home spacedock"
 ]
 
 # Per-host active status for roll-flow verification.
