@@ -14,10 +14,12 @@ hosts = []
 roll_to_rolling_gates = [
     "nix flake check --print-build-logs",
     "just test-rebuild-full wsl",
+    "just test-rebuild-full spacedock",
 ]
 rolling_to_main_gates = [
     "nix flake check --print-build-logs",
     "just test-rebuild-full wsl",
+    "just test-rebuild-full spacedock",
 ]
 
 # Per-host active status for roll-flow verification.
@@ -27,4 +29,4 @@ rolling_to_main_gates = [
 ganoslal = false
 merlin = false
 wsl = true
-spacedock = false
+spacedock = true
