@@ -1,0 +1,21 @@
+config_version = 1
+repo_root = "/home/user/roll-flow"
+rolling_branch = "develop"
+stable_branch = "main"
+roll_prefix = "roll/"
+username = ""
+hosts = []
+roll_to_rolling_gates = [
+    "cargo fmt --all --check",
+    "cargo clippy --all-targets --locked -- -D warnings",
+    "cargo test --locked",
+]
+rolling_to_main_gates = [
+    "cargo update --workspace --locked",
+    "cargo fmt --all --check",
+    "cargo clippy --all-targets --locked -- -D warnings",
+    "cargo build --locked",
+    "cargo test --locked",
+]
+
+[host_active]
