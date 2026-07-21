@@ -37,7 +37,7 @@
   # or the payloads under containers/services) or adhoc (podman CLI + the
   # nixos-generators images under containers/{buzz,mini}).
   gigpkgs.containers = {
-    enable = false;
+    enable = true;
     backend = "podman";
     adhoc.enable = true;
   };
