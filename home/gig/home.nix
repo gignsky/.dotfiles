@@ -61,6 +61,7 @@
     # shell packages defined in this repo
     supertree
     locker
+    fupdate
     # quick-results
     upjust
     # cargo-update
