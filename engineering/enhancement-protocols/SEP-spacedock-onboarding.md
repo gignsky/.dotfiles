@@ -72,7 +72,7 @@ Per roll-flow, the feature branch merges into a roll, not `main`:
 
 ## Remaining manual steps before switch
 
-- [ ] Regenerate `hosts/spacedock/hardware-configuration.nix` on the box.
+- [x] Regenerate `hosts/spacedock/hardware-configuration.nix` on the box.
 - [ ] Provision the spacedock host sops age key + `~/nix-secrets` entries +
       `just rekey`.
 - [ ] `just build spacedock`, then switch (Pi-hole comes up as an
