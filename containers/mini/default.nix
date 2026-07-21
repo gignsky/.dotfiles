@@ -19,7 +19,7 @@
       outputs = {
         overlays = import ../../overlays { inherit inputs; };
       };
-      nixpkgs = inputs.nixpkgs;
+      inherit (inputs) nixpkgs;
     };
     modules = [
       ./config.nix

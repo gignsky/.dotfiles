@@ -49,7 +49,7 @@ in
         configLib
         outputs
         ;
-      nixpkgs = inputs.nixpkgs;
+      inherit (inputs) nixpkgs;
     };
     modules = [ buzzConfig ];
   };

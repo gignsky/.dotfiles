@@ -33,7 +33,7 @@ let
         configLib
         outputs
         ;
-      nixpkgs = inputs.nixpkgs;
+      inherit (inputs) nixpkgs;
     };
     modules = [ ./config.nix ];
     format = "docker";
