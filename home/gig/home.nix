@@ -2,7 +2,7 @@
 # Use this to configure your home environment (it replaces ~/.config/nixpkgs/home.nix)
 {
   # flakeRoot,
-  # inputs,
+  inputs,
   overlays,
   lib,
   # , config,
@@ -21,8 +21,7 @@
     ./common/optional/direnv.nix
     ./common/optional/bat.nix
     # direnvModule
-    # inputs.nixpkgs.homeManagerModules.gignews #TODO Remove if gignews still works with this
-    # missing
+    inputs.nixpkgs.homeManagerModules.gignews
   ];
   nix = {
     package = lib.mkDefault pkgs.nix;
