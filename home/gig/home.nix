@@ -65,7 +65,6 @@
     locker
     fupdate
     quick-results
-    fupdate
     upjust
     # cargo-update
 
