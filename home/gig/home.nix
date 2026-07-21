@@ -21,8 +21,7 @@
     ./common/optional/direnv.nix
     ./common/optional/bat.nix
     # direnvModule
-    # inputs.nixpkgs.homeManagerModules.gignews #TODO Remove if gignews still works with this
-    # missing
+    inputs.nixpkgs.homeManagerModules.gignews
   ];
   nix = {
     package = lib.mkDefault pkgs.nix;

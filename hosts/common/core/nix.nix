@@ -17,16 +17,14 @@ let
   # These resolve at use-time, so pointing at branches that do not exist yet
   # (gigpkgs-*, *-stable — created later by gigpkgs CI) is fine; they simply
   # fail to fetch until the branch exists.
-  gigpkgsRef =
-    ref:
-    {
-      to = {
-        type = "github";
-        owner = "gignsky";
-        repo = "gigpkgs";
-      }
-      // lib.optionalAttrs (ref != null) { inherit ref; };
-    };
+  gigpkgsRef = ref: {
+    to = {
+      type = "github";
+      owner = "gignsky";
+      repo = "gigpkgs";
+    }
+    // lib.optionalAttrs (ref != null) { inherit ref; };
+  };
 
   # Dotless registry handles (a `.` will not parse as a flakeref id on the CLI),
   # each pointing at the correspondingly-named gigpkgs branch:
