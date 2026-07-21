@@ -15,7 +15,10 @@ roll_to_rolling_gates = [
     "nix flake check --print-build-logs",
     "just test-rebuild-full wsl",
 ]
-rolling_to_main_gates = []
+rolling_to_main_gates = [
+    "nix flake check --print-build-logs",
+    "just test-rebuild-full wsl",
+]
 
 # Per-host active status for roll-flow verification.
 # Only wsl is active for now; spacedock is flipped to true on the
