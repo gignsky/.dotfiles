@@ -1,4 +1,4 @@
-config_version = 1
+config_version = 2
 repo_root = "/home/gig/.dotfiles"
 rolling_branch = "develop"
 stable_branch = "main"
