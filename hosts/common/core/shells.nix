@@ -26,7 +26,6 @@ in
     wget
     screen
     fastfetch
-    # gigvim-minimal #TODO UNCOMMENT ME AND VERIFY MINI GIGVIM IS INSTALLED ACROSS THE BOARD
 
     # nixos-unstable packages
     unstable.just
