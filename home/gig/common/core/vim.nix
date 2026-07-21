@@ -1,9 +1,8 @@
-# { inputs, ... }:
-_: {
+{ inputs, ... }: {
   # https://notashelf.github.io/nvf/index.xhtml
-  # imports = [
-  #   inputs.nixpkgs.homeManagerModules.gigvim
-  # ];
+  imports = [
+    inputs.nixpkgs.homeManagerModules.gigvim
+  ];
 
   programs.gigvim.enable = true;
 

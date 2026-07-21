@@ -5,7 +5,7 @@
     #################### Official NixOS and HM Package Sources ####################
     # Stable
     # nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
-    nixpkgs.url = "github:gignsky/gigpkgs/gigos-26.05";
+    nixpkgs.url = "github:gignsky/gigpkgs/gigos-2605";
     # Unstable
     nixpkgs-unstable.url = "github:gignsky/gigpkgs/gigos-unstable";
     # Local
@@ -493,6 +493,7 @@
             locker
             #necessary for bootstrapping
             ripgrep
+            roll-flow
             ;
         };
 
