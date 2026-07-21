@@ -2,7 +2,7 @@
 # Use this to configure your home environment (it replaces ~/.config/nixpkgs/home.nix)
 {
   # flakeRoot,
-  inputs,
+  # inputs,
   overlays,
   lib,
   # , config,
@@ -61,8 +61,9 @@
     man-db
     # shell packages defined in this repo
     supertree
-    quick-results
+    locker
     fupdate
+    quick-results
     upjust
     # cargo-update
 
