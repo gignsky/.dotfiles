@@ -31,6 +31,16 @@
     # Users
     (configLib.relativeToRoot "hosts/common/users/gig")
   ];
+  # gigpkgs container engine — the module is injected in flake.nix as
+  # `inputs.nixpkgs.nixosModules.containers`. Provides the OCI runtime for
+  # containers that run either as a service (via `gigpkgs.containers.services`
+  # or the payloads under containers/services) or adhoc (podman CLI + the
+  # nixos-generators images under containers/{buzz,mini}).
+  gigpkgs.containers = {
+    enable = false;
+    backend = "podman";
+    adhoc.enable = true;
+  };
 
   networking = {
     hostName = "spacedock";
@@ -45,17 +55,6 @@
       device = "/dev/sda";
     };
     kernelPackages = lib.mkDefault pkgs.linuxPackages_6_12;
-  };
-
-  # gigpkgs container engine — the module is injected in flake.nix as
-  # `inputs.nixpkgs.nixosModules.containers`. Provides the OCI runtime for
-  # containers that run either as a service (via `gigpkgs.containers.services`
-  # or the payloads under containers/services) or adhoc (podman CLI + the
-  # nixos-generators images under containers/{buzz,mini}).
-  gigpkgs.containers = {
-    enable = true;
-    backend = "podman";
-    adhoc.enable = true;
   };
 
   nixpkgs.config.permittedInsecurePackages = [
