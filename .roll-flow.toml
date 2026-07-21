@@ -5,7 +5,16 @@ stable_branch = "main"
 roll_prefix = "roll/"
 username = "gig"
 hosts = []
-roll_to_rolling_gates = []
+
+# Gates that must pass before a roll graduates to the rolling branch (develop).
+# Verify the flake evaluates/builds, then dry-build each ACTIVE host (system +
+# home). roll-flow gates are literal commands (no host templating), so there is
+# one `just test-rebuild-full <host>` line per active host below — add a line
+# when a host is activated in [host_active] (e.g. spacedock on roll/20).
+roll_to_rolling_gates = [
+    "nix flake check --print-build-logs",
+    "just test-rebuild-full wsl",
+]
 rolling_to_main_gates = []
 
 # Per-host active status for roll-flow verification.
