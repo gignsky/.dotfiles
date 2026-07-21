@@ -1,0 +1,30 @@
+config_version = 1
+repo_root = "/home/gig/.dotfiles"
+rolling_branch = "develop"
+stable_branch = "main"
+roll_prefix = "roll/"
+username = "gig"
+hosts = []
+
+# Gates that must pass before a roll graduates to the rolling branch (develop).
+# Verify the flake evaluates/builds, then dry-build each ACTIVE host (system +
+# home). roll-flow gates are literal commands (no host templating), so there is
+# one `just test-rebuild-full <host>` line per active host below — add a line
+# when a host is activated in [host_active] (e.g. spacedock on roll/20).
+roll_to_rolling_gates = [
+    "nix flake check --print-build-logs",
+    "just test-rebuild-full wsl",
+]
+rolling_to_main_gates = [
+    "nix flake check --print-build-logs",
+    "just test-rebuild-full wsl",
+]
+
+# Per-host active status for roll-flow verification.
+# Only wsl is active for now; spacedock is flipped to true on the
+# roll/20 spacedock-onboarding roll once it builds + switches.
+[host_active]
+ganoslal = false
+merlin = false
+wsl = true
+spacedock = false
