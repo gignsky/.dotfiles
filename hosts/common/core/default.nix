@@ -11,7 +11,7 @@
   # ++ (builtins.attrValues outputs.nixosModules); # TODO: IMPORT THIS when implementing the modules subdirectory
 
   nixpkgs = {
-    overlays = [ inputs.gigpkgs.overlays.default ];
+    overlays = [ inputs.nixpkgs.overlays.default ];
     config = {
       allowUnfree = true;
     };
