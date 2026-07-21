@@ -73,6 +73,8 @@
 
     };
 
+    avec-moi.url = "github:gignsky/avecmoi";
+
     # # tax-matrix - currently on develop branch
     # tax-matrix = {
     #   url = "github:gignsky/tax-matrix/develop";
@@ -226,6 +228,21 @@
             # }
             ./hosts/ganoslal
             inputs.nixos-cli.nixosModules.nixos-cli
+          ];
+        };
+
+        # Spacedock — repurposed from the standalone dot-spacedock flake
+        # (dotfiles#14). Legacy-BIOS box; bootloader/hardware in hosts/spacedock.
+        # Rides the fleet `nixpkgs` (already the gigos-2605 gigpkgs channel).
+        spacedock = nixpkgs.lib.nixosSystem {
+          inherit system specialArgs;
+          modules = [
+            ./hosts/spacedock
+            inputs.nixos-cli.nixosModules.nixos-cli
+            # gigpkgs container engine → `gigpkgs.containers.*`. `nixpkgs` is the
+            # gigos-2605 gigpkgs channel, which exposes this once gigpkgs#20 is
+            # on master and the channel branch is regenerated.
+            inputs.nixpkgs.nixosModules.containers
           ];
         };
       };

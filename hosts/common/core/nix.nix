@@ -34,11 +34,11 @@ let
   gigpkgsRegistry = {
     gigpkgs = gigpkgsRef null;
     "gigos-unstable" = gigpkgsRef "gigos-unstable";
-    "gigos-2605" = gigpkgsRef "gigos-26.05";
+    "gigos-2605" = gigpkgsRef "gigos-2605";
     "gigos-stable" = gigpkgsRef "gigos-stable";
     "gigpkgs-unstable" = gigpkgsRef "gigpkgs-unstable";
-    "gigpkgs-2605" = gigpkgsRef "gigpkgs-26.05";
     "gigpkgs-stable" = gigpkgsRef "gigpkgs-stable";
+    "gigpkgs-master" = gigpkgsRef null;
   };
 in
 {
@@ -46,8 +46,8 @@ in
     settings = {
       # Enable flakes and new 'nix' command
       experimental-features = "nix-command flakes";
-      # Opinionated: disable global registry
-      flake-registry = "";
+      # Opinionated: disable global registry # Turned off the opinion by commenting below out
+      # flake-registry = "";
       # Workaround for https://github.com/NixOS/nix/issues/9574
       nix-path = config.nix.nixPath;
     };

@@ -150,7 +150,7 @@ rebuild-full args="":
 # Test rebuild commands (dry-run evaluation without applying)
 test-rebuild host=`scripts/get-flake-target.sh`:
 	@echo "Testing system rebuild for {{host}} (evaluation only)..."
-	sudo nixos-rebuild dry-activate --flake .#{{host}} --verbose --show-trace
+	sudo nixos-rebuild dry-activate --flake .#{{host}} --print-build-logs
 
 test-home host=`scripts/get-flake-target.sh`:
 	@echo "Testing home-manager rebuild for gig@{{host}} (evaluation only)..."
@@ -158,7 +158,7 @@ test-home host=`scripts/get-flake-target.sh`:
 
 test-rebuild-full host=`scripts/get-flake-target.sh`:
 	@echo "Testing full rebuild for {{host}} (evaluation only)..."
-	sudo nixos-rebuild dry-activate --flake .#{{host}} --verbose --show-trace
+	sudo nixos-rebuild dry-activate --flake .#{{host}} --print-build-logs
 	home-manager build --flake .#gig@{{host}} --verbose
 
 # Update the flake
@@ -447,3 +447,11 @@ package-script:
 # Check hardware configuration synchronization
 check-hardware:
 	nix run .#check-hardware-config
+
+# Pull the latest tdarr-node image and restart the container (spacedock)
+update-tdarr:
+  @nix-shell -p lolcat --run 'echo "Pulling latest tdarr-node image..." | lolcat 2> /dev/null'
+  sudo podman pull ghcr.io/haveagitgat/tdarr_node:latest
+  @nix-shell -p lolcat --run 'echo "Restarting podman-tdarr-node.service..." | lolcat 2> /dev/null'
+  sudo systemctl restart podman-tdarr-node.service
+  @nix-shell -p lolcat --run 'echo "tdarr-node updated. ✅" | lolcat 2> /dev/null'
