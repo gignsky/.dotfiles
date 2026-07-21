@@ -62,6 +62,10 @@
   wsl.enable = true; # Redunent with nixosModules.default on the flake.nix level
   wsl.defaultUser = "gig";
 
+  # Shared nix settings/registry/nixPath live in hosts/common/core/nix.nix;
+  # only the wsl-specific trusted-users is set here.
+  nix.settings.trusted-users = [ "gig" ];
+
   #   # I think this is unneccecary if I'm going with standalone home-manager rather than flake os module home-manager
   #   home-manager = {
   #     extraSpecialArgs = { inherit inputs outputs; };

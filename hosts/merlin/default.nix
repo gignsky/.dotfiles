@@ -102,6 +102,9 @@
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
+  # nix daemon settings, flake registry, and nix path are configured centrally
+  # in hosts/common/core/nix.nix.
+
   # fileSystems = {
   #   "/" = {
   #     device = "zroot/root";
