@@ -5,7 +5,7 @@
 # it. pihole is enabled so spacedock has a working container out of the box.
 _: {
   imports = [
-    ./pihole.nix # Pi-hole DNS — runs as a service via the container engine
+    # ./pihole.nix # Pi-hole DNS — runs as a service via the container engine
     # ./tdarr-node.nix  # Tdarr node — needs CIFS mounts + samba creds first
   ];
 }
