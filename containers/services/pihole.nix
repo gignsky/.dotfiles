@@ -15,7 +15,7 @@ in
 {
   services.resolved = {
     enable = true;
-    settings."DNSStubListener" = "no";
+    settings.Resolve.DNSStubListener = "no";
   };
   systemd.tmpfiles.rules = [
     "d /var/lib/pihole/etc-pihole 0755 root root -"
