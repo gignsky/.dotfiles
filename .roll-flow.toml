@@ -13,14 +13,20 @@ mode = "assist"
 # one `just test-rebuild-full <host>` line per active host below — add a line
 # when a host is activated in [host_active] (e.g. spacedock on roll/20).
 roll_to_rolling_gates = [
+    "echo '----------- NIX FLAKE CHECK -----------'",
     "nix flake check --print-build-logs",
-    "just test-rebuild-full wsl",
-    "just test-rebuild-full spacedock",
+    "echo '----------- NIXOS REBUILD CHECK -------'",
+    "just test-rebuild wsl",
+    "echo '----------- HM REBUILD CHECK ----------'",
+    "just test-home wsl"
 ]
 rolling_to_main_gates = [
+    "echo '----------- NIX FLAKE CHECK -----------'",
     "nix flake check --print-build-logs",
-    "just test-rebuild-full wsl",
-    "just test-rebuild-full spacedock",
+    "echo '----------- NIXOS REBUILD CHECK -------'",
+    "just test-rebuild wsl",
+    "echo '----------- HM REBUILD CHECK ----------'",
+    "just test-home wsl"
 ]
 
 # Per-host active status for roll-flow verification.
