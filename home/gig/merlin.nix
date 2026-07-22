@@ -24,7 +24,7 @@
     # bitwarden-cli
     # bitwarden-desktop
     discord
-    makemkv
+    # makemkv
     steam
     # anydesk
     # bambu-studio
