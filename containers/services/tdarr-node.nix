@@ -26,7 +26,7 @@ in
     "d /var/lib/tdarr/logs 0755 root root -"
   ];
   virtualisation.oci-containers.containers.tdarr-node = {
-    image = "ghcr.io/haveagitgat/tdarr_node:latest";
+    image = "ghcr.io/haveagitgat/tdarr_node:2.83.01";
     autoStart = true;
     environment = {
       TZ = "America/New_York";
