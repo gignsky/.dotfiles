@@ -28,7 +28,7 @@
     (configLib.relativeToRoot "hosts/common/optional/brightness-control.nix") # Enable brightness control for Framework laptops
     (configLib.relativeToRoot "hosts/common/optional/docker.nix") # Enable brightness control for Framework laptops
     # ../common/optional/xrdp.nix
-    (configLib.relativeToRoot "containers/services/tdarr") # Enable brightness control for Framework laptops
+    (configLib.relativeToRoot "containers/services/merlin") # Enable brightness control for Framework laptops
 
     #gig users
     (configLib.relativeToRoot "hosts/common/users/gig")
