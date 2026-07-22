@@ -28,7 +28,9 @@
     steam
     # anydesk
     # bambu-studio
-    claude-desktop
+    inputs.claude-desktop.packages.${system}.claude-desktop
+    # inputs.claude-desktop.packages.${system}.claude-desktop-with-fhs # for use if you want MCP
+    # servers
   ];
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
