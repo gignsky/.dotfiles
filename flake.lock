@@ -615,28 +615,6 @@
       "inputs": {
         "nixpkgs": [
           "nixpkgs",
-          "pre-commit-hooks",
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1709087332,
-        "narHash": "sha256-HG2cCnktfHsKV0s4XW83gU3F57gaTljL9KNSuG6bnQs=",
-        "owner": "hercules-ci",
-        "repo": "gitignore.nix",
-        "rev": "637db329424fd7e46cf4185293b9cc8c88c95394",
-        "type": "github"
-      },
-      "original": {
-        "owner": "hercules-ci",
-        "repo": "gitignore.nix",
-        "type": "github"
-      }
-    },
-    "gitignore_3": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs",
           "roll-flow",
           "nixpkgs",
           "pre-commit-hooks",
@@ -657,7 +635,7 @@
         "type": "github"
       }
     },
-    "gitignore_4": {
+    "gitignore_3": {
       "inputs": {
         "nixpkgs": [
           "nixpkgs-unstable",
@@ -681,7 +659,7 @@
         "type": "github"
       }
     },
-    "gitignore_5": {
+    "gitignore_4": {
       "inputs": {
         "nixpkgs": [
           "nixpkgs-unstable",
@@ -703,7 +681,7 @@
         "type": "github"
       }
     },
-    "gitignore_6": {
+    "gitignore_5": {
       "inputs": {
         "nixpkgs": [
           "nixpkgs-unstable",
@@ -759,11 +737,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1781124985,
-        "narHash": "sha256-hIaUkf6qalGk2xxNEkBMP2m2aPBq+qXvUPOIwwEDySI=",
+        "lastModified": 1784350909,
+        "narHash": "sha256-ZWyzLbS1yKUTeFJLmdVuWNnHttL333/ldJbEE+KzCrM=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "d899b01766784bcc9a141ee13bad6dc689d47c37",
+        "rev": "4ce190229c73d44536caa7072f6308fb2d8feeb3",
         "type": "github"
       },
       "original": {
@@ -970,10 +948,10 @@
     "nix-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1775119164,
-        "narHash": "sha256-R9m8csDEJ5vf5WkUJU898/L5vcFFYSdlwxTMtJcwBx4=",
+        "lastModified": 1784671046,
+        "narHash": "sha256-72Li/naw0HPPeOuY3YiEnuuUyBwBM55nOFnagYGAELY=",
         "ref": "main",
-        "rev": "cb28ccad10d0114649bfc29271844bcfdb0899a0",
+        "rev": "2c2d96c81cd478b7820c25f3228b976dde8fae8b",
         "shallow": true,
         "type": "git",
         "url": "ssh://git@github.com/gignsky/nix-secrets.git"
@@ -1023,11 +1001,11 @@
     },
     "nixos-2605_2": {
       "locked": {
-        "lastModified": 1780902259,
-        "narHash": "sha256-q8yYEC5f1mFlQO9RGna4LTc9QrcvWunX6FYp83munkQ=",
+        "lastModified": 1784432872,
+        "narHash": "sha256-n3gKTBIV4ZA5VQpUakffBe3KGu4+mhPoA34rrqS0GkA=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "bd0ff2d3eac24699c3664d5966b9ef36f388e2ca",
+        "rev": "fd1462031fdee08f65fd0b4c6b64e22239a77870",
         "type": "github"
       },
       "original": {
@@ -1160,11 +1138,11 @@
     },
     "nixos-unstable_2": {
       "locked": {
-        "lastModified": 1780749050,
-        "narHash": "sha256-3av0pIjlOWQ6rDbNOmpUSvbNnJkGORQKKjb4LtCZsIY=",
+        "lastModified": 1784497964,
+        "narHash": "sha256-vlHUuqAcbcH2RKmHbPiuQzbv1pnzzavXnI62RD0bqCU=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "a799d3e3886da994fa307f817a6bc705ae538eeb",
+        "rev": "241313f4e8e508cb9b13278c2b0fa25b9ca27163",
         "type": "github"
       },
       "original": {
@@ -1339,11 +1317,11 @@
     },
     "nixpkgs-unstable_2": {
       "locked": {
-        "lastModified": 1781136106,
-        "narHash": "sha256-lXUh1lC8t98IZNpzAg9J+S4/K/sh1/usMmrIHfUtT2I=",
+        "lastModified": 1784631360,
+        "narHash": "sha256-oLykijd/7/ub3LJRKDzKz13BeJr4+AQjkJehFUq6hgQ=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "d9c4084332a1f90837df2ae0ff8e2b6634ae3f2e",
+        "rev": "ca1a290679131b86ff6169765920992db84c8d91",
         "type": "github"
       },
       "original": {
@@ -1623,11 +1601,11 @@
         "roll-flow": "roll-flow"
       },
       "locked": {
-        "lastModified": 1784605881,
-        "narHash": "sha256-pXH5XvvWN+w1d32WZPqHryRtyqDt3hRnZDpZZjqY/nM=",
+        "lastModified": 1784671436,
+        "narHash": "sha256-V5rbnHxmr0BJP/7mwnbCAh07nEv5PLNRqJXoHhsH0So=",
         "owner": "gignsky",
         "repo": "gigpkgs",
-        "rev": "fa35a669b642750f687b6e2c378b8bf77e142ff5",
+        "rev": "f2ef601a3fd87a1f86d22e862d9c64599b9e4bc9",
         "type": "github"
       },
       "original": {
@@ -1875,18 +1853,17 @@
     "pre-commit-hooks_2": {
       "inputs": {
         "flake-compat": "flake-compat_5",
-        "gitignore": "gitignore_2",
         "nixpkgs": [
           "nixpkgs",
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1778507602,
-        "narHash": "sha256-kTwur1wV+01SdqskVMSo6JMEpg71ps3HpbFY2GsflKs=",
+        "lastModified": 1784288435,
+        "narHash": "sha256-ReRHaLgr/uVqdD8afFSn+myXIfpHeOhP0yYe0TJqAA8=",
         "owner": "cachix",
         "repo": "git-hooks.nix",
-        "rev": "61ab0e80d9c7ab14c256b5b453d8b3fb0189ba0a",
+        "rev": "43b3c1ab9d40fb1dbb008f451988a91e375825e9",
         "type": "github"
       },
       "original": {
@@ -1898,7 +1875,7 @@
     "pre-commit-hooks_3": {
       "inputs": {
         "flake-compat": "flake-compat_6",
-        "gitignore": "gitignore_3",
+        "gitignore": "gitignore_2",
         "nixpkgs": [
           "nixpkgs",
           "roll-flow",
@@ -1923,7 +1900,7 @@
     "pre-commit-hooks_4": {
       "inputs": {
         "flake-compat": "flake-compat_7",
-        "gitignore": "gitignore_4",
+        "gitignore": "gitignore_3",
         "nixpkgs": [
           "nixpkgs-unstable",
           "gigvim",
@@ -1948,7 +1925,7 @@
     "pre-commit-hooks_5": {
       "inputs": {
         "flake-compat": "flake-compat_9",
-        "gitignore": "gitignore_5",
+        "gitignore": "gitignore_4",
         "nixpkgs": [
           "nixpkgs-unstable",
           "nixpkgs"
@@ -1971,7 +1948,7 @@
     "pre-commit-hooks_6": {
       "inputs": {
         "flake-compat": "flake-compat_10",
-        "gitignore": "gitignore_6",
+        "gitignore": "gitignore_5",
         "nixpkgs": [
           "nixpkgs-unstable",
           "roll-flow",
@@ -2020,11 +1997,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1784603746,
-        "narHash": "sha256-Y8oxg7TDCcnX525pO4R3TjLISZibXV73gPCgxcVsjz4=",
+        "lastModified": 1784669220,
+        "narHash": "sha256-QTPunFO7RyTSkZNCR/GyWi4O5D/p3WgCB0nABMLSt6A=",
         "owner": "gignsky",
         "repo": "roll-flow",
-        "rev": "c546381312f1bc9e35cb9457cbf86b6480b5b70b",
+        "rev": "97f9aa32ed8a6171eb64152f7d62f970c41f54db",
         "type": "github"
       },
       "original": {
