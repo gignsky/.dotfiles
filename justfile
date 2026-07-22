@@ -150,7 +150,7 @@ rebuild-full args="":
 # Test rebuild commands (dry-run evaluation without applying)
 test-rebuild host=`scripts/get-flake-target.sh`:
 	@echo "Testing system rebuild for {{host}} (evaluation only)..."
-	sudo nixos-rebuild dry-activate --flake .#{{host}} --verbose --show-trace
+	sudo nixos-rebuild dry-activate --flake .#{{host}} --print-build-logs
 
 test-home host=`scripts/get-flake-target.sh`:
 	@echo "Testing home-manager rebuild for gig@{{host}} (evaluation only)..."
@@ -158,7 +158,7 @@ test-home host=`scripts/get-flake-target.sh`:
 
 test-rebuild-full host=`scripts/get-flake-target.sh`:
 	@echo "Testing full rebuild for {{host}} (evaluation only)..."
-	sudo nixos-rebuild dry-activate --flake .#{{host}} --verbose --show-trace
+	sudo nixos-rebuild dry-activate --flake .#{{host}} --print-build-logs
 	home-manager build --flake .#gig@{{host}} --verbose
 
 # Update the flake
