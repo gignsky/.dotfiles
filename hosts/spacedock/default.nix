@@ -26,7 +26,7 @@
     # Containers — run-as-a-service OCI payloads (pihole enabled in the
     # aggregator; see containers/README.md). The runtime comes from the
     # gigpkgs container engine configured below.
-    (configLib.relativeToRoot "containers/services")
+    (configLib.relativeToRoot "containers/services/spacedock")
 
     # Users
     (configLib.relativeToRoot "hosts/common/users/gig")

@@ -213,6 +213,7 @@
 
             # https://github.com/NixOS/nixos-hardware/tree/master/framework/16-inch/7040-amd
             inputs.nixos-hardware.nixosModules.framework-16-7040-amd
+            inputs.nixpkgs.nixosModules.containers
           ];
         };
 
