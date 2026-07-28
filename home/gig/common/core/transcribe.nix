@@ -20,7 +20,7 @@
 #   <name>.srt             ← subtitles, word-accurate
 #   <name>.json            ← the full structured output, word-level
 
-{ pkgs, config, ... }:
+{ pkgs, ... }:
 
 let
   # ── Knobs ────────────────────────────────────────────────────────────
@@ -200,6 +200,6 @@ in
 
   # SOPS secret configuration using nested path
   sops.secrets."HF_Token" = {
-    path = config.whizperx.token;
+    path = "/home/gig/.config/whisperx/token";
   };
 }
