@@ -20,7 +20,7 @@
 #   <name>.srt             ← subtitles, word-accurate
 #   <name>.json            ← the full structured output, word-level
 
-{ pkgs, ... }:
+{ pkgs, config, ... }:
 
 let
   # ── Knobs ────────────────────────────────────────────────────────────
@@ -197,4 +197,9 @@ in
 
   # NixOS instead? swap the line above for:
   #   environment.systemPackages = [ transcribe ];
+
+  # SOPS secret configuration using nested path
+  sops.secrets."HF_Token" = {
+    path = config.whizperx.token;
+  };
 }
