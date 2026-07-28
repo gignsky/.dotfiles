@@ -20,7 +20,7 @@
 #   <name>.srt             ← subtitles, word-accurate
 #   <name>.json            ← the full structured output, word-level
 
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 let
   # ── Knobs ────────────────────────────────────────────────────────────
@@ -35,6 +35,9 @@ let
 
   computeType = if device == "cuda" then "float16" else "int8";
   batchSize = if device == "cuda" then 16 else 4;
+
+  # Decided here, in Nix — not in the shell, where the value is a constant.
+  langArgs = lib.optionalString (language != "") ''--language "${language}"'';
 
   # ── The formatter: WhisperX JSON -> a transcript a human wants to read ──
   # WhisperX's own .txt writer silently DROPS the speaker labels, which is
@@ -141,10 +144,7 @@ let
         speaker_args=(--min_speakers "$n_speakers" --max_speakers "$n_speakers")
       fi
 
-      lang_args=()
-      if [ -n "${language}" ]; then
-        lang_args=(--language "${language}")
-      fi
+      lang_args=( ${langArgs} )
 
       # Keep every downloaded model in one predictable, cacheable place.
       HF_HOME="''${XDG_CACHE_HOME:-$HOME/.cache}/whisperx"
