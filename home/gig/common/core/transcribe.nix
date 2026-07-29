@@ -1,21 +1,38 @@
-# transcribe.nix — one command, any audio file in, a speaker-labelled
-# transcript out. WhisperX: faster-whisper for the words, wav2vec2 forced
-# alignment for the timing, pyannote for who-spoke-when.
+# transcribe.nix — one command, audio in, a speaker-labelled transcript out.
+# WhisperX: faster-whisper for the words, wav2vec2 forced alignment for the
+# timing, pyannote for who-spoke-when.
 #
 # Import from home.nix:      imports = [ ./transcribe.nix ];
 #
-# Usage:
-#   transcribe session.mp3            # let the voices fall where they may
-#   transcribe -n 4-12 session.mp3    # a RANGE — best for TTRPG (see below)
-#   transcribe -n 2 interview.mp3     # an exact count, for a plain interview
-#   transcribe -v session.mp3         # watch the words land as they land
-#   transcribe *.mp3                  # several files, counted as it goes
+# TWO MODES
 #
-# Writes, beside each input file:
-#   <name>.transcript.md   ← the readable one, with a Voices legend at top
+#   Separate sessions — each file transcribed on its own, each into its own
+#   session directory:
+#       transcribe s1.mp3 s2.mp3 s3.mp3
+#     ->  s1/s1.transcript.md   s2/s2.transcript.md   s3/s3.transcript.md
+#
+#   One session in clips — -c welds them into one continuous recording FIRST,
+#   then transcribes once:
+#       transcribe -c "7.28.26 - "*.mp3
+#     ->  7.28.26/7.28.26.transcript.md   (+ a Clips table of offsets)
+#
+#   Why -c matters: speaker labels cannot be shared across separate runs.
+#   Transcribe three clips singly and SPEAKER_00 in clip one has no relation
+#   to SPEAKER_00 in clip two. Welded first, one clustering covers the whole
+#   session and the labels mean something end to end.
+#
+# EACH SESSION DIRECTORY HOLDS
+#   <name>.transcript.md   ← the readable one: Clips, Voices, then the talk
 #   <name>.speakers        ← blank name-mapping sheet, ready to fill in
-#   <name>.srt             ← subtitles, word-accurate
-#   <name>.json            ← the full structured output, word-level
+#   <name>.srt  <name>.json
+#
+# FLAGS
+#   -n N        exact number of distinct VOICES, if truly known
+#   -n MIN-MAX  a range, e.g. -n 5-14 — the right choice for TTRPG
+#   -c          combine all inputs into one session before transcribing
+#   -o NAME     name the session (default: common prefix of the filenames)
+#   -k          keep the combined audio file (default: deleted after)
+#   -v          stream each segment's text as it is transcribed
 #
 # ── ON SPEAKER COUNTS, AND WHY TTRPG IS DIFFERENT ────────────────────────
 # Pyannote clusters on VOICE EMBEDDINGS — the acoustic print of a voice, not
@@ -28,18 +45,18 @@
 # labels is a find-and-replace. Splitting one merged label back into two
 # people cannot be done without re-running the hour. So: give a generous
 # RANGE (humans as floor, characters as ceiling) or none at all, and let it
-# over-split. The Voices legend and the .speakers sheet exist to make the
-# merging afterwards quick.
+# over-split. The Voices legend and the .speakers sheet make the merging
+# afterwards quick.
 
 { pkgs, ... }:
 
 let
   # ── Knobs ────────────────────────────────────────────────────────────
-  # large-v3 runs about 2.8x realtime on CPU, so a three-hour session costs
-  # the better part of a working day. large-v3-turbo is roughly 4x faster
-  # for a modest accuracy loss — for long informal sessions with crosstalk,
-  # very likely the better trade.
-  model = "large-v3";
+  # large-v3-turbo: roughly 4x faster than large-v3 for a modest accuracy
+  # loss, mostly on rare proper nouns. For multi-hour sessions with
+  # crosstalk and character voices, decisively the better trade — large-v3
+  # ran ~2.8x realtime, which is a whole working day for a three-hour game.
+  model = "large-v3-turbo";
   language = "en"; # "" to auto-detect, at the cost of a probe pass
 
   # nixpkgs' ctranslate2 is built WITHOUT CUDA by default, so "cuda" here
@@ -158,9 +175,10 @@ let
   # ── The formatter ────────────────────────────────────────────────────
   # WhisperX's own .txt writer silently DROPS the speaker labels, which is
   # the whole point of the exercise. So we render the JSON ourselves:
-  # consecutive segments from one voice merged into single turns, plus a
-  # legend ranking each voice by speaking time with a sample utterance —
-  # which is how you work out who is who when there are nine of them.
+  # consecutive segments from one voice merged into single turns, a Clips
+  # table when several were welded together, and a Voices legend ranking
+  # each voice by speaking time with a sample utterance — which is how you
+  # work out who is who when there are eleven of them.
   formatter = pkgs.writeText "whisperx-to-markdown.py" ''
     import json, sys, pathlib
 
@@ -168,6 +186,8 @@ let
     dst = pathlib.Path(sys.argv[2])
     title = sys.argv[3]
     legend_path = pathlib.Path(sys.argv[4])
+    clips_path = (pathlib.Path(sys.argv[5])
+                  if len(sys.argv) > 5 and sys.argv[5] else None)
 
     segments = json.loads(src.read_text()).get("segments", [])
 
@@ -193,13 +213,14 @@ let
 
     def dur(sec):
         sec = int(sec)
-        m, s = sec // 60, sec % 60
-        return f"{m}m{s:02d}s" if m else f"{s}s"
+        h, m, s = sec // 3600, (sec % 3600) // 60, sec % 60
+        return f"{h}h{m:02d}m" if h else (f"{m}m{s:02d}s" if m else f"{s}s")
 
 
     stats = {}
     for t in turns:
-        st = stats.setdefault(t["speaker"], {"secs": 0.0, "turns": 0, "long": ""})
+        st = stats.setdefault(t["speaker"],
+                              {"secs": 0.0, "turns": 0, "long": ""})
         st["secs"] += max(t["end"] - t["start"], 0)
         st["turns"] += 1
         if len(t["text"]) > len(st["long"]):
@@ -211,6 +232,18 @@ let
     out = [f"# {title}", ""]
     out.append(f"*{len(turns)} turns · {len(stats)} voices · "
                f"{dur(total_secs)} of speech*")
+
+    if clips_path and clips_path.exists():
+        rows = [ln.split("\t", 1) for ln in
+                clips_path.read_text().splitlines() if "\t" in ln]
+        if len(rows) > 1:
+            out += ["", "## Clips", "", "| # | Begins at | Clip |",
+                    "| --- | --- | --- |"]
+            for i, (off, name) in enumerate(rows, 1):
+                out.append(f"| {i} | `{stamp(float(off))}` | {name} |")
+            out += ["", "*Offsets are approximate to within a second or so —"
+                    " container padding accumulates across joins.*"]
+
     out += ["", "## Voices", "",
             "| Voice | Speaking | Share | Turns | Longest utterance begins |",
             "| --- | --- | --- | --- | --- |"]
@@ -247,25 +280,58 @@ let
     text = ''
       usage() {
         cat >&2 <<'USAGE'
-      usage: transcribe [-n N | -n MIN-MAX] [-v] <audio-file> [more-files...]
+      usage: transcribe [-c] [-n N|MIN-MAX] [-o NAME] [-k] [-v] <audio>...
 
         -n N        exact number of distinct VOICES, if truly known
-        -n MIN-MAX  a range, e.g. -n 4-12 — the right choice when people
-                    put on character voices; over-splitting is recoverable,
+        -n MIN-MAX  a range, e.g. -n 5-14 — right when people put on
+                    character voices; over-splitting is recoverable,
                     merging labels afterwards is a find-and-replace
+        -c          COMBINE all inputs into one session first, then
+                    transcribe once. Use for clips of a single sitting:
+                    speaker labels cannot be shared across separate runs.
+        -o NAME     name the session (default: common filename prefix)
+        -k          keep the combined audio (default: deleted after)
         -v          stream each segment's text as it is transcribed
 
-      Omit -n entirely and pyannote decides for itself. For a plain
-      two-person interview, -n 2 is markedly better than nothing.
+      Each transcription lands in its own directory named for the session.
       USAGE
         exit 1
       }
 
+      # Longest common prefix of the basenames — so three clips named
+      # "7.28.26 - 1", "- 2", "- 3" yield a session called "7.28.26".
+      common_name() {
+        local first="" cand="" f b i
+        for f in "$@"; do
+          b="$(basename "''${f%.*}")"
+          if [ -z "$first" ]; then
+            first="$b"; cand="$b"; continue
+          fi
+          i=0
+          while [ "$i" -lt "''${#cand}" ] && [ "$i" -lt "''${#b}" ] \
+            && [ "''${cand:$i:1}" = "''${b:$i:1}" ]; do
+            i=$((i + 1))
+          done
+          cand="''${cand:0:$i}"
+        done
+        cand="$(printf '%s' "$cand" | sed -E 's/[[:space:]_.-]+$//')"
+        if [ -z "$cand" ]; then
+          cand="$(basename "''${1%.*}")-combined"
+        fi
+        printf '%s' "$cand"
+      }
+
       n_speakers=""
+      combine=0
+      keep=0
       verbose=0
-      while getopts ":n:vh" opt; do
+      outname=""
+      while getopts ":n:o:ckvh" opt; do
         case "$opt" in
           n) n_speakers="$OPTARG" ;;
+          o) outname="$OPTARG" ;;
+          c) combine=1 ;;
+          k) keep=1 ;;
           v) verbose=1 ;;
           *) usage ;;
         esac
@@ -284,7 +350,7 @@ let
           lo="''${n_speakers%%-*}"
           hi="''${n_speakers##*-}"
           if [ -z "$lo" ] || [ -z "$hi" ]; then
-            echo "!! malformed range: $n_speakers (want e.g. 4-12)" >&2
+            echo "!! malformed range: $n_speakers (want e.g. 5-14)" >&2
             exit 1
           fi
           speaker_args=(--min_speakers "$lo" --max_speakers "$hi") ;;
@@ -322,27 +388,20 @@ let
       # than sitting in a 4KB buffer for the length of the whole run.
       export PYTHONUNBUFFERED=1
 
-      total=$#
-      idx=0
+      # ── One transcription: audio in, a populated session directory out ──
+      # $1 audio  $2 session dir  $3 session name  $4 clips manifest or ""
+      run_one() {
+        local audio="$1" outdir="$2" name="$3" clips="''${4:-}"
+        local abase work duration ext
 
-      for f in "$@"; do
-        idx=$((idx + 1))
-
-        if [ ! -f "$f" ]; then
-          echo "!! no such file: $f" >&2
-          continue
-        fi
-
-        dir="$(dirname "$f")"
-        base="$(basename "''${f%.*}")"
+        abase="$(basename "''${audio%.*}")"
+        mkdir -p "$outdir"
         work="$(mktemp -d)"
 
         duration="$(ffprobe -v error -show_entries format=duration \
-          -of default=nw=1:nk=1 "$f" 2>/dev/null || true)"
+          -of default=nw=1:nk=1 "$audio" 2>/dev/null || true)"
 
-        echo ":: [$idx/$total] $base"
-
-        whisperx "$f" \
+        whisperx "$audio" \
           --model ${model} \
           "''${lang_args[@]}" \
           --device ${device} \
@@ -357,19 +416,95 @@ let
           | python3 ${progress} "$duration" "$verbose"
 
         python3 ${formatter} \
-          "$work/$base.json" \
-          "$dir/$base.transcript.md" \
-          "$base" \
-          "$dir/$base.speakers"
+          "$work/$abase.json" \
+          "$outdir/$name.transcript.md" \
+          "$name" \
+          "$outdir/$name.speakers" \
+          "$clips"
 
         for ext in srt json; do
-          if [ -f "$work/$base.$ext" ]; then
-            cp "$work/$base.$ext" "$dir/$base.$ext"
+          if [ -f "$work/$abase.$ext" ]; then
+            cp "$work/$abase.$ext" "$outdir/$name.$ext"
           fi
         done
 
         rm -rf "$work"
-      done
+      }
+
+      if [ "$combine" -eq 1 ]; then
+        # ── One session, delivered in clips ──────────────────────────────
+        # Natural sort, so "- 10" follows "- 9" rather than "- 1".
+        mapfile -t clips_in < <(printf '%s\n' "$@" | sort -V)
+
+        for f in "''${clips_in[@]}"; do
+          if [ ! -f "$f" ]; then
+            echo "!! no such file: $f" >&2
+            exit 1
+          fi
+        done
+
+        name="$outname"
+        if [ -z "$name" ]; then
+          name="$(common_name "''${clips_in[@]}")"
+        fi
+        outdir="$(dirname "''${clips_in[0]}")/$name"
+        mkdir -p "$outdir"
+
+        combined="$outdir/$name.combined.flac"
+        manifest="$outdir/$name.clips.tsv"
+
+        echo ":: welding ''${#clips_in[@]} clips into one session: $name"
+
+        # The concat FILTER, not the concat demuxer — it decodes each input
+        # and so tolerates clips that differ in codec, sample rate, or
+        # channel count, which recordings from mixed sources usually do.
+        # 16 kHz mono is exactly what Whisper and pyannote consume anyway.
+        ff_args=()
+        filter=""
+        i=0
+        : > "$manifest"
+        offset=0
+        for f in "''${clips_in[@]}"; do
+          ff_args+=(-i "$f")
+          filter+="[$i:a]"
+          i=$((i + 1))
+          printf '%s\t%s\n' "$offset" "$(basename "$f")" >> "$manifest"
+          d="$(ffprobe -v error -show_entries format=duration \
+            -of default=nw=1:nk=1 "$f" 2>/dev/null || echo 0)"
+          offset="$(python3 -c "print(f'{$offset + ($d or 0):.3f}')")"
+        done
+        filter+="concat=n=$i:v=0:a=1[out]"
+
+        ffmpeg -v error -y "''${ff_args[@]}" -filter_complex "$filter" \
+          -map "[out]" -ar 16000 -ac 1 -c:a flac "$combined"
+
+        echo ":: $name"
+        run_one "$combined" "$outdir" "$name" "$manifest"
+
+        if [ "$keep" -eq 0 ]; then
+          rm -f "$combined"
+        else
+          echo "   kept $combined"
+        fi
+      else
+        # ── Separate sessions, one directory apiece ──────────────────────
+        total=$#
+        idx=0
+        for f in "$@"; do
+          idx=$((idx + 1))
+          if [ ! -f "$f" ]; then
+            echo "!! no such file: $f" >&2
+            continue
+          fi
+          name="$outname"
+          if [ -z "$name" ]; then
+            name="$(basename "''${f%.*}")"
+          fi
+          outdir="$(dirname "$f")/$name"
+          echo ":: [$idx/$total] $name"
+          run_one "$f" "$outdir" "$name" ""
+        done
+      fi
     '';
   };
 in
