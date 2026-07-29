@@ -42,6 +42,18 @@
     adhoc.enable = true;
   };
 
+  # Discrete AMD Polaris GPU (RX 470/480/570/580/590, PCI 1002:67df) bound to
+  # the in-tree `amdgpu` driver. Enable the VA-API userspace so the tdarr-node
+  # container can hardware-transcode via radeonsi. `libva-utils` supplies
+  # `vainfo` for on-box diagnosis. See containers/services/tdarr-node.nix.
+  hardware.graphics = {
+    enable = true;
+    extraPackages = with pkgs; [
+      libva-vdpau-driver
+      libva-utils
+    ];
+  };
+
   networking = {
     hostName = "spacedock";
     networkmanager.enable = true;
