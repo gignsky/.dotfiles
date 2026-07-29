@@ -172,6 +172,31 @@ let
           file=sys.stderr, flush=True)
   '';
 
+  # ── The weld check ───────────────────────────────────────────────────
+  # Malformed mp3 frames make ffmpeg complain loudly ("Header missing",
+  # "Error submitting packet to decoder") while discarding only the bad
+  # packet and resyncing — almost always harmless. Rather than silence
+  # those warnings, we check the arithmetic and say plainly whether audio
+  # was actually lost, BEFORE committing hours of compute to it.
+  driftCheck = pkgs.writeText "transcribe-weld-check.py" ''
+    import sys
+
+    expected = float(sys.argv[1] or 0)
+    actual = float(sys.argv[2] or 0)
+    drift = actual - expected
+
+    if abs(drift) > 2.0:
+        direction = "short of" if drift < 0 else "past"
+        sys.stderr.write(
+            f"   !! the weld runs {abs(drift):.1f}s {direction} the sum of "
+            f"the clips ({actual:.0f}s against {expected:.0f}s expected).\n"
+            "      Decode errors above may have dropped real audio — look "
+            "before trusting this transcript.\n")
+    else:
+        sys.stderr.write(f"   welded {int(actual // 60)}m of audio, intact "
+                         f"(drift {drift:+.2f}s)\n")
+  '';
+
   # ── The formatter ────────────────────────────────────────────────────
   # WhisperX's own .txt writer silently DROPS the speaker labels, which is
   # the whole point of the exercise. So we render the JSON ourselves:
@@ -315,9 +340,18 @@ let
           cand="''${cand:0:$i}"
         done
         cand="$(printf '%s' "$cand" | sed -E 's/[[:space:]_.-]+$//')"
+        # An empty or purely numeric prefix — "1.mp3", "2.mp3" — tells us
+        # nothing about the session. The containing directory does.
+        case "$cand" in
+          *[!0-9]*) : ;;       # holds a non-digit: a real name, keep it
+          *) cand="" ;;        # empty or all digits: uninformative
+        esac
         if [ -z "$cand" ]; then
-          cand="$(basename "''${1%.*}")-combined"
+          cand="$(basename "$(cd "$(dirname "$1")" && pwd)")"
         fi
+        case "$cand" in
+          "" | "/" | ".") cand="session" ;;
+        esac
         printf '%s' "$cand"
       }
 
@@ -475,8 +509,17 @@ let
         done
         filter+="concat=n=$i:v=0:a=1[out]"
 
+        # Malformed mp3 frames make ffmpeg complain loudly ("Header missing",
+        # "Error submitting packet to decoder") while discarding only that
+        # packet and resyncing — almost always harmless. So rather than
+        # silence the warnings, we check the arithmetic and say plainly
+        # whether anything was actually lost, BEFORE committing hours to it.
         ffmpeg -v error -y "''${ff_args[@]}" -filter_complex "$filter" \
           -map "[out]" -ar 16000 -ac 1 -c:a flac "$combined"
+
+        actual="$(ffprobe -v error -show_entries format=duration \
+          -of default=nw=1:nk=1 "$combined" 2>/dev/null || echo 0)"
+        python3 ${driftCheck} "$offset" "$actual"
 
         echo ":: $name"
         run_one "$combined" "$outdir" "$name" "$manifest"
