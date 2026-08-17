@@ -8,10 +8,11 @@
 # GPU: spacedock carries a discrete AMD Polaris card (RX 470/480/570/580/590,
 {
   inputs,
+  system,
   ...
 }:
 let
-  image = inputs.avec-moi.packages.site;
+  image = inputs.avec-moi.packages.${system}.site;
 in
 {
   virtualisation.oci-containers.containers.avec-moi-app = {
