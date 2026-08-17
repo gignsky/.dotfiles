@@ -21,11 +21,7 @@ in
       TZ = "America/New_York";
     };
     ports = [
-      {
-        hostPort = "8081";
-        containerPort = "8080";
-        protocol = "tcp";
-      }
+      "8081:8080/tcp"
     ];
   };
   networking.firewall = {
