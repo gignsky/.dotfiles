@@ -11,7 +11,7 @@
   ...
 }:
 let
-  image = inputs.avec-moi.site;
+  image = inputs.avec-moi.packages.site;
 in
 {
   virtualisation.oci-containers.containers.avec-moi-app = {
