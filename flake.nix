@@ -73,6 +73,8 @@
 
     };
 
+    avec-moi.url = "github:gignsky/avecmoi";
+
     # # tax-matrix - currently on develop branch
     # tax-matrix = {
     #   url = "github:gignsky/tax-matrix/develop";
