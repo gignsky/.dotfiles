@@ -1,31 +1,29 @@
-# Tdarr transcode node run-as-a-service container, ported verbatim from
-# dot-spacedock. DISABLED by default (not imported by
-# containers/services/default.nix).
+# avec-moi.app — static slide deck served by static-web-server on :8080,
+# packaged as an OCI image by the `avec-moi` flake input.
 #
-# ⚠️  Before enabling: needs CIFS/samba mounts and /etc/samba/cifs-creds
-# (provisioned via sops-nix), and the hardcoded server IP (192.168.51.3).
-#
-# GPU: spacedock carries a discrete AMD Polaris card (RX 470/480/570/580/590,
+# The image comes from `avec-moi.packages.<system>.default` (a
+# `dockerTools.buildLayeredImage` tarball tagged `avecmoi:latest`). NOTE:
+# `packages.<system>.site` is NOT the image — it is just the raw HTML site
+# directory that the image serves. We reference the input by `pkgs.system`
+# so the module does not need `system` threaded through `specialArgs`.
 {
   inputs,
+  pkgs,
   ...
 }:
 let
-  image = inputs.avec-moi.site;
+  imageFile = inputs.avec-moi.packages.${pkgs.system}.default;
 in
 {
   virtualisation.oci-containers.containers.avec-moi-app = {
-    inherit image;
+    inherit imageFile;
+    image = "avecmoi:latest";
     autoStart = true;
     environment = {
       TZ = "America/New_York";
     };
     ports = [
-      {
-        hostPort = 8081;
-        containerPort = 8080;
-        protocol = "tcp";
-      }
+      "8081:8080/tcp"
     ];
   };
   networking.firewall = {
