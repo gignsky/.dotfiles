@@ -22,8 +22,8 @@ in
     };
     ports = [
       {
-        hostPort = 8081;
-        containerPort = 8080;
+        hostPort = "8081";
+        containerPort = "8080";
         protocol = "tcp";
       }
     ];
