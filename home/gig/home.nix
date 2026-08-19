@@ -20,7 +20,6 @@
     ./common/core
     ./common/optional/direnv.nix
     ./common/optional/bat.nix
-    ./common/optional/latex.nix
     # direnvModule
     inputs.nixpkgs.homeManagerModules.gignews
   ];
