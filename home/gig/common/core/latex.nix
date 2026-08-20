@@ -15,7 +15,7 @@
     file.".latexmkrc".text = ''
       $pdf_mode = 1;
       $synctex = 1;
-      $pdf_previewer = 'none';
+      $pdf_previewer = '${pkgs.zathura}/bin/zathura %0 %S';
       $clean_ext = 'synctex.gz synctex.gz(busy) run.xml bbl bcf fdb_latexmk run tdo';
     '';
 
