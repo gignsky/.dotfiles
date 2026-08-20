@@ -32,6 +32,7 @@
   nb = "nix build";
   ndw = "nix develop .#windows -c nu";
   nfc = "nix flake check --print-build-logs";
+  nfm = "nix flake metadata";
   ns = "nix shell";
 
   # Agent calls directly
@@ -75,5 +76,4 @@
   mvim = "nix run github:gignsky/gigvim";
   mini = "nix run github:gignsky/gigvim#mini";
   full = "nix run github:gignsky/gigvim#full";
-  fupdate = "nix run github:gignsky/nix-update-input";
 }
