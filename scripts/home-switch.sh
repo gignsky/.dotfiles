@@ -58,70 +58,17 @@ fi
 export HOST=$(detect_flake_target)
 export HOST_IDENTIFIER=$(get_host_identifier "$HOST")
 
-# Source Scotty's logging library for automatic build logging
-# Try multiple locations for the logging library
-LOGGING_LIB_PATHS=(
-  "${SCOTTY_LOGGING_LIB_PATH:-}"
-  "${HOME}/.dotfiles/scripts/scotty-logging-lib.sh"
-  "$(dirname "$0")/scotty-logging-lib.sh"
-)
-
-LOGGING_LIB_FOUND=false
-for lib_path in "${LOGGING_LIB_PATHS[@]}"; do
-  if [ -n "$lib_path" ] && [ -f "$lib_path" ]; then
-    source "$lib_path"
-    LOGGING_LIB_FOUND=true
-    break
+# Annex build logging temporarily disabled — stubs print a notice instead of
+# sourcing scotty-logging-lib.sh or writing to ~/local_repos/annex.
+ANNEX_LOG_NOTICE_SHOWN=false
+annex_logging_disabled_notice() {
+  if [ "$ANNEX_LOG_NOTICE_SHOWN" = false ]; then
+    echo "📴 Annex build logging is temporarily disabled — no log entry will be recorded." >&2
+    ANNEX_LOG_NOTICE_SHOWN=true
   fi
-done
-
-if [ "$LOGGING_LIB_FOUND" = false ]; then
-  # Fallback: define basic logging functions if library is not found
-  scotty_log_event() { echo "[$1] $*" >&2; }
-  log_build_performance() {
-    local operation="$1"
-    local duration_seconds="$2"
-    local success="$3"
-    local error_type="$4"
-    local notes="$5"
-    local generation_number="${6:-unknown}"
-
-    local annex_dir="${HOME}/local_repos/annex"
-    local metrics_dir="${annex_dir}/fleet/operations/metrics"
-    mkdir -p "$metrics_dir"
-
-    local timestamp
-    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    local host
-    host=$(hostname)
-
-    # Get git state
-    local git_commit
-    git_commit=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
-    local git_branch
-    git_branch=$(git branch --show-current 2>/dev/null || echo "unknown")
-    local git_status="clean"
-    if ! git diff-index --quiet HEAD -- 2>/dev/null; then
-      local modified_count
-      modified_count=$(git status --porcelain | wc -l)
-      git_status="${modified_count}_modified"
-    fi
-    local flake_lock_hash="none"
-    if [ -f "flake.lock" ]; then
-      flake_lock_hash=$(sha256sum flake.lock | cut -d' ' -f1)
-    fi
-
-    local csv_file="${metrics_dir}/build-performance.csv"
-
-    # Create header if file doesn't exist
-    if [ ! -f "$csv_file" ]; then
-      echo "date,host,operation,duration_seconds,success,error_type,git_commit,git_branch,git_status,flake_lock_hash,generation_number,notes" >"$csv_file"
-    fi
-
-    # Append the data
-    echo "${timestamp},${host},${operation},${duration_seconds},${success},${error_type},${git_commit},${git_branch},${git_status},${flake_lock_hash},${generation_number},${notes}" >>"$csv_file"
-  }
-fi
+}
+scotty_log_event() { annex_logging_disabled_notice; }
+log_build_performance() { annex_logging_disabled_notice; }
 
 # Pre-commit checks with auto-fix and validation
 echo "🔍 Running pre-commit checks..."
@@ -296,7 +243,6 @@ if [ $BUILD_SUCCESS -eq 0 ]; then
   fi
 
   echo "✅ Home Manager rebuild successful! Generation: $generation_number (${duration}s) for ${HOST_IDENTIFIER}"
-  echo "📝 Detailed engineering log created by Scotty"
   
   # Clean up temp files on success
   rm -f "$output_file" "$error_log_file"

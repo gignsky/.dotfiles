@@ -70,31 +70,17 @@ if [ "$HOST_DETECTION_FOUND" = false ]; then
     get_host_identifier() { echo "$1"; }
 fi
 
-# Source Scotty's logging library for automatic build logging
-LOGGING_LIB_PATHS=(
-    "${SCOTTY_LOGGING_LIB_PATH:-}"
-    "${HOME}/.dotfiles/scripts/scotty-logging-lib.sh"
-    "$(dirname "$0")/scotty-logging-lib.sh"
-)
-
-LOGGING_LIB_FOUND=false
-for lib_path in "${LOGGING_LIB_PATHS[@]}"; do
-    if [ -n "$lib_path" ] && [ -f "$lib_path" ]; then
-        source "$lib_path"
-        LOGGING_LIB_FOUND=true
-        break
+# Annex build logging temporarily disabled — stubs print a notice instead of
+# sourcing scotty-logging-lib.sh or writing to ~/local_repos/annex.
+ANNEX_LOG_NOTICE_SHOWN=false
+annex_logging_disabled_notice() {
+    if [ "$ANNEX_LOG_NOTICE_SHOWN" = false ]; then
+        echo "📴 Annex build logging is temporarily disabled — no log entry will be recorded." >&2
+        ANNEX_LOG_NOTICE_SHOWN=true
     fi
-done
-
-if [ "$LOGGING_LIB_FOUND" = false ]; then
-    # Fallback: define basic logging functions if library is not found
-    # echo "DEBUG: Using fallback logging functions"
-    scotty_log_event() { echo "[$1] $*" >&2; }
-    log_build_performance() { echo "Build: $1 took $2 seconds (success: $3)" >&2; }
-else
-    # echo "DEBUG: Scotty logging library loaded from: ${lib_path}"
-    true
-fi
+}
+scotty_log_event() { annex_logging_disabled_notice; }
+log_build_performance() { annex_logging_disabled_notice; }
 
 # Enhanced host detection with intelligent WSL mapping
 # Use auto-detected hostname, don't treat arguments as hostname
