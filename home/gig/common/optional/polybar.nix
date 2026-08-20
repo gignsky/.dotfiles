@@ -42,7 +42,7 @@
         modules-left = "bspwm";
         modules-center = "date pulseaudio";
         # modules-right = "filesystem cpu memory wlan eth battery";
-        modules-right = "cpu memory wlan eth battery";
+        modules-right = "backlight cpu memory wlan eth battery";
 
         # System tray
         tray-position = "right";
@@ -151,6 +151,32 @@
         bar-volume-empty = "─";
         bar-volume-empty-font = 2;
         bar-volume-empty-foreground = "#4C566A";
+      };
+
+      # Backlight / brightness module (Framework 16 AMD)
+      "module/backlight" = {
+        type = "internal/backlight";
+        # IMPORTANT: verify the device name on merlin with: ls /sys/class/backlight/
+        # Framework 16 AMD is typically "amdgpu_bl1" (sometimes "amdgpu_bl0").
+        card = "amdgpu_bl1";
+        use-actual-brightness = true;
+        enable-scroll = true; # scroll over the widget to change brightness
+
+        format = "<label> <bar>";
+        format-prefix = " "; # sun/brightness glyph (Font Awesome Solid)
+        format-prefix-foreground = "#88C0D0";
+        label = "%percentage%%";
+        label-foreground = "#D8DEE9";
+
+        bar-width = 10;
+        bar-indicator = "|";
+        bar-indicator-font = 2;
+        bar-fill = "─";
+        bar-fill-font = 2;
+        bar-fill-foreground = "#EBCB8B";
+        bar-empty = "─";
+        bar-empty-font = 2;
+        bar-empty-foreground = "#4C566A";
       };
 
       # Wireless network module
