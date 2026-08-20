@@ -8,6 +8,7 @@
     packages = [
       # Full scheme so no package is ever missing while learning LaTeX.
       pkgs.texlive.combined.scheme-full
+      pkgs.zathura
     ];
 
     # Declarative build automation: latexmk watches/builds/cleans without a
