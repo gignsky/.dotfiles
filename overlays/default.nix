@@ -24,6 +24,12 @@
       config.allowUnfree = true;
     };
   };
+  local-packages = final: _prev: {
+    unstable = import inputs.nixpkgs-local {
+      inherit (final.stdenv.hostPlatform) system;
+      config.allowUnfree = true;
+    };
+  };
 
   # # wrap packages overlay example
   # wrap-packages = final: _prev: {

@@ -9,7 +9,7 @@
     # Unstable
     nixpkgs-unstable.url = "github:gignsky/gigpkgs/gigos-unstable";
     # Local
-    # nixpkgs-local.url = "git+file:///home/gig/local_repos/nixpkgs";
+    nixpkgs-local.url = "git+file:///home/gig/local_repos/gigpkgs";
 
     # Home manager
     home-manager.follows = "nixpkgs/home-manager";
