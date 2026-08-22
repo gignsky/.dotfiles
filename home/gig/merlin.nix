@@ -28,7 +28,7 @@
     steam
     # anydesk
     # bambu-studio
-    local.claude-desktop
+    claude-desktop
   ];
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
