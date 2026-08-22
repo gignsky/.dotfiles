@@ -8,5 +8,6 @@ _: {
     # ./pihole.nix # Pi-hole DNS — runs as a service via the container engine
     ./tdarr-node.nix # Tdarr node — needs CIFS mounts + samba creds first
     ./avec-moi-app.nix
+    ./kottonmouth.nix
   ];
 }
