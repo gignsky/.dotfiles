@@ -5,11 +5,12 @@
     #################### Official NixOS and HM Package Sources ####################
     # Stable
     # nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
-    nixpkgs.url = "github:gignsky/gigpkgs/gigos-2605";
+    # Gigpkgs Version
+    # nixpkgs.url = "github:gignsky/gigpkgs/gigos-2605";
+    # Local
+    nixpkgs.url = "git+file:///home/gig/local_repos/gigpkgs";
     # Unstable
     nixpkgs-unstable.url = "github:gignsky/gigpkgs/gigos-unstable";
-    # Local
-    nixpkgs-local.url = "git+file:///home/gig/local_repos/gigpkgs";
 
     # Home manager
     home-manager.follows = "nixpkgs/home-manager";
