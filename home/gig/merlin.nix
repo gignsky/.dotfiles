@@ -29,6 +29,7 @@
     # anydesk
     # bambu-studio
     claude-desktop
+    obsidian
   ];
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
