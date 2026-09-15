@@ -1448,11 +1448,11 @@
         "roll-flow": "roll-flow_2"
       },
       "locked": {
-        "lastModified": 1789500096,
-        "narHash": "sha256-zlRPKvzncIgnQzVyB1s04cUYRj6esaKqE60iofLuUh8=",
+        "lastModified": 1789510092,
+        "narHash": "sha256-azCkfPiGsiTSJcAbfq2InScN8xozSIr1Mi0JqTuYez8=",
         "owner": "gignsky",
         "repo": "gigpkgs",
-        "rev": "6d9346a49ff65716f4860cf9601e5ca05589a876",
+        "rev": "a40e3577ffe4a3bc10f356b8172423dae6db98b9",
         "type": "github"
       },
       "original": {
