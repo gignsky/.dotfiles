@@ -4,15 +4,16 @@
 # The image comes from `avec-moi.packages.<system>.default` (a
 # `dockerTools.buildLayeredImage` tarball tagged `avecmoi:latest`). NOTE:
 # `packages.<system>.site` is NOT the image — it is just the raw HTML site
-# directory that the image serves. We reference the input by `pkgs.system`
-# so the module does not need `system` threaded through `specialArgs`.
+# directory that the image serves. We reference the input by
+# `pkgs.stdenv.hostPlatform.system` so the module does not need `system`
+# threaded through `specialArgs`.
 {
   inputs,
   pkgs,
   ...
 }:
 let
-  imageFile = inputs.avec-moi.packages.${pkgs.system}.default;
+  imageFile = inputs.avec-moi.packages.${pkgs.stdenv.hostPlatform.system}.default;
 in
 {
   virtualisation.oci-containers.containers.avec-moi-app = {
