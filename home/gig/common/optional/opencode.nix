@@ -57,7 +57,7 @@
         wikipedia = {
           type = "local";
           command = [
-            "npx"
+            "${pkgs.nodejs_22}/bin/npx"
             "-y"
             "wikipedia-mcp"
           ];
@@ -106,7 +106,7 @@
         internetsearch = {
           type = "local";
           command = [
-            "npx"
+            "${pkgs.nodejs_22}/bin/npx"
             "-y"
             "@nachoretro/internetsearch"
           ];
@@ -118,7 +118,7 @@
         github = {
           type = "local";
           command = [
-            "npx"
+            "${pkgs.nodejs_22}/bin/npx"
             "-y"
             "@modelcontextprotocol/server-github"
           ];

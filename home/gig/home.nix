@@ -97,7 +97,9 @@
     # ncdu # unneccecary due to the ability to use `dua i` for interactive better dua the only downside is that dua doesn't have a way of sorting folders at the top
 
     # MCP Server Dependencies
-    nodejs_22 # For Wikipedia MCP server (npx)
+    # nodejs_22 - removed; kept off the default PATH. MCP servers that need npx
+    # pin it to a store path (see common/optional/opencode.nix). For ad-hoc use:
+    #   nix shell nixpkgs#nodejs_22
     # python312 # For Python-based MCP servers - commented out to keep Python in flake environments only
     uv # Modern Python package installer for MCP servers
 
