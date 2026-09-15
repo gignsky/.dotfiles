@@ -1711,11 +1711,11 @@
         "roll-flow": "roll-flow"
       },
       "locked": {
-        "lastModified": 1789500092,
-        "narHash": "sha256-bWi/yMz57i3hwiGjpqyv+sRfhdnkP0HpNoAvWVqhQ88=",
+        "lastModified": 1789510093,
+        "narHash": "sha256-XMCdmpZcnIsuxpjR1dm4+02lpHvNcRTn0zXE/N1DQUI=",
         "owner": "gignsky",
         "repo": "gigpkgs",
-        "rev": "7c3d19b6072829b66c337209870a51a977368fa8",
+        "rev": "4103fc2444099391535ebc3ad0cb863b24b45e65",
         "type": "github"
       },
       "original": {
