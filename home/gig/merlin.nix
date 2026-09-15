@@ -24,6 +24,7 @@
     # bitwarden-cli
     # bitwarden-desktop
     discord
+    audacity
     # makemkv
     steam
     # anydesk
