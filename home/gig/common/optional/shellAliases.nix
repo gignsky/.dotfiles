@@ -48,7 +48,7 @@
 
   # ssh
   spacedock = "ssh -i ~/.ssh/gment gig@192.168.51.2";
-  ganoslal = "ssh gig@ganoslal-wsl";
+  ganoslal = "ssh gig@192.168.51.50";
   merlin = "ssh gig@merlins-windows-wsl";
   spacedockm = "mosh gig@192.168.51.2";
   ganoslalm = "mosh gig@ganoslal-wsl";
