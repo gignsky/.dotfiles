@@ -1,9 +1,10 @@
 { pkgs, ... }:
 
+# NOTE: autorandr is deliberately NOT imported here. Its postswitch hook runs
+# `bspc wm -r`, which fails under any non-bspwm session, and profile switching
+# is useless on hosts with a fixed monitor set. Hosts that want it import
+# hosts/common/optional/autorandr.nix explicitly.
 {
-  imports = [
-    ./autorandr.nix
-  ];
   services = {
     displayManager.ly = {
       enable = true;

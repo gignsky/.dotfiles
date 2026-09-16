@@ -4,7 +4,6 @@
   inputs,
   lib,
   config,
-  pkgs,
   configLib,
   ...
 }:
@@ -24,9 +23,17 @@
     (configLib.relativeToRoot "hosts/common/core")
 
     # optional
+    # XFCE is the current session: its display settings GUI owns the monitor
+    # layout while the dual-GPU setup is being verified. bspwm stays enabled
+    # below so it remains selectable from ly.
+    (configLib.relativeToRoot "hosts/common/optional/xfce.nix") # Enable XFCE desktop
     (configLib.relativeToRoot "hosts/common/optional/bspwm.nix") # Enable bspwm window manager
+    (configLib.relativeToRoot "hosts/common/optional/audio.nix") # Enable PipeWire audio system
     (configLib.relativeToRoot "hosts/common/optional/firefox.nix")
     # ../common/optional/xrdp.nix
+    # NOTE: autorandr is deliberately not imported — this host has a fixed
+    # 4-monitor set, and two of its panels have byte-identical EDIDs so
+    # autorandr cannot tell them apart anyway.
 
     #gig users
     (configLib.relativeToRoot "hosts/common/users/gig")
@@ -79,14 +86,10 @@
       variant = "";
     };
 
-    # Use both NVIDIA and AMD drivers for dual-GPU setup (NVIDIA primary + AMD secondary)
+    # Both GPUs in this machine are NVIDIA (RTX 3060 Ti + GTX 970); the single
+    # nvidia driver handles both. See ./nvidia.nix for the multi-GPU wiring.
     videoDrivers = [ "nvidia" ];
   };
-
-  # Add autorandr for monitor profile management
-  environment.systemPackages = with pkgs; [
-    autorandr
-  ];
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;

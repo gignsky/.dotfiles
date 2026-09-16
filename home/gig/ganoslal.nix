@@ -3,7 +3,6 @@
 {
   # inputs,
   pkgs,
-  configLib,
   ...
 }:
 {
@@ -31,27 +30,12 @@
       gpu-viewer
     ];
 
-    file = {
-      # 4 monitor setup
-      ".config/autorandr/ganoslal-4-monitor/config" = {
-        source = configLib.relativeToRoot "home/gig/common/resources/autorandr/ganoslal/ganoslal-4-monitor/config";
-        executable = true;
-      };
-      ".config/autorandr/ganoslal-4-monitor/setup" = {
-        source = configLib.relativeToRoot "home/gig/common/resources/autorandr/ganoslal/ganoslal-4-monitor/setup";
-        executable = true;
-      };
-
-      #only ultrawide setup
-      ".config/autorandr/ganoslal-only-ultra/config" = {
-        source = configLib.relativeToRoot "home/gig/common/resources/autorandr/ganoslal/ganoslal-only-ultra/config";
-        executable = true;
-      };
-      ".config/autorandr/ganoslal-only-ultra/setup" = {
-        source = configLib.relativeToRoot "home/gig/common/resources/autorandr/ganoslal/ganoslal-only-ultra/setup";
-        executable = true;
-      };
-    };
+    # NOTE: the autorandr profiles that used to live here were removed — they
+    # pinned output names (DP-2, HDMI-0) that no longer exist, and two of this
+    # host's panels share a byte-identical EDID so autorandr can't fingerprint
+    # them apart. The desktop environment owns the monitor layout instead.
+    # Stale copies survive a switch; clean up once with:
+    #   rm -rf ~/.config/autorandr/ganoslal-4-monitor ~/.config/autorandr/ganoslal-only-ultra
 
     # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
     stateVersion = "25.05";

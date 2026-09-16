@@ -4,9 +4,28 @@
   pkgs,
   ...
 }:
-# Dual-NVIDIA GPU configuration for multi-monitor setup
-# Primary: NVIDIA RTX 3060 Ti (PCI:2d:0:0) - DP-1, DP-2, HDMI-0
-# Secondary: NVIDIA GTX 970 (PCI:23:0:0) - DP-1-1 (top center display)
+# Dual-NVIDIA GPU configuration for ganoslal's 4-monitor setup.
+# There is no AMD GPU in this machine — both cards are NVIDIA:
+#
+#   RTX 3060 Ti  PCI 2d:00.0  (decimal 45)  <- pinned as the X primary below
+#   GTX 970      PCI 23:00.0  (decimal 35)
+#
+# IMPORTANT: NVIDIA derives RandR output names from provider order, so the
+# names below are only stable as long as the primary GPU is pinned. X defaults
+# to the lowest PCI bus, which would pick the GTX 970 (0x23 < 0x2d) and rename
+# every output — that is exactly what broke this host previously. The BusID in
+# deviceSection is what keeps the naming below true.
+#
+#   RTX 3060 Ti (NVIDIA-0, Source Output)
+#     DP-2      5120x1440@144  ultrawide, bottom center
+#     HDMI-0    1920x1080@60   top left
+#     DP-1      1920x1080@60   top right
+#   GTX 970 (NVIDIA-G0, Sink Output — driven via PRIME output offload)
+#     DP-1-1    1920x1080@60   top center (LG IPS235)
+#
+# Monitor modes and positions are NOT set here. XFCE's display settings
+# (xfsettingsd / xfconf) owns the layout; nothing in Nix should fight it.
+#
 # Ref: https://nixos.wiki/wiki/Nvidia
 {
   nixpkgs.config.allowUnfree = lib.mkForce true;
@@ -28,19 +47,10 @@
       # Enable NVIDIA Control Panel
       nvidiaSettings = true;
 
-      # # Prime configuration - NVIDIA as primary, AMD as secondary
-      # prime = {
-      #   # Sync mode: NVIDIA always on, handles all rendering and outputs
-      #   sync.enable = false;
-      #
-      #   # Bus IDs - verify these match your hardware with 'lspci'
-      #   nvidiaBusId = "PCI:2d:0:0"; # NVIDIA GPU bus ID
-      #   # # second nvidiaBusId
-      #   # nvidiaBusId = "PCI:23:0:0"; # AMD GPU bus ID
-      # };
-      # NOTE: PRIME is for hybrid laptop configurations (integrated + discrete GPU)
-      # For dual discrete NVIDIA GPUs, we don't use PRIME at all
-      # Instead, both GPUs are managed by the nvidia driver as separate devices
+      # NOTE: PRIME is for hybrid laptop configurations (integrated + discrete GPU).
+      # For two discrete NVIDIA GPUs we don't use hardware.nvidia.prime at all —
+      # the second card is attached at runtime as a RandR output sink instead
+      # (see displayManager.sessionCommands below).
 
       # Enable power management for better stability
       powerManagement = {
@@ -57,60 +67,42 @@
 
   # Configure X11 to recognize both NVIDIA GPUs
   services.xserver = {
-    # Configure X11 to expose outputs from BOTH GPUs on a single unified screen
-    # This is critical for multi-GPU setups - without this, X11 only sees one GPU
+    # Expose outputs from BOTH GPUs on a single unified screen. Without this,
+    # X11 only ever sees the primary GPU's outputs.
     serverFlagsSection = ''
       Option "AllowMouseOpenFail" "True"
       Option "AutoAddGPU" "True"
     '';
 
-    # Screen configuration - allow empty initial config so nvidia can set it up
+    # Let the nvidia driver bring up the screen even with no monitor attached
+    # to the primary output at server start.
     screenSection = ''
       Option "AllowEmptyInitialConfiguration" "True"
     '';
 
-    # Device configuration - critical for multi-GPU
+    # Spliced into the generated Section "Device" / Identifier "Device-nvidia[0]".
     deviceSection = ''
-      # Allow X11 to use multiple NVIDIA GPUs simultaneously
-      Option "AllowExternalGpus" "True"
+      # Pin the RTX 3060 Ti (PCI 2d:00.0) as X's primary device. X wants this in
+      # DECIMAL, so 0x2d -> 45. Without it X picks the lowest bus (the GTX 970)
+      # and every RandR output gets renamed.
+      BusID "PCI:45:0:0"
       # Probe and enable all connected outputs across all GPUs
       Option "ProbeAllGpus" "True"
-      # Use all available outputs from all GPUs
-      Option "AllowMultipleGPUs" "True"
+      Option "AllowExternalGpus" "True"
     '';
 
-    # X11 display initialization script (runs before display manager and window manager)
+    # Runs per-session, after login, before the window manager.
     displayManager.sessionCommands = ''
-      # Dual-NVIDIA GPU setup: Link GTX 970 outputs to RTX 3060 Ti X screen
-      # This ensures outputs from both GPUs are available in a unified screen
+      # Attach the secondary GPU (GTX 970) to the primary GPU's X screen so its
+      # outputs are usable. This is provider-name based, not output-name based,
+      # so it is unaffected by output renaming.
       ${pkgs.xorg.xrandr}/bin/xrandr --setprovideroutputsource NVIDIA-G0 NVIDIA-0 || true
 
-      # CRITICAL: Enable GTX 970 output (DP-1-1) which requires manual initialization
-      # Without this, the GTX 970's monitor won't have any modes available
-      if ${pkgs.xorg.xrandr}/bin/xrandr | grep -q "DP-1-1 connected"; then
-          ${pkgs.xorg.xrandr}/bin/xrandr --output DP-1-1 --auto
-      fi
-
-      # Configure 4-monitor layout for ganoslal
-      # Physical layout:
-      #   [HDMI-0] [DP-1-1] [DP-1]     ← Top row (1920x1080 @ 60Hz each)
-      #            [DP-2]               ← Bottom center (5120x1440 @ 144Hz - PRIMARY)
-
-      ${pkgs.xorg.xrandr}/bin/xrandr \
-        --output DP-2 --primary --mode 5120x1440 --rate 144 --pos 0x1080 \
-        --output HDMI-0 --mode 1920x1080 --rate 60 --pos 0x0 \
-        --output DP-1-1 --mode 1920x1080 --rate 60 --pos 1920x0 \
-        --output DP-1 --mode 1920x1080 --rate 60 --pos 3840x0
-
-      # Log monitor setup for debugging
-      echo "ganoslal: X11 monitor initialization complete ($(date))" >> /tmp/xrandr-init.log
+      # Deliberately no mode/position commands here — the desktop environment
+      # owns the monitor layout. Log what X actually ended up with so display
+      # problems can be diagnosed without a working screen.
+      echo "ganoslal: X11 provider link complete ($(date))" >> /tmp/xrandr-init.log
       ${pkgs.xorg.xrandr}/bin/xrandr --listmonitors >> /tmp/xrandr-init.log 2>&1
     '';
-  };
-
-  # Optional: Environment variables for debugging/optimization
-  environment.variables = {
-    # Force applications to use NVIDIA GPU
-    # __GLX_VENDOR_LIBRARY_NAME = "nvidia";
   };
 }
