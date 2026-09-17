@@ -132,6 +132,43 @@ let
       description = "Runs the ISO installer in a VM for testing";
     };
 
+    # polybar: network throughput sparkline (tail-mode custom/script)
+    polybar-net-graph = makeScriptPackage {
+      name = "polybar-net-graph";
+      scriptPath = ../scripts/polybar-net-graph.sh;
+      dependencies = with pkgs; [
+        bash
+        coreutils
+      ];
+      description = "Network throughput sparkline for polybar (prints one line per second)";
+    };
+
+    # polybar: count of minimized (bspwm `hidden`) windows
+    polybar-hidden-count = makeScriptPackage {
+      name = "polybar-hidden-count";
+      scriptPath = ../scripts/polybar-hidden-count.sh;
+      dependencies = with pkgs; [
+        bash
+        coreutils
+        bspwm
+      ];
+      description = "Prints how many windows are currently minimized, for polybar";
+    };
+
+    # rofi picker for restoring minimized (bspwm `hidden`) windows
+    bspwm-hidden-picker = makeScriptPackage {
+      name = "bspwm-hidden-picker";
+      scriptPath = ../scripts/bspwm-hidden-picker.sh;
+      dependencies = with pkgs; [
+        bash
+        coreutils
+        bspwm
+        xdotool
+        rofi
+      ];
+      description = "rofi picker to restore a minimized window, by desktop/class/title";
+    };
+
     # Interactive script packager with fzf selection and OpenCode integration
     package-script = makeScriptPackage {
       name = "package-script";

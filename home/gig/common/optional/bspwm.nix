@@ -4,10 +4,48 @@
   ...
 }:
 
+let
+  # Any keybinding whose command spans more than one line MUST go through
+  # writeShellScript. `services.sxhkd.keybindings` emits the value under the
+  # hotkey line but only indents the FIRST line, so line two lands in column 0 --
+  # where sxhkd reads it as a new hotkey declaration, not a continuation. That
+  # silently reduced `super + u` to its own leading comment (i.e. a no-op, which
+  # is why minimized windows could never be brought back) and broke
+  # `super + shift + w` outright. A store path is always one line.
+  #
+  # These also run with whatever PATH the sxhkd session happens to have, so
+  # every binary is referenced by absolute store path.
+  restoreLastHidden = pkgs.writeShellScript "bspwm-restore-last-hidden" ''
+    # Most recently hidden window. -f focuses it, which also switches to
+    # whichever desktop it lives on.
+    ${pkgs.bspwm}/bin/bspc query -N -n .hidden.window \
+      | ${pkgs.coreutils}/bin/tail -1 \
+      | ${pkgs.findutils}/bin/xargs -I {} ${pkgs.bspwm}/bin/bspc node {} -g hidden=off -f
+  '';
+
+  # Same selector and same flag form as restoreLastHidden -- these two used to
+  # disagree (`.window.hidden` / `--flag hidden=off`) for no reason.
+  restoreAllHidden = pkgs.writeShellScript "bspwm-restore-all-hidden" ''
+    ${pkgs.bspwm}/bin/bspc query -N -n .hidden.window \
+      | ${pkgs.findutils}/bin/xargs -r -I {} ${pkgs.bspwm}/bin/bspc node {} -g hidden=off
+  '';
+
+  refreshWallpaper = pkgs.writeShellScript "bspwm-refresh-wallpaper" ''
+    if [ -f "$HOME/.background-image" ]; then
+      ${pkgs.feh}/bin/feh --bg-fill "$HOME/.background-image"
+    fi
+  '';
+in
+
 {
   imports = [
     ./polybar.nix
-    # ./picom.nix
+    # Compositor. Disabled by 066fb2e1 alongside polybar during the display
+    # firefight; e5ae183c brought polybar back but not this. It matters for more
+    # than transparency -- without a compositor every pointer-resize motion event
+    # repaints the whole 5120x1440 surface untouched by damage tracking, which is
+    # what made mouse resize feel like it only updated on release.
+    ./picom.nix
   ];
 
   # Additional packages for user-level bspwm functionality
@@ -59,6 +97,19 @@
       gapless_monocle = true;
       focus_follows_pointer = false;
       pointer_follows_focus = true;
+
+      # Mouse move/resize. These four match bspwm's compiled-in defaults, but
+      # nothing here used to set them, so the behaviour was implicit and would
+      # move with any upstream default change.
+      #
+      # Worth knowing: bspwm has no live drag for TILED nodes -- super+left-drag
+      # transplants the node only on button release, so it reads as doing
+      # nothing. Live move/resize tracking is a floating-window feature; press
+      # super + f first, then drag, and super + t to hand it back to the tiler.
+      pointer_modifier = "mod4";
+      pointer_action1 = "move";
+      pointer_action2 = "resize_side";
+      pointer_action3 = "resize_corner";
       # No manual padding for polybar: it sets _NET_WM_STRUT_PARTIAL and bspwm
       # honours struts, so reserving 30px here as well would double-count and
       # leave a gap under the bar. (If windows end up *behind* the bar instead,
@@ -141,6 +192,7 @@
         super + t                         Toggle tiled
         super + m                         Minimize window
         super + u                         Restore last minimized window
+        super + shift + m                 Pick a minimized window to restore
         super + shift + u                 Restore all minimized windows
         super + shift + w                 Refresh wallpaper/background
 
@@ -151,12 +203,18 @@
         super + shift + arrows            Swap window (alternative)
 
         <b>Desktops:</b>
-        super + 1-9/0/grave              Switch to desktop 1-11
-        super + shift + 1-9/0/grave      Move window to desktop 1-11
+        super + 1-9/0                    Switch to desktop I-X
+        super + shift + 1-9/0            Move window to desktop I-X
 
         <b>Window Resizing:</b>
         super + alt + h/j/k/l            Resize window
         super + alt + shift + h/j/k/l    Resize window (alternative)
+
+        <b>Mouse (super + drag):</b>
+        super + left-drag                 Move window
+        super + middle-drag               Resize nearest side
+        super + right-drag                Resize nearest corner
+        (tiled windows only swap on release -- super + f to float first)
 
         <b>Screenshots:</b>
         Print                            Screenshot selection to clipboard
@@ -165,6 +223,7 @@
         <b>System:</b>
         super + alt + Escape             Quit bspwm
         super + alt + r                  Restart bspwm
+        super + shift + d                Re-apply the monitor layout (ganoslal)
 
         <b>Audio:</b>
         XF86AudioRaiseVolume            Volume up
@@ -207,10 +266,16 @@
       # screen all disagreed. Names are stable regardless of monitor ordering,
       # so super+N now always reaches desktop N and polybar's %name% label
       # matches the key that gets there.
-      "super + {1-9,0,grave}" = "bspc desktop -f {I,II,III,IV,V,VI,VII,VIII,IX,X,XI}";
+      #
+      # Ten desktops, so `grave` is deliberately unbound. XI used to be the
+      # fifth desktop on the ultrawide, which meant that bar showed five labels
+      # while super+5 jumped to the top-left screen — the last place where the
+      # label and the key still disagreed. Both sxhkd sequences below must stay
+      # balanced at ten elements.
+      "super + {1-9,0}" = "bspc desktop -f {I,II,III,IV,V,VI,VII,VIII,IX,X}";
 
       # Move window to desktop (same by-name selection as above)
-      "super + shift + {1-9,0,grave}" = "bspc node -d {I,II,III,IV,V,VI,VII,VIII,IX,X,XI}";
+      "super + shift + {1-9,0}" = "bspc node -d {I,II,III,IV,V,VI,VII,VIII,IX,X}";
 
       # Toggle fullscreen
       "super + shift + f" = "bspc node -t fullscreen";
@@ -225,21 +290,21 @@
       "super + alt + {h,j,k,l}" = "bspc node -z {left -20 0,bottom 0 20,top 0 -20,right 20 0}";
       "super + alt + shift + {h,j,k,l}" = "bspc node -z {right -20 0,top 0 20,bottom 0 -20,left 20 0}";
 
-      # Minimize & Restore windows
+      # Minimize & Restore windows. See the writeShellScript note at the top of
+      # this file for why these are store paths and not inline commands.
       "super + m" = "bspc node -g hidden";
-      "super + u" = ''
-        # Restore most recently hidden window
-        bspc query -N -n .hidden.window | tail -1 | xargs -I {} bspc node {} -g hidden=off -f
-      '';
-      "super + shift + u" =
-        "bspc query -N -n .window.hidden | xargs -I {} bspc node {} --flag hidden=off";
+      "super + u" = "${restoreLastHidden}";
+      "super + shift + u" = "${restoreAllHidden}";
+
+      # Browse everything that is currently minimized and pick one to bring
+      # back. Without this, hidden windows were only reachable newest-first
+      # (super + u) or all at once (super + shift + u), with nothing showing
+      # what was actually in there. The same script backs a left click on
+      # polybar's `hidden` module.
+      "super + shift + m" = "${pkgs.bspwm-hidden-picker}/bin/bspwm-hidden-picker";
 
       # Background/wallpaper refresh
-      "super + shift + w" = ''
-        if [ -f "$HOME/.background-image" ]; then
-          feh --bg-fill "$HOME/.background-image"
-        fi
-      '';
+      "super + shift + w" = "${refreshWallpaper}";
 
       # Screenshots
       "Print" = "maim -s | xclip -selection clipboard -t image/png";
