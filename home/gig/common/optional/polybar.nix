@@ -68,21 +68,29 @@
       "module/bspwm" = {
         type = "internal/bspwm";
 
+        # Only show desktops belonging to the monitor this bar is on. Without
+        # this every bar lists all desktops from every monitor.
+        pin-workspaces = true;
+
+        # Labels use %name% (the desktop's actual name, e.g. "IV") rather than
+        # %index%. %index% is the desktop's POSITION WITHIN THE BAR, so every
+        # 2-desktop monitor rendered "1 2" and the 5-desktop ultrawide rendered
+        # "1 2 3 4 5" — the same digits on different screens, matching nothing.
         # Workspace labels
-        label-focused = "%index%";
+        label-focused = "%name%";
         label-focused-background = "#88C0D0";
         label-focused-foreground = "#2E3440";
         label-focused-padding = 2;
 
-        label-occupied = "%index%";
+        label-occupied = "%name%";
         label-occupied-padding = 2;
         label-occupied-foreground = "#D8DEE9";
 
-        label-urgent = "%index%!";
+        label-urgent = "%name%!";
         label-urgent-background = "#BF616A";
         label-urgent-padding = 2;
 
-        label-empty = "%index%";
+        label-empty = "%name%";
         label-empty-foreground = "#4C566A";
         label-empty-padding = 2;
       };

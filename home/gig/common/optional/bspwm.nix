@@ -67,15 +67,15 @@
     };
     rules = {
       "Discord" = {
-        desktop = "^9";
+        desktop = "IX";
         follow = true;
       };
       "youtube-music" = {
-        desktop = "^9";
+        desktop = "IX";
         follow = true;
       };
       "ytmusicdesktop" = {
-        desktop = "^9";
+        desktop = "IX";
         follow = true;
       };
       # "Firefox" = {
@@ -189,15 +189,28 @@
       # Restart bspwm
       "super + alt + r" = "bspc wm -r";
 
+      # Re-apply the monitor layout by hand. Only ganoslal ships
+      # `ganoslal-displays` (see hosts/ganoslal/nvidia.nix); the guard keeps
+      # this a no-op on hosts that don't, since this module is shared.
+      "super + shift + d" = "command -v ganoslal-displays >/dev/null && ganoslal-displays manual";
+
       # Focus/swap windows
       "super + {_,shift + }{h,j,k,l}" = "bspc node -{f,s} {west,south,north,east}";
       "super + {_,shift + }{Left,Down,Up,Right}" = "bspc node -{f,s} {west,south,north,east}";
 
-      # Switch desktops (supports up to 11 desktops for multi-monitor)
-      "super + {1-9,0,grave}" = "bspc desktop -f '^{1-9,10,11}'";
+      # Switch desktops. Selected BY NAME, not by '^N'.
+      #
+      # '^N' is bspwm's GLOBAL index, and global order follows RandR monitor
+      # order rather than the order desktops are declared in the host .conf.
+      # On ganoslal that made '^1' land on desktop V (top-left screen) while the
+      # main screen's first desktop was '^7' — so the key, the label and the
+      # screen all disagreed. Names are stable regardless of monitor ordering,
+      # so super+N now always reaches desktop N and polybar's %name% label
+      # matches the key that gets there.
+      "super + {1-9,0,grave}" = "bspc desktop -f {I,II,III,IV,V,VI,VII,VIII,IX,X,XI}";
 
-      # Move window to desktop (supports up to 11 desktops for multi-monitor)
-      "super + shift + {1-9,0,grave}" = "bspc node -d '^{1-9,10,11}'";
+      # Move window to desktop (same by-name selection as above)
+      "super + shift + {1-9,0,grave}" = "bspc node -d {I,II,III,IV,V,VI,VII,VIII,IX,X,XI}";
 
       # Toggle fullscreen
       "super + shift + f" = "bspc node -t fullscreen";
