@@ -239,10 +239,14 @@
     # Launch one bar per connected monitor. `polybar main &` on its own only
     # ever produces a bar on the primary output, which on a 4-monitor host
     # means three bare monitors.
+    # NOTE: the generated unit sets Environment=PATH to just the polybar
+    # package and /run/wrappers/bin, so grep/cut must be referenced by absolute
+    # path. Relying on PATH here makes the loop silently produce no monitors,
+    # the script exit 0, and the service go straight back to inactive.
     script = ''
-      PRIMARY=$(polybar --list-monitors | grep '(primary)' | cut -d: -f1)
+      PRIMARY=$(polybar --list-monitors | ${pkgs.gnugrep}/bin/grep '(primary)' | ${pkgs.coreutils}/bin/cut -d: -f1)
 
-      for m in $(polybar --list-monitors | cut -d: -f1); do
+      for m in $(polybar --list-monitors | ${pkgs.coreutils}/bin/cut -d: -f1); do
         if [ "$m" = "$PRIMARY" ]; then
           TRAY_POSITION=right
         else
