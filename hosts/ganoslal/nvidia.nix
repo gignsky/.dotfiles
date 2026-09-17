@@ -35,8 +35,13 @@
 
   hardware = {
     nvidia = {
-      # Use latest stable drivers (535+ with modern features)
-      package = config.boot.kernelPackages.nvidiaPackages.stable;
+      # MUST stay on the 580 branch: NVIDIA dropped Maxwell (GTX 900 series),
+      # Pascal and Volta support in 590, and this box has a GTX 970. On 26.05
+      # `nvidiaPackages.stable` is 595.71.05, which would leave the 970
+      # unsupported and take DP-1-1 (top center) offline with it. legacy_580
+      # is 580.173.02 — the final branch that still supports Maxwell, and it
+      # drives the RTX 3060 Ti perfectly well too.
+      package = config.boot.kernelPackages.nvidiaPackages.legacy_580;
 
       # Enable kernel modesetting (required for 535+, prevents screen tearing)
       modesetting.enable = true;
