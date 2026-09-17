@@ -23,8 +23,9 @@
 #   GTX 970 (NVIDIA-G0, Sink Output — driven via PRIME output offload)
 #     DP-1-1    1920x1080@60   top center (LG IPS235)
 #
-# Monitor modes and positions are NOT set here. XFCE's display settings
-# (xfsettingsd / xfconf) owns the layout; nothing in Nix should fight it.
+# The monitor layout is applied in displayManager.sessionCommands below.
+# DP-1-1 in particular reports connected with a valid mode list but is never
+# given a CRTC automatically, so it stays dark unless explicitly enabled.
 #
 # Ref: https://nixos.wiki/wiki/Nvidia
 {
@@ -91,18 +92,59 @@
       Option "AllowExternalGpus" "True"
     '';
 
-    # Runs per-session, after login, before the window manager.
+    # Runs per-session, after login, before the window manager starts — so the
+    # monitors exist by the time bspwmrc assigns desktops to them.
     displayManager.sessionCommands = ''
+      XRANDR=${pkgs.xorg.xrandr}/bin/xrandr
+
       # Attach the secondary GPU (GTX 970) to the primary GPU's X screen so its
       # outputs are usable. This is provider-name based, not output-name based,
       # so it is unaffected by output renaming.
-      ${pkgs.xorg.xrandr}/bin/xrandr --setprovideroutputsource NVIDIA-G0 NVIDIA-0 || true
+      $XRANDR --setprovideroutputsource NVIDIA-G0 NVIDIA-0 || true
 
-      # Deliberately no mode/position commands here — the desktop environment
-      # owns the monitor layout. Log what X actually ended up with so display
-      # problems can be diagnosed without a working screen.
-      echo "ganoslal: X11 provider link complete ($(date))" >> /tmp/xrandr-init.log
-      ${pkgs.xorg.xrandr}/bin/xrandr --listmonitors >> /tmp/xrandr-init.log 2>&1
+      # DP-1-1 lives on the offloaded GPU: it reports as connected and has a
+      # mode list, but X never assigns it a CRTC on its own. It stays dark
+      # until something explicitly enables it.
+
+      is_connected() {
+        $XRANDR --query | grep -q "^$1 connected"
+      }
+
+      # Physical layout:
+      #   [HDMI-0] [DP-1-1] [DP-1]   top row, 1920x1080@60 each (5760 wide)
+      #            [DP-2]            bottom center, 5120x1440@144
+      # DP-2 is centred under the top row: (5760 - 5120) / 2 = 320.
+      #
+      # Applied as ONE xrandr call so the arrangement lands atomically, but
+      # guarded on every output being present first. A single call naming an
+      # absent output fails as a whole and silently leaves the previous layout
+      # in place — that is exactly how this host ended up mirrored before.
+      if is_connected DP-2 && is_connected HDMI-0 && is_connected DP-1-1 && is_connected DP-1; then
+        $XRANDR \
+          --output DP-2   --primary --mode 5120x1440 --rate 144 --pos 320x1080 \
+          --output HDMI-0 --mode 1920x1080 --rate 60 --pos 0x0 \
+          --output DP-1-1 --mode 1920x1080 --rate 60 --pos 1920x0 \
+          --output DP-1   --mode 1920x1080 --rate 60 --pos 3840x0
+      else
+        # Unexpected monitor set (cable moved, panel off). Lay whatever is
+        # connected out left-to-right rather than leaving outputs stacked at
+        # +0+0, which looks like mirroring.
+        echo "ganoslal: expected outputs missing, falling back to auto layout" >> /tmp/xrandr-init.log
+        prev=""
+        for out in $($XRANDR --query | grep " connected" | cut -d' ' -f1); do
+          if [ -z "$prev" ]; then
+            $XRANDR --output "$out" --auto --primary
+          else
+            $XRANDR --output "$out" --auto --right-of "$prev"
+          fi
+          prev=$out
+        done
+      fi
+
+      # Log what X actually ended up with, so display problems can be
+      # diagnosed over SSH without a working screen.
+      echo "ganoslal: X11 monitor init complete ($(date))" >> /tmp/xrandr-init.log
+      $XRANDR --listmonitors >> /tmp/xrandr-init.log 2>&1
     '';
   };
 }
