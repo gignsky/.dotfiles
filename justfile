@@ -32,6 +32,9 @@ pull:
   @nix-shell -p lolcat --run "echo 'Running git pull on all files in dotfiles and nix-secrets' | lolcat 2> /dev/null"
   just pre-pull-stash
   git pull
+  # Binary assets (wallpapers, etc.) are Git LFS-tracked; a plain `git pull`
+  # leaves pointer files behind, which nix then copies into the store as-is.
+  git lfs pull
   just pull-nix-secrets
   just post-pull-stash
 

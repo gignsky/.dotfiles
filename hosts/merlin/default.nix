@@ -22,6 +22,7 @@
     # optional
     # (configLib.relativeToRoot "hosts/common/optional/xfce.nix")
     (configLib.relativeToRoot "hosts/common/optional/bspwm.nix") # Enable bspwm window manager
+    (configLib.relativeToRoot "hosts/common/optional/autorandr.nix") # Monitor profile switching (was implicit via bspwm.nix)
     (configLib.relativeToRoot "hosts/common/optional/firefox.nix")
     (configLib.relativeToRoot "hosts/common/optional/audio.nix") # Enable PipeWire audio system
     (configLib.relativeToRoot "hosts/common/optional/bluetooth.nix") # Enable Bluetooth support

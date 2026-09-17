@@ -23,6 +23,7 @@ in
         times-newer-roman
 
         # Essential icon/symbol fonts (replaces enableDefaultPackages)
+        font-awesome # polybar's module glyphs (font-1/font-2 in polybar.nix)
         noto-fonts-color-emoji # Emoji support
         dejavu_fonts # Broad Unicode + symbols
         unifont # Rare glyph coverage

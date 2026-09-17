@@ -128,8 +128,8 @@
       inherit (self) outputs;
       # Switched from `inputs.gigpkgs.lib` to `inputs.nixpkgs.lib` with the swap to native `gigpkgs`
       # as `nixpkgs` -- TODO remove this comment later should everything work out (07/20/2026)
-      lib = inputs.nixpkgs.lib;
-      hmLib = lib.extend (_: _: { hm = inputs.home-manager.lib.hm; });
+      inherit (inputs.nixpkgs) lib;
+      hmLib = lib.extend (_: _: { inherit (inputs.home-manager.lib) hm; });
       system = "x86_64-linux";
       # forAllSystems = nixpkgs.lib.genAttrs [
       #   "x86_64-linux"
