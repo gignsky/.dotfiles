@@ -258,7 +258,7 @@ DISPLAY=:0 xrandr --query | grep -A2 '^DP-2 connected'
 for m in $(bspc query -M --names); do
   printf "%s: " "$m"; bspc query -D -m "$m" --names | tr '\n' ' '; echo
 done
-# expect: DP-2: I II III IV XI / HDMI-0: V VI / DP-1-1: VII VIII / DP-1: IX X
+# expect: DP-2: I II III IV / HDMI-0: V VI / DP-1-1: VII VIII / DP-1: IX X
 
 # 6. One polybar per monitor, tray only on the primary
 for p in $(pgrep polybar); do
@@ -301,3 +301,62 @@ Or pick an older entry at GRUB (`configurationLimit = 20`). Known-good reference
 | — | `h8x7mmq0…` | 26.05 + nvidia 580 pin — built and staged, **not yet switched to** |
 | — | `n66bbvnr…` | 25.11 with the guarded layout — last known 4-monitor-good |
 | — | `7wdcr9fl…` | 25.11, BusID pin but **no layout** — looks broken, is stale |
+
+---
+
+## Follow-up, 2026-09-17 — two sxhkd traps
+
+Finishing the polish items (drop `XI`, network graph, minimize picker, mouse) turned up two
+bugs that had nothing to do with displays but were quietly corrupting every keybinding.
+Worth knowing before touching `home/gig/common/optional/bspwm.nix` again.
+
+### 1. Multi-line `services.sxhkd.keybindings` values are silently broken
+
+home-manager writes the value under the hotkey line but indents only the FIRST line. A second
+line therefore lands in column 0, where sxhkd reads it as a new hotkey declaration rather than
+a continuation. Nothing errors — the binding just does the wrong thing.
+
+`super + u` was the clearest casualty:
+
+```
+super + u
+  # Restore most recently hidden window
+bspc query -N -n .hidden.window | tail -1 | xargs -I {} bspc node {} -g hidden=off -f
+```
+
+sxhkd ran `# Restore most recently hidden window` — a comment, i.e. a no-op — and discarded the
+`bspc` line. So `super + m` hid windows and nothing could bring them back. `super + shift + w`
+(wallpaper refresh) was broken the same way.
+
+**Rule: any keybinding command longer than one line goes through `pkgs.writeShellScript`** and
+the binding gets the store path. A store path is always one line. There is a `let` block at the
+top of `bspwm.nix` for exactly this.
+
+### 2. Two sxhkd daemons were running
+
+`xsession.initExtra` had `sxhkd &` while `services.sxhkd.enable = true` *also* starts it —
+home-manager appends its own `systemd-run --user --scope -u sxhkd …` line to the same
+`~/.xsession`. Both held the same grabs, so **every hotkey fired twice**. That is why `super + m`
+seemed to swallow an extra window: it hid the focused node, focus moved on, and the second
+firing hid that one too.
+
+Check with `pgrep -x sxhkd` — exactly one PID, and it should sit in `…/app.slice/sxhkd.scope`:
+
+```bash
+pgrep -x sxhkd | while read -r p; do head -1 "/proc/$p/cgroup"; done
+```
+
+### Also changed
+
+- Desktop `XI` dropped — it was the fifth desktop on the ultrawide, so that bar showed five
+  labels while `super+5` jumped to the top-left screen. Ten desktops now, `grave` unbound.
+- `./picom.nix` re-enabled. `066fb2e1` disabled it alongside polybar; `e5ae183c` restored only
+  polybar. Beyond transparency it matters for input feel: with no compositor every
+  pointer-resize motion event repaints the full 5120x1440 surface with no damage tracking.
+- `pointer_modifier` / `pointer_action1-3` are now set explicitly rather than relying on
+  bspwm's compiled-in defaults. Note bspwm has **no live drag for tiled nodes** — super+left-drag
+  transplants only on button release. Live move/resize is a floating-window feature (`super + f`).
+- New polybar modules `net` (throughput sparkline, `scripts/polybar-net-graph.sh`, tail mode)
+  and `hidden` (minimized count, click opens the rofi picker). Both scripts are packaged through
+  `makeScriptPackage`, which sets PATH from declared dependencies before exec — the standing
+  defence against the minimal-PATH trap that the polybar unit imposes.
