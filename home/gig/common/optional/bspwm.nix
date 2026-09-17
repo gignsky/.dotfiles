@@ -343,8 +343,12 @@ in
       #   feh --bg-scale "$HOME/wallpaper.png" &
       # fi
 
-      # Start sxhkd hotkey daemon
-      sxhkd &
+      # NOTE: sxhkd is NOT started here. `services.sxhkd.enable` above already
+      # launches it (home-manager appends its own `systemd-run --scope` line to
+      # this same script), and starting it here as well left TWO daemons holding
+      # the same grabs -- so every hotkey fired twice. That is what made
+      # `super + m` appear to swallow an extra window: it hid the focused one,
+      # focus moved on, and the second firing hid that one too.
     '';
   };
 }
