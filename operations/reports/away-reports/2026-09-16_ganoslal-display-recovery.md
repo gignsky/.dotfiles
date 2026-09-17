@@ -19,6 +19,19 @@ one provider, and output `DP-1-1` (top-center monitor) is gone entirely.
 `nvidiaPackages.legacy_580` (580.173.02 — the final branch supporting Maxwell). Verified
 to **compile against kernel 6.18.51**. It has *not* been deployed yet.
 
+The pin alone was not enough. `hosts/ganoslal/hardware-configuration.nix` also had
+`boot.extraModulePackages = [ config.boot.kernelPackages.nvidia_x11 ]`. That attribute is the
+**default** nvidia package for the kernel set — 595 on 26.05 — so it dragged the 595 kernel
+module back into the module tree alongside the pinned 580 one, and both landed in the system
+closure. Removed; the `hardware.nvidia` module already contributes the module package
+matching `hardware.nvidia.package`.
+
+Confirm the pin actually took before rebooting — this must print **only** 580:
+
+```bash
+nix-store -qR $(readlink -f /run/current-system) | grep -oE 'nvidia-x11-[0-9.]+' | sort -u
+```
+
 **Next action on ganoslal:**
 
 ```bash
@@ -256,5 +269,6 @@ Or pick an older entry at GRUB (`configurationLimit = 20`). Known-good reference
 | Generation | Store path prefix | Notes |
 |---|---|---|
 | 33 | `3r3ilxls…` | 26.05, nvidia 595 — **3 monitors only**, GTX 970 absent |
+| — | `h8x7mmq0…` | 26.05 + nvidia 580 pin — built and staged, **not yet switched to** |
 | — | `n66bbvnr…` | 25.11 with the guarded layout — last known 4-monitor-good |
 | — | `7wdcr9fl…` | 25.11, BusID pin but **no layout** — looks broken, is stale |
