@@ -27,6 +27,7 @@
     # (configLib.relativeToRoot "hosts/common/optional/xfce.nix")
     (configLib.relativeToRoot "hosts/common/optional/bspwm.nix") # Enable bspwm window manager
     (configLib.relativeToRoot "hosts/common/optional/audio.nix") # Enable PipeWire audio system
+    (configLib.relativeToRoot "hosts/common/optional/dns.nix") # Pin LAN DNS to the router
     (configLib.relativeToRoot "hosts/common/optional/firefox.nix")
     # ../common/optional/xrdp.nix
     # NOTE: autorandr is deliberately not imported — this host has a fixed
