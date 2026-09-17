@@ -25,7 +25,11 @@
     ];
     initrd.kernelModules = [ "nvidia" ];
     kernelModules = [ "kvm-amd" ];
-    extraModulePackages = [ config.boot.kernelPackages.nvidia_x11 ];
+    # NOTE: do NOT add `config.boot.kernelPackages.nvidia_x11` here. That is the
+    # DEFAULT nvidia package for the kernel set (on 26.05, stable = 595), which
+    # would drag the 595 kernel module into the module tree alongside the 580
+    # one this host pins in ./nvidia.nix. The hardware.nvidia module already
+    # adds the module package matching hardware.nvidia.package.
   };
 
   fileSystems."/" = {
