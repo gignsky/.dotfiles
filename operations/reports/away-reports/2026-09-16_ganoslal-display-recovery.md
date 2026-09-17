@@ -205,6 +205,35 @@ Two things auto-merge got right that would have been easy to lose:
 6. **`youtube-music` → `pear-desktop`** rename warning on 26.05 (`home/gig/ganoslal.nix`,
    and the bspwm window rules reference the old class). Still works via alias.
 
+7. **Suspend/resume does not restore the layout.** Observed 2026-09-16: the machine slept,
+   and on wake the other monitors came back but the main ultrawide (`DP-2`) stayed off. It
+   does not recover on its own.
+
+   The layout is currently applied *only* from
+   `services.xserver.displayManager.sessionCommands` in `hosts/ganoslal/nvidia.nix`, which
+   runs **once per session at login**. Nothing re-applies it after a DPMS/resume cycle, so
+   any mode the driver drops on wake stays dropped until the next login. The PRIME-offloaded
+   `DP-1-1` is the most likely to be lost, but here it was `DP-2`.
+
+   Suggested fix — factor the layout out of `sessionCommands` into a real script and call it
+   from three places:
+
+   - a `makeScriptPackage` entry in `pkgs/scripts.nix` (e.g. `ganoslal-displays`), following
+     the existing pattern in that file, exposed via `pkgs/default.nix`;
+   - `sessionCommands` invokes the script instead of inlining it;
+   - a systemd unit bound to `post-resume.target` (`after = [ "suspend.target" "hibernate.target" ]`,
+     `wantedBy = [ "post-resume.target" ]`) re-runs it on wake. It must run as the user with
+     `DISPLAY=:0` and the right `XAUTHORITY`, so a `systemd.user.service` bound to the user
+     `post-resume` path is cleaner than a system unit.
+
+   Also worth binding to an sxhkd key (next to the existing `super + shift + w` wallpaper
+   refresh) so the layout can be re-applied by hand without a relogin.
+
+   Keep the existing "all four outputs connected or fall back to left-to-right" guard — on
+   resume, outputs can briefly report disconnected, so the script should tolerate that rather
+   than blanking things. A short retry/settle loop before the guard check is probably needed
+   in the resume path, unlike at login where the outputs are already settled.
+
 ---
 
 ## Verification commands
