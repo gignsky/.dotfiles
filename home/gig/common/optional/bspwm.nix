@@ -6,7 +6,7 @@
 
 {
   imports = [
-    # ./polybar.nix
+    ./polybar.nix
     # ./picom.nix
   ];
 
@@ -34,24 +34,18 @@
       executable = true;
     };
     #TODO SCOTTY! REMIND ME to figure out how to make these roatate through the tolkien folder
-    # SGA wallpaper
-    # ".background-image" = {
-    #   source = configLib.relativeToRoot "home/gig/common/resources/wallpapers/SGA/Stargate_Atlantis_Gate_Fixed_Centered_2560x1440.png";
-    # };
-    # ".background-image" = {
-    #   source = configLib.relativeToRoot "home/gig/common/resources/wallpapers/SGA/Stargate_Atlantis_Gate_Fixed_Centered_5K.png";
-    # };
-    # ".background-image" = {
-    #   source = configLib.relativeToRoot "home/gig/common/resources/wallpapers/SGA/Stargate_Atlantis_Gate_Fixed_Centered_5K Sharper.png";
-    # };
-    # LOTR wallpaper
-    # ".background-image" = {
-    #   source = configLib.relativeToRoot "home/gig/common/resources/wallpapers/tolkien/desktop/doors-of-durin-horizontal.webp";
-    # };
-    # # NixOS logo wallpaper
-    # ".background-image" = {
-    #   source = configLib.relativeToRoot "home/gig/common/resources/wallpapers/nixos-logo.png";
-    # };
+    # Wallpaper. feh applies this per-monitor (it reads Xinerama info), so one
+    # image covers every screen. The 5K source is 5120x2880 (16:9); --bg-fill
+    # crops it to fit rather than squashing it onto the 32:9 ultrawide.
+    # Alternatives in home/gig/common/resources/wallpapers/:
+    #   SGA/Stargate_Atlantis_Gate_Fixed_Centered_5K Sharper.png  (same size, larger file)
+    #   SGA/Stargate_Atlantis_Gate_Fixed_Centered_2560x1440.png   (lower res)
+    #   nixos-logo.png
+    # (the tolkien/desktop/ path referenced here previously does not exist —
+    # only tolkien/mobile/ is in the repo)
+    ".background-image" = {
+      source = configLib.relativeToRoot "home/gig/common/resources/wallpapers/SGA/Stargate_Atlantis_Gate_Fixed_Centered_5K.png";
+    };
   };
 
   # bspwm window manager configuration
@@ -65,7 +59,11 @@
       gapless_monocle = true;
       focus_follows_pointer = false;
       pointer_follows_focus = true;
-      top_padding = 30; # Reserve space for polybar (30px height)
+      # No manual padding for polybar: it sets _NET_WM_STRUT_PARTIAL and bspwm
+      # honours struts, so reserving 30px here as well would double-count and
+      # leave a gap under the bar. (If windows end up *behind* the bar instead,
+      # put this back to 30 -- that means struts aren't being applied.)
+      top_padding = 0;
     };
     rules = {
       "Discord" = {
@@ -106,6 +104,12 @@
         bspc monitor -d I II III IV V VI VII VIII IX X
       fi
 
+      # Wallpaper. Set from bspwmrc rather than from the X session script so it
+      # is re-applied by `bspc wm -r` (super + alt + r), which is also what
+      # re-runs the monitor/desktop assignment above.
+      if [ -f "$HOME/.background-image" ]; then
+        ${pkgs.feh}/bin/feh --bg-fill "$HOME/.background-image" &
+      fi
     '';
   };
 
@@ -220,7 +224,7 @@
       # Background/wallpaper refresh
       "super + shift + w" = ''
         if [ -f "$HOME/.background-image" ]; then
-          feh --bg-scale "$HOME/.background-image"
+          feh --bg-fill "$HOME/.background-image"
         fi
       '';
 

@@ -13,6 +13,12 @@
     };
     config = {
       "bar/main" = {
+        # Which monitor this instance binds to. One polybar process is spawned
+        # per connected monitor with MONITOR set in its environment (see the
+        # launch loop in `script` below). Empty falls back to the primary.
+        monitor = "\${env:MONITOR:}";
+        monitor-strict = false;
+
         # Bar positioning and appearance
         width = "100%";
         height = 30;
@@ -44,8 +50,10 @@
         # modules-right = "filesystem cpu memory wlan eth battery";
         modules-right = "cpu memory wlan eth battery";
 
-        # System tray
-        tray-position = "right";
+        # System tray. Only ONE bar may own the tray — if several claim it the
+        # losers fail to start — so the launch loop sets this to "right" for the
+        # primary monitor and "none" everywhere else.
+        tray-position = "\${env:TRAY_POSITION:none}";
         tray-padding = 2;
 
         # Cursor actions
@@ -228,6 +236,20 @@
         margin-bottom = 0;
       };
     };
-    script = "polybar main &";
+    # Launch one bar per connected monitor. `polybar main &` on its own only
+    # ever produces a bar on the primary output, which on a 4-monitor host
+    # means three bare monitors.
+    script = ''
+      PRIMARY=$(polybar --list-monitors | grep '(primary)' | cut -d: -f1)
+
+      for m in $(polybar --list-monitors | cut -d: -f1); do
+        if [ "$m" = "$PRIMARY" ]; then
+          TRAY_POSITION=right
+        else
+          TRAY_POSITION=none
+        fi
+        MONITOR=$m TRAY_POSITION=$TRAY_POSITION polybar --reload main &
+      done
+    '';
   };
 }

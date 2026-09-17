@@ -23,10 +23,10 @@
     (configLib.relativeToRoot "hosts/common/core")
 
     # optional
-    # XFCE is the current session: its display settings GUI owns the monitor
-    # layout while the dual-GPU setup is being verified. bspwm stays enabled
-    # below so it remains selectable from ly.
-    (configLib.relativeToRoot "hosts/common/optional/xfce.nix") # Enable XFCE desktop
+    # NOTE: xfce.nix was tried here as a GUI for verifying the monitor layout,
+    # but xfce4-session blanks every display on this dual-GPU setup. bspwm
+    # drives all four monitors correctly, so XFCE is not imported — that also
+    # keeps a session that cannot work out of ly's picker.
     (configLib.relativeToRoot "hosts/common/optional/bspwm.nix") # Enable bspwm window manager
     (configLib.relativeToRoot "hosts/common/optional/audio.nix") # Enable PipeWire audio system
     (configLib.relativeToRoot "hosts/common/optional/firefox.nix")
