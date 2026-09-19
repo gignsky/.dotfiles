@@ -1711,11 +1711,11 @@
         "roll-flow": "roll-flow"
       },
       "locked": {
-        "lastModified": 1789781287,
-        "narHash": "sha256-YRf0vPe3y3xQ/OPcZ9R9zpHtzBsazOjdR0jhhu/M2xw=",
+        "lastModified": 1789785540,
+        "narHash": "sha256-T/JTZI9s7szlblIlpEjIDLvNdR3tG6CNxKlwOWFQxBc=",
         "owner": "gignsky",
         "repo": "gigpkgs",
-        "rev": "38c43a0ebc554c4019851f8ed800e7fb09b1b412",
+        "rev": "b2acbb0e96218d74433c1aad886a85cbc37bfaa6",
         "type": "github"
       },
       "original": {
@@ -2090,11 +2090,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789780926,
-        "narHash": "sha256-c4Nmddm0r6IVVriQMWTlkk/7y4a6Krg9JWHej6MQw8k=",
+        "lastModified": 1789784831,
+        "narHash": "sha256-lYOqFqKZ/7bFlCRwFCwqpSmvBnnQxPlJRhIZW9I6b5Y=",
         "owner": "gignsky",
         "repo": "roll-flow",
-        "rev": "b038fc9bea0c961874c3608c143218edd3655c38",
+        "rev": "f9d75fc18ba7ee156ea4553966dcdc5cf253b309",
         "type": "github"
       },
       "original": {
