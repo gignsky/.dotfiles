@@ -38,3 +38,12 @@ SEPs should be named descriptively:
 ## Template
 
 Use the `template.md` file as a starting point for new SEPs.
+
+## Index
+
+| SEP | Status | Notes |
+|---|---|---|
+| `001-bspwm-visual-enhancements.md` | — | |
+| `002-interactive-roll-mgmt.md` | Planning | |
+| `003-git-history-rewrite.md` | **Deferred — blocked** | ⚠️ Check before every `rolling` → `main` promotion. Purges ~114 MB of pre-LFS binary blobs; requires a force-push and a fleet-wide re-clone, so it may only run when no `roll/*` or `feature/*` work is outstanding. |
+| `SEP-spacedock-onboarding.md` | In progress | |
