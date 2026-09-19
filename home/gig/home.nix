@@ -76,6 +76,9 @@
     pdfarranger
     pdf4qt
 
+    #calculator - RPN
+    orpie
+
     #file manager
     # spaceFM # - Likely removed from nixpkgs
 
