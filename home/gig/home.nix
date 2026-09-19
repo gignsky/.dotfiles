@@ -80,6 +80,7 @@
     # spaceFM # - Likely removed from nixpkgs
 
     claude-code
+    claude-monitor
 
     vlc
 
