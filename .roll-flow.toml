@@ -28,8 +28,11 @@ rolling_to_main_gates = [
 ]
 
 # Per-host active status for roll-flow verification.
-# Only wsl is active for now; spacedock is flipped to true on the
-# roll/20 spacedock-onboarding roll once it builds + switches.
+# wsl and spacedock are active (spacedock was flipped on when the roll/20
+# onboarding roll built + switched). ganoslal and merlin are offline.
+# NOTE: vars/hosts.nix carries a second, stale copy of this table — its only
+# consumer, tmp-roll-flow.nix, is imported by nothing, so THIS file is the live
+# value that roll-flow reads.
 [host_active]
 ganoslal = false
 merlin = false
