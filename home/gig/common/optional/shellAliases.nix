@@ -18,7 +18,6 @@
   cat = "bat";
   bcat = "bat --paging=always"; # Better cat with forced paging
   alsmod = "nano $env.HOME/.dotfiles/home/gig/common/optional/shellAliases.nix";
-  als = "help aliases";
   cd = "z";
   diddy = "touch";
   podman = "sudo podman";

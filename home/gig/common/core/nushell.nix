@@ -15,6 +15,18 @@ let
   # Utilizes the provided configLib.scanPaths function to read all .nu files
   # in the directory and concatenate their contents into a single string.
   customNuFunctions = lib.scanPathsNuShell nuResourcesPath;
+
+  # Fleet topology for `als stats --fleet`. Reachability lives in vars/fleet.nix,
+  # activity in vars/hosts.nix — als.nu itself hardcodes no hosts, so the module
+  # stays portable enough to extract upstream.
+  hostActive = import (configLib.relativeToRoot "vars/hosts.nix");
+  fleetTargets = import (configLib.relativeToRoot "vars/fleet.nix");
+  alsFleet = lib.mapAttrsToList (name: spec: {
+    inherit name;
+    inherit (spec) target;
+    remote = spec.remote or "nu -l -c 'als stats --json'";
+    enabled = hostActive.${name} or true;
+  }) fleetTargets;
 in
 {
   # overlays
@@ -67,11 +79,24 @@ in
             }
         )
 
+        # als: fleet topology (data only — als.nu never hardcodes hosts)
+        $env.ALS_FLEET = (r#'${builtins.toJSON alsFleet}'# | from json)
+
         # ┌──────────────────────────────────────────────────────────┐
         # │ Custom Functions Loaded from Resource Directory          │
         # │ Sourced via configLib.scanPaths for modular NuShell code.│
         # └──────────────────────────────────────────────────────────┘
         ${customNuFunctions}
+
+        # als: show the shorter alias when the long form is typed.
+        # Appended rather than assigned so it composes with any other hook.
+        # `try` without `catch` swallows errors — a hint must never be able to
+        # wedge the shell or eat a command.
+        $env.config.hooks.pre_execution = (
+            $env.config.hooks.pre_execution?
+            | default []
+            | append {|| try { als hint-line (commandline) } }
+        )
       '';
     };
     zoxide = {
