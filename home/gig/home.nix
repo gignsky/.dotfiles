@@ -82,7 +82,7 @@
     #file manager
     # spaceFM # - Likely removed from nixpkgs
 
-    claude-code
+    unstable.claude-code
     claude-monitor
 
     vlc
