@@ -151,6 +151,21 @@ let
       description = "Interactive script packager with fzf selection and OpenCode test generation";
     };
 
+    # DNS resolution latency probe (see engineering/enhancement-protocols/)
+    dns-probe = makeScriptPackage {
+      name = "dns-probe";
+      scriptPath = ../scripts/dns-probe.sh;
+      dependencies = with pkgs; [
+        bash
+        coreutils
+        gawk
+        dnsutils # dig; the script falls back to `host` if absent
+        git
+        glibc # getent
+      ];
+      description = "Probes DNS resolution latency per layer to capture intermittent stalls";
+    };
+
   };
 
 in

@@ -27,6 +27,7 @@
     (configLib.relativeToRoot "hosts/common/optional/bluetooth.nix") # Enable Bluetooth support
     (configLib.relativeToRoot "hosts/common/optional/brightness-control.nix") # Enable brightness control for Framework laptops
     (configLib.relativeToRoot "hosts/common/optional/docker.nix") # Enable brightness control for Framework laptops
+    (configLib.relativeToRoot "hosts/common/optional/dns-probe.nix") # TEMPORARY: capture intermittent DNS stalls
     # ../common/optional/xrdp.nix
 
     #gig users

@@ -26,5 +26,6 @@ rec {
     pre-commit-flake-check
     run-iso-vm
     package-script
+    dns-probe
     ;
 }
