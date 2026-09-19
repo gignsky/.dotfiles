@@ -355,7 +355,7 @@ def als-render-report [d: record] {
 def als-render-fleet [d: record] {
     $d.hosts | each {|h| als-render-report $h; print "" }
     print (als box "als · fleet total" [
-        $"(ansi green_bold)($d.totals.used.keystrokes)(ansi reset) keystrokes saved across ($d.hosts | length) hosts"
+        $"(ansi green_bold)($d.totals.used.keystrokes)(ansi reset) keystrokes saved across ($d.hosts | length) host(if ($d.hosts | length) == 1 { '' } else { 's' })"
         $"(ansi red_bold)($d.totals.missed.keystrokes)(ansi reset) keystrokes missed"
     ])
     if ($d.unreachable | is-not-empty) {
