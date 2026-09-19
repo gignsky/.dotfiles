@@ -455,3 +455,12 @@ update-tdarr:
   @nix-shell -p lolcat --run 'echo "Restarting podman-tdarr-node.service..." | lolcat 2> /dev/null'
   sudo systemctl restart podman-tdarr-node.service
   @nix-shell -p lolcat --run 'echo "tdarr-node updated. ✅" | lolcat 2> /dev/null'
+
+# The 4h nebula-sync timer covers the routine case; use this after changing
+# blocklists on the master, or to watch a sync by hand.
+# Trigger an immediate Pi-hole sync from the master on memory-alpha (spacedock)
+pihole-sync-now:
+  @nix-shell -p lolcat --run 'echo "Syncing Pi-hole from the master (192.168.51.3)..." | lolcat 2> /dev/null'
+  sudo systemctl start nebula-sync.service
+  journalctl -u nebula-sync.service -n 60 --no-pager
+  @nix-shell -p lolcat --run 'echo "Sync run finished — look for \"Sync completed\" above. ✅" | lolcat 2> /dev/null'

@@ -7,18 +7,24 @@ flake as part of the spacedock onboarding (dotfiles#14).
 Two mechanisms are preserved — a container can run **as a service** or **adhoc** —
 split hybrid-style: the generic *engine* lives in **gigpkgs**
 (`gigpkgs.nixosModules.containers` → the `gigpkgs.containers.*` options), and the
-spacedock-specific *payloads* live here as data. **Everything here is disabled by
-default.**
+spacedock-specific *payloads* live here as data.
 
 ## As a service — `containers/services/`
 
 systemd-managed OCI containers via `virtualisation.oci-containers`.
 
-- `services/default.nix` — aggregator; imports **nothing** until you uncomment a payload.
-- `services/pihole.nix` (+ `pihole-config.nix`) — Pi-hole + nebula-sync.
-- `services/tdarr-node.nix` — Tdarr transcode node (needs CIFS mounts + samba creds).
+- `services/default.nix` — the aggregator. A payload runs iff it is imported here.
+- `services/pihole.nix` (+ `pihole-config.nix`) — **enabled**. Pi-hole DNS replica
+  on `192.168.51.2` (`:53`, web UI `:1702`) plus a nebula-sync oneshot + 4 h timer
+  that clones blocklists, groups, clients and DNS config from the master on
+  memory-alpha (`192.168.51.3:20720`). The API password is a sops secret
+  (`pihole/api-password`), injected via `environmentFiles`, never in the store.
+  Sync is **selective, not `FULL_SYNC`** — see the reasoning in `pihole.nix`.
+- `services/tdarr-node.nix` — **enabled**. Tdarr transcode node (CIFS mounts +
+  samba creds).
+- `services/avec-moi-app.nix` — **enabled**. Static slide deck on `:8081`.
 
-Enable one by uncommenting its import in `services/default.nix`. The host must
+Toggle one by commenting its import in/out of `services/default.nix`. The host must
 import `containers/services` (spacedock does) and have the engine on:
 
 ```nix
@@ -38,9 +44,10 @@ gigpkgs.containers.services.myapp = {
 };
 ```
 
-⚠️ The ported payloads carry placeholder secrets (e.g. Pi-hole `WEBPASSWORD`) and
-hardcoded LAN IPs (`192.168.51.x`). Move secrets to sops-nix and confirm the IPs
-before enabling.
+⚠️ These payloads hardcode LAN IPs (`192.168.51.x`) — confirm them before reusing
+this on another network. Secrets must go through sops-nix and reach the container
+via `environmentFiles`, never through `environment` (which lands in the
+world-readable nix store); `services/pihole.nix` is the worked example.
 
 ## Adhoc — `containers/buzz/`, `containers/mini/`
 

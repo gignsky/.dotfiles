@@ -24,8 +24,9 @@
     # Core: locale, sops, sshd, samba, nix settings, virtualisation, vm-test, ...
     (configLib.relativeToRoot "hosts/common/core")
 
-    # Containers — run-as-a-service OCI payloads (pihole enabled in the
-    # aggregator; see containers/README.md). The runtime comes from the
+    # Containers — run-as-a-service OCI payloads (see containers/README.md).
+    # Enabled here: pihole (DNS replica + nebula-sync from the master on
+    # memory-alpha), tdarr-node, avec-moi-app. The runtime comes from the
     # gigpkgs container engine configured below.
     (configLib.relativeToRoot "containers/services")
 
