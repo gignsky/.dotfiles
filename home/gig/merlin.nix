@@ -29,7 +29,7 @@
     steam
     # anydesk
     # bambu-studio
-    claude-desktop
+    claude-desktop-with-fhs
     obsidian
   ];
 
