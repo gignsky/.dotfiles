@@ -1,0 +1,1206 @@
+ ▐▛███▜▌   Claude Code v2.1.223
+▝▜█████▛▘  Opus 5 · Claude Max
+  ▘▘ ▝▝    ~/.dotfiles
+
+
+❯ can you figure out why git pushes and pulls are taking so long?               
+
+● I'll start by looking at the repo's git state and measuring where time
+  actually goes.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● 120 MiB packed for a dotfiles repo is suspicious. Let me find what's bloating
+  it and how many refs are being negotiated.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Found the likely culprits. Let me confirm whether they're still tracked or
+  only in history, and time an actual network operation.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● I'm in plan mode now, so I'll keep investigating read-only and then write up a
+  plan. Let me read those active hooks — they run on every push/commit.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● LFS hooks are installed. Let me check whether LFS is actually in use, verify
+  the stale mirror remote, and measure real network timing.
+
+  Listed 1 directory, ran 1 shell command (ctrl+o to expand)
+
+● Now the picture is clear. Let me measure actual timings to confirm which part
+  dominates.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● git ls-remote takes 10.6 seconds at 0% CPU — that's pure connection wait, not
+  git work. Let me isolate the SSH handshake.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Auth succeeds but takes 10.5s at 0% CPU. That ~10s is suspiciously exactly 2 ×
+  5s — a DNS timeout signature. Let me check.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Root cause found — and it's DNS, not git at all. Let me pin down exactly which
+  resolver is stalling.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● No dig available. Let me prove the mechanism with getent and a fully-qualified
+  name (trailing dot bypasses the search domain).
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● host and resolvectl are available, and nscd is active — which is why repeat
+  lookups are now instant. Let me confirm the wildcard hijack directly
+  (bypassing the nscd cache).
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Confirmed definitively. Let me find where this DNS config is set in your NixOS
+  config so the fix lands in the right place.
+
+  Ran 4 shell commands (ctrl+o to expand)
+● Let me test the third (IPv6) nameserver directly — that's the remaining
+  suspect for the 5s timeouts.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● I have a complete, evidence-backed diagnosis. Let me write up the plan.
+
+● Updated plan
+  ⎿  /plan to preview
+
+● I found the cause, and it isn't git. One scope question before I finalize:
+
+● User declined to answer questions
+  ⎿  · The fix has a client-side half (strip the search domain in your NixOS 
+     config) and a network-side half (remove the `*.gignsky.com` wildcard on the
+     DNS server at 192.168.51.3). Which should I plan for? (Client-side only 
+     (Recommended) / Both halves / Network-side only)
+     · Your .git is 184MB — a 62MB cargo.bin.tar plus raw wallpaper PNGs left in
+     history from before LFS was adopted. This slows fresh clones but NOT 
+     incremental push/pull. How do you want to handle it? (Defer, note it only 
+     (Recommended) / Safe gc now / Full history rewrite)
+
+● Got your answer on scope — both halves, plus a ganoslal rollout sequenced
+  after the current roll merges, and a separate roll for the Pi-hole backup
+  server. I'll fold those in.
+
+  What would you like to clarify? A few things I'm unsure about that you may be
+  reacting to:
+
+  - The repo-bloat question went unanswered — possibly because the options
+  didn't fit, or because you'd rather not mix it into this work at all.
+  - How much of the multi-roll sequencing you want in this plan file versus
+  split into separate planning docs. You named three distinct pieces of work
+  (DNS fix on merlin, ganoslal rollout post-merge, Pi-hole backup server), and
+  they're on different timelines.
+  - The Pi-hole backup server scope — I saw containers/services/pihole.nix in
+  the repo, disabled by default, with a header warning that WEBPASSWORD and sync
+  tokens are placeholders needing sops, and a commented-out nebula-sync
+  replica. I don't know whether "backup server" means enabling that container
+  here, or standing up a second Pi-hole elsewhere with this as primary.
+
+  One correction to flag: the active resolver at 192.168.51.3 is not the
+  disabled container in this repo — so "remove the wildcard" may be a change on
+  existing infrastructure I haven't seen. If the Pi-hole backup roll is meant to
+  bring that zone under this repo's management, that changes how I'd sequence
+  the wildcard fix.
+
+  What did you want to adjust?
+
+✻ Brewed for 5m 14s
+
+❯ Lets step through this in sequence, first the bloat; describe the issue       
+
+● Let me verify a few details so the description is precise — specifically
+  whether those PNGs are LFS pointers in HEAD or still raw.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Confirmed. Let me get a clean accounting of the duplication.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Here's the bloat issue.
+
+  What's on disk
+
+  .git is 184 MB for a config repo whose actual working tree is a few MB of Nix
+  files:
+
+  ┌───────────────────┬────────┐
+  │                   │        │
+  ├───────────────────┼────────┤
+  │ .git/objects/pack │ 122 MB │
+  ├───────────────────┼────────┤
+  │ .git/lfs          │ 61 MB  │
+  └───────────────────┴────────┘
+
+  Where the 122 MB pack went
+
+  Four blobs account for 114 MB of the 122 MB pack — about 94% of it:
+
+  ┌─────────────────────────────────────┬────────┬──────────────────────────┐
+  │                Blob                 │ Packed │      Still in HEAD?      │
+  ├─────────────────────────────────────┼────────┼──────────────────────────┤
+  │ actualDOTFILES_MASTER/cargo.bin.tar │ 59.1   │ No — deleted in b16bb741 │
+  │                                     │ MB     │                          │
+  ├─────────────────────────────────────┼────────┼──────────────────────────┤
+  │ SGA/…_5K Sharper.png                │ 31.2   │ Only as a 133-byte LFS   │
+  │                                     │ MB     │ pointer                  │
+  ├─────────────────────────────────────┼────────┼──────────────────────────┤
+  │ SGA/…_5K.png                        │ 18.9   │ Only as a 133-byte LFS   │
+  │                                     │ MB     │ pointer                  │
+  ├─────────────────────────────────────┼────────┼──────────────────────────┤
+  │ SGA/…_2560x1440.png                 │ 5.0 MB │ Only as a 133-byte LFS   │
+  │                                     │        │ pointer                  │
+  └─────────────────────────────────────┴────────┴──────────────────────────┘
+
+  Strip those four and the pack drops to roughly 8 MB.
+
+  Why they're still there
+
+  Two separate mistakes, same outcome.
+
+  The tarball: 630b4284 added a 59 MB tarball of cargo binaries. b16bb741
+  removed it, replacing it with a text listing — the right call, and the commit
+  message shows the intent was always documentation, not the binary. But
+  deleting a file in a later commit doesn't remove it from history. The adding
+  commit is still reachable, so the blob can never be garbage-collected.
+
+  The wallpapers: these were committed raw, and LFS was adopted afterward
+  (9f99c2f2 tracking .png for git lfs). This is the classic LFS trap — editing
+  .gitattributes only changes how future commits are stored. It never rewrites
+  what's already there. So you now have both copies:
+
+  history:      31.2 MB raw blob  (pre-LFS commits, permanently reachable)
+  .git/lfs:     32 MB LFS object  (post-migration)
+  HEAD:         133-byte pointer
+
+  Those three images are stored twice — ~112 MB of disk for ~57 MB of actual
+  pictures. git lfs migrate would have been needed to rewrite history; git lfs 
+  track alone was not enough.
+
+  What it actually costs you
+
+  Being honest about scope, because this is the part that's easy to overstate:
+
+  - It does not slow down your day-to-day push/pull. Git only transfers objects
+  the other side lacks. Your 10-second push delay is the DNS problem, not this.
+  Fixing the bloat would not have made pushes faster.
+  - It does hit fresh clones. Setting up a new host pulls ~122 MB of pack plus
+  ~61 MB of LFS objects. With the roll-flow workflow spanning ganoslal, merlin,
+  wsl, and spacedock, that's a real cost every time you provision.
+  - Secondary: slower git gc, ~184 MB resident on every host, and any
+  full-history operation pays for it.
+
+  Why it's awkward to fix
+
+  The blobs are reachable from history, so no amount of gc touches them.
+  Removing them means rewriting history — which changes every commit SHA from
+  the rewrite point forward, requiring a force-push and a re-clone on all four
+  hosts. With 7,460 commits and 37 branches live across main / rolling / roll/*,
+  doing that mid-roll would be disruptive.
+
+  That's the description. Ready for the next piece when you are — whether that's
+  how you'd want to sequence the rewrite, or moving on to the DNS fix.
+
+✻ Crunched for 1m 1s
+
+※ recap: You asked why git pushes and pulls are slow; that turned out to be DNS, and we're now stepping through findings in sequence, starting with the separate repo-bloat issue I just described. Next: decide how you want to sequence the history rewrite. (disable recaps in /config)
+
+❯ Okay, make a note in the repo that we need to do the forced rewrite when      
+  there are minimal rolls., but the daily dns issue is my main problem. What is 
+  the full issue with dns, if possible draw me a nice flowchart of where        
+  things are going wrong.                                                       
+
+● Before I draw it, let me nail down two remaining mechanics so the flowchart is
+  accurate rather than plausible.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Let me pin down where the time goes (separate from the wrong answer) using
+  names that can't be cached yet.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Strong signal: every domain that has an AAAA record resolves in milliseconds.
+  Let me test more AAAA-less domains to confirm the pattern.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● These resolve fast too — so "missing AAAA" alone doesn't explain the delay.
+  Let me re-run the original measurement and try to reproduce it cold.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Now the crucial finding — and it changes the picture. Let me be precise:
+
+  The wrong answer is 100% reproducible (getent hosts github.com still returns a
+  bogus address), but the 10-second delay is not reproducing right now (git 
+  ls-remote is 0.56s). That intermittency is the thing to explain. Let me test
+  the bogus address directly.
+
+  Ran 2 shell commands (ctrl+o to expand)
+● Major finding. Let me check the exact address list getaddrinfo hands to SSH
+  (that's what determines connection order).
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Let me check the LFS path, since pushes use a separate HTTPS connection.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● I need to correct something from earlier before drawing this, because it
+  changes the conclusion.
+
+  The correction
+
+  My earlier "root cause found — it's DNS" was too strong. The timings were
+  real, but the causal chain I asserted doesn't hold. The decisive test:
+
+  getent ahosts github.com    →  140.82.114.4          ← getaddrinfo(), what
+  ssh/git use.  CORRECT
+  getent hosts  github.com    →  2603:6080:ca3e:...    ← gethostbyname(), legacy
+  path.     WRONG
+
+  SSH uses getaddrinfo, which returns only the correct IPv4. So the wildcard is
+  not poisoning your git traffic the way I claimed. And right now everything is
+  fast:
+
+  ┌───────────────────────┬─────────┬───────┐
+  │                       │ Earlier │  Now  │
+  ├───────────────────────┼─────────┼───────┤
+  │ git ls-remote origin  │ 10.6s   │ 0.56s │
+  ├───────────────────────┼─────────┼───────┤
+  │ ssh -T git@github.com │ 10.5s   │ 0.42s │
+  ├───────────────────────┼─────────┼───────┤
+  │ git fetch origin      │ —       │ 0.61s │
+  ├───────────────────────┼─────────┼───────┤
+  │ git push --dry-run    │ —       │ 1.74s │
+  └───────────────────────┴─────────┴───────┘
+
+  So there are two separate things, and only one is confirmed.
+
+  Issue 1 — the wildcard (confirmed, reproducible, but not your slowdown)
+
+  gignsky.com answers every name, both record types:
+
+  random-nonexistent-4417.gignsky.com   A     24.211.162.59
+  random-nonexistent-4417.gignsky.com   AAAA
+  2603:6080:ca3e:6907:42a8:f0ff:fe25:94b0
+
+  That IPv6 reverse-resolves to syn-…res6.spectrum.com — a box on your own
+  Spectrum /64, same prefix as merlin itself. It has sshd listening on port 22
+  (it answered Permission denied (publickey)).
+
+                            "github.com"
+                                 │
+           ┌─────────────────────┴─────────────────────┐
+           │                                           │
+     getaddrinfo()                              gethostbyname()
+     ssh · git · curl · modern tools            legacy path · `getent hosts`
+           │                                           │
+           ▼                                           ▼
+     ┌───────────────────────── /etc/nsswitch.conf ─────────────────────────┐
+     │  mymachines → mdns4_minimal → files → myhostname → dns → mdns4       │
+     └──────────────────────────────────────────────────────────────────────┘
+           │                                           │
+           ▼                                           ▼
+     A     github.com → 140.82.114.4  ✓          A/AAAA github.com
+     AAAA  github.com → NODATA                   AAAA → NODATA
+           │                                           │
+           │  got a usable address →                   │  nothing for the
+  requested
+           │  STOP. Never consults `search`.           │  family → FALL THROUGH
+  to
+           │                                           │  `search gignsky.com`
+           ▼                                           ▼
+     ┌──────────────┐                     query  github.com.gignsky.com
+     │ 140.82.114.4 │  CORRECT                          │
+     │  ssh/git OK  │                                   ▼
+     └──────────────┘                    ╔══════════════════════════════╗
+                                         ║   *.gignsky.com  WILDCARD    ║
+                                         ║   answers ANY name, A + AAAA ║
+                                         ╚══════════════════════════════╝
+                                                        │
+                                                        ▼
+                                      2603:6080:ca3e:6907:42a8:f0ff:fe25:94b0
+                                          "github.com.gignsky.com"   ✗ WRONG
+                                          (a LAN box — sshd on :22)
+
+  The left branch is why git still works. The right branch is a live landmine:
+  any tool on the legacy path aimed at a hostname with no AAAA gets silently
+  pointed at a machine on your own network. A wildcard that answers everything
+  also means DNS can never tell you a name doesn't exist — it turns typos into
+  connections.
+
+  Issue 2 — the daily slowdown (real, but unproven)
+
+  I measured 10.6s / 10.5s / 15.0s three times at session start. That happened.
+  But it isn't reproducing, and the wildcard doesn't explain it, because
+  getaddrinfo never takes that branch.
+
+  What I ruled out: all three nameservers answer directly in ~0.02s;
+  missing-AAAA domains (api.github.com, codeload.github.com) resolve in <50ms;
+  fresh uncached names resolve in ~0.1s; repo size is irrelevant to this.
+
+  The surviving hypothesis is upstream recursion latency at the Pi-hole 
+  (192.168.51.3) on cache expiry — ssh -vvv put the stall precisely between
+  resolving "github.com" and Connecting to, and "once a day" matches a TTL
+  expiring. But I can't confirm it while it's fast.
+
+  Since it's daily, the right move is to instrument it now and catch the next 
+  occurrence, rather than guess. Let me put that plus your rewrite note into the
+  plan.
+
+● Updated plan
+  ⎿  /plan to preview
+
+● User approved Claude's plan
+  ⎿  Plan saved to: ~/.claude/plans/zesty-sleeping-sparrow.md · /plan to edit
+     DNS latency + repo bloat on the fleet
+
+     Context
+
+     Git pushes/pulls from ~/.dotfiles on merlin intermittently stall ~10s.
+     Investigation
+     found two unrelated problems, plus a third pre-existing cleanup item. Only
+     one is
+     confirmed as a root cause, and it is not the one causing the stalls — this
+     plan is
+     therefore split into "fix what's proven" and "instrument what isn't".
+
+     Measurements (merlin, 2026-09-18)
+
+     ┌───────────────────────────┬──────────────────┬─────────────────────┐
+     │         Operation         │ At session start │ Later, same session │
+     ├───────────────────────────┼──────────────────┼─────────────────────┤
+     │ git ls-remote origin      │ 10.6s            │ 0.56s               │
+     ├───────────────────────────┼──────────────────┼─────────────────────┤
+     │ ssh -T git@github.com     │ 10.5s            │ 0.42s               │
+     ├───────────────────────────┼──────────────────┼─────────────────────┤
+     │ getent hosts github.com   │ 15.0s            │ 0.007s              │
+     ├───────────────────────────┼──────────────────┼─────────────────────┤
+     │ git fetch origin          │ —                │ 0.61s               │
+     ├───────────────────────────┼──────────────────┼─────────────────────┤
+     │ git push --dry-run origin │ —                │ 1.74s               │
+     └───────────────────────────┴──────────────────┴─────────────────────┘
+
+     ssh -vvv located the stall between resolving "github.com" and Connecting 
+     to…,
+     at ~0% CPU — i.e. blocked in name resolution, not in git.
+
+     Issue 1 — *.gignsky.com wildcard (CONFIRMED, reproducible)
+
+     The zone answers every possible name, on both record types:
+
+     random-nonexistent-4417.gignsky.com  A     24.211.162.59
+     random-nonexistent-4417.gignsky.com  AAAA
+     2603:6080:ca3e:6907:42a8:f0ff:fe25:94b0
+
+     That IPv6 reverse-resolves to syn-…res6.spectrum.com, on merlin's own /64,
+     and has
+     sshd listening on :22. Combined with search gignsky.com in
+     /etc/resolv.conf,
+     the legacy gethostbyname path resolves github.com to that LAN box.
+
+     Important scoping: getaddrinfo (used by ssh/git/curl) returns only the
+     correct
+     140.82.114.4 and never consults the search domain, because the A lookup
+     succeeds.
+     So this is not the cause of the slow pushes. It is a real
+     correctness/security
+     problem worth fixing on its own merits — a wildcard means DNS can never
+     report that a
+     name does not exist, so typos become connections to an arbitrary host.
+
+     Issue 2 — intermittent ~10s resolver stall (REAL but UNPROVEN)
+
+     Measured three times, then stopped reproducing. Ruled out: all three
+     nameservers answer
+     directly in ~0.02s; AAAA-less hosts (api.github.com, codeload.github.com)
+     resolve in
+     <50ms; fresh uncached names resolve in ~0.1s; repo size is irrelevant.
+
+     Surviving hypothesis: upstream recursion latency at the Pi-hole
+     (192.168.51.3) when a
+     cache entry expires. Consistent with the reported ~daily frequency, but
+     unconfirmed.
+     nsncd (not stock nscd) is the local caching layer; systemd-resolved is
+     inactive.
+
+     Issue 3 — repo bloat (separate, deferred)
+
+     .git is 184MB (122MB pack + 61MB LFS). Four blobs are 114MB of the 122MB
+     pack:
+     cargo.bin.tar (59.1MB, deleted from HEAD but still reachable) and three SGA
+     wallpapers
+     (31.2 + 18.9 + 5.0MB) committed raw before LFS adoption — so they exist
+     twice, as raw
+     history blobs and as LFS objects. Does not affect incremental push/pull;
+     does affect
+     fresh clones. Requires history rewrite + force-push + re-clone on all four
+     hosts.
+
+     ---
+     Plan
+
+     Step 1 — Record the history-rewrite debt in the repo
+
+     Create engineering/enhancement-protocols/SEP-git-history-rewrite.md
+     (matching the
+     existing SEP convention in that directory). Contents:
+
+     - The measured numbers from Issue 3 above (pack breakdown, the four blobs,
+     the
+     raw-vs-LFS duplication, and why git gc cannot reclaim them).
+     - Why it is deferred: rewriting changes every SHA from the rewrite point
+     forward,
+     forcing a coordinated force-push and re-clone across ganoslal, merlin, wsl,
+     spacedock.
+     - Trigger condition — execute only when roll branches are at a minimum,
+     i.e. after
+     rolling → main promotion, with no active roll/* or feature/* work
+     outstanding.
+     There are currently 17 local + 20 remote refs and 7,460 commits.
+     - Sketch of the mechanism (git lfs migrate import --above=1MB or git 
+     filter-repo),
+     plus the re-clone checklist for each host.
+
+     Add a pointer to it from the roll-flow docs so it resurfaces at promotion
+     time rather
+     than being forgotten.
+
+     Step 2 — Instrument the intermittent stall (highest priority — it is the 
+     daily pain)
+
+     Cannot be fixed until it is captured. Add a lightweight probe that records
+     timing when
+     the problem next occurs, rather than guessing at a fix now.
+
+     - A small script in scripts/ (wrapped as a package in pkgs/scripts.nix per
+     the repo's
+     makeScriptPackage convention) that logs, with timestamps:
+     getent ahosts github.com, getent hosts github.com, a direct host query to
+     each of
+     the three nameservers, and git ls-remote origin — each individually timed.
+     - Run it on a systemd timer every few minutes, appending to a log. When a
+     slow event
+     lands, the log shows whether the delay is in the local resolver, one
+     specific upstream
+     nameserver, or the network path — which distinguishes the Pi-hole-recursion
+     hypothesis
+     from the alternatives.
+     - Reassess once a stall is captured. Do not pre-emptively "fix" Issue 2 —
+     every
+     candidate fix so far is unsupported by evidence.
+
+     Step 3 — Fix the wildcard (both halves)
+
+     3a. Network side (the actual defect). Remove the catch-all record from the
+     gignsky.com zone on the DNS server at 192.168.51.3, so nonexistent names
+     return
+     NXDOMAIN. This is on existing infrastructure outside this repo — the
+     in-repo
+     containers/services/pihole.nix is disabled and is not the active resolver.
+
+     3b. Client side (defence in depth), on merlin first. New
+     hosts/common/optional/dns-hardening.nix, imported from
+     hosts/merlin/default.nix
+     alongside the other optionals, dropping the DHCP-supplied search 
+     gignsky.com.
+     merlin uses NetworkManager (hosts/merlin/default.nix:49). Prefer stripping
+     only the
+     search list — ipv4.ignore-auto-dns is too blunt and would discard the
+     nameservers too.
+     Verify the rendered /etc/resolv.conf, since resolvconf merges several
+     sources.
+
+     Repo conventions: kebab-case filename, lib.mkDefault, wire in via
+     configLib.relativeToRoot.
+
+     Step 4 — Roll out to ganoslal (sequenced after the current roll merges)
+
+     Do not fold into the active roll/113-0918-claude-desktop-with-code. Once
+     that roll
+     graduates to rolling and is promoted, apply the Step 3b module to ganoslal
+     on its own
+     roll branch, then verify per Step 5. wsl/spacedock to follow if they share
+     the resolver.
+
+     Step 5 — Pi-hole backup server (own roll, separate effort)
+
+     Tracked separately, not part of this work. Open question before planning:
+     containers/services/pihole.nix exists but is disabled, with a header
+     warning that
+     WEBPASSWORD and the nebula-sync tokens are placeholders needing sops-nix
+     migration,
+     and hardcoded 192.168.51.x LAN IPs to confirm. Needs scoping: whether
+     "backup" means
+     enabling that container as a secondary to the existing 192.168.51.3, and
+     whether that
+     brings the gignsky.com zone under this repo's management — which would
+     change how
+     Step 3a is done.
+
+     Step 6 — Housekeeping
+
+     - git remote remove mirror — points at /tmp/dotfiles-sanitize.git, which
+     does not
+     exist; it also has a stale LFS endpoint configured.
+     - Optionally git gc --aggressive --prune=now — repacks 4 packs into 1, zero
+     risk, but
+     will not reclaim the large blobs (still reachable from history).
+
+     ---
+     Files touched
+
+     File: engineering/enhancement-protocols/SEP-git-history-rewrite.md
+     Change: new — deferred rewrite, trigger condition
+     ────────────────────────────────────────
+     File: scripts/dns-probe + pkgs/scripts.nix
+     Change: new — timing probe for the intermittent stall
+     ────────────────────────────────────────
+     File: hosts/common/optional/dns-hardening.nix
+     Change: new — strip DHCP search domain
+     ────────────────────────────────────────
+     File: hosts/merlin/default.nix
+     Change: import the new optional module
+     ────────────────────────────────────────
+     File: (git config)
+     Change: git remote remove mirror
+
+     Out of repo: remove the *.gignsky.com wildcard on the DNS server at
+     192.168.51.3.
+
+     Verification
+
+     1. Wildcard gone: host random-probe-1234.gignsky.com 192.168.51.3 →
+     NXDOMAIN
+     (currently returns 24.211.162.59).
+     2. Search domain gone: getent hosts github.com → a 140.82.x.x address, and
+     not anything labelled github.com.gignsky.com. Confirm the search line is
+     absent from /etc/resolv.conf and survives a reboot.
+     3. Regression guard: getent ahosts github.com must still return 140.82.x.x
+     —
+     this already works today and must not break.
+     4. Probe working: confirm the Step 2 log is being written and contains
+     per-nameserver
+     timings; leave it running until a slow event is captured.
+     5. Flake health: just check, then just test-rebuild before just rebuild.
+     6. Real git round trip: time git fetch origin and time git push --dry-run 
+     origin.
+     Note these are ~0.6s / ~1.7s today, so they only prove a regression has not
+     been
+     introduced — they cannot confirm Issue 2 is fixed until a stall is captured
+     first.
+
+● Plan approved. Let me start with Step 1 — the repo note you asked for. First,
+  the existing SEP conventions.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Noting you've created roll/115-0918-fix-dns — good, I'll work there. Let me
+  check the SEP format conventions.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Now let me write the SEP. Using the numbered convention (003-) per the README.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Let me verify the doc reference I used actually exists, and find where to add
+  the promotion-time pointer.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● docs/guides/ROLL-FLOW-QUICKREF.md doesn't exist — CLAUDE.md references a
+  missing file. Let me fix my reference and find where a promotion-time pointer
+  would actually surface.
+
+  Ran 4 shell commands (ctrl+o to expand)
+
+● scripts/roll-flow and the just roll-* recipes no longer exist in this repo —
+  CLAUDE.md is stale there. Let me confirm where that tooling lives now before
+  writing a pointer.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● roll-flow is now an external package (v0.2.0) on PATH, not a just recipe. Let
+  me correct my SEP's references.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Now a pointer so it resurfaces at promotion time. Let me add an index to the
+  SEP README.
+
+  Ran 1 shell command (ctrl+o to expand)
+● Step 1 done. Now the priority item — Step 2, the probe to capture the
+  intermittent stall. Let me follow the repo's script-packaging conventions.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Now the probe script. Let me write it to isolate which layer is slow when a
+  stall happens.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Let me test it immediately.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Testing found three real bugs. Let me fix them:
+
+  1. REPLY_OUT is lost — time_ms is called inside $(...), a subshell, so global
+  assignments don't propagate
+  2. dig isn't installed → every nameserver reads NOANSWER; needs a host
+  fallback
+  3. A fourth nameserver appeared since my earlier read:
+  fe80::692:26ff:fe81:3620%wlp2s0 (link-local, WiFi-provided) — resolv.conf is
+  changing under us
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Working correctly now — and the detail block captures the wildcard bug live
+  (getaddrinfo → correct IPv4, gethostbyname → poisoned). Let me package it.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Now the systemd timer module. Let me check how custom packages are surfaced
+  via the overlay.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Typo crept into the heredoc. Fixing:
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Now Step 3b. Rather than guess at the NixOS mechanism, let me check what the
+  resolvconf layer actually supports.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● openresolv supports exactly what I need. Let me read the precise semantics
+  before choosing.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● domain_blacklist is exactly the right tool. Let me confirm the NixOS option
+  that writes it exists.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Confirmed. Now the hardening module.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Now wire both modules into merlin.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Now let me validate — formatting, lint, and evaluation.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Let me build the package to catch dependency problems.
+
+  Ran 1 shell command (ctrl+o to expand)
+● Nix flakes only see git-tracked files. Let me stage the new files (staging
+  only — not committing).
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Package builds and pulls in dig. Let me test the built binary.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Now let me evaluate the full merlin config to validate both modules.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● The additions overlay isn't reaching merlin's pkgs. Let me check how overlays
+  are wired.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● The overlay must be applied somewhere in hosts/common/core. Let me find it.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Found the real constraint: NixOS hosts apply inputs.nixpkgs.overlays.default
+  (the gigpkgs channel overlay), not this repo's additions overlay — only Home
+  Manager gets additions. So pkgs.dns-probe doesn't exist system-side. Let me
+  check relativeToRoot and import the package directly.
+
+  Ran 3 shell commands (ctrl+o to expand)
+
+● Evaluates cleanly. Let me verify both modules actually produce what I
+  intended.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Timer and service are correct. The resolvconf.conf path needs escaping — let
+  me use an expression.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Let me verify domain_blacklist actually strips the search domain, by reading
+  openresolv's implementation rather than assuming.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● domain_blacklist doesn't appear in the main script. Let me search the whole
+  package — this matters, since a missing feature would make my fix a no-op.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Implemented in .resolvconf-wrapped (the real script; bin/resolvconf is a Nix
+  wrapper). Line 1036 does exactly what I need. Let me confirm the match
+  semantics.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● list_remove does glob matching (case "$e" in $l)), so gignsky.com matches
+  exactly but not subdomains. Let me cover both, per the man page's *.bar idiom.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Let me run the repo's linters on the new files.
+
+  Ran 4 shell commands (ctrl+o to expand)
+● Let me run shellcheck on the probe script.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Only info-level SC2329 false positives — query_ns is called, but indirectly
+  via time_it query_ns, which shellcheck can't see. Let me annotate that.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Let me do a final build-and-run of the packaged probe.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Done on roll/115-0918-fix-dns. Everything below is validated, not just
+  written.
+
+  What landed
+
+  1. The rewrite note you asked for —
+  engineering/enhancement-protocols/003-git-history-rewrite.md, following the
+  numbered SEP convention. It records the measured numbers, both root causes
+  (tarball deleted-not-purged; LFS adopted after the fact), why git gc can't
+  reclaim any of it, and a trigger-condition checklist gating execution on 
+  rolling→main with no outstanding roll/* or feature/*. Indexed in the SEP
+  README with a ⚠️ flag so it surfaces at promotion time.
+
+  2. The probe (scripts/dns-probe.sh + package + systemd timer on merlin, every
+  5 min). It times each resolver layer separately so the next stall shows which
+  layer was slow instead of leaving us guessing. On a slow event it prints an
+  interpretation line distinguishing upstream-nameserver from local-resolver
+  from network-path.
+
+  3. The wildcard fix (hosts/common/optional/dns-hardening.nix) —
+  domain_blacklist='gignsky.com *.gignsky.com' via openresolv.
+
+  Verification actually run
+
+  - nix build .#dns-probe succeeds; ran the built binary — output above
+  - merlin config evaluates to a derivation; confirmed the rendered
+  resolvconf.conf contains the blacklist, and the timer/ExecStart are correct
+  - nixfmt, statix, deadnix, shellcheck all clean
+
+  I didn't take domain_blacklist on faith — I read openresolv 3.17.4's source
+  and confirmed line 1036 filters SEARCH through it, and that list_remove
+  glob-matches (which is why the bare name alone wouldn't cover subdomains).
+
+  Things testing turned up that I'd flag
+
+  - A fourth nameserver appeared mid-session: fe80::692:26ff:fe81:3620%wlp2s0.
+  Your resolv.conf is changing as the network shifts, so the probe re-reads it
+  every run rather than caching.
+  - CLAUDE.md is stale: it documents just roll-* recipes and
+  docs/guides/ROLL-FLOW-QUICKREF.md. Neither exists — roll-flow is now an
+  external package (v0.2.0) on PATH. I noted this in the SEP rather than fixing
+  it, since it's outside this task.
+  - Custom pkgs/ aren't available to NixOS, only to home-manager —
+  hosts/common/core applies the gigpkgs channel overlay, not this repo's
+  additions. I worked around it locally in the module; making additions
+  available fleet-wide is a real improvement but a broader change than this
+  warranted.
+
+  Two honest caveats
+
+  The probe is instrumentation, not a fix. I could not reproduce the stall — it
+  was 10.6s at session start and 0.56s later, with the wildcard fully explaining
+  the wrong answer but not the latency. Shipping a guessed fix would have
+  risked declaring victory on a TTL coincidence.
+
+  Nothing is applied yet — I haven't run just rebuild, since that's a system
+  change. Once you do, the timer starts logging to
+  /var/log/dns-probe/dns-probe.log, and the next time a push hangs we'll have
+  the layer breakdown.
+
+  Steps 3a (removing the wildcard on 192.168.51.3), 4 (ganoslal after the roll
+  merges), and 5 (Pi-hole backup) are still open — and for step 5, my question
+  about scope stands: whether "backup" means enabling the in-repo container as a
+  secondary, since that changes how 3a gets done.
+
+✻ Cogitated for 13m 19s
+
+※ recap: Goal was fixing slow git pushes. I added a DNS probe, a search-domain fix, and a note about the deferred repo-history rewrite, all validated on branch roll/115-0918-fix-dns. Next: run just rebuild to apply them. (disable recaps in /config)
+
+❯ I think the domain blacklisting is unneeded, don't I simply need to update    
+  either my router's dhcp server or my pihole dns server to stop attempting to  
+  serve that domain? This also makes me wonder how I might in the future take   
+  advantage of having a local domain when it comes to general networking        
+  improvements. Note that I want to do that at some point.                      
+
+● You're right, and there's a stronger reason than you've stated: the blacklist 
+  would actively sabotage the local-domain setup you want later. Stripping
+  gignsky.com from the search list is exactly what stops ssh merlin from
+  resolving to merlin.gignsky.com. I'd be building the workaround and the
+  obstacle in one commit.
+
+  But before I rip it out, let me check where the wildcard actually lives —
+  because "router vs Pi-hole" may not be the full set of options.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● That changes the answer completely. Let me confirm.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Definitively answered — and it's neither of your two guesses.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Confirmed: the wildcard matches at any depth — github.com.lan.gignsky.com also
+  resolves. That rules out "just move the search domain to a subdomain" as an
+  escape. Let me remove the blacklist module as you asked.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Status lost the SEP entries — let me check nothing was clobbered.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Nothing lost — you committed the SEP as 6c6e8e1e future documentation while I
+  was working. Let me re-validate merlin after the removal.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Removed, and merlin still evaluates clean. You were right — but the location
+  isn't either of your two guesses.
+
+  The wildcard is in Cloudflare, not your LAN
+
+  gignsky.com  NS  weston.ns.cloudflare.com, evangeline.ns.cloudflare.com
+
+  *.gignsky.com  A     24.211.162.59                             (your Spectrum
+  WAN)
+  *.gignsky.com  AAAA  2603:6080:ca3e:6907:42a8:f0ff:fe25:94b0
+
+  Queried straight at Cloudflare's authoritative servers, bypassing your Pi-hole
+  and every cache — 8.8.8.8 and 1.1.1.1 return it too. www, git, pihole, and
+  totally-random-55512 all give the identical pair. That's a deliberate
+  self-hosting wildcard pointing everything at home for a reverse proxy to sort
+  out by Host header, not a misconfiguration.
+
+  So: not the router's DHCP, not the Pi-hole. Changing either would not have
+  fixed it. My earlier plan said "remove the wildcard on the DNS server at
+  192.168.51.3" — that was wrong, and this supersedes it.
+
+  One finding that constrains the design: the wildcard matches at any depth.
+  a.b.gignsky.com, deep.nest.test.gignsky.com, and github.com.lan.gignsky.com
+  all resolve to the WAN IP. So simply moving your search domain to a subdomain
+  does not escape it.
+
+  Why the blacklist was the wrong instinct
+
+  Beyond redundancy — search gignsky.com is not the bug. It's the feature you
+  want. It's what makes ssh merlin work. The bug is a search domain pointed at a
+  zone that can never say "no". Blacklisting would have deleted the feature to
+  work around the defect.
+
+  For the local domain later
+
+  The combination you want is a search domain over a zone that returns NXDOMAIN
+  for names that don't exist. The lever is making your Pi-hole authoritative for
+  an internal zone rather than forwarding it upstream — in dnsmasq terms:
+
+  local=/lan.gignsky.com/                          # never forward; NXDOMAIN if
+  no local record
+  host-record=merlin.lan.gignsky.com,192.168.51.x
+
+  That local= line is the crux. Without it the Pi-hole forwards to Cloudflare
+  and the wildcard answers. With it, github.com.lan.gignsky.com gets a clean
+  NXDOMAIN and glibc falls through correctly — while merlin still resolves. Then
+  set DHCP's search domain to lan.gignsky.com.
+
+  Two things worth weighing:
+
+  - Why a subdomain of a domain you own beats .internal or .lan: you can issue
+  real Let's Encrypt certs for internal-only services via the Cloudflare DNS-01
+  challenge, without exposing anything. Made-up TLDs can't do that.
+  - The alternative — dropping the wildcard at Cloudflare for explicit
+  per-service records — gives you honest DNS everywhere, at the cost of a record
+  per service. Better hygiene; more upkeep. If the wildcard is earning its keep
+  with a reverse proxy, the local= approach keeps it.
+
+  Since you've said you want to do this at some point and you're already
+  collecting future work as docs, I'd suggest capturing this as a SEP alongside
+  003 rather than leaving it in chat. Want me to write that up?
+
+  State of the branch
+
+  Still uncommitted: the probe (scripts/dns-probe.sh,
+  hosts/common/optional/dns-probe.nix, pkgs/ registration). dns-hardening.nix is
+  gone and unimported. Merlin evaluates clean.
+
+  Worth being explicit: nothing now mitigates the poisoning until you change
+  Cloudflare. The practical exposure is low — it only affects the legacy
+  gethostbyname path, and ssh/git use getaddrinfo, which resolves correctly —
+  but getent hosts github.com will keep returning that LAN box until the zone
+  changes.
+
+✻ Worked for 2m 30s
+
+❯ give me a situation report for where we are this process                      
+
+● Let me pull the current state rather than report from memory.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Situation Report — 2026-09-18
+
+  Branch: roll/115-0918-fix-dns · Host: merlin · Nothing applied to the system
+  yet.
+
+  ---
+  The original question: why are pushes/pulls slow?
+
+  Not answered. The slowness is real but unreproduced, and the cause I first
+  named was wrong.
+
+  ┌─────────────────────────┬───────────────┬────────┐
+  │        Operation        │ Session start │ Later  │
+  ├─────────────────────────┼───────────────┼────────┤
+  │ git ls-remote origin    │ 10.6s         │ 0.56s  │
+  ├─────────────────────────┼───────────────┼────────┤
+  │ ssh -T git@github.com   │ 10.5s         │ 0.42s  │
+  ├─────────────────────────┼───────────────┼────────┤
+  │ getent hosts github.com │ 15.0s         │ 0.007s │
+  └─────────────────────────┴───────────────┴────────┘
+
+  ssh -vvv put the stall inside name resolution, at ~0% CPU. Beyond that I have
+  no confirmed mechanism.
+
+  Ruled out: repo size (irrelevant to incremental transfer); all four
+  nameservers (answer directly in ~0.02s); AAAA-less hosts generally
+  (api.github.com, codeload.github.com resolve in <50ms); fresh uncached names
+  (~0.1s).
+
+  Correction I had to make: I initially called the wildcard the root cause. It
+  isn't. getaddrinfo — the path ssh and git actually use — returns the correct
+  140.82.114.4 and never consults the search domain. Only legacy gethostbyname
+  is poisoned.
+
+  ---
+  What we found instead: a real but separate defect
+
+  *.gignsky.com is a wildcard in Cloudflare, public and authoritative:
+
+  *.gignsky.com  A     24.211.162.59                             (your Spectrum
+  WAN)
+  *.gignsky.com  AAAA  2603:6080:ca3e:6907:42a8:f0ff:fe25:94b0   (a LAN box,
+  sshd on :22)
+
+  Matches at any depth. Confirmed against weston.ns.cloudflare.com directly, and
+  via 8.8.8.8/1.1.1.1.
+
+  Two things this corrected:
+  - My plan was wrong — it said to fix this on the DNS server at 192.168.51.3.
+  - Your two candidates were both wrong — not router DHCP, not Pi-hole. It's a
+  Cloudflare record.
+
+  Live effect, reproducible right now:
+  getent ahosts github.com  →  140.82.114.4                            ✓
+  (ssh/git)
+  getent hosts  github.com  →  2603:6080:…  github.com.gignsky.com     ✗
+  (legacy)
+
+  ---
+  Delivered
+
+  Committed (6c6e8e1e, by you):
+  engineering/enhancement-protocols/003-git-history-rewrite.md — the 184MB
+  repo-bloat debt, gated on a trigger condition of minimal rolls, indexed in the
+  SEP README.
+
+  Uncommitted, validated — the DNS probe, 251 lines across 5 files:
+
+  ┌─────────────────────────────────────┬────────────────────────────────────┐
+  │                File                 │                                    │
+  ├─────────────────────────────────────┼────────────────────────────────────┤
+  │ scripts/dns-probe.sh                │ times each resolver layer          │
+  │                                     │ separately                         │
+  ├─────────────────────────────────────┼────────────────────────────────────┤
+  │ hosts/common/optional/dns-probe.nix │ systemd timer, 5-min interval      │
+  ├─────────────────────────────────────┼────────────────────────────────────┤
+  │ pkgs/scripts.nix, pkgs/default.nix  │ package registration               │
+  ├─────────────────────────────────────┼────────────────────────────────────┤
+  │ hosts/merlin/default.nix            │ import                             │
+  └─────────────────────────────────────┴────────────────────────────────────┘
+
+  Verified: builds, runs, merlin config evaluates to a derivation, systemd
+  timer/ExecStart correct; nixfmt, statix, deadnix, shellcheck clean.
+
+  Reverted at your direction: dns-hardening.nix — deleted and unimported. Your
+  call was right, and for a reason stronger than redundancy: blacklisting
+  gignsky.com would have broken the local-domain setup you want later. The
+  search domain is the feature; the wildcard is the bug.
+
+  ---
+  Incidental findings
+
+  - A fourth nameserver appeared mid-session (fe80::692:26ff:fe81:3620%wlp2s0) —
+  resolv.conf shifts as the network changes; the probe re-reads it each run.
+  - CLAUDE.md is stale — documents just roll-* recipes and
+  docs/guides/ROLL-FLOW-QUICKREF.md; neither exists. roll-flow is now an
+  external package on PATH.
+  - Custom pkgs/ aren't available system-side, only to home-manager. Worked
+  around locally in the module.
+  - Stale mirror remote → /tmp/dotfiles-sanitize.git, which doesn't exist. Not
+  yet removed.
+
+  ---
+  Open
+
+  1. Commit and rebuild — the probe does nothing until just rebuild. This is the
+  only path to answering your original question.
+  2. Cloudflare wildcard — yours to decide: drop it for explicit records, or
+  keep it and make Pi-hole authoritative for an internal zone via dnsmasq
+  local=/lan.gignsky.com/.
+  3. Local-domain SEP — I offered to write this up; you haven't said yes.
+  4. ganoslal rollout — moot for now, since the only client-side module was the
+  one we removed.
+  5. Pi-hole backup roll — still unscoped; my question about whether "backup"
+  means enabling the in-repo container stands.
+  6. git remote remove mirror — trivial, unaddressed.
+
+  ---
+  Bottom line
+
+  Your reported problem is not fixed and I can't yet say why it happens. What
+  exists is instrumentation to catch it, a confirmed unrelated DNS defect with
+  its true location established, and the bloat debt recorded. The next real move
+  is rebuilding so the probe starts logging — everything else is waiting on a
+  decision from you.
+✻ Brewed for 31s
+
+※ recap: We're chasing why git push/pull on merlin intermittently stalls; I've built and validated a DNS probe to capture the next occurrence, currently uncommitted. Next: commit it and run just rebuild so it starts logging. (disable recaps in /config)
+
+❯ I have rebuilt and committed, next steps?                                     
+
+● Let me verify the probe is actually live before planning anything else.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● Timer is live. Let me confirm the service actually works end-to-end rather
+  than waiting 4 minutes to find out it's broken.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Service ran successfully at boot (status=0/SUCCESS). Let me read the log.
+
+  Listed 1 directory (ctrl+o to expand)
+
+● Probe is live and logging. Before calling this done, let me check one risk I
+  should have caught earlier — whether the probe's own queries keep the cache
+  warm and mask the problem.
+
+  Ran 2 shell commands (ctrl+o to expand)
+
+● sleep is blocked in the foreground — let me redo without it.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● dig isn't on my PATH (earlier output came from the host -v fallback). Let me
+  use host -v.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Good — that settles the masking risk. GitHub's TTL is 0–25s with rotating IPs,
+  far shorter than the 5-minute probe interval, so the probe won't keep the
+  cache warm and hide the problem. Every run samples a cold lookup, which is
+  what we want.
+
+  Let me clear the one piece of approved housekeeping still outstanding.
+
+  Ran 1 shell command (ctrl+o to expand)
+
+● Probe is confirmed live and the stale remote is gone.
+
+  Verified just now
+
+  - dns-probe.timer active, next fire in ~4 min
+  - dns-probe.service ran at boot, status=0/SUCCESS
+  - /var/log/dns-probe/dns-probe.log written, first sample recorded,
+  world-readable
+  - mirror remote removed; its dead /tmp LFS endpoint is gone too
+
+  One thing I checked that I should have caught during design: whether the
+  probe's own queries would keep the cache warm and mask the very stall it's
+  hunting. They won't — GitHub's TTL is 0–25s with rotating IPs, well under the
+  5-minute interval. Every probe run samples a cold lookup.
+
+  Next steps, in order
+
+  1. Wait. This is genuinely the next step. The probe needs to catch a stall,
+  and you've described it as roughly daily. There's nothing productive to do on
+  the slowness until there's a SLOW line in the log. Check with:
+
+  grep SLOW /var/log/dns-probe/dns-probe.log
+
+  When one lands, the detail block names the layer — upstream nameserver vs
+  local resolver vs network path — and that determines the fix. Any fix
+  attempted before then is guesswork.
+
+  2. Decisions that are yours, not blocked on the probe:
+
+  - Cloudflare wildcard — drop it for explicit records, or keep it and make
+  Pi-hole authoritative for an internal zone. Independent of the latency issue;
+  fixes the gethostbyname poisoning either way.
+  - Local-domain SEP — I've offered twice to write this up. Still unanswered,
+  and it's the piece you said you want to build toward.
+  - Pi-hole backup roll — still unscoped. My question stands: does "backup" mean
+  enabling the in-repo containers/services/pihole.nix as a secondary to
+  192.168.51.3?
+
+  3. Roll hygiene. roll/115-0918-fix-dns is committed and rebuilt (generation
+  264). It could graduate to rolling now — but I'd hold it until the probe has
+  earned its keep, since the whole roll is diagnostic and dns-probe.nix is
+  marked TEMPORARY for removal once the cause is found.
+
+  Honest status on the original question
+
+  Still unanswered. What changed today is that we can now observe it instead of
+  guessing, and we corrected two wrong theories along the way — mine (the
+  wildcard causing the stalls) and the location of the wildcard itself. The
+  bloat debt is recorded and gated.
+
+  Which of the three decisions in step 2 do you want to take next? I'd start
+  with the local-domain SEP, since it shapes how the Cloudflare question gets
+  answered.
+
+✻ Sautéed for 1m 36s
+
+※ recap: We're chasing intermittently slow git pushes; a DNS probe is now live on merlin, logging every 5 minutes, but the cause is still unconfirmed. Next: wait for a stall, then check `grep SLOW /var/log/dns-probe/dns-probe.log`.
