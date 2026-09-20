@@ -5,11 +5,14 @@
     #################### Official NixOS and HM Package Sources ####################
     # Stable
     # nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+    # Gigpkgs Version
     nixpkgs.url = "github:gignsky/gigpkgs/gigos-2605";
+    # Local
+    # nixpkgs.url = "git+file:///home/gig/local_repos/gigpkgs";
     # Unstable
     nixpkgs-unstable.url = "github:gignsky/gigpkgs/gigos-unstable";
     # Local
-    # nixpkgs-local.url = "git+file:///home/gig/local_repos/nixpkgs";
+    # nixpkgs-local.url = "git+file:///home/gig/local_repos/gigpkgs";
 
     # Home manager
     home-manager.follows = "nixpkgs/home-manager";
@@ -192,8 +195,9 @@
 
         # Merlin configuration entrypoint
         # Using unstable to access virtualisation.credentials for VM secrets testing
-        # Will move to 26.05 stable when released (~May 2026)
-        merlin = inputs.nixpkgs-unstable.lib.nixosSystem {
+        # Will move to 26.05 stable when released (~May 2026) # MOVED on 2026-09-15
+        # merlin = inputs.nixpkgs-unstable.lib.nixosSystem {
+        merlin = inputs.nixpkgs.lib.nixosSystem {
           inherit system;
           specialArgs = specialArgs // {
             inherit inputs;

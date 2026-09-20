@@ -10,6 +10,7 @@
 # See engineering/enhancement-protocols/SEP-spacedock-onboarding.md.
 {
   lib,
+  config,
   configLib,
   pkgs,
   ...
@@ -69,8 +70,14 @@
     kernelPackages = lib.mkDefault pkgs.linuxPackages_6_12;
   };
 
+  # broadcom-sta's package name embeds the running kernel version, so a
+  # hardcoded entry breaks on every kernel bump. Derive the suffix from the
+  # actual kernel version so this auto-tracks kernel updates. The driver
+  # version prefix (6.30.223.271-59) is frozen upstream (unmaintained driver).
+  # NOTE: build from kernel.version, NOT broadcom_sta.name — referencing the
+  # insecure package's own name here would recurse through the permit check.
   nixpkgs.config.permittedInsecurePackages = [
-    "broadcom-sta-6.30.223.271-59-6.12.96"
+    "broadcom-sta-6.30.223.271-59-${config.boot.kernelPackages.kernel.version}"
   ];
 
   # Tailscale defaults to enabled fleet-wide; keep it off here until configured.
