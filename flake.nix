@@ -6,11 +6,15 @@
     # Stable
     # nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     # Gigpkgs Version
-    nixpkgs.url = "github:gignsky/gigpkgs/gigos-2605";
+    # Uses the `git+https` fetcher (not `github:`) so branch-ref resolution
+    # goes through `git ls-remote` instead of the GitHub REST API — the
+    # `github:` fetcher hits the unauthenticated 60 req/hr API rate limit
+    # when resolving a branch name to a commit, which starved `fupdate`.
+    nixpkgs.url = "git+https://github.com/gignsky/gigpkgs?ref=gigos-2605";
     # Local
     # nixpkgs.url = "git+file:///home/gig/local_repos/gigpkgs";
     # Unstable
-    nixpkgs-unstable.url = "github:gignsky/gigpkgs/gigos-unstable";
+    nixpkgs-unstable.url = "git+https://github.com/gignsky/gigpkgs?ref=gigos-unstable";
     # Local
     # nixpkgs-local.url = "git+file:///home/gig/local_repos/gigpkgs";
 
