@@ -54,19 +54,19 @@
         "flake-utils": "flake-utils",
         "nixpkgs": [
           "nixpkgs",
-          "nixpkgs-master"
+          "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1764098187,
-        "narHash": "sha256-H6JjWXhKqxZ8QLMoqndZx9e5x0Sv5AiipSmqvIxIbgo=",
-        "owner": "k3d3",
+        "lastModified": 1789740652,
+        "narHash": "sha256-JVPGwhY3FqmmLi3/uCXxVJyEo9RCmYFIMWvOKUVBJtQ=",
+        "owner": "heytcass",
         "repo": "claude-desktop-linux-flake",
-        "rev": "b2b040cb68231d2118906507d9cc8fd181ca6308",
+        "rev": "755e7ab980a8e22c04d03f1de02713f38f3c06c9",
         "type": "github"
       },
       "original": {
-        "owner": "k3d3",
+        "owner": "heytcass",
         "repo": "claude-desktop-linux-flake",
         "type": "github"
       }
@@ -76,19 +76,19 @@
         "flake-utils": "flake-utils_2",
         "nixpkgs": [
           "nixpkgs-unstable",
-          "nixpkgs-master"
+          "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1764098187,
-        "narHash": "sha256-H6JjWXhKqxZ8QLMoqndZx9e5x0Sv5AiipSmqvIxIbgo=",
-        "owner": "k3d3",
+        "lastModified": 1789740652,
+        "narHash": "sha256-JVPGwhY3FqmmLi3/uCXxVJyEo9RCmYFIMWvOKUVBJtQ=",
+        "owner": "heytcass",
         "repo": "claude-desktop-linux-flake",
-        "rev": "b2b040cb68231d2118906507d9cc8fd181ca6308",
+        "rev": "755e7ab980a8e22c04d03f1de02713f38f3c06c9",
         "type": "github"
       },
       "original": {
-        "owner": "k3d3",
+        "owner": "heytcass",
         "repo": "claude-desktop-linux-flake",
         "type": "github"
       }
@@ -575,11 +575,11 @@
         "snacks-nvim": "snacks-nvim"
       },
       "locked": {
-        "lastModified": 1789779600,
-        "narHash": "sha256-kFlWwKZhHTaRmrmmexH02Q1KGfz569jUg7Xy0FGLnf0=",
+        "lastModified": 1789936490,
+        "narHash": "sha256-Lh5dqikcudeIZinSsPuFskUAJ2WnFXKOISlQVJkvClM=",
         "owner": "gignsky",
         "repo": "gigvim",
-        "rev": "19974d617d41a9ce0103e89418fe065a82a65063",
+        "rev": "e78e5485a631ca6b2c4979744318c364cc9c37da",
         "type": "github"
       },
       "original": {
@@ -608,11 +608,11 @@
         "snacks-nvim": "snacks-nvim_2"
       },
       "locked": {
-        "lastModified": 1789779600,
-        "narHash": "sha256-kFlWwKZhHTaRmrmmexH02Q1KGfz569jUg7Xy0FGLnf0=",
+        "lastModified": 1789936490,
+        "narHash": "sha256-Lh5dqikcudeIZinSsPuFskUAJ2WnFXKOISlQVJkvClM=",
         "owner": "gignsky",
         "repo": "gigvim",
-        "rev": "19974d617d41a9ce0103e89418fe065a82a65063",
+        "rev": "e78e5485a631ca6b2c4979744318c364cc9c37da",
         "type": "github"
       },
       "original": {
@@ -1448,18 +1448,18 @@
         "roll-flow": "roll-flow_2"
       },
       "locked": {
-        "lastModified": 1789781287,
-        "narHash": "sha256-yAxgWDMtolOHnaP80T1vn804lufxX/BZQCE8Ykl9i14=",
-        "owner": "gignsky",
-        "repo": "gigpkgs",
-        "rev": "02ec5190df5c69fc0fd59a91cc2821a8b446813e",
-        "type": "github"
+        "lastModified": 1789936678,
+        "narHash": "sha256-ZTdBQwyOKfAZDn/g3OpwN62cNeGBsRrBxC7HYM55dqQ=",
+        "ref": "gigos-unstable",
+        "rev": "c5e82638647f7cec6d82e5d06425b702fd5a7e77",
+        "revCount": 232,
+        "type": "git",
+        "url": "https://github.com/gignsky/gigpkgs"
       },
       "original": {
-        "owner": "gignsky",
         "ref": "gigos-unstable",
-        "repo": "gigpkgs",
-        "type": "github"
+        "type": "git",
+        "url": "https://github.com/gignsky/gigpkgs"
       }
     },
     "nixpkgs-unstable_5": {
@@ -1711,18 +1711,18 @@
         "roll-flow": "roll-flow"
       },
       "locked": {
-        "lastModified": 1789785540,
-        "narHash": "sha256-T/JTZI9s7szlblIlpEjIDLvNdR3tG6CNxKlwOWFQxBc=",
-        "owner": "gignsky",
-        "repo": "gigpkgs",
-        "rev": "b2acbb0e96218d74433c1aad886a85cbc37bfaa6",
-        "type": "github"
+        "lastModified": 1789936678,
+        "narHash": "sha256-jS8JdNEp2nUo3wrd+Plmr9Awb0A4McRDlFSgCJM0g0U=",
+        "ref": "gigos-2605",
+        "rev": "844507ba5b78d5077a337a0e5e8cabf8e3f15e36",
+        "revCount": 232,
+        "type": "git",
+        "url": "https://github.com/gignsky/gigpkgs"
       },
       "original": {
-        "owner": "gignsky",
         "ref": "gigos-2605",
-        "repo": "gigpkgs",
-        "type": "github"
+        "type": "git",
+        "url": "https://github.com/gignsky/gigpkgs"
       }
     },
     "nixpkgs_6": {
@@ -2090,11 +2090,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789784831,
-        "narHash": "sha256-lYOqFqKZ/7bFlCRwFCwqpSmvBnnQxPlJRhIZW9I6b5Y=",
+        "lastModified": 1789848558,
+        "narHash": "sha256-hkmlzM+YPS4WUs/Ez8tPTMpfRfDjRYTk6CLkJFi4jfk=",
         "owner": "gignsky",
         "repo": "roll-flow",
-        "rev": "f9d75fc18ba7ee156ea4553966dcdc5cf253b309",
+        "rev": "9b56550a6f75a160aebfbc039dcbb6a3689bb449",
         "type": "github"
       },
       "original": {
@@ -2114,11 +2114,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789780926,
-        "narHash": "sha256-c4Nmddm0r6IVVriQMWTlkk/7y4a6Krg9JWHej6MQw8k=",
+        "lastModified": 1789848558,
+        "narHash": "sha256-hkmlzM+YPS4WUs/Ez8tPTMpfRfDjRYTk6CLkJFi4jfk=",
         "owner": "gignsky",
         "repo": "roll-flow",
-        "rev": "b038fc9bea0c961874c3608c143218edd3655c38",
+        "rev": "9b56550a6f75a160aebfbc039dcbb6a3689bb449",
         "type": "github"
       },
       "original": {
