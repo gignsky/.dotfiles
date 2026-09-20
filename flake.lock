@@ -575,11 +575,11 @@
         "snacks-nvim": "snacks-nvim"
       },
       "locked": {
-        "lastModified": 1789779600,
-        "narHash": "sha256-kFlWwKZhHTaRmrmmexH02Q1KGfz569jUg7Xy0FGLnf0=",
+        "lastModified": 1789936490,
+        "narHash": "sha256-Lh5dqikcudeIZinSsPuFskUAJ2WnFXKOISlQVJkvClM=",
         "owner": "gignsky",
         "repo": "gigvim",
-        "rev": "19974d617d41a9ce0103e89418fe065a82a65063",
+        "rev": "e78e5485a631ca6b2c4979744318c364cc9c37da",
         "type": "github"
       },
       "original": {
@@ -608,11 +608,11 @@
         "snacks-nvim": "snacks-nvim_2"
       },
       "locked": {
-        "lastModified": 1789779600,
-        "narHash": "sha256-kFlWwKZhHTaRmrmmexH02Q1KGfz569jUg7Xy0FGLnf0=",
+        "lastModified": 1789936490,
+        "narHash": "sha256-Lh5dqikcudeIZinSsPuFskUAJ2WnFXKOISlQVJkvClM=",
         "owner": "gignsky",
         "repo": "gigvim",
-        "rev": "19974d617d41a9ce0103e89418fe065a82a65063",
+        "rev": "e78e5485a631ca6b2c4979744318c364cc9c37da",
         "type": "github"
       },
       "original": {
@@ -1448,11 +1448,11 @@
         "roll-flow": "roll-flow_2"
       },
       "locked": {
-        "lastModified": 1789847781,
-        "narHash": "sha256-9EYh9zUiYfmjgH/KoOwgYvd9pDRds9nCWeM8A/21KcE=",
+        "lastModified": 1789936678,
+        "narHash": "sha256-ZTdBQwyOKfAZDn/g3OpwN62cNeGBsRrBxC7HYM55dqQ=",
         "ref": "gigos-unstable",
-        "rev": "49ca7fe9c73edffa8804699a1f35ba7cc6642f7b",
-        "revCount": 230,
+        "rev": "c5e82638647f7cec6d82e5d06425b702fd5a7e77",
+        "revCount": 232,
         "type": "git",
         "url": "https://github.com/gignsky/gigpkgs"
       },
@@ -1711,11 +1711,11 @@
         "roll-flow": "roll-flow"
       },
       "locked": {
-        "lastModified": 1789847781,
-        "narHash": "sha256-By/EO6REYdMqqjdmZQ4U/RT5VutvvGfQd/YQ+xH0lGc=",
+        "lastModified": 1789936678,
+        "narHash": "sha256-jS8JdNEp2nUo3wrd+Plmr9Awb0A4McRDlFSgCJM0g0U=",
         "ref": "gigos-2605",
-        "rev": "6917be983b9de1630674473ad4000f1a8b796067",
-        "revCount": 230,
+        "rev": "844507ba5b78d5077a337a0e5e8cabf8e3f15e36",
+        "revCount": 232,
         "type": "git",
         "url": "https://github.com/gignsky/gigpkgs"
       },
@@ -2090,11 +2090,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789784831,
-        "narHash": "sha256-lYOqFqKZ/7bFlCRwFCwqpSmvBnnQxPlJRhIZW9I6b5Y=",
+        "lastModified": 1789848558,
+        "narHash": "sha256-hkmlzM+YPS4WUs/Ez8tPTMpfRfDjRYTk6CLkJFi4jfk=",
         "owner": "gignsky",
         "repo": "roll-flow",
-        "rev": "f9d75fc18ba7ee156ea4553966dcdc5cf253b309",
+        "rev": "9b56550a6f75a160aebfbc039dcbb6a3689bb449",
         "type": "github"
       },
       "original": {
@@ -2114,11 +2114,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789784831,
-        "narHash": "sha256-lYOqFqKZ/7bFlCRwFCwqpSmvBnnQxPlJRhIZW9I6b5Y=",
+        "lastModified": 1789848558,
+        "narHash": "sha256-hkmlzM+YPS4WUs/Ez8tPTMpfRfDjRYTk6CLkJFi4jfk=",
         "owner": "gignsky",
         "repo": "roll-flow",
-        "rev": "f9d75fc18ba7ee156ea4553966dcdc5cf253b309",
+        "rev": "9b56550a6f75a160aebfbc039dcbb6a3689bb449",
         "type": "github"
       },
       "original": {
