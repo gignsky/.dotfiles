@@ -195,8 +195,9 @@
 
         # Merlin configuration entrypoint
         # Using unstable to access virtualisation.credentials for VM secrets testing
-        # Will move to 26.05 stable when released (~May 2026)
-        merlin = inputs.nixpkgs-unstable.lib.nixosSystem {
+        # Will move to 26.05 stable when released (~May 2026) # MOVED on 2026-09-15
+        # merlin = inputs.nixpkgs-unstable.lib.nixosSystem {
+        merlin = inputs.nixpkgs.lib.nixosSystem {
           inherit system;
           specialArgs = specialArgs // {
             inherit inputs;

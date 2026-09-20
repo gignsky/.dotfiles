@@ -42,7 +42,7 @@
 # it's treated as a directory path and returned as-is.
 # Otherwise, its parent directory is returned.
 def get-dir-to-create [destination: string] {
-    if ($destination | str ends-with '/' or ($destination | str ends-with '\')) {
+    if ($destination | str ends-with '/') or ($destination | str ends-with '\') {
         $destination
     } else {
         $destination | path dirname
@@ -55,7 +55,7 @@ export def --wrapped supercopy [
     ...rest # All arguments for the underlying 'cp' command
 ] {
     # Passthrough --help request to the original command
-    if ($rest | contains '--help') {
+    if ('--help' in $rest) {
         ^cp --help
         return
     }
@@ -80,9 +80,9 @@ export def --wrapped supercopy [
             # Optional: print a message
             # print -e $"Created directory : ($dir_to_create)"
         }
-    } catch {
+    } catch {|err|
         print -e $"Error creating directory: ($dir_to_create). See error below."
-        print -e $in
+        print -e $err.msg
         # Allow the operation to continue, cp/mv will likely fail and give a better error
     }
 
@@ -96,7 +96,7 @@ export def --wrapped supermove [
     ...rest # All arguments for the underlying 'mv' command
 ] {
     # Passthrough --help request to the original command
-    if ($rest | contains '--help') {
+    if ('--help' in $rest) {
         ^mv --help
         return
     }
@@ -118,9 +118,9 @@ export def --wrapped supermove [
         if not ($dir_to_create | path exists) {
             mkdir -v $dir_to_create
         }
-    } catch {
+    } catch {|err|
         print -e $"Error creating directory: ($dir_to_create). See error below."
-        print -e $in
+        print -e $err.msg
     }
 
     # Execute the original mv command with all arguments
