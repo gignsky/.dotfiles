@@ -2147,6 +2147,7 @@
           "nixpkgs",
           "pre-commit-hooks"
         ],
+        "scrivener": "scrivener",
         "sops-nix": "sops-nix",
         "treefmt-nix": "treefmt-nix",
         "vscode-server": "vscode-server",
@@ -2195,6 +2196,26 @@
       "original": {
         "owner": "oxalica",
         "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "scrivener": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1790293056,
+        "narHash": "sha256-WL91lT2P/32dcTlFf38xgpr85lNVN3/E6xbfYCWrQbs=",
+        "owner": "gignsky",
+        "repo": "scribbydascribe",
+        "rev": "83b57bd5550bcbc245bb79b85ce83d2b182f8a42",
+        "type": "github"
+      },
+      "original": {
+        "owner": "gignsky",
+        "repo": "scribbydascribe",
         "type": "github"
       }
     },
