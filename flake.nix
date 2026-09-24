@@ -82,6 +82,12 @@
 
     avec-moi.url = "github:gignsky/avecmoi";
 
+    # Discord voice-call recorder/transcriber, run as a container on spacedock
+    scrivener = {
+      url = "github:gignsky/scribbydascribe";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # # tax-matrix - currently on develop branch
     # tax-matrix = {
     #   url = "github:gignsky/tax-matrix/develop";
