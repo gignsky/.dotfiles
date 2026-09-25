@@ -84,7 +84,7 @@
 
     # Discord voice-call recorder/transcriber, run as a container on spacedock
     scrivener = {
-      url = "github:gignsky/scribbydascribe";
+      url = "github:gignsky/scribbydascribe/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

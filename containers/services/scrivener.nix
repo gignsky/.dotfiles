@@ -14,7 +14,7 @@
 #      validateSopsFiles is on, so the build fails until the key exists.
 #   2. Add the flake input in flake.nix:
 #        scrivener = {
-#          url = "github:gignsky/scribbydascribe";
+#          url = "github:gignsky/scribbydascribe/master";
 #          inputs.nixpkgs.follows = "nixpkgs";
 #        };
 #
