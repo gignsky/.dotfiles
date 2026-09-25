@@ -63,21 +63,5 @@ in
     extraOptions = [ "--stop-timeout=600" ];
   };
 
-  systemd.services.podman-scrivener = {
-    serviceConfig.TimeoutStopSec = lib.mkForce 660;
-
-    # A rebuild must never take a recording down with it. Stopping the
-    # container is graceful but final: the bot finishes the session, posts the
-    # transcript and exits, which in the middle of a game night is exactly the
-    # interruption we are trying to avoid. So a switch installs the new unit
-    # and leaves the running container alone; the changeover happens on an
-    # explicit `systemctl restart podman-scrivener` at a break.
-    #
-    # switch-to-configuration reads X-RestartIfChanged from the *new*
-    # generation's unit file, so this already governs the switch that
-    # introduces it. The cost is that it is now on us to remember: until that
-    # restart, the container keeps running whatever image it started with, no
-    # matter how many rebuilds go past.
-    restartIfChanged = false;
-  };
+  systemd.services.podman-scrivener.serviceConfig.TimeoutStopSec = lib.mkForce 660;
 }
