@@ -50,6 +50,11 @@ in
       WHISPER_DEVICE = "cpu";
       WHISPER_COMPUTE_TYPE = "int8";
       WHISPER_LANGUAGE = "en";
+      # Unset, ctranslate2 takes its default of 4 threads and leaves the other
+      # 8 of spacedock's cores idle, which is how a five-speaker call builds a
+      # backlog it never catches up on. Two cores are held back for the bot,
+      # the ffmpeg track build at the end, and everything else on the host.
+      WHISPER_THREADS = "10";
     };
     volumes = [ "/var/lib/scrivener:/data" ];
     # On stop the bot finishes any recording in progress (drains the
@@ -58,5 +63,21 @@ in
     extraOptions = [ "--stop-timeout=600" ];
   };
 
-  systemd.services.podman-scrivener.serviceConfig.TimeoutStopSec = lib.mkForce 660;
+  systemd.services.podman-scrivener = {
+    serviceConfig.TimeoutStopSec = lib.mkForce 660;
+
+    # A rebuild must never take a recording down with it. Stopping the
+    # container is graceful but final: the bot finishes the session, posts the
+    # transcript and exits, which in the middle of a game night is exactly the
+    # interruption we are trying to avoid. So a switch installs the new unit
+    # and leaves the running container alone; the changeover happens on an
+    # explicit `systemctl restart podman-scrivener` at a break.
+    #
+    # switch-to-configuration reads X-RestartIfChanged from the *new*
+    # generation's unit file, so this already governs the switch that
+    # introduces it. The cost is that it is now on us to remember: until that
+    # restart, the container keeps running whatever image it started with, no
+    # matter how many rebuilds go past.
+    restartIfChanged = false;
+  };
 }
