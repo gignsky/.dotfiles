@@ -13,15 +13,19 @@
 let
   flakeInputs = lib.filterAttrs (_: lib.isType "flake") inputs;
 
-  # Live github handle for a gigpkgs branch (ref = null -> default branch/master).
+  # Live git handle for a gigpkgs branch (ref = null -> repo default branch).
   # These resolve at use-time, so pointing at branches that do not exist yet
   # (gigpkgs-*, *-stable — created later by gigpkgs CI) is fine; they simply
   # fail to fetch until the branch exists.
+  #
+  # Uses `type = "git"` rather than `type = "github"`: the github fetcher
+  # resolves a branch ref via the GitHub REST API (unauthenticated, 60
+  # req/hr), while the git fetcher resolves it via `git ls-remote` directly
+  # against GitHub, which isn't subject to that limit.
   gigpkgsRef = ref: {
     to = {
-      type = "github";
-      owner = "gignsky";
-      repo = "gigpkgs";
+      type = "git";
+      url = "https://github.com/gignsky/gigpkgs.git";
     }
     // lib.optionalAttrs (ref != null) { inherit ref; };
   };
