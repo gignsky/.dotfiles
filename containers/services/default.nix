@@ -7,7 +7,7 @@ _: {
   imports = [
     # ./pihole.nix # Pi-hole DNS — runs as a service via the container engine
     ./tdarr-node.nix # Tdarr node — needs CIFS mounts + samba creds first
-    # ./avec-moi-app.nix
+    ./avec-moi-app.nix
     ./scrivener.nix # Discord voice transcriber — needs the `scrivener-env` sops key first
   ];
 }
