@@ -2147,7 +2147,7 @@
           "nixpkgs",
           "pre-commit-hooks"
         ],
-        "scrivener": "scrivener",
+        "scribbydascribe": "scribbydascribe",
         "sops-nix": "sops-nix",
         "treefmt-nix": "treefmt-nix",
         "vscode-server": "vscode-server",
@@ -2199,18 +2199,18 @@
         "type": "github"
       }
     },
-    "scrivener": {
+    "scribbydascribe": {
       "inputs": {
         "nixpkgs": [
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1790298655,
-        "narHash": "sha256-//lnSPpw8+CC15wiMxU9ET8cTHGEgmTwLxMZJ88ySdI=",
+        "lastModified": 1790895991,
+        "narHash": "sha256-3iKdg8U1sPwYxizlFNinCo+hO/8bGto3I9v/QMSMcBs=",
         "owner": "gignsky",
         "repo": "scribbydascribe",
-        "rev": "0ae933a423d969552c7e62d5cc468f7c80567128",
+        "rev": "a7872246eb8f1dc34ad6c3d93f2d38ff833caa34",
         "type": "github"
       },
       "original": {
