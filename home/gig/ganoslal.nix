@@ -20,6 +20,7 @@
     packages = with pkgs; [
       # ytmdesktop
       youtube-music
+      claude-desktop
       steam
       plex-desktop
       remmina
