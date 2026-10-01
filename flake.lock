@@ -5,11 +5,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1786998263,
-        "narHash": "sha256-Dd7JTNiIIuOTxksc6QJsztcwVrNkEu4Mn6cVyGeIHEs=",
+        "lastModified": 1790788103,
+        "narHash": "sha256-C4D1hpJpqFAwPBnyIcrXLhRr3ZF9jIJ+CgxzhsJzIMM=",
         "owner": "gignsky",
         "repo": "avecmoi",
-        "rev": "ab6e045995c1a06c5bf83f853428228e7691f856",
+        "rev": "5b1dcf1ecb75eb30594569bc17b04271e30f39bc",
         "type": "github"
       },
       "original": {
