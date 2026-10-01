@@ -2147,7 +2147,7 @@
           "nixpkgs",
           "pre-commit-hooks"
         ],
-        "scrivener": "scrivener",
+        "scribbydascribe": "scribbydascribe",
         "sops-nix": "sops-nix",
         "treefmt-nix": "treefmt-nix",
         "vscode-server": "vscode-server",
@@ -2199,7 +2199,7 @@
         "type": "github"
       }
     },
-    "scrivener": {
+    "scribbydascribe": {
       "inputs": {
         "nixpkgs": [
           "nixpkgs"
