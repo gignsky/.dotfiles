@@ -40,6 +40,44 @@ let
       };
     };
 
+  # Helper function to create a packaged script from a .py file
+  # Mirrors makeScriptPackage, but execs python3 and can export env vars so
+  # store paths (shared libraries, for instance) can be injected at build time.
+  makePythonScriptPackage =
+    {
+      name, # Package name (used for binary name)
+      scriptPath, # Path to the .py file
+      dependencies ? [ ], # List of packages this script depends on
+      env ? { }, # Environment variables to export before running
+      description ? "A packaged python script",
+    }:
+    pkgs.writeShellScriptBin name ''
+      # Auto-generated wrapper for ${scriptPath}
+
+      # Make dependencies available in PATH
+      export PATH="${pkgs.lib.makeBinPath dependencies}:$PATH"
+      ${pkgs.lib.concatStringsSep "\n" (
+        pkgs.lib.mapAttrsToList (k: v: "export ${k}=${pkgs.lib.escapeShellArg v}") env
+      )}
+
+      # Execute the original script with all arguments
+      exec ${pkgs.python3}/bin/python3 "${scriptPath}" "$@"
+    ''
+    // {
+      meta = {
+        inherit description;
+        maintainers = [ ];
+      };
+      passthru = {
+        inherit scriptPath dependencies;
+        # Basic test that the script compiles under the python we ship
+        tests.basic = pkgs.runCommand "${name}-test" { buildInputs = [ pkgs.python3 ]; } ''
+          ${pkgs.python3}/bin/python3 -m py_compile "${scriptPath}" || exit 1
+          echo "Script syntax check passed" > $out
+        '';
+      };
+    };
+
   # Script definitions
   scripts = {
     # Hardware configuration validation script
@@ -149,6 +187,22 @@ let
         bat
       ];
       description = "Interactive script packager with fzf selection and OpenCode test generation";
+    };
+
+    # Thunderbird credential seeder (see home/gig/common/optional/thunderbird.nix)
+    # nss_latest is deliberate: it is the same NSS that thunderbird links
+    # against, so the key4.db and SDR blobs we write are exactly what
+    # Thunderbird expects to read back.
+    seed-thunderbird-logins = makePythonScriptPackage {
+      name = "seed-thunderbird-logins";
+      scriptPath = ../scripts/seed-thunderbird-logins.py;
+      dependencies = with pkgs; [
+        coreutils
+      ];
+      env = {
+        SEED_THUNDERBIRD_NSS_LIBDIR = "${pkgs.lib.getLib pkgs.nss_latest}/lib";
+      };
+      description = "Seeds a Thunderbird profile's logins.json with NSS-encrypted mail credentials";
     };
 
   };
