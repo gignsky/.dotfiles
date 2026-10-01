@@ -37,7 +37,7 @@ in
 
   virtualisation.oci-containers.containers.scribbydascribe = {
     inherit imageFile;
-    image = "scrivener:latest";
+    image = "scribbydascribe:latest";
     autoStart = true;
     environmentFiles = [ config.sops.secrets.scribbydascribe-env.path ];
     environment = {
