@@ -16,9 +16,10 @@
     # ./cams-countertop.nix
   ];
 
-  home.packages = with pkgs; [
+  packages = with pkgs; [
     # ytmdesktop
     youtube-music
+    claude-desktop
     steam
     plex-desktop
     remmina
