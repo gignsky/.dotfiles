@@ -1,5 +1,9 @@
 { pkgs, ... }:
 
+# NOTE: autorandr is deliberately NOT imported here. Its postswitch hook runs
+# `bspc wm -r`, which fails under any non-bspwm session, and profile switching
+# is useless on hosts with a fixed monitor set. Hosts that want it import
+# hosts/common/optional/autorandr.nix explicitly.
 {
   services = {
     displayManager = {
@@ -33,6 +37,7 @@
 
   # System-level packages required for bspwm
   environment.systemPackages = with pkgs; [
+    #TODO Look into removing some of these system packages
     bspwm # Binary space partitioning window manager
     sxhkd # Simple X hotkey daemon
     rofi # Application launcher and window switcher

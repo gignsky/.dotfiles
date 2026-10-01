@@ -26,5 +26,8 @@ rec {
     pre-commit-flake-check
     run-iso-vm
     package-script
+    polybar-net-graph
+    polybar-hidden-count
+    bspwm-hidden-picker
     ;
 }

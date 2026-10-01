@@ -13,6 +13,12 @@
     };
     config = {
       "bar/main" = {
+        # Which monitor this instance binds to. One polybar process is spawned
+        # per connected monitor with MONITOR set in its environment (see the
+        # launch loop in `script` below). Empty falls back to the primary.
+        monitor = "\${env:MONITOR:}";
+        monitor-strict = false;
+
         # Bar positioning and appearance
         width = "100%";
         height = 30;
@@ -38,14 +44,18 @@
         font-1 = "Font Awesome 7 Free:style=Solid:size=11;2";
         font-2 = "Font Awesome 7 Brands:size=11;2";
 
-        # Module layout
+        # Module layout. `net` is last so the throughput graph lands in the
+        # actual top-right corner; on the primary bar the tray sits to its
+        # right, which is expected.
         modules-left = "bspwm";
         modules-center = "date pulseaudio";
         # modules-right = "filesystem cpu memory wlan eth battery";
-        modules-right = "cpu memory wlan eth battery";
+        modules-right = "hidden cpu memory wlan eth battery net";
 
-        # System tray
-        tray-position = "right";
+        # System tray. Only ONE bar may own the tray — if several claim it the
+        # losers fail to start — so the launch loop sets this to "right" for the
+        # primary monitor and "none" everywhere else.
+        tray-position = "\${env:TRAY_POSITION:none}";
         tray-padding = 2;
 
         # Cursor actions
@@ -60,21 +70,29 @@
       "module/bspwm" = {
         type = "internal/bspwm";
 
+        # Only show desktops belonging to the monitor this bar is on. Without
+        # this every bar lists all desktops from every monitor.
+        pin-workspaces = true;
+
+        # Labels use %name% (the desktop's actual name, e.g. "IV") rather than
+        # %index%. %index% is the desktop's POSITION WITHIN THE BAR, so every
+        # 2-desktop monitor rendered "1 2" and the 5-desktop ultrawide rendered
+        # "1 2 3 4 5" — the same digits on different screens, matching nothing.
         # Workspace labels
-        label-focused = "%index%";
+        label-focused = "%name%";
         label-focused-background = "#88C0D0";
         label-focused-foreground = "#2E3440";
         label-focused-padding = 2;
 
-        label-occupied = "%index%";
+        label-occupied = "%name%";
         label-occupied-padding = 2;
         label-occupied-foreground = "#D8DEE9";
 
-        label-urgent = "%index%!";
+        label-urgent = "%name%!";
         label-urgent-background = "#BF616A";
         label-urgent-padding = 2;
 
-        label-empty = "%index%";
+        label-empty = "%name%";
         label-empty-foreground = "#4C566A";
         label-empty-padding = 2;
       };
@@ -187,6 +205,29 @@
         format-disconnected = "";
       };
 
+      # Network throughput graph. polybar has no native graph type, so the
+      # history lives in the script: it runs in tail mode, printing one
+      # sparkline + rate line per second. See scripts/polybar-net-graph.sh.
+      "module/net" = {
+        type = "custom/script";
+        exec = "${pkgs.polybar-net-graph}/bin/polybar-net-graph";
+        tail = true;
+      };
+
+      # Minimized-window count. Prints nothing when none are hidden, so the
+      # module vanishes from the bar rather than reading "0 hidden". Clicking
+      # it opens the same rofi picker that super + shift + m does.
+      #
+      # Both scripts are referenced by absolute store path: the polybar unit's
+      # PATH is just the polybar package and /run/wrappers/bin, so `bspc` would
+      # not otherwise resolve (same trap as the launch script below).
+      "module/hidden" = {
+        type = "custom/script";
+        exec = "${pkgs.polybar-hidden-count}/bin/polybar-hidden-count";
+        interval = 1;
+        click-left = "${pkgs.bspwm-hidden-picker}/bin/bspwm-hidden-picker";
+      };
+
       # Battery module (for laptops)
       "module/battery" = {
         type = "internal/battery";
@@ -231,6 +272,24 @@
         margin-bottom = 0;
       };
     };
-    script = "polybar main &";
+    # Launch one bar per connected monitor. `polybar main &` on its own only
+    # ever produces a bar on the primary output, which on a 4-monitor host
+    # means three bare monitors.
+    # NOTE: the generated unit sets Environment=PATH to just the polybar
+    # package and /run/wrappers/bin, so grep/cut must be referenced by absolute
+    # path. Relying on PATH here makes the loop silently produce no monitors,
+    # the script exit 0, and the service go straight back to inactive.
+    script = ''
+      PRIMARY=$(polybar --list-monitors | ${pkgs.gnugrep}/bin/grep '(primary)' | ${pkgs.coreutils}/bin/cut -d: -f1)
+
+      for m in $(polybar --list-monitors | ${pkgs.coreutils}/bin/cut -d: -f1); do
+        if [ "$m" = "$PRIMARY" ]; then
+          TRAY_POSITION=right
+        else
+          TRAY_POSITION=none
+        fi
+        MONITOR=$m TRAY_POSITION=$TRAY_POSITION polybar --reload main &
+      done
+    '';
   };
 }
