@@ -2206,11 +2206,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790895991,
-        "narHash": "sha256-3iKdg8U1sPwYxizlFNinCo+hO/8bGto3I9v/QMSMcBs=",
+        "lastModified": 1790897825,
+        "narHash": "sha256-74uiIq8b/xtwTJ91p4Xq4qsEOVsCUpEdTXJYdmfb5gw=",
         "owner": "gignsky",
         "repo": "scribbydascribe",
-        "rev": "a7872246eb8f1dc34ad6c3d93f2d38ff833caa34",
+        "rev": "d21ece5a3171129dc33206a97f1e1657b42461ea",
         "type": "github"
       },
       "original": {
