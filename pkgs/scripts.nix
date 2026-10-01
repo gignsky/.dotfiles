@@ -66,6 +66,9 @@ let
     // {
       meta = {
         inherit description;
+        # writeShellScriptBin sets this, but the meta override above would drop
+        # it and lib.getExe needs it.
+        mainProgram = name;
         maintainers = [ ];
       };
       passthru = {

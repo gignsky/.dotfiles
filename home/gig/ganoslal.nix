@@ -13,6 +13,7 @@
 
     ./home.nix
     ./common/optional/bspwm.nix # Enable bspwm window manager configuration
+    ./common/optional/thunderbird.nix # WorkMail account, declaratively configured
     # ./cams-countertop.nix
   ];
 
