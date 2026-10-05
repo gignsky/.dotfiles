@@ -354,6 +354,9 @@
 
       packages.${system} = import ./pkgs { inherit pkgs; };
 
+      # Reusable NixOS modules (candidates for upstreaming to gigpkgs).
+      nixosModules.binary-cache = ./modules/nixos/binary-cache;
+
       # Custom modifications/overrides to upstream packages.
       overlays = import ./overlays { inherit inputs; };
 
