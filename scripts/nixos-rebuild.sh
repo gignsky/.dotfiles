@@ -255,23 +255,11 @@ error_log_file=$(mktemp)
 # Use pipefail to ensure we capture the exit code of nixos-rebuild, not tee
 set -o pipefail
 
-# Run nixos-rebuild and capture both output and exit code properly
+# Run nixos-rebuild, streaming build progress live while also capturing
+# it to $output_file for the error-extraction logic below.
 echo "Starting nixos-rebuild ${REBUILD_SUBCOMMAND} for ${HOST_IDENTIFIER}..."
-if [ "$VERBOSE" = true ]; then
-  # Verbose mode: show all output
-  if eval "$NIXOS_CMD" 2>&1 | tee "$output_file"; then
-    nixos_rebuild_exit_code=${PIPESTATUS[0]}
-  else
-    nixos_rebuild_exit_code=${PIPESTATUS[0]}
-  fi
-else
-  # Normal mode: capture output but don't show unless there's an error
-  if eval "$NIXOS_CMD" > "$output_file" 2>&1; then
-    nixos_rebuild_exit_code=$?
-  else
-    nixos_rebuild_exit_code=$?
-  fi
-fi
+eval "$NIXOS_CMD" 2>&1 | tee "$output_file"
+nixos_rebuild_exit_code=${PIPESTATUS[0]}
 
 # Double-check the actual exit code from nixos-rebuild (not tee)
 if [ "$nixos_rebuild_exit_code" -eq 0 ]; then
