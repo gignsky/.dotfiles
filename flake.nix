@@ -6,11 +6,15 @@
     # Stable
     # nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
     # Gigpkgs Version
-    nixpkgs.url = "github:gignsky/gigpkgs/gigos-2605";
+    # Uses the `git+https` fetcher (not `github:`) so branch-ref resolution
+    # goes through `git ls-remote` instead of the GitHub REST API — the
+    # `github:` fetcher hits the unauthenticated 60 req/hr API rate limit
+    # when resolving a branch name to a commit, which starved `fupdate`.
+    nixpkgs.url = "git+https://github.com/gignsky/gigpkgs?ref=gigos-2605";
     # Local
     # nixpkgs.url = "git+file:///home/gig/local_repos/gigpkgs";
     # Unstable
-    nixpkgs-unstable.url = "github:gignsky/gigpkgs/gigos-unstable";
+    nixpkgs-unstable.url = "git+https://github.com/gignsky/gigpkgs?ref=gigos-unstable";
     # Local
     # nixpkgs-local.url = "git+file:///home/gig/local_repos/gigpkgs";
 
@@ -78,6 +82,12 @@
 
     avec-moi.url = "github:gignsky/avecmoi";
 
+    # Discord voice-call recorder/transcriber, run as a container on spacedock
+    scrivener = {
+      url = "github:gignsky/scribbydascribe/master";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # # tax-matrix - currently on develop branch
     # tax-matrix = {
     #   url = "github:gignsky/tax-matrix/develop";
@@ -128,8 +138,8 @@
       inherit (self) outputs;
       # Switched from `inputs.gigpkgs.lib` to `inputs.nixpkgs.lib` with the swap to native `gigpkgs`
       # as `nixpkgs` -- TODO remove this comment later should everything work out (07/20/2026)
-      lib = inputs.nixpkgs.lib;
-      hmLib = lib.extend (_: _: { hm = inputs.home-manager.lib.hm; });
+      inherit (inputs.nixpkgs) lib;
+      hmLib = lib.extend (_: _: { inherit (inputs.home-manager.lib) hm; });
       system = "x86_64-linux";
       # forAllSystems = nixpkgs.lib.genAttrs [
       #   "x86_64-linux"
