@@ -257,8 +257,14 @@ set -o pipefail
 
 # Run nixos-rebuild, streaming build progress live while also capturing
 # it to $output_file for the error-extraction logic below.
+#
+# Piping straight into `tee` makes Nix see a non-tty stdout/stderr, so it
+# drops the live "[N/M/T] items being built" progress bar in favor of
+# plain line-by-line logging. Running it under `script` instead allocates
+# a pty, so Nix still thinks it's talking to a terminal and keeps the
+# progress bar, while `script -e` still reports the child's real exit code.
 echo "Starting nixos-rebuild ${REBUILD_SUBCOMMAND} for ${HOST_IDENTIFIER}..."
-eval "$NIXOS_CMD" 2>&1 | tee "$output_file"
+script -qefc "$NIXOS_CMD" /dev/null 2>&1 | tee "$output_file"
 nixos_rebuild_exit_code=${PIPESTATUS[0]}
 
 # Double-check the actual exit code from nixos-rebuild (not tee)
