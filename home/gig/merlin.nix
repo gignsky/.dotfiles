@@ -20,7 +20,7 @@
   home.packages = with pkgs; [
     plex-desktop
     remmina
-    youtube-music
+    pear-desktop
     # bitwarden-cli
     # bitwarden-desktop
     discord
@@ -31,6 +31,7 @@
     # bambu-studio
     claude-desktop
     obsidian
+    gnumeric
   ];
 
   # https://nixos.wiki/wiki/FAQ/When_do_I_update_stateVersion
