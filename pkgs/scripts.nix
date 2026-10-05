@@ -66,6 +66,7 @@ let
         nix
         # nixos-rebuild is available from system, not needed here (would cause recursion)
         hostname
+        util-linux # `script`, used to keep Nix's live build-progress bar when teeing output
       ];
       description = "Rebuilds NixOS system configuration from flake";
     };
@@ -79,6 +80,7 @@ let
         nix
         home-manager
         hostname
+        util-linux # `script`, used to keep Nix's live build-progress bar when teeing output
       ];
       description = "Rebuilds Home Manager configuration from flake";
     };
