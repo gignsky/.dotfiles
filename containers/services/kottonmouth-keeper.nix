@@ -33,8 +33,17 @@ in
   sops.secrets = {
     # KEEPER_TOKEN / GITHUB_TOKEN, as unquoted KEY=value lines. Optional
     # SMTP_URL enables booking emails; until then they wait, owed, in the db.
-    kottonmouth-keeper-env = { };
-    kottonmouth-tunnel = { };
+    # restartUnits: a nixos-rebuild switch doesn't restart a unit just
+    # because a secret *file*'s content changed underneath it -- only if
+    # the unit definition itself changes. Without these, rotating either
+    # secret silently keeps the old value running until something else
+    # bounces the service.
+    kottonmouth-keeper-env = {
+      restartUnits = [ "podman-kottonmouth-keeper.service" ];
+    };
+    kottonmouth-tunnel = {
+      restartUnits = [ "cloudflared-tunnel-${tunnelId}.service" ];
+    };
   };
 
   systemd.tmpfiles.rules = [ "d /var/lib/kottonmouth-keeper 0700 ${uid} ${uid} -" ];
