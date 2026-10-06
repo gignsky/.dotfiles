@@ -24,7 +24,7 @@
 }:
 let
   # TODO(tunnel): the UUID printed by `cloudflared tunnel create kottonmouth`.
-  tunnelId = "00000000-0000-0000-0000-000000000000";
+  tunnelId = "1a878786-561d-427c-90cd-358f1b82aea4";
   adminPort = 8790;
   # Matches the image's `User`; owns the state dir on the host.
   uid = "8790";
