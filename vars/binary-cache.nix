@@ -6,5 +6,5 @@
   serverHost = "spacedock"; # networking.hostName of the server
   sshTarget = "spacedock"; # ~/.ssh/config host used for pushes
   url = "http://192.168.51.2:5000";
-  publicKey = null; # "spacedock-cache-1:…"
+  publicKey = "spacedock-cache-1:/M65sHAOdhlDXRoEx5QaxMrqy0Fe5MtrPa5KykiEKEs=";
 }
