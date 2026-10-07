@@ -31,6 +31,9 @@
 
     # Users
     (configLib.relativeToRoot "hosts/common/users/gig")
+
+    # Fleet binary cache server (Harmonia + builder + roll-flow watcher)
+    ./binary-cache.nix
   ];
   # gigpkgs container engine — the module is injected in flake.nix as
   # `inputs.nixpkgs.nixosModules.containers`. Provides the OCI runtime for

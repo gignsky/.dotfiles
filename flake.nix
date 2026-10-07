@@ -88,6 +88,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # kottonmouthband.com keeper image (private repo, so ssh like nix-secrets).
+    # See containers/services/kottonmouth-keeper.nix.
+    kottonmouth = {
+      url = "git+ssh://git@github.com/gignsky/kottonmouth.git?ref=main";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # # tax-matrix - currently on develop branch
     # tax-matrix = {
     #   url = "github:gignsky/tax-matrix/develop";
@@ -353,6 +360,9 @@
       # nixosModules = { inherit (import ./modules/nixos); };
 
       packages.${system} = import ./pkgs { inherit pkgs; };
+
+      # Reusable NixOS modules (candidates for upstreaming to gigpkgs).
+      nixosModules.binary-cache = ./modules/nixos/binary-cache;
 
       # Custom modifications/overrides to upstream packages.
       overlays = import ./overlays { inherit inputs; };

@@ -13,6 +13,28 @@ rec {
   #   ${pkgs.cowsay}/bin/cowsay "hello world" | ${pkgs.lolcat}/bin/lolcat 2> /dev/null
   # '';
 
+  #################### Package name wrappers #############################
+  # pear-desktop is YouTube Music's actual upstream package name; expose it
+  # under the name people actually look for.
+  ytmusic = pkgs.symlinkJoin {
+    name = "ytmusic";
+    paths = [ pkgs.pear-desktop ];
+    postBuild = ''
+      ln -sfn ${pkgs.pear-desktop}/bin/pear-desktop $out/bin/ytmusic
+    '';
+    meta = pkgs.pear-desktop.meta // {
+      mainProgram = "ytmusic";
+    };
+  };
+  #################### Binary cache scripts ##############################
+  # Live next to their NixOS module (modules/nixos/binary-cache) so the two
+  # extract together; exposed here for `nix run .#cache-push`.
+  inherit (pkgs.callPackage ../modules/nixos/binary-cache/package.nix { })
+    cache-build
+    cache-watch
+    cache-push
+    ;
+
   #################### Packages with external source ####################
   # zsh-als-aliases = pkgs.callPackage ./zsh-als-aliases { }; # Removed as unnecessary but left for help in the future
 

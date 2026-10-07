@@ -131,6 +131,7 @@ rebuild-post:
 	# just check-sops
 	@nix-shell -p lolcat --run 'echo "[POST] Rebuilt." | lolcat 2> /dev/null'
 	@echo "✅ Rebuild completed successfully - engineering logs handled by rebuild script"
+	-just cache-push /run/current-system
 
 # Rebuild the system
 rebuild args="":
@@ -225,6 +226,7 @@ pre-home:
 post-home:
 	@nix-shell -p lolcat --run 'echo "[POST-HOME] Finished." | lolcat 2> /dev/null'
 	@echo "✅ Home-manager rebuild completed - engineering logs handled by rebuild script"
+	-just cache-push ~/.local/state/home-manager/gcroots/current-home
 
 home *ARGS:
   just pre-home
@@ -266,7 +268,27 @@ build *args:
 
 post-build:
 	@nix-shell -p lolcat --run 'echo "Build Finished." | lolcat 2> /dev/null'
+	-just cache-push result
 	nix run github:gignsky/gigpkgs#quick-results
+
+# Fleet binary cache on spacedock — mirrors vars/binary-cache.nix.
+# See docs/guides/BINARY-CACHE.md.
+cache_host := "spacedock"
+cache_url := "http://192.168.51.2:5000"
+
+# Push closures to the cache (default: current system + home generation). Skips if unreachable.
+cache-push *paths:
+	-nix run .#cache-push -- --to {{cache_host}} --server-host {{cache_host}} {{paths}}
+
+# Have spacedock check watched repos (roll-flow) for new commits right now
+cache-poke:
+	ssh {{cache_host}} systemctl start --no-block binary-cache-watch.service
+
+# Show cache health, timers and recent builder/watcher activity
+cache-status:
+	curl -fsS --max-time 3 {{cache_url}}/nix-cache-info
+	ssh {{cache_host}} systemctl list-timers 'binary-cache-*' --no-pager
+	ssh {{cache_host}} journalctl -u binary-cache-watch -u binary-cache-build -n 30 --no-pager
 
 #
 # test:
