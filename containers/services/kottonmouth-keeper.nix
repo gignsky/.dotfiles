@@ -3,19 +3,14 @@
 # as an OCI image by the `kottonmouth` flake input (`packages.<system>
 # .keeper-image`), same pattern as avec-moi-app.nix.
 #
-# Inbound: none from the LAN. The admin is published on loopback only, and the
-# cloudflared tunnel below is its single door (admin.kottonmouthband.com,
-# behind Cloudflare Access). Outbound: HTTPS to the site and GitHub
-# (and SMTP, once SMTP_URL is set).
+# Inbound: none from the LAN. The admin is published on loopback only; the
+# cloudflared tunnel is its one door in, and a local nginx gate in front of
+# it (not Cloudflare Access) does HTTP Basic Auth with one shared band
+# password. The keeper's own ADMIN_EMAILS check is intentionally left unset
+# below -- it only means anything behind Cloudflare Access, which nothing
+# here uses anymore. Outbound: HTTPS to the site and GitHub (and SMTP, once
+# SMTP_URL is set).
 # If this is down, the public site doesn't notice -- the queue waits in D1.
-#
-# NOT IMPORTED YET -- sops validates at build time, so first:
-#   1. sops (`just sops`): add `kottonmouth-keeper-env` and `kottonmouth-tunnel`.
-#   2. `cloudflared tunnel create kottonmouth` -> set tunnelId below;
-#      `cloudflared tunnel route dns kottonmouth admin.kottonmouthband.com`;
-#      Cloudflare Access app on that hostname (email one-time PIN).
-#   3. `nix flake update kottonmouth` once kottonmouth's main has keeper-image.
-# Then uncomment ./kottonmouth-keeper.nix in services/default.nix and rebuild.
 {
   inputs,
   config,
@@ -23,9 +18,10 @@
   ...
 }:
 let
-  # TODO(tunnel): the UUID printed by `cloudflared tunnel create kottonmouth`.
   tunnelId = "1a878786-561d-427c-90cd-358f1b82aea4";
   adminPort = 8790;
+  # Loopback port nginx listens on, between cloudflared and the keeper.
+  gatePort = 8791;
   # Matches the image's `User`; owns the state dir on the host.
   uid = "8790";
 in
@@ -44,6 +40,12 @@ in
     kottonmouth-tunnel = {
       restartUnits = [ "cloudflared-tunnel-${tunnelId}.service" ];
     };
+    # htpasswd-format line(s), e.g. `admin:$2y$10$...` -- generate with
+    # `nix shell nixpkgs#apacheHttpd -c htpasswd -nBC 10 admin`.
+    kottonmouth-admin-htpasswd = {
+      owner = "nginx";
+      restartUnits = [ "nginx.service" ];
+    };
   };
 
   systemd.tmpfiles.rules = [ "d /var/lib/kottonmouth-keeper 0700 ${uid} ${uid} -" ];
@@ -58,14 +60,32 @@ in
       EDGE_URL = "https://kottonmouthband.com";
       GITHUB_REPO = "gignsky/kottonmouth";
       GITHUB_BRANCH = "main";
-      # Keep in step with the Cloudflare Access policy on the admin hostname.
-      # TODO: Wes's address, and anyone else in the band who edits shows.
-      ADMIN_EMAILS = "maxwell@giglab.dev";
       NOTIFY_TO = "kottonmouthband@gmail.com";
       NOTIFY_FROM = "Kottonmouth site <keeper@kottonmouthband.com>";
     };
     volumes = [ "/var/lib/kottonmouth-keeper:/data" ];
     ports = [ "127.0.0.1:${toString adminPort}:8790/tcp" ];
+  };
+
+  # Basic-auth gate: cloudflared -> nginx (shared password) -> keeper.
+  # Loopback only, same trust boundary the keeper already assumed.
+  services.nginx = {
+    enable = true;
+    virtualHosts."kottonmouth-admin-gate" = {
+      listen = [
+        {
+          addr = "127.0.0.1";
+          port = gatePort;
+        }
+      ];
+      locations."/" = {
+        proxyPass = "http://127.0.0.1:${toString adminPort}";
+        extraConfig = ''
+          auth_basic "G'day Mate, speak friend and enter!";
+          auth_basic_user_file ${config.sops.secrets.kottonmouth-admin-htpasswd.path};
+        '';
+      };
+    };
   };
 
   # Outbound-only tunnel: no ports opened on the home network. Anything not
@@ -75,7 +95,7 @@ in
     tunnels.${tunnelId} = {
       credentialsFile = config.sops.secrets.kottonmouth-tunnel.path;
       default = "http_status:404";
-      ingress."admin.kottonmouthband.com" = "http://127.0.0.1:${toString adminPort}";
+      ingress."admin.kottonmouthband.com" = "http://127.0.0.1:${toString gatePort}";
     };
   };
 }
