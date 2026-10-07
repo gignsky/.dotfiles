@@ -26,6 +26,14 @@ rec {
       mainProgram = "ytmusic";
     };
   };
+  #################### Binary cache scripts ##############################
+  # Live next to their NixOS module (modules/nixos/binary-cache) so the two
+  # extract together; exposed here for `nix run .#cache-push`.
+  inherit (pkgs.callPackage ../modules/nixos/binary-cache/package.nix { })
+    cache-build
+    cache-watch
+    cache-push
+    ;
 
   #################### Packages with external source ####################
   # zsh-als-aliases = pkgs.callPackage ./zsh-als-aliases { }; # Removed as unnecessary but left for help in the future
