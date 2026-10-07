@@ -22,16 +22,18 @@ rolling_to_main_gates = [
     "echo '----------- NIXOS REBUILD CHECK -------'",
     "just test-rebuild wsl",
     "just test-rebuild spacedock",
+    "just test-rebuild merlin",
+    "just test-rebuild ganoslal",
     "echo '----------- HM REBUILD CHECK ----------'",
     "just test-home wsl",
-    "just test-home spacedock"
+    "just test-home spacedock",
+    "just test-home merlin",
+    "just test-home ganoslal"
 ]
 
 # Per-host active status for roll-flow verification.
-# Only wsl is active for now; spacedock is flipped to true on the
-# roll/20 spacedock-onboarding roll once it builds + switches.
 [host_active]
-ganoslal = false
-merlin = false
+ganoslal = true
+merlin = true
 wsl = true
 spacedock = true
