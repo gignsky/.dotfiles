@@ -46,7 +46,7 @@ def main [
     ^ssh ...$ssh_opts $to mkdir cache-roots | complete | ignore
     for t in $targets {
         print $"cache-push: ($t.path) → ($to)"
-        ^nix copy --to $"ssh-ng://($to)" $t.path
+        ^nix copy --no-check-sigs --to $"ssh-ng://($to)" $t.path
         ^ssh ...$ssh_opts $to nix-store --realise $t.path --add-root $"cache-roots/($host)-($t.kind)" | ignore
     }
 }
