@@ -31,6 +31,7 @@ let
     "roll-flow-0.2.6-dev"
     "gigvim-full"
     "claude-desktop"
+    "fastfetch"
   ];
   gigpkgsTargets = builtins.listToAttrs (
     lib.concatMap
