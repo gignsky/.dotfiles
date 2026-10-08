@@ -31,6 +31,8 @@ let
     "roll-flow-0.2.6-dev"
     "gigvim-full"
     "claude-desktop"
+    "fastfetch"
+    "bambu-studio"
   ];
   gigpkgsTargets = builtins.listToAttrs (
     lib.concatMap
