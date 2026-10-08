@@ -271,10 +271,11 @@ post-build:
 	-just cache-push result
 	nix run github:gignsky/gigpkgs#quick-results
 
-# Fleet binary cache on spacedock — mirrors vars/binary-cache.nix.
+# Fleet binary cache — read from vars/binary-cache.nix so moving the server
+# to another host only requires editing that one file.
 # See docs/guides/BINARY-CACHE.md.
-cache_host := "spacedock"
-cache_url := "http://192.168.51.2:5000"
+cache_host := `nix eval --raw -f vars/binary-cache.nix sshTarget`
+cache_url := `nix eval --raw -f vars/binary-cache.nix url`
 
 # Push closures to the cache (default: current system + home generation). Skips if unreachable.
 cache-push *paths:

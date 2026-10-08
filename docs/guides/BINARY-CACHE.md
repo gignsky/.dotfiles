@@ -18,7 +18,7 @@ compiled once and then downloaded by every other host.
 | Scripts (`cache-build`, `cache-watch`, `cache-push`) | `modules/nixos/binary-cache/*.nu`, packaged by `package.nix` |
 | Fleet values (URL, public key) | `vars/binary-cache.nix` |
 | Client wiring (all hosts) | `hosts/common/core/binary-cache.nix` |
-| Server wiring | `hosts/spacedock/binary-cache.nix` |
+| Server wiring (imported by whichever host runs it) | `hosts/common/optional/binary-cache.nix` |
 | Recipes | `just cache-push`, `just cache-poke`, `just cache-status` |
 
 ## How the cache gets filled
@@ -73,16 +73,32 @@ Everything else stays cached until disk pressure evicts it.
    nix key generate-secret --key-name spacedock-cache-1 | save -f /tmp/cache.sec
    open /tmp/cache.sec | nix key convert-secret-to-public
    ```
-   - `just sops` → add `binary-cache: { spacedock-signing-key: <contents of /tmp/cache.sec> }`, then `rm /tmp/cache.sec`.
+   - `just sops` → add `binary-cache: { <hostname>-signing-key: <contents of /tmp/cache.sec> }`
+     (the secret name follows `config.networking.hostName` of the server host,
+     e.g. `spacedock-signing-key`), then `rm /tmp/cache.sec`.
    - Put the printed public key in `vars/binary-cache.nix` → `publicKey`.
-2. **Switch spacedock first** (`just rebuild` on spacedock). Then check
+2. **Switch the server first** (`just rebuild` on that host). Then check
    `just cache-status`.
 3. **Switch the clients.** They only add the substituter once `publicKey` is
    set; until then they print a warning and carry on as before.
 4. **Optional: deploy key for host closures.** Create a read-only GitHub
    deploy key, add it to both `gignsky/.dotfiles` and `gignsky/nix-secrets`,
    and store the private half at `binary-cache/builder-github-key`. Then set
-   `haveDeployKey = true` in `hosts/spacedock/binary-cache.nix`.
+   `haveDeployKey = true` in `hosts/common/optional/binary-cache.nix`.
+
+### Moving the server to a different host
+
+1. Import `hosts/common/optional/binary-cache.nix` into the new host's
+   `default.nix` (and drop the import from the old server's, if it's giving
+   up the role).
+2. Generate a new signing key and store it under
+   `binary-cache/<new-hostname>-signing-key` in nix-secrets — the module
+   derives the secret name from the server's own `networking.hostName`, so no
+   Nix edits are needed for that part.
+3. Update `vars/binary-cache.nix`: `serverHost`, `sshTarget`, `url` and
+   `publicKey`. This is the single source of truth for clients
+   (`hosts/common/core/binary-cache.nix`) and for `just cache-push` /
+   `cache-poke` / `cache-status`, which read `sshTarget`/`url` from it directly.
 
 ### Rotating the key
 

@@ -1,6 +1,11 @@
-# Spacedock is the fleet binary cache: Harmonia serves its store, and the
+# The fleet binary cache server: Harmonia serves this host's store, and the
 # builder + watcher keep it stocked. Module lives in modules/nixos/binary-cache
-# (imported fleet-wide via hosts/common/core/binary-cache.nix).
+# (imported fleet-wide via hosts/common/core/binary-cache.nix). Import this
+# file into any host's default.nix to make IT the server — the signing-key
+# secret name and the excluded-from-targets host both follow
+# `config.networking.hostName` automatically. Moving the server also means
+# updating `vars/binary-cache.nix` (url/publicKey/serverHost/sshTarget) so
+# clients and `just cache-*` point at the new host.
 # See docs/guides/BINARY-CACHE.md for key setup and operations.
 {
   config,
@@ -15,7 +20,11 @@ let
   # host closures reach the cache via `just cache-push` instead.
   haveDeployKey = false;
 
-  # Active hosts other than spacedock itself (its own closure is local anyway).
+  # Per-host secret name (e.g. `binary-cache/spacedock-signing-key`), so this
+  # file works unmodified on whichever host imports it.
+  signingKeySecret = "binary-cache/${config.networking.hostName}-signing-key";
+
+  # Active hosts other than this server itself (its own closure is local anyway).
   hosts = lib.attrNames (
     lib.filterAttrs (name: active: active && name != config.networking.hostName) (
       import (configLib.relativeToRoot "vars/hosts.nix")
@@ -64,7 +73,7 @@ let
 in
 {
   sops.secrets = {
-    "binary-cache/spacedock-signing-key" = { };
+    ${signingKeySecret} = { };
   }
   // (
     if haveDeployKey then
@@ -81,7 +90,7 @@ in
 
     server = {
       enable = true;
-      signingKeyFile = config.sops.secrets."binary-cache/spacedock-signing-key".path;
+      signingKeyFile = config.sops.secrets.${signingKeySecret}.path;
       trustedPushers = [ configVars.username ];
     };
 
