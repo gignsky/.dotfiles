@@ -32,6 +32,7 @@ let
     "gigvim-full"
     "claude-desktop"
     "fastfetch"
+    "bambu-studio"
   ];
   gigpkgsTargets = builtins.listToAttrs (
     lib.concatMap
