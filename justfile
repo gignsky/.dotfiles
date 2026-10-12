@@ -152,18 +152,23 @@ rebuild-full args="":
 
 
 # Test rebuild commands (dry-run evaluation without applying)
+# Build (never activate) a host's system closure, then push it to the cache so
+# the next host verifying the same roll substitutes instead of rebuilding.
+# The named out-link keeps one cache root per verifier+target on the server.
 test-rebuild host=`scripts/get-flake-target.sh`:
-	@echo "Testing system rebuild for {{host}} (evaluation only)..."
-	sudo nixos-rebuild dry-activate --flake .#{{host}} --print-build-logs
+	@echo "Testing system build for {{host}} (no activation)..."
+	nix build .#nixosConfigurations.{{host}}.config.system.build.toplevel --print-build-logs --out-link result-{{host}}-system
+	-just cache-push result-{{host}}-system
 
+# Same for the home-manager generation.
 test-home host=`scripts/get-flake-target.sh`:
-	@echo "Testing home-manager rebuild for gig@{{host}} (evaluation only)..."
-	home-manager build --flake .#gig@{{host}} --verbose
+	@echo "Testing home-manager build for gig@{{host}} (no activation)..."
+	nix build '.#homeConfigurations."gig@{{host}}".activationPackage' --print-build-logs --out-link result-{{host}}-home
+	-just cache-push result-{{host}}-home
 
 test-rebuild-full host=`scripts/get-flake-target.sh`:
-	@echo "Testing full rebuild for {{host}} (evaluation only)..."
-	sudo nixos-rebuild dry-activate --flake .#{{host}} --print-build-logs
-	home-manager build --flake .#gig@{{host}} --verbose
+	just test-rebuild {{host}}
+	just test-home {{host}}
 
 # Update the flake
 update:
