@@ -14,5 +14,5 @@
   hostKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDmBvxBTdFdO0IKT30vqec/JkfjAjlv7trlh+tPuK0W2";
   # Public half of `binary-cache/push-key` in nix-secrets. While null, no host
   # pushes on build and the server creates no push account.
-  pushPublicKey = null;
+  pushPublicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOn0osK7pACmtOUWVTEWXo0YJE5vkUhvnFBVW/jQxaWa binary-cache-push";
 }
