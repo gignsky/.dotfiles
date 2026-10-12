@@ -4,6 +4,6 @@
 {
   merlin = true;
   wsl = true;
-  ganoslal = false;
+  ganoslal = true;
   spacedock = false;
 }

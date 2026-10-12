@@ -29,7 +29,7 @@ WSL note: The flake target for WSL must be `wsl` (not the hostname `nixos`). `sc
 
 ### Flake Structure
 
-- **`flake.nix`** — Entry point. Defines `nixosConfigurations` (ganoslal, merlin, wsl) and `homeConfigurations` (gig@{wsl,spacedock,merlin,ganoslal}). Uses nixpkgs stable 26.05 for most hosts; merlin uses nixpkgs-unstable.
+- **`flake.nix`** — Entry point. Defines `nixosConfigurations` (ganoslal, merlin, wsl, spacedock) and `homeConfigurations` (gig@{wsl,spacedock,merlin,ganoslal}). Uses nixpkgs stable 26.05 for most hosts; merlin uses nixpkgs-unstable.
 - **`vars/`** — Global config values (`configVars`): username, uid/gid, hostname mappings. Passed to all modules as `specialArgs`.
 - **`lib/`** — Utility functions (`configLib`): `relativeToRoot`, `scanPaths` (auto-import directories of .nix files), `scanPathsNuShell` (concatenate .nu files for extraConfig).
 - **`pkgs/`** — Custom Nix packages. `scripts.nix` wraps shell scripts as proper packages with dependency injection via `makeScriptPackage`.
@@ -99,6 +99,10 @@ Never merge directly to `main`. Always flow through `rolling`. See `docs/guides/
 - **Linting**: `statix` (anti-patterns), `deadnix` (unused bindings)
 - **Function params**: destructuring `{ pkgs, lib, ... }:`
 - **Overridable defaults**: use `lib.mkDefault`
+
+## Binary Cache
+
+Spacedock serves a signed Harmonia binary cache on the LAN (`modules/nixos/binary-cache/`, values in `vars/binary-cache.nix`). All other hosts use it as an extra substituter. It is filled by a nightly builder, a 5-minute roll-flow branch watcher, and `just cache-push` (run automatically after rebuild/home/build). See `docs/guides/BINARY-CACHE.md`.
 
 ## Secrets Management
 

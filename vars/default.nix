@@ -1,6 +1,7 @@
 { lib, ... }:
 {
   networking = import ./networking.nix { inherit lib; };
+  binaryCache = import ./binary-cache.nix;
 
   username = "gig";
   uid = 1701;

@@ -182,20 +182,18 @@ if [ "$VERBOSE" = true ]; then
   HM_ARGS+=("--show-trace")
 fi
 
-# Execute home-manager with proper output capture
+# Execute home-manager, streaming build progress live while also capturing
+# it to $output_file for the error-extraction logic below.
+#
+# Piping straight into `tee` makes Nix see a non-tty stdout/stderr, so it
+# drops the live "[N/M/T] items being built" progress bar in favor of
+# plain line-by-line logging. Running it under `script` instead allocates
+# a pty, so Nix still thinks it's talking to a terminal and keeps the
+# progress bar, while `script -e` still reports the child's real exit code.
 set -o pipefail
-if [ "$VERBOSE" = true ]; then
-  # Verbose mode: show all output
-  home-manager "${HM_ARGS[@]}" 2>&1 | tee "$output_file"
-  BUILD_SUCCESS=${PIPESTATUS[0]}
-else
-  # Normal mode: capture output but show errors if build fails
-  if home-manager "${HM_ARGS[@]}" > "$output_file" 2>&1; then
-    BUILD_SUCCESS=0
-  else
-    BUILD_SUCCESS=$?
-  fi
-fi
+HM_CMD="home-manager $(printf '%q ' "${HM_ARGS[@]}")"
+script -qefc "$HM_CMD" /dev/null 2>&1 | tee "$output_file"
+BUILD_SUCCESS=${PIPESTATUS[0]}
 
 if [ $BUILD_SUCCESS -eq 0 ]; then
   # Get the generation number after successful build

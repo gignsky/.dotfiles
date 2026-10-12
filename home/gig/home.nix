@@ -124,6 +124,7 @@
     easyeffects # Audio effects processing including spatial audio/surround emulation
     calf # Audio plugins for EasyEffects including convolution reverb
     lsp-plugins # Additional audio processing plugins
+    guvcview # Webcam + mic test utility - live video preview with audio level meter
 
     ################################################################
     ## look through and decide if these might be good to have then sort them throughout the configuration of the home files and the dotfiles, all new packages should start here for testing purposes if not used in a nix-shell -p command

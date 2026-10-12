@@ -8,7 +8,7 @@
   annex = "cd ~/local_repos/annex/";
   # ll = "ls -lh";
   lla = "eza -gla";
-  # cp = "cp -rv";
+  cp = "cp -rv";
   # mv = "mv -v";
   rd = "rmdir";
   rdd = "rm -rfv";
