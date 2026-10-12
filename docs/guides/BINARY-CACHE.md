@@ -25,8 +25,12 @@ compiled once and then downloaded by every other host.
 
 1. **Builder:** `binary-cache-build.timer` runs nightly. It builds
    `binaryCache.builder.targets` and roots each result at
-   `/var/lib/binary-cache/roots/build/<name>`. The targets are the big gigpkgs
-   packages on `gigos-2605` and `gigos-unstable`. Once a deploy key exists (see
+   `/var/lib/binary-cache/roots/build/<name>`. The targets are every gigpkgs
+   package (its `packages.x86_64-linux` output) on `gigos-2605` and
+   `gigos-unstable`, plus a few heavy upstream packages (`fastfetch`,
+   `bambu-studio`). The package names come from the locked `nixpkgs` /
+   `nixpkgs-unstable` inputs, so a new gigpkgs package joins the list on the
+   next `flake.lock` update. Once a deploy key exists (see
    below), it also builds each active host's system and home closure from
    dotfiles `main`.
 2. **Watcher:** `binary-cache-watch.timer` runs every 5 minutes. It runs
