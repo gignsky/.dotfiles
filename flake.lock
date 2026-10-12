@@ -1704,10 +1704,10 @@
     "nix-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1791839086,
-        "narHash": "sha256-bUN77yQycctWUiRzpLLqWKgwjLCgW4y+Q4qAzY1RvdY=",
+        "lastModified": 1791352180,
+        "narHash": "sha256-HhtRIhxxRFhGJuIlh6TQM+GurknBBc8tuI21XlR10f0=",
         "ref": "main",
-        "rev": "b4be4ec068438d0dc738e7d60231c7cbe42ab725",
+        "rev": "8b92c6d04ee00755e1e43ce00416224058058686",
         "shallow": true,
         "type": "git",
         "url": "ssh://git@github.com/gignsky/nix-secrets.git"
