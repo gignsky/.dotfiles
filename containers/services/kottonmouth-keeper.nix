@@ -34,15 +34,15 @@ in
     # the unit definition itself changes. Without these, rotating either
     # secret silently keeps the old value running until something else
     # bounces the service.
-    kottonmouth-keeper-env = {
+    "kottonmouth/kottonmouth-keeper-env" = {
       restartUnits = [ "podman-kottonmouth-keeper.service" ];
     };
-    kottonmouth-tunnel = {
+    "kottonmouth/kottonmouth-tunnel" = {
       restartUnits = [ "cloudflared-tunnel-${tunnelId}.service" ];
     };
     # htpasswd-format line(s), e.g. `admin:$2y$10$...` -- generate with
     # `nix shell nixpkgs#apacheHttpd -c htpasswd -nBC 10 admin`.
-    kottonmouth-admin-htpasswd = {
+    "kottonmouth/kottonmouth-admin-htpasswd" = {
       owner = "nginx";
       restartUnits = [ "nginx.service" ];
     };
@@ -54,7 +54,7 @@ in
     imageFile = inputs.kottonmouth.packages.${pkgs.system}.keeper-image;
     image = "kottonmouth-keeper:latest";
     autoStart = true;
-    environmentFiles = [ config.sops.secrets.kottonmouth-keeper-env.path ];
+    environmentFiles = [ config.sops.secrets."kottonmouth/kottonmouth-keeper-env".path ];
     environment = {
       TZ = "America/New_York";
       EDGE_URL = "https://kottonmouthband.com";
@@ -82,7 +82,7 @@ in
         proxyPass = "http://127.0.0.1:${toString adminPort}";
         extraConfig = ''
           auth_basic "G'day Mate, speak friend and enter!";
-          auth_basic_user_file ${config.sops.secrets.kottonmouth-admin-htpasswd.path};
+          auth_basic_user_file ${config.sops.secrets."kottonmouth/kottonmouth-admin-htpasswd".path};
         '';
       };
     };
@@ -93,7 +93,7 @@ in
   services.cloudflared = {
     enable = true;
     tunnels.${tunnelId} = {
-      credentialsFile = config.sops.secrets.kottonmouth-tunnel.path;
+      credentialsFile = config.sops.secrets."kottonmouth/kottonmouth-tunnel".path;
       default = "http_status:404";
       ingress."admin.kottonmouthband.com" = "http://127.0.0.1:${toString gatePort}";
     };

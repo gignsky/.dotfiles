@@ -15,7 +15,7 @@ compiled once and then downloaded by every other host.
 | Piece | Where |
 |---|---|
 | Module (host-agnostic) | `modules/nixos/binary-cache/` |
-| Scripts (`cache-build`, `cache-watch`, `cache-push`) | `modules/nixos/binary-cache/*.nu`, packaged by `package.nix` |
+| Scripts (`cache-build`, `cache-watch`, `cache-push`, `cache-drain`) | `modules/nixos/binary-cache/*.nu`, packaged by `package.nix` |
 | Fleet values (URL, public key) | `vars/binary-cache.nix` |
 | Client wiring (all hosts) | `hosts/common/core/binary-cache.nix` |
 | Server wiring (imported by whichever host runs it) | `hosts/common/optional/binary-cache.nix` |
@@ -25,8 +25,12 @@ compiled once and then downloaded by every other host.
 
 1. **Builder:** `binary-cache-build.timer` runs nightly. It builds
    `binaryCache.builder.targets` and roots each result at
-   `/var/lib/binary-cache/roots/build/<name>`. The targets are the big gigpkgs
-   packages on `gigos-2605` and `gigos-unstable`. Once a deploy key exists (see
+   `/var/lib/binary-cache/roots/build/<name>`. The targets are every gigpkgs
+   package (its `packages.x86_64-linux` output) on `gigos-2605` and
+   `gigos-unstable`, plus a few heavy upstream packages (`fastfetch`,
+   `bambu-studio`). The package names come from the locked `nixpkgs` /
+   `nixpkgs-unstable` inputs, so a new gigpkgs package joins the list on the
+   next `flake.lock` update. Once a deploy key exists (see
    below), it also builds each active host's system and home closure from
    dotfiles `main`.
 2. **Watcher:** `binary-cache-watch.timer` runs every 5 minutes. It runs
@@ -40,6 +44,25 @@ compiled once and then downloaded by every other host.
    `just cache-push`. That `nix copy`s the result to spacedock and roots it as
    `~gig/cache-roots/<host>-<kind>`.
    - If spacedock is unreachable it skips, and it never fails the rebuild.
+   - `just test-rebuild <host>` / `just test-home <host>` (the `rf verify`
+     gates) build into `result-<host>-system` / `result-<host>-home` and push
+     those too. The server root is `<verifier>-result-<target>-<kind>`, so a
+     `rolling_to_main` verify on one machine leaves all four hosts' closures
+     cached for the next machine that verifies.
+4. **Push-on-build:** once a push key exists (setup step 5), every client has
+   a Nix `post-build-hook` that uploads **every** path it builds: `nix flake
+   check`, devShells, ad-hoc `nix build`s, everything.
+   - The hook only appends `$OUT_PATHS` to `/var/lib/binary-cache-push/queue`.
+     Nix waits for the hook and aborts on a failing one, so it never touches
+     the network itself.
+   - `binary-cache-push.path` starts `binary-cache-push.service` when the
+     queue changes. The service waits 30s to batch a burst of builds, then
+     runs `cache-drain`, which `nix copy`s to `ssh-ng://cache-push@<pushHost>`.
+   - Paths that fail to upload (off the LAN, server down) move to
+     `…/retry`. `binary-cache-push.timer` retries them every 15 min. Paths
+     garbage-collected locally in the meantime are dropped.
+   - These pushes are **not** GC-rooted on spacedock. They live until disk
+     pressure evicts them. Rooted copies still come from `cache-push`.
 
 ### Why the watcher's builds hit for gigpkgs
 
@@ -85,6 +108,20 @@ Everything else stays cached until disk pressure evicts it.
    deploy key, add it to both `gignsky/.dotfiles` and `gignsky/nix-secrets`,
    and store the private half at `binary-cache/builder-github-key`. Then set
    `haveDeployKey = true` in `hosts/common/optional/binary-cache.nix`.
+5. **Push key for push-on-build.** Use one fleet-wide key, dedicated to this:
+   ```nu
+   ssh-keygen -t ed25519 -N "" -C binary-cache-push -f /tmp/cache-push
+   ```
+   - `just sops` → add `binary-cache: { push-key: <contents of /tmp/cache-push> }`
+     (use a YAML block scalar `|` and keep the trailing newline).
+   - Put the contents of `/tmp/cache-push.pub` in `vars/binary-cache.nix` →
+     `pushPublicKey`, then `rm /tmp/cache-push*`.
+   - Switch **spacedock first**, which creates the `cache-push` account, then
+     each client. Setting `pushPublicKey` before the secret exists fails the
+     client build, because `validateSopsFiles` is on.
+   - If spacedock's host key or LAN address changes, update `hostKey` /
+     `pushHost` in the same file. Root has no interactive way to accept a
+     new host key, so pushes fail until you do.
 
 ### Moving the server to a different host
 
@@ -95,8 +132,8 @@ Everything else stays cached until disk pressure evicts it.
    `binary-cache/<new-hostname>-signing-key` in nix-secrets — the module
    derives the secret name from the server's own `networking.hostName`, so no
    Nix edits are needed for that part.
-3. Update `vars/binary-cache.nix`: `serverHost`, `sshTarget`, `url` and
-   `publicKey`. This is the single source of truth for clients
+3. Update `vars/binary-cache.nix`: `serverHost`, `sshTarget`, `url`,
+   `publicKey`, `pushHost` and `hostKey`. This is the single source of truth for clients
    (`hosts/common/core/binary-cache.nix`) and for `just cache-push` /
    `cache-poke` / `cache-status`, which read `sshTarget`/`url` from it directly.
 
@@ -114,6 +151,10 @@ switch spacedock, and drop the old key.
   to that store can feed the fleet:
   - root;
   - `trustedPushers`, which is `gig`;
+  - `cache-push`, the push-on-build account. Its key is forced to
+    `nix-daemon --stdio` (`restrict,command=…`), so it gets no shell. It is
+    still a trusted user, though, and can add unsigned paths. Anyone holding
+    `binary-cache/push-key` (root on any client) can therefore feed the fleet.
   - the builder and watcher, which can only build pinned refs from the
     configured repos.
 - `gig` is a `trusted-user` on spacedock **only**. That setting is
@@ -124,6 +165,7 @@ switch spacedock, and drop the old key.
 ## Troubleshooting
 
 - `journalctl -u binary-cache-watch -u binary-cache-build` on spacedock, or `just cache-status`.
+- Push-on-build on a client: `journalctl -u binary-cache-push`. A backlog sits in `sudo ls /var/lib/binary-cache-push` (`queue` = not yet tried, `retry` = failed). `sudo systemctl start binary-cache-push` drains it now.
 - Watch state: `sudo cat /var/lib/binary-cache/watch/roll-flow.json`, a map of ref → `{sha, ok, at}`. Delete an entry to force a rebuild.
 - If a client is slow off the LAN: `connect-timeout` is 3s, and Nix stops trying a dead substituter for the rest of that invocation.
 - To check a path is served and signed: `nix path-info --store http://192.168.51.2:5000 --sigs <path>`.
