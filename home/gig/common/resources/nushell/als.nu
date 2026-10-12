@@ -2,7 +2,10 @@
 #
 # Two capabilities, both driven off `scope aliases` at runtime:
 #   1. lookup  — find an alias by name, or find aliases for a command you typed
-#   2. hint    — a pre_execution hook that shows the shorter alias you could have used
+#   2. hint    — a pre_execution hook that shows the shorter alias you could have used,
+#               and/or longer, more specific aliases that extend what you typed
+#               (e.g. typing `git stash` surfaces `gstl`/`gstd`/`gstp` even though
+#               no single alias covers `git stash` itself)
 #
 # Public API
 #   als                       list every alias
@@ -149,6 +152,17 @@ export def "als box" [title: string, rows: list<string>] {
 
 # ─── hint ───────────────────────────────────────────────────────────────────
 
+# Related aliases that extend `line` exactly — i.e. longer, more specific
+# aliases worth knowing about when no (or no complete) shorter match exists.
+# Works off the already-first-word-filtered `cands`, not the full index, so
+# this stays cheap enough to run on every command.
+def als-hint-related [cands: list<any>, w: list<string>, ignore: list<string>] {
+    $cands
+    | where {|a| ($a.n > ($w | length)) and (($a.nw | first ($w | length)) == $w) and not ($a.name in $ignore) }
+    | sort-by n name
+    | first 3
+}
+
 # Returns the box string for `line`, or null when no hint is warranted.
 # This deliberately does NOT build the alias index. Building it costs ~37ms,
 # which would be paid on EVERY command; filtering `scope aliases` down to the
@@ -177,15 +191,40 @@ export def "als hint" [line: string] {
     )
     if ($cands | is-empty) { return null }
 
+    let ignore = ($env.ALS_IGNORE? | default [])
     let min = ($env.ALS_MIN_SAVED? | default 1 | into int)
-    let b = (als-pick-best (als-prefix-hits $cands $w $min))
-    if ($b == null) { return null }
-    if ($b.name in ($env.ALS_IGNORE? | default [])) { return null }
 
-    als box "alias" [
-        $"(ansi yellow_bold)($b.name)(ansi reset)  (ansi dark_gray)->(ansi reset)  ($b.expansion)"
-        $"(ansi dark_gray)saves ($b.saved) keystrokes(ansi reset)"
-    ]
+    let picked = (als-pick-best (als-prefix-hits $cands $w $min))
+    let b = if ($picked != null) and ($picked.name in $ignore) { null } else { $picked }
+
+    # A shorter match that covers the whole typed command is the full story —
+    # e.g. typing `git log` when `gl` exists. But a partial or missing match
+    # (e.g. `git stash`, where the only "shorter" hit is the trivial `g`)
+    # means there may be longer, more specific aliases worth surfacing too.
+    let related = if ($b != null) and ($b.n >= ($w | length)) {
+        []
+    } else {
+        als-hint-related $cands $w $ignore
+    }
+
+    if ($b == null) and ($related | is-empty) { return null }
+
+    mut rows = []
+    if ($b != null) {
+        $rows = ($rows | append $"(ansi yellow_bold)($b.name)(ansi reset)  (ansi dark_gray)->(ansi reset)  ($b.expansion)")
+        $rows = ($rows | append $"(ansi dark_gray)saves ($b.saved) keystrokes(ansi reset)")
+    }
+    if ($related | is-not-empty) {
+        let skip_n = ($w | length)
+        let tail = (
+            $related
+            | each {|a| $"(ansi yellow_bold)($a.name)(ansi reset) (ansi dark_gray)\(($a.nw | skip $skip_n | str join $ALS_SP)\)(ansi reset)" }
+            | str join ", "
+        )
+        $rows = ($rows | append $"(ansi dark_gray)also:(ansi reset) ($tail)")
+    }
+
+    als box "alias" $rows
 }
 
 # What the pre_execution hook calls. Never throws, never returns a value.
