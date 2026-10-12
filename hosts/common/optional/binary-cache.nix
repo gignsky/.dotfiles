@@ -92,6 +92,11 @@ in
       enable = true;
       signingKeyFile = config.sops.secrets.${signingKeySecret}.path;
       trustedPushers = [ configVars.username ];
+      # Push-on-build from every other host (client.pushOnBuild); empty until
+      # the key is generated, which leaves the account uncreated.
+      pushUser.authorizedKeys = lib.optional (
+        configVars.binaryCache.pushPublicKey != null
+      ) configVars.binaryCache.pushPublicKey;
     };
 
     builder = {

@@ -37,4 +37,8 @@ in
     nix
     openssh
   ];
+  cache-drain = mkScript "cache-drain" [
+    nix
+    openssh
+  ];
 }
