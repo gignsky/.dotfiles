@@ -9,6 +9,7 @@
 # See docs/guides/BINARY-CACHE.md for key setup and operations.
 {
   config,
+  inputs,
   lib,
   configLib,
   configVars,
@@ -32,30 +33,31 @@ let
   );
   dotfiles = "git+ssh://git@github.com/gignsky/.dotfiles?ref=main&lfs=1";
 
-  # Large gigpkgs packages, on both channels the fleet rides. The roll-flow
-  # pins share derivations with roll-flow's own builds (see watch below).
-  gigpkgsPackages = [
-    "roll-flow"
-    "roll-flow-0.2.5"
-    "roll-flow-0.2.6-dev"
-    "gigvim-full"
-    "claude-desktop"
+  # Every gigpkgs package (its `packages.x86_64-linux` output), on both
+  # channels the fleet rides. The package *names* come from the locked flake
+  # inputs, so new gigpkgs packages are picked up on the next `flake.lock`
+  # update; the builds themselves re-resolve the branch ref every run. The
+  # roll-flow pins share derivations with roll-flow's own builds (see watch).
+  gigpkgsChannels = {
+    gigos-2605 = inputs.nixpkgs;
+    gigos-unstable = inputs.nixpkgs-unstable;
+  };
+  # Heavy upstream (legacyPackages) builds worth caching that gigpkgs doesn't
+  # expose as its own packages.
+  extraChannelPackages = [
     "fastfetch"
     "bambu-studio"
   ];
   gigpkgsTargets = builtins.listToAttrs (
-    lib.concatMap
-      (
-        channel:
+    lib.concatLists (
+      lib.mapAttrsToList (
+        channel: input:
         map (pkg: {
           name = "${channel}-${pkg}";
           value = "git+https://github.com/gignsky/gigpkgs?ref=${channel}#\"${pkg}\"";
-        }) gigpkgsPackages
-      )
-      [
-        "gigos-2605"
-        "gigos-unstable"
-      ]
+        }) (lib.unique (lib.attrNames input.packages.x86_64-linux ++ extraChannelPackages))
+      ) gigpkgsChannels
+    )
   );
 
   dotfilesTargets = builtins.listToAttrs (
