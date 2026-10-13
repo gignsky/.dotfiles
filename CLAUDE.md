@@ -102,7 +102,7 @@ Never merge directly to `main`. Always flow through `rolling`. See `docs/guides/
 
 ## Binary Cache
 
-Spacedock serves a signed Harmonia binary cache on the LAN (`modules/nixos/binary-cache/`, values in `vars/binary-cache.nix`). All other hosts use it as an extra substituter. It is filled by a nightly builder, a 5-minute roll-flow branch watcher, and `just cache-push` (run automatically after rebuild/home/build). See `docs/guides/BINARY-CACHE.md`.
+Spacedock serves a signed Harmonia binary cache on the LAN (`modules/nixos/binary-cache/`, values in `vars/binary-cache.nix`). All other hosts use it as an extra substituter. It is filled by a nightly builder, a 5-minute roll-flow branch watcher, `just cache-push` (run automatically after rebuild/home/build and the `test-rebuild`/`test-home` verify gates), and — once `pushPublicKey` is set in `vars/binary-cache.nix` — a post-build hook on every client that uploads everything it builds. See `docs/guides/BINARY-CACHE.md`.
 
 ## Secrets Management
 

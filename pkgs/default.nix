@@ -48,6 +48,7 @@ rec {
     pre-commit-flake-check
     run-iso-vm
     package-script
+    seed-thunderbird-logins
     polybar-net-graph
     polybar-hidden-count
     bspwm-hidden-picker
