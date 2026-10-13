@@ -7,7 +7,9 @@
 #     host closures) and keeps them rooted.
 #   - `watch`:   a timer that polls git remotes and builds every matching
 #     branch/tag head as soon as it lands, whoever pushed it.
-#   - pushes:    clients `nix copy` what they built (see `cache-push`).
+#   - pushes:    clients `nix copy` what they built — on demand with
+#                `cache-push` (rooted), or every build via `client.pushOnBuild`
+#                (a post-build hook; unrooted).
 #
 # Deliberately host-agnostic: no hostnames, addresses, repos or secret
 # backends live in here — the consuming config passes all of that in. Laid out
@@ -26,6 +28,7 @@ in
   imports = [
     ./server.nix
     ./client.nix
+    ./push-hook.nix
     ./builder.nix
     ./watch.nix
   ];
@@ -76,7 +79,7 @@ in
       defaultText = lib.literalExpression "pkgs.callPackage ./package.nix { }";
       readOnly = true;
       internal = true;
-      description = "The cache-build / cache-watch / cache-push scripts.";
+      description = "The cache-build / cache-watch / cache-push / cache-drain scripts.";
     };
   };
 
