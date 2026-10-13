@@ -14,6 +14,7 @@
     ./home.nix
     ./common/optional/bspwm.nix # Enable bspwm window manager configuration
     ./common/optional/thunderbird.nix # WorkMail account, declaratively configured
+    ./common/optional/thunderbird-gmail.nix # Personal Gmail accounts, OAuth2
     # ./cams-countertop.nix
   ];
   home = {
