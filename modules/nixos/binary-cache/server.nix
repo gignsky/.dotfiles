@@ -41,6 +41,25 @@ in
       '';
     };
 
+    pushUser = {
+      name = lib.mkOption {
+        type = lib.types.str;
+        default = "cache-push";
+        description = "Account clients' post-build hooks push as (see `client.pushOnBuild`).";
+      };
+
+      authorizedKeys = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [ ];
+        description = ''
+          SSH public keys allowed to push as `name`. The account is only created
+          when this is non-empty. Each key is forced to `nix-daemon --stdio`, so
+          it can do nothing but talk to the store — but it is still a trusted
+          user (unsigned paths), so give it a dedicated key.
+        '';
+      };
+    };
+
     minFree = lib.mkOption {
       type = lib.types.nullOr lib.types.str;
       default = "20G";
@@ -57,6 +76,19 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    users.users = lib.mkIf (cfg.pushUser.authorizedKeys != [ ]) {
+      ${cfg.pushUser.name} = {
+        isSystemUser = true;
+        group = cfg.pushUser.name;
+        # The forced command runs via the login shell; nologin would block it.
+        useDefaultShell = true;
+        openssh.authorizedKeys.keys = map (
+          key: ''restrict,command="${config.nix.package}/bin/nix-daemon --stdio" ${key}''
+        ) cfg.pushUser.authorizedKeys;
+      };
+    };
+    users.groups = lib.mkIf (cfg.pushUser.authorizedKeys != [ ]) { ${cfg.pushUser.name} = { }; };
+
     services.harmonia.cache = {
       enable = true;
       signKeyPaths = [ cfg.signingKeyFile ];
@@ -69,7 +101,8 @@ in
     networking.firewall.allowedTCPPorts = lib.mkIf cfg.openFirewall [ cfg.port ];
 
     nix.settings = {
-      trusted-users = cfg.trustedPushers;
+      trusted-users =
+        cfg.trustedPushers ++ lib.optional (cfg.pushUser.authorizedKeys != [ ]) cfg.pushUser.name;
     }
     // lib.optionalAttrs (cfg.minFree != null) { min-free = cfg.minFree; }
     // lib.optionalAttrs (cfg.maxFree != null) { max-free = cfg.maxFree; };
