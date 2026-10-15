@@ -34,6 +34,10 @@
 
     # Fleet binary cache server (Harmonia + builder + roll-flow watcher)
     (configLib.relativeToRoot "hosts/common/optional/binary-cache.nix")
+
+    # Self-hosted Actions runner driving kottonmouth's rolling-preview.yml
+    # (beta.kottonmouthband.com + kottonmouth-keeper-dev start/stop).
+    (configLib.relativeToRoot "hosts/common/optional/github-runner.nix")
   ];
   # gigpkgs container engine — the module is injected in flake.nix as
   # `inputs.nixpkgs.nixosModules.containers`. Provides the OCI runtime for
