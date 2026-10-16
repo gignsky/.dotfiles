@@ -29,6 +29,7 @@
     (configLib.relativeToRoot "hosts/common/optional/audio.nix") # Enable PipeWire audio system
     (configLib.relativeToRoot "hosts/common/optional/dns.nix") # Pin LAN DNS to the router
     (configLib.relativeToRoot "hosts/common/optional/firefox.nix")
+    (configLib.relativeToRoot "hosts/common/optional/nix-build-throttle.nix") # Keep nix builds from starving interactive use
     # ../common/optional/xrdp.nix
     # NOTE: autorandr is deliberately not imported — this host has a fixed
     # 4-monitor set, and two of its panels have byte-identical EDIDs so

@@ -22,3 +22,18 @@
         bspwm, which would retire the whole xrandr layout script above.
 4. Plex does not play videos, it buffers endlessly.
 5. There is an issue where when a nix build is going on on merlin or ganoslal, then the rest of the system hangs and processes things slowly. This could likely be resolved by reserving how much of the overall system resources may be used by nix if other things are trying to use said resources.
+   5.a. Resolved — `hosts/common/optional/nix-build-throttle.nix`, imported by
+        ganoslal and merlin only (build servers are deliberately left alone, so
+        spacedock's nightly builder and roll-flow watcher keep the whole box).
+        Measured cause: nix defaulted to `max-jobs = 12, cores = 0` on a
+        6-core/12-thread 5600X — up to 12 jobs each free to use all 12 threads,
+        with no memory or I/O limit anywhere.
+        Two layers: admission control (`max-jobs = 4`, `cores = 2`,
+        `max-substitution-jobs = 8`) bounds work in flight; priority
+        (`daemonCPUSchedPolicy = "batch"`, `daemonIOSchedClass = "idle"`,
+        plus CPUWeight/IOWeight 20 and MemoryHigh 60% on nix-daemon) decides who
+        wins only under contention — an idle machine still gives a build the
+        whole box. Verified a build process lands in
+        `/system.slice/nix-daemon.service`, the cgroup those weights bind.
+        Burst for one big build without rebuilding:
+          sudo systemctl set-property --runtime nix-daemon.service CPUWeight=100 IOWeight=100
