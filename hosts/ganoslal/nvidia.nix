@@ -6,13 +6,15 @@
   ...
 }:
 let
-  # Applies the 4-monitor layout. Invoked from FOUR places, all the same store
+  # Applies the 4-monitor layout. Invoked from FIVE places, all the same store
   # path, dispatched on the context argument:
   #
-  #   login   sessionCommands below, before bspwm starts
-  #   resume  the post-sleep unit below
-  #   manual  sxhkd `super + shift + d` (home/gig/common/optional/bspwm.nix)
-  #   verify  the user timer below -- side-effect-free unless the layout drifted
+  #   login    sessionCommands below, before bspwm starts
+  #   resume   the post-sleep unit below
+  #   manual   sxhkd `super + shift + d` (home/gig/common/optional/bspwm.nix)
+  #   verify   the user timer below -- side-effect-free unless the layout drifted
+  #   refresh  sxhkd `super + alt + r` -- power-cycles every output, for a panel
+  #            that stays dark while X believes it is lit (see do_refresh)
   #
   # `login` is the authoritative apply and is free to block: the LightDM session
   # wrapper runs it at line 53, before `nixos-fake-graphical-session.target`
@@ -40,6 +42,7 @@ let
     }
 
     XRANDR=${pkgs.xrandr}/bin/xrandr
+    XSET=${pkgs.xorg.xset}/bin/xset
     BSPC=${pkgs.bspwm}/bin/bspc
     LOG=/tmp/xrandr-init.log
     CTX="''${1:-manual}"
@@ -78,6 +81,19 @@ let
 
     # "5120x1440+320+1080" from mode 5120x1440 and pos 320x1080.
     expected_geom() { printf '%s+%s+%s' "$1" "''${2%x*}" "''${2#*x}"; }
+
+    # The xrandr flags that light one EXPECTED entry, e.g.
+    # "--output DP-2 --mode 5120x1440 --rate 144 --pos 320x1080". Callers expand
+    # the result unquoted on purpose: none of these can contain whitespace.
+    entry_args() {
+      name=''${1%%:*}
+      rest=''${1#*:}
+      mode=''${rest%%:*}
+      rest=''${rest#*:}
+      rate=''${rest%%:*}
+      pos=''${rest#*:}
+      printf -- '--output %s --mode %s --rate %s --pos %s' "$name" "$mode" "$rate" "$pos"
+    }
 
     # ONE cached snapshot per decision, rather than one `xrandr --query` per
     # output. The old all_present() spread its verdict over four round-trips to
@@ -154,17 +170,10 @@ let
       args=""
       present=0
       for entry in $EXPECTED; do
-        rest=''${entry#*:}
         name=''${entry%%:*}
-        mode=''${rest%%:*}
-        rest=''${rest#*:}
-        rate=''${rest%%:*}
-        pos=''${rest#*:}
         connected "$name" || continue
         present=$((present + 1))
-        # Expanded unquoted just below on purpose: these are xrandr flags, none
-        # of which can contain whitespace.
-        args="$args --output $name --mode $mode --rate $rate --pos $pos"
+        args="$args $(entry_args "$entry")"
         [ "$present" -eq 1 ] && args="$args --primary"
       done
 
@@ -204,7 +213,7 @@ let
     # paid when a monitor is genuinely absent, and a one-time 15s slower session
     # start beats a scrambled desktop. LightDM does not watchdog
     # sessionCommands, so blocking here is safe.
-    do_apply() {
+    wait_for_outputs() {
       link_provider || true
       attempt=0
       while :; do
@@ -228,8 +237,84 @@ let
       if [ -n "$still_missing" ]; then
         log "missing after wait:$(printf '%s' " $still_missing")"
       fi
+    }
 
+    do_apply() {
+      wait_for_outputs
       apply_layout
+    }
+
+    # Full refresh (super + alt + r). apply_layout is NOT enough for a panel
+    # that stays dark after sleep: X already believes every output is lit at
+    # the right geometry -- observed 2026-10-15 ~23:00, DP-2 black while
+    # `xrandr --query` showed 5120x1440+320+1080 at 144.00* -- so re-applying
+    # the same geometry is a no-op to the server and the DP link is never
+    # retrained. Turning the outputs off and back on forces a real modeset.
+    #
+    # ALL outputs go off in one call and come back in one call (apply_layout),
+    # never one at a time. The xrandr client re-normalises whatever is still
+    # lit so its top-left lands at 0,0, so cycling HDMI-0 alone shifted the
+    # other three monitors 320px left for the duration (verified live
+    # 2026-10-15). With everything off there is nothing to normalise, and the
+    # atomic re-apply restores all four positions at once.
+    #
+    # bspwm keeps a monitor whose output is connected but disabled
+    # (remove_disabled_monitors is off, its default -- see update_monitors() in
+    # bspwm 0.9.12 monitor.c), and with no CRTC it never sees a geometry
+    # change, so desktops and windows stay exactly where they were. Verified
+    # live on HDMI-0 the same day.
+    do_refresh() {
+      # Keep the verify timer out of the way while outputs are deliberately
+      # off. Removed on exit, after which the timer is also the safety net
+      # should the re-apply below fail: an all-off screen is drift to it.
+      touch "$PAUSE"
+      trap 'rm -f "$PAUSE"' EXIT
+
+      # A panel that is merely DPMS-blanked wakes on this alone. Harmless when
+      # it is not.
+      $XSET dpms force on 2>/dev/null || log "xset dpms force on failed"
+
+      wait_for_outputs
+      off=""
+      for entry in $EXPECTED; do
+        name=''${entry%%:*}
+        connected "$name" && off="$off --output $name --off"
+      done
+      if [ -z "$off" ]; then
+        log "no expected output is connected, nothing to cycle"
+        return 1
+      fi
+      if out=$($XRANDR $off 2>&1); then
+        log "outputs off:$off"
+      else
+        log "could not turn outputs off: $out"
+      fi
+      # Long enough for the panels to notice the link drop; some monitors
+      # treat an instant off/on as no change and stay asleep.
+      sleep 1
+
+      attempt=1
+      until refresh_query && apply_layout; do
+        if [ "$attempt" -ge 3 ]; then
+          log "re-apply failed $attempt times, leaving it to the verify timer"
+          return 1
+        fi
+        attempt=$((attempt + 1))
+        sleep 1
+      done
+
+      # Bars re-place for the (possibly) new geometry; see do_verify.
+      systemctl --user restart polybar.service 2>/dev/null \
+        || log "could not restart polybar (not running?)"
+
+      # What this key always did. bspwmrc re-sources ganoslal.conf, which
+      # re-asserts the desktop/monitor assignment, and re-applies the
+      # wallpaper. Windows survive a `wm -r`.
+      if $BSPC wm -r 2>/dev/null; then
+        log "bspwm restarted"
+      else
+        log "bspc wm -r failed (bspwm not running?)"
+      fi
     }
 
     layout_matches() {
@@ -294,6 +379,11 @@ let
     case "$CTX" in
       verify)
         do_verify
+        ;;
+      refresh)
+        do_refresh
+        log "complete ($(date))"
+        $XRANDR --listmonitors | tee -a "$LOG"
         ;;
       *) # login | resume | manual
         do_apply
@@ -402,7 +492,8 @@ in
   };
 
   # `ganoslal-displays` on PATH, so the layout can also be re-applied by hand
-  # (super + shift + d, see home/gig/common/optional/bspwm.nix).
+  # (super + shift + d) or every output power-cycled (super + alt + r); both in
+  # home/gig/common/optional/bspwm.nix.
   environment.systemPackages = [ applyDisplays ];
 
   # All the systemd units this host needs for its displays live in one attrset

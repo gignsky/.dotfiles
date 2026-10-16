@@ -35,6 +35,25 @@ let
       ${pkgs.feh}/bin/feh --bg-fill "$HOME/.background-image"
     fi
   '';
+
+  # super + alt + r. On ganoslal this is a full display refresh: every output
+  # is powered off and back on (a real modeset, which retrains the DP link),
+  # polybar is restarted and bspwm is restarted last. That is the cure for a
+  # monitor that stays dark after sleep while X still believes it is lit -- a
+  # state in which `bspc wm -r` and a plain layout re-apply both do nothing,
+  # because neither changes the geometry. Elsewhere this key is the bspwm
+  # restart it always was.
+  #
+  # `ganoslal-displays` is a SYSTEM package (hosts/ganoslal/nvidia.nix), so it
+  # has no store path this module can name; the system profile is the next
+  # most stable thing, and it does not depend on whatever PATH sxhkd has.
+  refreshDisplays = pkgs.writeShellScript "bspwm-refresh-displays" ''
+    displays=/run/current-system/sw/bin/ganoslal-displays
+    if [ -x "$displays" ]; then
+      exec "$displays" refresh
+    fi
+    exec ${pkgs.bspwm}/bin/bspc wm -r
+  '';
 in
 
 {
@@ -156,8 +175,8 @@ in
       fi
 
       # Wallpaper. Set from bspwmrc rather than from the X session script so it
-      # is re-applied by `bspc wm -r` (super + alt + r), which is also what
-      # re-runs the monitor/desktop assignment above.
+      # is re-applied by `bspc wm -r` (the last step of super + alt + r), which
+      # is also what re-runs the monitor/desktop assignment above.
       if [ -f "$HOME/.background-image" ]; then
         ${pkgs.feh}/bin/feh --bg-fill "$HOME/.background-image" &
       fi
@@ -222,7 +241,9 @@ in
 
         <b>System:</b>
         super + alt + Escape             Quit bspwm
-        super + alt + r                  Restart bspwm
+        super + alt + r                  Full display refresh: power-cycle every
+                                         monitor, then restart bspwm (ganoslal;
+                                         plain bspwm restart elsewhere)
         super + shift + d                Re-apply the monitor layout (ganoslal)
 
         <b>Audio:</b>
@@ -245,8 +266,9 @@ in
       # Quit bspwm
       "super + alt + Escape" = "bspc quit";
 
-      # Restart bspwm
-      "super + alt + r" = "bspc wm -r";
+      # Full display refresh (ganoslal) / restart bspwm (elsewhere). See the
+      # refreshDisplays note at the top of this file.
+      "super + alt + r" = "${refreshDisplays}";
 
       # Re-apply the monitor layout by hand. Only ganoslal ships
       # `ganoslal-displays` (see hosts/ganoslal/nvidia.nix); the guard keeps
