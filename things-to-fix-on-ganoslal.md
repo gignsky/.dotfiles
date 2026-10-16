@@ -21,48 +21,47 @@
         as `- niri (what gabby uses)`. Still open: whether to actually move off
         bspwm, which would retire the whole xrandr layout script above.
 4. Plex does not play videos, it buffers endlessly.
-   4.a. ROOT CAUSE FOUND (2026-10-16) — the client streams over the WAN instead
-        of the LAN. This supersedes the earlier `plex-normal-quality` theory,
-        which was wrong.
-        Evidence: the client's only connection to "Maxwell's Media" is
-        `wss://24-211-162-59.<hash>.plex.direct:32400` — 24.211.162.59 is this
-        site's PUBLIC IP (confirmed against api.ipify.org). The string
-        `192-168-51-3` appears **0 times in every Plex client log**, and the only
-        connection it ever tests is `[Loopback] at http://127.0.0.1:32400`
-        (which fails — there is no local PMS). So every byte of video leaves the
-        network and hairpins back, bounded by upload bandwidth, while the server
-        sits 2 ms away on the same /24.
-        ganoslal is 192.168.51.50/24, server is 192.168.51.3 — same subnet, one
-        hop. `http://192.168.51.3:32400/identity` answers HTTP 200 in 0.002 s.
-        Why: the server never advertises its LAN address. Plex GDM discovery
-        returns nothing (no reply even to a unicast probe of
-        192.168.51.3:32414), and plex.tv is handing the client only the WAN URL
-        plus a phantom "Loopback" entry.
-        PROPER FIX (server-side, 192.168.51.3 — not managed by this repo):
-        PMS Settings > Network > enable local discovery (GDM), and make sure
-        "Custom server access URLs" is either empty or includes
-        `https://192-168-51-3.<hash>.plex.direct:32400`. When that setting lists
-        only a WAN URL, Plex advertises only that.
-        VERIFIED CLIENT-SIDE WORKAROUND (ganoslal, in-repo): pin the WAN
-        plex.direct hostname to the LAN IP, which keeps the hostname the client
-        expects so Plex's wildcard cert still validates:
-          curl --resolve 24-211-162-59.<hash>.plex.direct:32400:192.168.51.3 ...
-          -> HTTP 200, TLS verify ok, 0.014 s, connected to 192.168.51.3
-        Caveat: the hostname embeds the WAN IP, so an ISP address change makes
-        the entry stale and silently returns to the slow path. Scope it to
-        ganoslal only — never merlin, which leaves the LAN.
-        Not measured: actual stream throughput over each path (needs a Plex
-        token; extraction was deliberately not pursued).
-   4.b. SEPARATE latent DNS bug found while diagnosing the above.
-        /etc/resolv.conf carries `search gignsky.com`, and `*.gignsky.com` has a
-        wildcard AAAA. Any name whose AAAA lookup fails therefore falls through
-        to the search domain and resolves to 2603:6080:ca3e:6907:...:94b0
-        instead of failing. Observed directly: `getent hosts
-        192-168-51-3.<hash>.plex.direct` returned
-        `...plex.direct.gignsky.com` -> that IPv6 address, while the same name
-        WITH a trailing dot correctly returned 192.168.51.3. Any IPv6-preferring
-        client (Qt/Chromium, i.e. Plex) can be sent to the wrong host by this.
-        Worth fixing regardless of Plex; see hosts/common/optional/dns.nix.
+   4.a. ROOT CAUSE CONFIRMED (2026-10-16). The Plex server advertises "local"
+        addresses that no client on the real LAN can reach, so every client
+        falls back to the public IP and streams out to the internet and back.
+        What the server publishes to plex.tv (from the client logs), and whether
+        ganoslal (192.168.51.50/24, GUA IPv6 only) can use it:
+          172-16-23-2.<hash>.plex.direct        172.16.23.2    UNREACHABLE
+          fdd0-...-0002.<hash>.plex.direct      fdd0::13::2    UNREACHABLE
+          24-211-162-59.<hash>.plex.direct      24.211.162.59  works = WAN
+          https://plex.gignsky.com (custom)     24.211.162.59  works = WAN
+          https://www.plex.gignsky.com (custom) 24.211.162.59  works = WAN
+        So PMS runs on a container/VM network (172.16.23.0/24 + fdd0:0:0:13::/64)
+        and does not know it is reachable at 192.168.51.3. `192-168-51-3` appears
+        0 times in every client log. This also explains why GDM discovery returns
+        nothing, even to a unicast probe — broadcasts do not cross that bridge.
+        Meanwhile the LAN path is perfectly healthy and fast:
+          http://192.168.51.3:32400/identity          -> 200 in 0.002 s
+          https://192-168-51-3.<hash>.plex.direct:32400 -> 200, TLS ok, 0.048 s
+        FIX (server-side, one setting, fixes every LAN client at once): append
+        the LAN plex.direct URL to Custom server access URLs, so the list reads
+          https://plex.gignsky.com,https://www.plex.gignsky.com,https://192-168-51-3.7417054e0444471ba79889c51bd5546e.plex.direct:32400
+        TLS validates because the Plex cert is a wildcard for *.<hash>.plex.direct,
+        which is why this works on any IP. Better long-term: give the Plex
+        container/VM a real LAN address (macvlan or host networking), which also
+        restores GDM.
+        FALLBACK (ganoslal-only, in-repo, verified): pin the WAN plex.direct
+        hostname to the LAN IP via networking.hosts —
+          curl --resolve 24-211-162-59.<hash>.plex.direct:32400:192.168.51.3
+          -> 200, TLS verify ok, 0.014 s, connected to 192.168.51.3
+        Goes stale if the ISP changes the WAN IP, and must never go on merlin,
+        which leaves the LAN. Prefer the server-side fix.
+        Not measured: per-path stream throughput (needs a Plex token; extraction
+        was deliberately not pursued).
+   4.b. RED HERRING, retained for the record. /etc/resolv.conf has
+        `search gignsky.com` and *.gignsky.com has a wildcard AAAA, so any
+        AAAA-failing lookup resolves via the search domain instead of failing
+        (`getent hosts <lan>.plex.direct` returned ...plex.direct.gignsky.com,
+        while the same name with a trailing dot returned 192.168.51.3).
+        Initially suspected of contributing to the Plex fault; it does NOT —
+        that IPv6 address is the Plex server itself (its MAC 40:a8:f0:25:94:b0
+        matches the EUI-64, and ARP confirms it is 192.168.51.3 on-link). Still
+        an oddity worth tidying, but unrelated.
 5. There is an issue where when a nix build is going on on merlin or ganoslal, then the rest of the system hangs and processes things slowly. This could likely be resolved by reserving how much of the overall system resources may be used by nix if other things are trying to use said resources.
    5.a. Resolved — `hosts/common/optional/nix-build-throttle.nix`, imported by
         ganoslal and merlin only (build servers are deliberately left alone, so
