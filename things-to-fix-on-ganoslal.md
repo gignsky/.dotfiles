@@ -21,6 +21,32 @@
         as `- niri (what gabby uses)`. Still open: whether to actually move off
         bspwm, which would retire the whole xrandr layout script above.
 4. Plex does not play videos, it buffers endlessly.
+   4.a. Diagnosed, not yet fixed — needs a reproduction to confirm.
+        Setup: server is PMS 1.43.4.10903 at 192.168.51.3:32400 (machineIdentifier
+        c74148a9… matches the client's plex.ini, so this is the right server); it
+        is NOT managed by this repo. Client is `plex-desktop` = Plex HTPC, which
+        plays via mpv; `~/.local/share/plex/mpv.conf` is stock.
+        Leading suspect: the client's `player.videoProfile` is
+        `plex-normal-quality`, a capped-bitrate profile that makes the client ask
+        the server to TRANSCODE instead of Direct Play. First thing to try is
+        setting quality to Original/Maximum in the HTPC settings.
+        Ruled out: hardware decode works (CUDA hwdec loads; the VAAPI and
+        drmprime failures in the log are expected on NVIDIA and harmless). No
+        local PMS on ganoslal — the `Plex Media Server` dir under
+        ~/.local/share/plex is just HTPC scaffolding and sits on local ext4, not
+        on the //192.168.51.3/plex-database CIFS mount. SMB mount options are
+        well tuned already (vers=3.0, rsize/wsize 4M).
+        Measured: ganoslal has a 1000 Mb/s link; sequential reads off
+        //192.168.51.3/media ran 27.8 / 40.2 / 64.5 MB/s (cold / warm re-read /
+        other file) — disk-bound on the server, well under line rate, but still
+        ~224 Mb/s at worst, i.e. enough to Direct Play even a 4K remux. So
+        bandwidth alone does not explain endless buffering, though it would make
+        a server-side transcode painful.
+        Next: reproduce a stuck playback, then read ~/.local/share/plex/Logs/Plex.log
+        for the transcode decision — the current logs contain no failed playback
+        (the last buffering entry reached 100%). Confirming the server's
+        transcoder settings / whether HW transcode is available needs a Plex
+        token or access to that box.
 5. There is an issue where when a nix build is going on on merlin or ganoslal, then the rest of the system hangs and processes things slowly. This could likely be resolved by reserving how much of the overall system resources may be used by nix if other things are trying to use said resources.
    5.a. Resolved — `hosts/common/optional/nix-build-throttle.nix`, imported by
         ganoslal and merlin only (build servers are deliberately left alone, so
