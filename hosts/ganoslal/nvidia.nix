@@ -100,10 +100,25 @@ let
     # X with 2>/dev/null swallowing failures, so any single transient query
     # failure in that window read as "a monitor is missing" and dropped us into
     # the destructive fallback with no record of which output or why.
+    #
+    # PROBE is what makes this safe to run from a timer. A plain `xrandr --query`
+    # (and `--listmonitors`) makes the server re-probe every connector on BOTH
+    # GPUs -- EDID over DDC for a dozen outputs, most of them on the PRIME-sink
+    # 970 -- and the X server is single-threaded, so nothing on screen updates
+    # and no keystroke is delivered until it finishes. Measured on this host:
+    # ~375ms per --query, ~525ms per --listmonitors, and the Xorg log agrees
+    # (libinput: "event processing lagging behind ... your system is too slow").
+    # The verify job issued one of those every two minutes, which was the
+    # "type blind for a second" lag spike. `--current` reads the server's cached
+    # state instead (~4ms); the server tracks hotplug itself, so the cache is
+    # the right thing for verify to read. login/resume/refresh keep the real
+    # probe: those are the moments an output may have just (re)appeared, and a
+    # one-off stall there is fine.
+    PROBE=""
     QUERY=""
     refresh_query() {
-      if ! QUERY=$($XRANDR --query 2>&1); then
-        log "xrandr --query failed: $QUERY"
+      if ! QUERY=$($XRANDR $PROBE --query 2>&1); then
+        log "xrandr $PROBE --query failed: $QUERY"
         QUERY=""
         return 1
       fi
@@ -334,10 +349,12 @@ let
     }
 
     # Side-effect-free unless the layout actually drifted. This is what makes it
-    # safe to run on a two-minute timer: no RandR call is issued, and nothing is
-    # logged, when the layout is already right.
+    # safe to run on a two-minute timer: the only RandR traffic is a cached
+    # `--current` read (see PROBE above -- a real probe stalls X for ~0.4s), and
+    # nothing is logged, when the layout is already right.
     do_verify() {
       [ -e "$PAUSE" ] && return 0
+      PROBE=--current
       # A failed query or a genuinely absent monitor is not drift: do nothing
       # and stay quiet, so the log only ever records real corrections.
       refresh_query || return 0

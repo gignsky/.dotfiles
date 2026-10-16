@@ -129,11 +129,16 @@ in
       pointer_action1 = "move";
       pointer_action2 = "resize_side";
       pointer_action3 = "resize_corner";
-      # No manual padding for polybar: it sets _NET_WM_STRUT_PARTIAL and bspwm
-      # honours struts, so reserving 30px here as well would double-count and
-      # leave a gap under the bar. (If windows end up *behind* the bar instead,
-      # put this back to 30 -- that means struts aren't being applied.)
-      top_padding = 0;
+      # No top_padding here, not even 0. polybar sets _NET_WM_STRUT_PARTIAL and
+      # bspwm turns that into per-monitor padding when a bar maps (30px on every
+      # screen here). But bspwmrc is re-run by `bspc wm -r` -- the last step of
+      # super + alt + r and of the display verify job -- and a
+      # `bspc config top_padding 0` in it resets the padding on EVERY monitor to
+      # 0, wiping the strut-derived value. That is what put the top 17px of each
+      # window under the bar (13px window gap vs. a 30px bar). bspwm takes
+      # MAX(strut, padding), never the sum, so an explicit 30 would also be
+      # safe; relying on the strut keeps the bar height defined in one place
+      # (polybar.nix) and survives `bspc wm -r`, which restores padding.
     };
     rules = {
       "Discord" = {
