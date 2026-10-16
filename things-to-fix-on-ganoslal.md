@@ -21,32 +21,48 @@
         as `- niri (what gabby uses)`. Still open: whether to actually move off
         bspwm, which would retire the whole xrandr layout script above.
 4. Plex does not play videos, it buffers endlessly.
-   4.a. Diagnosed, not yet fixed — needs a reproduction to confirm.
-        Setup: server is PMS 1.43.4.10903 at 192.168.51.3:32400 (machineIdentifier
-        c74148a9… matches the client's plex.ini, so this is the right server); it
-        is NOT managed by this repo. Client is `plex-desktop` = Plex HTPC, which
-        plays via mpv; `~/.local/share/plex/mpv.conf` is stock.
-        Leading suspect: the client's `player.videoProfile` is
-        `plex-normal-quality`, a capped-bitrate profile that makes the client ask
-        the server to TRANSCODE instead of Direct Play. First thing to try is
-        setting quality to Original/Maximum in the HTPC settings.
-        Ruled out: hardware decode works (CUDA hwdec loads; the VAAPI and
-        drmprime failures in the log are expected on NVIDIA and harmless). No
-        local PMS on ganoslal — the `Plex Media Server` dir under
-        ~/.local/share/plex is just HTPC scaffolding and sits on local ext4, not
-        on the //192.168.51.3/plex-database CIFS mount. SMB mount options are
-        well tuned already (vers=3.0, rsize/wsize 4M).
-        Measured: ganoslal has a 1000 Mb/s link; sequential reads off
-        //192.168.51.3/media ran 27.8 / 40.2 / 64.5 MB/s (cold / warm re-read /
-        other file) — disk-bound on the server, well under line rate, but still
-        ~224 Mb/s at worst, i.e. enough to Direct Play even a 4K remux. So
-        bandwidth alone does not explain endless buffering, though it would make
-        a server-side transcode painful.
-        Next: reproduce a stuck playback, then read ~/.local/share/plex/Logs/Plex.log
-        for the transcode decision — the current logs contain no failed playback
-        (the last buffering entry reached 100%). Confirming the server's
-        transcoder settings / whether HW transcode is available needs a Plex
-        token or access to that box.
+   4.a. ROOT CAUSE FOUND (2026-10-16) — the client streams over the WAN instead
+        of the LAN. This supersedes the earlier `plex-normal-quality` theory,
+        which was wrong.
+        Evidence: the client's only connection to "Maxwell's Media" is
+        `wss://24-211-162-59.<hash>.plex.direct:32400` — 24.211.162.59 is this
+        site's PUBLIC IP (confirmed against api.ipify.org). The string
+        `192-168-51-3` appears **0 times in every Plex client log**, and the only
+        connection it ever tests is `[Loopback] at http://127.0.0.1:32400`
+        (which fails — there is no local PMS). So every byte of video leaves the
+        network and hairpins back, bounded by upload bandwidth, while the server
+        sits 2 ms away on the same /24.
+        ganoslal is 192.168.51.50/24, server is 192.168.51.3 — same subnet, one
+        hop. `http://192.168.51.3:32400/identity` answers HTTP 200 in 0.002 s.
+        Why: the server never advertises its LAN address. Plex GDM discovery
+        returns nothing (no reply even to a unicast probe of
+        192.168.51.3:32414), and plex.tv is handing the client only the WAN URL
+        plus a phantom "Loopback" entry.
+        PROPER FIX (server-side, 192.168.51.3 — not managed by this repo):
+        PMS Settings > Network > enable local discovery (GDM), and make sure
+        "Custom server access URLs" is either empty or includes
+        `https://192-168-51-3.<hash>.plex.direct:32400`. When that setting lists
+        only a WAN URL, Plex advertises only that.
+        VERIFIED CLIENT-SIDE WORKAROUND (ganoslal, in-repo): pin the WAN
+        plex.direct hostname to the LAN IP, which keeps the hostname the client
+        expects so Plex's wildcard cert still validates:
+          curl --resolve 24-211-162-59.<hash>.plex.direct:32400:192.168.51.3 ...
+          -> HTTP 200, TLS verify ok, 0.014 s, connected to 192.168.51.3
+        Caveat: the hostname embeds the WAN IP, so an ISP address change makes
+        the entry stale and silently returns to the slow path. Scope it to
+        ganoslal only — never merlin, which leaves the LAN.
+        Not measured: actual stream throughput over each path (needs a Plex
+        token; extraction was deliberately not pursued).
+   4.b. SEPARATE latent DNS bug found while diagnosing the above.
+        /etc/resolv.conf carries `search gignsky.com`, and `*.gignsky.com` has a
+        wildcard AAAA. Any name whose AAAA lookup fails therefore falls through
+        to the search domain and resolves to 2603:6080:ca3e:6907:...:94b0
+        instead of failing. Observed directly: `getent hosts
+        192-168-51-3.<hash>.plex.direct` returned
+        `...plex.direct.gignsky.com` -> that IPv6 address, while the same name
+        WITH a trailing dot correctly returned 192.168.51.3. Any IPv6-preferring
+        client (Qt/Chromium, i.e. Plex) can be sent to the wrong host by this.
+        Worth fixing regardless of Plex; see hosts/common/optional/dns.nix.
 5. There is an issue where when a nix build is going on on merlin or ganoslal, then the rest of the system hangs and processes things slowly. This could likely be resolved by reserving how much of the overall system resources may be used by nix if other things are trying to use said resources.
    5.a. Resolved — `hosts/common/optional/nix-build-throttle.nix`, imported by
         ganoslal and merlin only (build servers are deliberately left alone, so
