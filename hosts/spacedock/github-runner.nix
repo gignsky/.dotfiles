@@ -26,6 +26,9 @@
 }:
 {
   sops.secrets = {
+    "gigpkgs/github-runner-token" = {
+      restartUnits = [ "github-runner-gigpkgs.service" ];
+    };
     "kottonmouth/github-runner-token" = {
       restartUnits = [ "github-runner-kottonmouth.service" ];
     };
@@ -33,20 +36,31 @@
       restartUnits = [ "github-runner-kottonmouth.service" ];
     };
   };
-
-  services.github-runners.kottonmouth = {
-    enable = true;
-    url = "https://github.com/gignsky/kottonmouth";
-    tokenFile = config.sops.secrets."kottonmouth/github-runner-token".path;
-    # Default labels already include self-hosted/Linux/X64; this is what
-    # `runs-on: [self-hosted, spacedock]` in rolling-preview.yml matches on.
-    extraLabels = [ "spacedock" ];
-    extraPackages = with pkgs; [
-      nodejs_22
-      nixos-rebuild
-      git
-    ];
-    serviceOverrides.EnvironmentFile = config.sops.secrets."kottonmouth/cloudflare-api-token".path;
+  services.github-runners = {
+    gigpkgs = {
+      enable = true;
+      url = "https://github.com/gignsky/gigpkgs";
+      tokenFile = config.sops.secrets."gigpkgs/github-runner-token".path;
+      extraLabels = [ "spacedock" ];
+      extraPackages = with pkgs; [
+        gnused
+        gnugrep
+      ];
+    };
+    kottonmouth = {
+      enable = true;
+      url = "https://github.com/gignsky/kottonmouth";
+      tokenFile = config.sops.secrets."kottonmouth/github-runner-token".path;
+      # Default labels already include self-hosted/Linux/X64; this is what
+      # `runs-on: [self-hosted, spacedock]` in rolling-preview.yml matches on.
+      extraLabels = [ "spacedock" ];
+      extraPackages = with pkgs; [
+        nodejs_22
+        nixos-rebuild
+        git
+      ];
+      serviceOverrides.EnvironmentFile = config.sops.secrets."kottonmouth/cloudflare-api-token".path;
+    };
   };
 
   # Scoped to exactly what rolling-preview.yml runs as root -- not blanket
