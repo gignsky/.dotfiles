@@ -7,7 +7,7 @@ _: {
   imports = [
     # ./pihole.nix # Pi-hole DNS — runs as a service via the container engine
     ./tdarr-node.nix # Tdarr node — needs CIFS mounts + samba creds first
-    # ./floatplane-wan-show.nix # WAN Show downloader — needs sops secret + interactive login first, see file header
+    ./floatplane-wan-show.nix # WAN Show downloader — autoStart=false until login/channel setup done, see file header
     ./avec-moi-app.nix
     ./scribbydascribe.nix # Discord voice transcriber — needs the `scribbydascribe-env` sops key first
     ./kottonmouth-keeper.nix # kottonmouthband.com keeper — needs its sops secrets + tunnel first
