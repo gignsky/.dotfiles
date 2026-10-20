@@ -51,7 +51,7 @@ in
   systemd.tmpfiles.rules = [ "d /var/lib/kottonmouth-keeper 0700 ${uid} ${uid} -" ];
 
   virtualisation.oci-containers.containers.kottonmouth-keeper = {
-    imageFile = inputs.kottonmouth.packages.${pkgs.system}.keeper-image;
+    imageFile = inputs.kottonmouth.packages.${pkgs.stdenv.hostPlatform.system}.keeper-image;
     image = "kottonmouth-keeper:latest";
     autoStart = true;
     environmentFiles = [ config.sops.secrets."kottonmouth/kottonmouth-keeper-env".path ];

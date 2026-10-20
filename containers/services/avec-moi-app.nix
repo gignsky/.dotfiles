@@ -4,8 +4,8 @@
 # The image comes from `avec-moi.packages.<system>.default` (a
 # `dockerTools.buildLayeredImage` tarball tagged `avecmoi:latest`). NOTE:
 # `packages.<system>.app` is NOT the image — it is just the server wrapper
-# that the image runs. We reference the input by `pkgs.system` so the module
-# does not need `system` threaded through `specialArgs`.
+# that the image runs. We reference the input by `pkgs.stdenv.hostPlatform.system`
+# so the module does not need `system` threaded through `specialArgs`.
 #
 # /admin (review submitted questions) uses root's password: the `root-password`
 # sops secret (a crypt hash, declared in hosts/common/core/sops.nix) is mounted
@@ -19,7 +19,7 @@
   ...
 }:
 let
-  imageFile = inputs.avec-moi.packages.${pkgs.system}.default;
+  imageFile = inputs.avec-moi.packages.${pkgs.stdenv.hostPlatform.system}.default;
 in
 {
   systemd.tmpfiles.rules = [ "d /var/lib/avec-moi 0750 root root -" ];
