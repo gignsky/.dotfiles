@@ -10,23 +10,34 @@
 # One-time setup: generate a runner registration token (repo → Settings →
 # Actions → Runners → New self-hosted runner, or the
 # `POST /repos/{owner}/{repo}/actions/runners/registration-token` API) and
-# store it at the `github-runner/kottonmouth-token` sops secret below. The
+# store it at the `kottonmouth/github-runner-token` sops secret below. The
 # token in the secret is only used once to register; nixos-module handles
 # renewal/removal itself after that.
+#
+# The runner also needs a Cloudflare API token to run `wrangler deploy
+# --env beta` -- stored at `kottonmouth/cloudflare-api-token` as a
+# `CLOUDFLARE_API_TOKEN=...` line (systemd EnvironmentFile syntax, same
+# convention as the oci-container `environmentFiles` secrets elsewhere in
+# this repo) and loaded into the runner's service environment below.
 {
   config,
   pkgs,
   ...
 }:
 {
-  sops.secrets."github-runner/kottonmouth-token" = {
-    restartUnits = [ "github-runner-kottonmouth.service" ];
+  sops.secrets = {
+    "kottonmouth/github-runner-token" = {
+      restartUnits = [ "github-runner-kottonmouth.service" ];
+    };
+    "kottonmouth/cloudflare-api-token" = {
+      restartUnits = [ "github-runner-kottonmouth.service" ];
+    };
   };
 
   services.github-runners.kottonmouth = {
     enable = true;
     url = "https://github.com/gignsky/kottonmouth";
-    tokenFile = config.sops.secrets."github-runner/kottonmouth-token".path;
+    tokenFile = config.sops.secrets."kottonmouth/github-runner-token".path;
     # Default labels already include self-hosted/Linux/X64; this is what
     # `runs-on: [self-hosted, spacedock]` in rolling-preview.yml matches on.
     extraLabels = [ "spacedock" ];
@@ -35,6 +46,7 @@
       nixos-rebuild
       git
     ];
+    serviceOverrides.EnvironmentFile = config.sops.secrets."kottonmouth/cloudflare-api-token".path;
   };
 
   # Scoped to exactly what rolling-preview.yml runs as root -- not blanket
