@@ -49,6 +49,9 @@
 #      the folder by hand so it matches what Floatplane-Downloader writes.
 #      Then check the title/date parse (fill in your real API key):
 #        curl "http://192.168.51.3:8989/api/v3/parse?title=The%20WAN%20Show%20-%202026-10-16%20-%20Test" -H "X-Api-Key: <your Sonarr API key>"
+#      (the trailing "Test" is a placeholder — the real filename carries
+#      whatever topic text the Floatplane post title had; this only checks
+#      that the "Title - Date" shape itself parses, not an exact title match).
 #      A real `series` + `episodes` in the response confirms the title
 #      matches; an empty one means nothing will ever import. It does NOT
 #      confirm the date the downloader itself produces — do that after step
@@ -87,13 +90,19 @@
 #      step 7 has replaced the channel list (see why there).
 #
 #   6. First run needs an interactive login — Floatplane uses a device-code
-#      flow, not a plain password:
-#        sudo podman run -it --rm -v /var/lib/floatplane-wan-show/db:/fp/db -v /mnt/floatplane-media/video/floatplane-login-scratch:/fp/videos -e headless=false docker.io/inrix/floatplane-downloader:latest
-#      Watch the console for the login URL/code and finish login in a
-#      browser. As soon as it confirms you're authenticated, Ctrl-C — don't
-#      wait for it to finish fetching/downloading anything. (Its generated
-#      settings.json will likely be incomplete or even absent at this point;
-#      that's fine, step 7 writes the part that matters directly.)
+#      flow, not a plain password. `floatplane_videosToSearch=0` below makes
+#      `fetchNewVideos` return immediately for every subscription (see
+#      Subscription.ts) regardless of skip state, so this run is guaranteed
+#      to search and download nothing no matter how far it gets — there's no
+#      race to manage, it just needs to run long enough to discover every
+#      creator/channel you're subscribed to:
+#        sudo podman run -it --rm -v /var/lib/floatplane-wan-show/db:/fp/db -v /mnt/floatplane-media/video/floatplane-login-scratch:/fp/videos -e headless=true -e floatplane_videosToSearch=0 docker.io/inrix/floatplane-downloader:latest
+#      headless=true means it won't try to open a browser itself — watch the
+#      console for the login URL and open it yourself. Once logged in, let
+#      it keep running until you see `Queued 0 videos...` — that's
+#      confirmation it finished walking every subscription you have (not
+#      just LMG) and wrote them all to settings.json. Ctrl-C any time after
+#      that line.
 #
 #   7. Edit /var/lib/floatplane-wan-show/db/settings.json as root. Under
 #      `subscriptions`, set the Linus Media Group entry's `channels` to
@@ -135,10 +144,17 @@
 #
 #   8. Delete the scratch directory from step 5 and
 #      /var/lib/floatplane-wan-show/db/attachments.json (if it has entries
-#      from the login run), then flip `autoStart` back to true below and
-#      switch. The container will do its real first pass into
-#      `video/floatplane`, bound by `floatplane_videosToSearch` (see its
-#      comment below — set high for the initial backfill, then lowered).
+#      from the login run — it shouldn't, since step 6 searched nothing),
+#      then flip `autoStart` back to true below and switch. The container
+#      will do its real first pass into `video/floatplane`, bound by
+#      `floatplane_videosToSearch` (see its comment below). After that first
+#      pass downloadNewVideos() resets it to the tool's own default (5) in
+#      settings.json for every subsequent 5-minute poll on its own — it only
+#      stays at the Nix-configured value here because this env var gets
+#      re-applied on top of settings.json every time the container starts,
+#      so a reboot/restart re-triggers one more deep pass. Harmless, just
+#      slower than necessary; lower the value here once you're caught up if
+#      that's worth avoiding.
 {
   configVars,
   pkgs,
