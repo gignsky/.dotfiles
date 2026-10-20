@@ -17,12 +17,18 @@
   # };
 
   # When applied, the unstable nixpkgs set (declared in the flake inputs) will
-  # be accessible through 'pkgs.unstable'
+  # be accessible through 'pkgs.unstable'.
+  #
+  # The `.extend` re-applies gigpkgs' own overlay (built with real flake inputs)
+  # on top of the plain import, which otherwise can't resolve gigpkgs' custom
+  # packages (roll-flow, gigvim, ...) under `pkgs.unstable.*`.
   unstable-packages = final: _prev: {
-    unstable = import inputs.nixpkgs-unstable {
-      inherit (final.stdenv.hostPlatform) system;
-      config.allowUnfree = true;
-    };
+    unstable =
+      (import inputs.nixpkgs-unstable {
+        inherit (final.stdenv.hostPlatform) system;
+        config.allowUnfree = true;
+      }).extend
+        inputs.nixpkgs-unstable.overlays.default;
   };
   # local-packages = final: _prev: {
   #   unstable = import inputs.nixpkgs-local {
