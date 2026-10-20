@@ -368,8 +368,9 @@ if [ "$nixos_rebuild_exit_code" -eq 0 ]; then
   #   echo "OpenCode not available - skipping detailed Scotty log"
   # fi
   
-  # Only commit if this was a switch or boot operation (not test/dry-run)
-  if [[ "$REBUILD_SUBCOMMAND" == "switch" || "$REBUILD_SUBCOMMAND" == "boot" ]]; then
+  # Only commit if this activated something real (switch/boot/test) -- not
+  # dry-activate or dry-build, which never touch the running system.
+  if [[ "$REBUILD_SUBCOMMAND" == "switch" || "$REBUILD_SUBCOMMAND" == "boot" || "$REBUILD_SUBCOMMAND" == "test" ]]; then
     # Commit with enhanced generation info
     export AUTOMATED_COMMIT=true
     if [ -f "$(dirname "$0")/commit-enhance-lib.sh" ]; then
