@@ -51,7 +51,7 @@
     },
     "claude-desktop": {
       "inputs": {
-        "flake-utils": "flake-utils_2",
+        "flake-utils": "flake-utils_3",
         "nixpkgs": [
           "nixpkgs",
           "nixpkgs"
@@ -73,7 +73,7 @@
     },
     "claude-desktop_2": {
       "inputs": {
-        "flake-utils": "flake-utils_3",
+        "flake-utils": "flake-utils_4",
         "nixpkgs": [
           "nixpkgs-unstable",
           "nixpkgs"
@@ -677,7 +677,25 @@
     },
     "flake-utils_3": {
       "inputs": {
-        "systems": "systems_4"
+        "systems": "systems_3"
+      },
+      "locked": {
+        "lastModified": 1731533236,
+        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "flake-utils_4": {
+      "inputs": {
+        "systems": "systems_5"
       },
       "locked": {
         "lastModified": 1731533236,
@@ -1729,6 +1747,28 @@
         "url": "ssh://git@github.com/gignsky/kottonmouth.git"
       }
     },
+    "kottonmouth-rolling": {
+      "inputs": {
+        "flake-utils": "flake-utils_2",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791488971,
+        "narHash": "sha256-sdBp3maBQl68czW0n/C7qqKS9CgovRDk8ShJnKER/Mg=",
+        "ref": "rolling",
+        "rev": "75cbc2553c1fbd0b076c20467570ceacebe467a5",
+        "revCount": 90,
+        "type": "git",
+        "url": "ssh://git@github.com/gignsky/kottonmouth.git"
+      },
+      "original": {
+        "ref": "rolling",
+        "type": "git",
+        "url": "ssh://git@github.com/gignsky/kottonmouth.git"
+      }
+    },
     "mnw": {
       "locked": {
         "lastModified": 1778541201,
@@ -1832,10 +1872,10 @@
     "nix-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1792517188,
-        "narHash": "sha256-rxg7qJ93x0tl35uWA3c4oMQ9dbBEMcNzmOj5DzMCb6k=",
+        "lastModified": 1792527870,
+        "narHash": "sha256-12eI6jh769SFdqumu5/VQ9kyw4pJUGT8PW3TbMM9898=",
         "ref": "main",
-        "rev": "fdf5e6d4671156ae940b1cb2f59b71a2b7ec5db5",
+        "rev": "6d2853632f0c0840b7c8c66e930fa9bedb19761b",
         "shallow": true,
         "type": "git",
         "url": "ssh://git@github.com/gignsky/nix-secrets.git"
@@ -3739,7 +3779,7 @@
           "gigvim",
           "nixpkgs"
         ],
-        "systems": "systems_3"
+        "systems": "systems_4"
       },
       "locked": {
         "lastModified": 1780042000,
@@ -3766,7 +3806,7 @@
           "gigvim",
           "nixpkgs"
         ],
-        "systems": "systems_5"
+        "systems": "systems_6"
       },
       "locked": {
         "lastModified": 1780042000,
@@ -4627,6 +4667,7 @@
           "home-manager"
         ],
         "kottonmouth": "kottonmouth",
+        "kottonmouth-rolling": "kottonmouth-rolling",
         "nix-secrets": "nix-secrets",
         "nix-sweep": "nix-sweep",
         "nixos-cli": "nixos-cli",
@@ -4854,6 +4895,21 @@
         "type": "github"
       }
     },
+    "systems_7": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
     "treefmt-nix": {
       "inputs": {
         "nixpkgs": [
@@ -4922,7 +4978,7 @@
         "nixpkgs": "nixpkgs_26",
         "process-compose-flake": "process-compose-flake",
         "rust-flake": "rust-flake",
-        "systems": "systems_6",
+        "systems": "systems_7",
         "treefmt-nix": "treefmt-nix_2"
       },
       "locked": {
