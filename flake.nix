@@ -171,102 +171,151 @@
       # as `nixpkgs` -- TODO remove this comment later should everything work out (07/20/2026)
       customPkgs = import ./pkgs { pkgs = inputs.nixpkgs.legacyPackages.${system}; };
       pkgs = inputs.nixpkgs.legacyPackages.${system} // customPkgs;
+
+      # Hosts that ship a real (nixos-generate-config'd) hardware-configuration.nix,
+      # mapped to any extra hand-written modules that file's `imports` nests (and
+      # which must be re-imported explicitly below, since `disabledModules` drops
+      # a whole module file — including imports only reachable through it).
+      # wsl has none, so it's excluded from the cross-host hardware substitution below.
+      hardwareHosts = {
+        merlin = [ ];
+        # nvidia.nix is imported from inside hardware-configuration.nix (not
+        # default.nix), but default.nix unconditionally sets videoDrivers =
+        # [ "nvidia" ], so it must survive even when ganoslal's own
+        # hardware-configuration.nix is disabled as the swap target.
+        ganoslal = [ ./hosts/ganoslal/nvidia.nix ];
+        spacedock = [ ];
+      };
+
+      # For every (target, current) pair of hardwareHosts, build a
+      # "<target>-on-<current>" nixosConfiguration: target's own config, but with
+      # its hardware-configuration.nix (filesystems/swap/initrd) swapped for
+      # current's. Used by `just rebuild <target>` when run from host `current`,
+      # so switch/boot/test activate against hardware that actually exists on
+      # this machine instead of the target's. This does NOT fix bootloader
+      # config (lives in each host's default.nix, not hardware-configuration.nix)
+      # or any other hardware-specific settings outside that file.
+      mkHardwareOverrides =
+        nixosConfigurations:
+        builtins.listToAttrs (
+          builtins.concatMap (
+            target:
+            map (current: {
+              name = "${target}-on-${current}";
+              value = nixosConfigurations.${target}.extendModules {
+                modules = [
+                  {
+                    disabledModules = [ ./hosts/${target}/hardware-configuration.nix ];
+                    imports = [
+                      ./hosts/${current}/hardware-configuration.nix
+                    ]
+                    ++ hardwareHosts.${target};
+                  }
+                ];
+              };
+            }) (lib.filter (current: current != target) (builtins.attrNames hardwareHosts))
+          ) (builtins.attrNames hardwareHosts)
+        );
     in
     {
       # NixOS configuration entrypoint
       # Available through 'nixos-rebuild --flake .#your-hostname'
-      nixosConfigurations = {
-        # WSL configuration entrypoint - name can not be changed from nixos without some extra work TODO
-        wsl = nixpkgs.lib.nixosSystem {
-          inherit system;
-          specialArgs = specialArgs // {
-            # inherit inputs;
-            # remove me when updateing to 26.05
-            inputs = inputs // {
-              nixpkgs = inputs.nixpkgs-unstable;
-              # sops-nix = inputs.unstable-sops;
-              # home-manager = inputs.unstable-home-manager;
+      nixosConfigurations =
+        let
+          baseNixosConfigurations = {
+            # WSL configuration entrypoint - name can not be changed from nixos without some extra work TODO
+            wsl = nixpkgs.lib.nixosSystem {
+              inherit system;
+              specialArgs = specialArgs // {
+                # inherit inputs;
+                # remove me when updateing to 26.05
+                inputs = inputs // {
+                  nixpkgs = inputs.nixpkgs-unstable;
+                  # sops-nix = inputs.unstable-sops;
+                  # home-manager = inputs.unstable-home-manager;
+                };
+                configVars = configVars // {
+                  uid = 1000; # WSL compatibility
+                  guid = 1000; # Keep gig group as 1000, not 100
+                };
+              };
+              modules = [
+                inputs.vscode-server.nixosModules.default
+                (_: { services.vscode-server.enable = true; })
+                inputs.nixos-wsl.nixosModules.default
+                {
+                  system.stateVersion = "24.05";
+                  wsl.enable = true;
+                  # wsl.nativeSystemd = true;
+                }
+                # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
+                # home-manager.nixosModules.home-manager {
+                #   home-manager.extraSpecialArgs = specialArgs;
+                # }
+                ./hosts/wsl
+                inputs.nixos-cli.nixosModules.nixos-cli
+              ];
             };
-            configVars = configVars // {
-              uid = 1000; # WSL compatibility
-              guid = 1000; # Keep gig group as 1000, not 100
+
+            # Merlin configuration entrypoint
+            # Using unstable to access virtualisation.credentials for VM secrets testing
+            # Will move to 26.05 stable when released (~May 2026) # MOVED on 2026-09-15
+            # merlin = inputs.nixpkgs-unstable.lib.nixosSystem {
+            merlin = inputs.nixpkgs.lib.nixosSystem {
+              inherit system;
+              specialArgs = specialArgs // {
+                inherit inputs;
+                # remove me when updateing to 26.05
+                # # Override inputs for Merlin to use unstable as primary nixpkgs
+                # inputs = inputs // {
+                #   nixpkgs = inputs.nixpkgs-unstable;
+                #   sops-nix = inputs.unstable-sops;
+                #   home-manager = inputs.unstable-home-manager;
+                # };
+              };
+              modules = [
+                # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
+                # home-manager.nixosModules.home-manager {
+                #   home-manager.extraSpecialArgs = specialArgs;
+                # }
+                ./hosts/merlin
+                inputs.nixos-cli.nixosModules.nixos-cli
+
+                # https://github.com/NixOS/nixos-hardware/tree/master/framework/16-inch/7040-amd
+                inputs.nixos-hardware.nixosModules.framework-16-7040-amd
+              ];
+            };
+
+            ganoslal = nixpkgs.lib.nixosSystem {
+              inherit system specialArgs;
+              # > Our main nixos configuration file <
+              modules = [
+                # home-manager.nixosModules.home-manager
+                # {
+                #   home-manager.extraSpecialArgs = specialArgs;
+                # }
+                ./hosts/ganoslal
+                inputs.nixos-cli.nixosModules.nixos-cli
+              ];
+            };
+
+            # Spacedock — repurposed from the standalone dot-spacedock flake
+            # (dotfiles#14). Legacy-BIOS box; bootloader/hardware in hosts/spacedock.
+            # Rides the fleet `nixpkgs` (already the gigos-2605 gigpkgs channel).
+            spacedock = nixpkgs.lib.nixosSystem {
+              inherit system specialArgs;
+              modules = [
+                ./hosts/spacedock
+                inputs.nixos-cli.nixosModules.nixos-cli
+                # gigpkgs container engine → `gigpkgs.containers.*`. `nixpkgs` is the
+                # gigos-2605 gigpkgs channel, which exposes this once gigpkgs#20 is
+                # on master and the channel branch is regenerated.
+                inputs.nixpkgs.nixosModules.containers
+              ];
             };
           };
-          modules = [
-            inputs.vscode-server.nixosModules.default
-            (_: { services.vscode-server.enable = true; })
-            inputs.nixos-wsl.nixosModules.default
-            {
-              system.stateVersion = "24.05";
-              wsl.enable = true;
-              # wsl.nativeSystemd = true;
-            }
-            # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
-            # home-manager.nixosModules.home-manager {
-            #   home-manager.extraSpecialArgs = specialArgs;
-            # }
-            ./hosts/wsl
-            inputs.nixos-cli.nixosModules.nixos-cli
-          ];
-        };
-
-        # Merlin configuration entrypoint
-        # Using unstable to access virtualisation.credentials for VM secrets testing
-        # Will move to 26.05 stable when released (~May 2026) # MOVED on 2026-09-15
-        # merlin = inputs.nixpkgs-unstable.lib.nixosSystem {
-        merlin = inputs.nixpkgs.lib.nixosSystem {
-          inherit system;
-          specialArgs = specialArgs // {
-            inherit inputs;
-            # remove me when updateing to 26.05
-            # # Override inputs for Merlin to use unstable as primary nixpkgs
-            # inputs = inputs // {
-            #   nixpkgs = inputs.nixpkgs-unstable;
-            #   sops-nix = inputs.unstable-sops;
-            #   home-manager = inputs.unstable-home-manager;
-            # };
-          };
-          modules = [
-            # Activate this if you want home-manager as a module of the system, maybe enable this for vm's or minimal system, idk. #TODO
-            # home-manager.nixosModules.home-manager {
-            #   home-manager.extraSpecialArgs = specialArgs;
-            # }
-            ./hosts/merlin
-            inputs.nixos-cli.nixosModules.nixos-cli
-
-            # https://github.com/NixOS/nixos-hardware/tree/master/framework/16-inch/7040-amd
-            inputs.nixos-hardware.nixosModules.framework-16-7040-amd
-          ];
-        };
-
-        ganoslal = nixpkgs.lib.nixosSystem {
-          inherit system specialArgs;
-          # > Our main nixos configuration file <
-          modules = [
-            # home-manager.nixosModules.home-manager
-            # {
-            #   home-manager.extraSpecialArgs = specialArgs;
-            # }
-            ./hosts/ganoslal
-            inputs.nixos-cli.nixosModules.nixos-cli
-          ];
-        };
-
-        # Spacedock — repurposed from the standalone dot-spacedock flake
-        # (dotfiles#14). Legacy-BIOS box; bootloader/hardware in hosts/spacedock.
-        # Rides the fleet `nixpkgs` (already the gigos-2605 gigpkgs channel).
-        spacedock = nixpkgs.lib.nixosSystem {
-          inherit system specialArgs;
-          modules = [
-            ./hosts/spacedock
-            inputs.nixos-cli.nixosModules.nixos-cli
-            # gigpkgs container engine → `gigpkgs.containers.*`. `nixpkgs` is the
-            # gigos-2605 gigpkgs channel, which exposes this once gigpkgs#20 is
-            # on master and the channel branch is regenerated.
-            inputs.nixpkgs.nixosModules.containers
-          ];
-        };
-      };
+        in
+        baseNixosConfigurations // mkHardwareOverrides baseNixosConfigurations;
 
       # Standalone home-manager configuration entrypoint
       # Available through 'home-manager --flake .#your-username@your-hostname'

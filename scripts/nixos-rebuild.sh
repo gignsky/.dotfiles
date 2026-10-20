@@ -3,6 +3,28 @@
 # Parse command-line arguments
 VERBOSE=false
 REBUILD_SUBCOMMAND="switch"
+HOST_OVERRIDE=""
+FORCE=false
+
+print_usage() {
+    echo "Usage: $0 [-v|--verbose] [-t|--dry-activate] [-T|--test|--temp] [-b|--boot] [--dry-build] [--force] [HOST]"
+    echo "  -v, --verbose            Show full output with --show-trace"
+    echo "  -t, --dry-activate       Build but show what would be activated without activating"
+    echo "  -T, --test, --temp       Build and activate, but don't add to bootloader"
+    echo "  -b, --boot               Build and add to bootloader, activate on next boot"
+    echo "  --dry-build              Show what would be built without building"
+    echo "  --force                  Skip the confirmation prompt when activating another host's config on this machine"
+    echo "  HOST                     Target a different flake host instead of this machine's auto-detected one"
+    echo ""
+    echo "Default: switch (build, activate, and add to bootloader) for this machine's own host"
+    echo ""
+    echo "⚠️  --dry-build and --dry-activate are safe to run against any HOST (preview only, nothing is activated)."
+    echo "⚠️  switch/boot/test against a different HOST will ACTIVATE that host's config on THIS machine's"
+    echo "    hardware and require interactive confirmation (or --force)."
+    echo "ℹ️  For switch/boot/test, if both HOST and this machine's own host have a real"
+    echo "    hardware-configuration.nix (merlin/ganoslal/spacedock, not wsl), HOST's hardware-configuration.nix"
+    echo "    is automatically substituted for this machine's own before activating."
+}
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -10,7 +32,11 @@ while [[ $# -gt 0 ]]; do
             VERBOSE=true
             shift
             ;;
-        -t|--test)
+        -t|--dry-activate)
+            REBUILD_SUBCOMMAND="dry-activate"
+            shift
+            ;;
+        -T|--test|--temp)
             REBUILD_SUBCOMMAND="test"
             shift
             ;;
@@ -22,21 +48,25 @@ while [[ $# -gt 0 ]]; do
             REBUILD_SUBCOMMAND="dry-build"
             shift
             ;;
-        --dry-activate)
-            REBUILD_SUBCOMMAND="dry-activate"
+        --force)
+            FORCE=true
             shift
             ;;
-        *)
+        -*)
             echo "Unknown option: $1"
-            echo "Usage: $0 [-v|--verbose] [-t|--test] [-b|--boot] [--dry-build] [--dry-activate]"
-            echo "  -v, --verbose       Show full output with --show-trace"
-            echo "  -t, --test          Build and activate, but don't add to bootloader"
-            echo "  -b, --boot          Build and add to bootloader, activate on next boot"
-            echo "  --dry-build         Show what would be built without building"
-            echo "  --dry-activate      Build but show what would be activated without activating"
             echo ""
-            echo "Default: switch (build, activate, and add to bootloader)"
+            print_usage
             exit 1
+            ;;
+        *)
+            if [ -n "$HOST_OVERRIDE" ]; then
+                echo "Unknown option: $1 (host already set to '${HOST_OVERRIDE}')"
+                echo ""
+                print_usage
+                exit 1
+            fi
+            HOST_OVERRIDE="$1"
+            shift
             ;;
     esac
 done
@@ -82,10 +112,81 @@ annex_logging_disabled_notice() {
 scotty_log_event() { annex_logging_disabled_notice; }
 log_build_performance() { annex_logging_disabled_notice; }
 
-# Enhanced host detection with intelligent WSL mapping
-# Use auto-detected hostname, don't treat arguments as hostname
-export HOST=$(detect_flake_target)
+# Enhanced host detection with intelligent WSL mapping.
+# NATURAL_HOST is what this machine would build/activate with no override,
+# used below to detect when HOST_OVERRIDE points at a *different* machine.
+NATURAL_HOST=$(detect_flake_target)
+export HOST=$(detect_flake_target "$HOST_OVERRIDE")
 export HOST_IDENTIFIER=$(get_host_identifier "$HOST")
+
+# Hosts with a real hardware-configuration.nix, matching flake.nix's
+# `hardwareHosts` list. For these pairs flake.nix generates a
+# "<target>-on-<current>" nixosConfiguration that swaps target's
+# hardware-configuration.nix (filesystems/swap/initrd) for current's, so a
+# cross-host switch/boot/test activates against hardware that actually
+# exists on this machine. wsl has no hardware-configuration.nix, so it has
+# no override and is left out of this list.
+HARDWARE_HOSTS=(merlin ganoslal spacedock)
+is_hardware_host() {
+    local h="$1"
+    local hh
+    for hh in "${HARDWARE_HOSTS[@]}"; do
+        [ "$hh" = "$h" ] && return 0
+    done
+    return 1
+}
+
+# The flake attribute actually passed to `nixos-rebuild --flake .#...`.
+# Defaults to $HOST; the cross-host switch/boot/test branch below may repoint
+# it at a "<target>-on-<current>" override. dry-build/dry-activate/the rest
+# of the matrix always build the real $HOST closure unchanged.
+FLAKE_TARGET="$HOST"
+
+# Building a foreign host's config is always safe (and how test-rebuild/test-home
+# verify the cache). Activating it is not: switch/boot/test run that config's
+# activation scripts against THIS machine's running kernel and hardware, which
+# can be wrong (different GPU drivers, disk layout, etc.) for another host's
+# profile. dry-build/dry-activate never touch real state, so they're exempt.
+if [ -n "$HOST_OVERRIDE" ] && [ "$HOST" != "$NATURAL_HOST" ]; then
+    case "$REBUILD_SUBCOMMAND" in
+        switch|boot|test)
+            if is_hardware_host "$HOST" && is_hardware_host "$NATURAL_HOST"; then
+                FLAKE_TARGET="${HOST}-on-${NATURAL_HOST}"
+                echo "ℹ️  Substituting ${NATURAL_HOST}'s hardware-configuration.nix for ${HOST}'s (flake target"
+                echo "    '${FLAKE_TARGET}') so filesystems/swap/initrd match this machine's real disks."
+                echo "    This does NOT fix hardware-specific settings that live outside hardware-configuration.nix"
+                echo "    (e.g. boot.loader is set per-host in default.nix, not hardware-configuration.nix) —"
+                echo "    ${HOST}'s own values for those still apply, and networking.hostName will still be '${HOST}'."
+            else
+                echo "⚠️  No hardware-substitution target for '${HOST}' on '${NATURAL_HOST}' (one of them has no"
+                echo "    hardware-configuration.nix, e.g. wsl) — proceeding with ${HOST}'s own hardware config as-is."
+            fi
+            if [ "$FORCE" = true ]; then
+                echo "⚠️  --force given: activating ${HOST}'s config on this machine (${NATURAL_HOST}) without confirmation."
+            else
+                echo ""
+                echo "⚠️  WARNING: this will run 'nixos-rebuild ${REBUILD_SUBCOMMAND}' for host '${HOST}', but you're"
+                echo "    physically on '${NATURAL_HOST}'. That activates ${HOST}'s config (drivers, disk layout,"
+                echo "    services) against this machine's actual hardware, not ${HOST}'s."
+                echo ""
+                if [ -t 0 ] && [ -t 1 ]; then
+                    read -p "Continue activating '${HOST}' on '${NATURAL_HOST}'? [y/N] " -n 1 -r
+                    echo
+                    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                        echo "Aborted. Use '--dry-activate' for a safe preview, or pass --force to skip this prompt."
+                        exit 1
+                    fi
+                else
+                    echo "❌ Non-interactive terminal - refusing to activate a different host's config without --force."
+                    exit 1
+                fi
+            fi
+            ;;
+        *)
+            : # dry-build / dry-activate are previews only — no state is touched
+            ;;
+    esac
+fi
 
 authenticate_sudo() {
     echo "🔐 NixOS rebuild requires sudo access for ${HOST_IDENTIFIER}..."
@@ -243,7 +344,7 @@ git diff -U0 ./*glob*.nix
 echo "NixOS Rebuilding ${HOST_IDENTIFIER} (subcommand: ${REBUILD_SUBCOMMAND})..."
 
 # Build the nixos-rebuild command with optional verbose flags
-NIXOS_CMD="sudo nixos-rebuild ${REBUILD_SUBCOMMAND} --flake .#${HOST}"
+NIXOS_CMD="sudo nixos-rebuild ${REBUILD_SUBCOMMAND} --flake .#${FLAKE_TARGET}"
 if [ "$VERBOSE" = true ]; then
   NIXOS_CMD="$NIXOS_CMD --show-trace"
 fi
@@ -304,8 +405,9 @@ if [ "$nixos_rebuild_exit_code" -eq 0 ]; then
   #   echo "OpenCode not available - skipping detailed Scotty log"
   # fi
   
-  # Only commit if this was a switch or boot operation (not test/dry-run)
-  if [[ "$REBUILD_SUBCOMMAND" == "switch" || "$REBUILD_SUBCOMMAND" == "boot" ]]; then
+  # Only commit if this activated something real (switch/boot/test) -- not
+  # dry-activate or dry-build, which never touch the running system.
+  if [[ "$REBUILD_SUBCOMMAND" == "switch" || "$REBUILD_SUBCOMMAND" == "boot" || "$REBUILD_SUBCOMMAND" == "test" ]]; then
     # Commit with enhanced generation info
     export AUTOMATED_COMMIT=true
     if [ -f "$(dirname "$0")/commit-enhance-lib.sh" ]; then
