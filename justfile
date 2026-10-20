@@ -153,7 +153,7 @@ rebuild-full args="":
 
 # Dry-activate rebuild: build and show what would be activated, without activating
 rebuild-test args="":
-	just rebuild --dry-activate {{args}}
+	just rebuild -t {{args}}
 
 
 # Test rebuild commands (dry-run evaluation without applying)
