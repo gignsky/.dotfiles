@@ -45,7 +45,13 @@ in
 
   virtualisation.oci-containers.containers.kottonmouth-keeper-dev = {
     imageFile = inputs.kottonmouth-rolling.packages.${pkgs.system}.keeper-image;
-    image = "kottonmouth-keeper-dev:latest";
+    # keeper-image always bakes the tag `kottonmouth-keeper:latest`, the same
+    # as the main keeper's image (it's the same package attribute, just built
+    # off a different flake input/ref) -- `image` has to match what the
+    # pre-start load actually tagged, or podman can't find it locally and
+    # tries (and fails) to pull it from a registry instead. See
+    # kottonmouth-keeper.nix for the same pattern.
+    image = "kottonmouth-keeper:latest";
     # Started/stopped by rolling-preview.yml based on rolling-vs-main
     # divergence, not on boot.
     autoStart = false;
