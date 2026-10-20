@@ -6,7 +6,12 @@
 
       local config = wezterm.config_builder()
 
-      config.font = wezterm.font("MonoLisa Variable")
+      config.font = wezterm.font_with_fallback({
+      	"MonoLisa Variable",
+      	"JetBrainsMono Nerd Font Mono",
+      	"GoMono Nerd Font Mono",
+      	"DejaVu Sans Mono",
+      })
       config.font_size = 15.0
 
       config.hide_tab_bar_if_only_one_tab = true
