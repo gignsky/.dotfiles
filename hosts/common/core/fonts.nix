@@ -21,6 +21,7 @@ in
         nerd-fonts.go-mono
         nerd-fonts.jetbrains-mono
         times-newer-roman
+        gentium-book # Gentium Book Plus (renamed "Gentium Book" in v7); has 400/italic/700 + extras
 
         # Essential icon/symbol fonts (replaces enableDefaultPackages)
         font-awesome # polybar's module glyphs (font-1/font-2 in polybar.nix)
