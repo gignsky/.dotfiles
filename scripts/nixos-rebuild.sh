@@ -21,6 +21,9 @@ print_usage() {
     echo "⚠️  --dry-build and --dry-activate are safe to run against any HOST (preview only, nothing is activated)."
     echo "⚠️  switch/boot/test against a different HOST will ACTIVATE that host's config on THIS machine's"
     echo "    hardware and require interactive confirmation (or --force)."
+    echo "ℹ️  For switch/boot/test, if both HOST and this machine's own host have a real"
+    echo "    hardware-configuration.nix (merlin/ganoslal/spacedock, not wsl), HOST's hardware-configuration.nix"
+    echo "    is automatically substituted for this machine's own before activating."
 }
 
 while [[ $# -gt 0 ]]; do
@@ -116,6 +119,29 @@ NATURAL_HOST=$(detect_flake_target)
 export HOST=$(detect_flake_target "$HOST_OVERRIDE")
 export HOST_IDENTIFIER=$(get_host_identifier "$HOST")
 
+# Hosts with a real hardware-configuration.nix, matching flake.nix's
+# `hardwareHosts` list. For these pairs flake.nix generates a
+# "<target>-on-<current>" nixosConfiguration that swaps target's
+# hardware-configuration.nix (filesystems/swap/initrd) for current's, so a
+# cross-host switch/boot/test activates against hardware that actually
+# exists on this machine. wsl has no hardware-configuration.nix, so it has
+# no override and is left out of this list.
+HARDWARE_HOSTS=(merlin ganoslal spacedock)
+is_hardware_host() {
+    local h="$1"
+    local hh
+    for hh in "${HARDWARE_HOSTS[@]}"; do
+        [ "$hh" = "$h" ] && return 0
+    done
+    return 1
+}
+
+# The flake attribute actually passed to `nixos-rebuild --flake .#...`.
+# Defaults to $HOST; the cross-host switch/boot/test branch below may repoint
+# it at a "<target>-on-<current>" override. dry-build/dry-activate/the rest
+# of the matrix always build the real $HOST closure unchanged.
+FLAKE_TARGET="$HOST"
+
 # Building a foreign host's config is always safe (and how test-rebuild/test-home
 # verify the cache). Activating it is not: switch/boot/test run that config's
 # activation scripts against THIS machine's running kernel and hardware, which
@@ -124,6 +150,17 @@ export HOST_IDENTIFIER=$(get_host_identifier "$HOST")
 if [ -n "$HOST_OVERRIDE" ] && [ "$HOST" != "$NATURAL_HOST" ]; then
     case "$REBUILD_SUBCOMMAND" in
         switch|boot|test)
+            if is_hardware_host "$HOST" && is_hardware_host "$NATURAL_HOST"; then
+                FLAKE_TARGET="${HOST}-on-${NATURAL_HOST}"
+                echo "ℹ️  Substituting ${NATURAL_HOST}'s hardware-configuration.nix for ${HOST}'s (flake target"
+                echo "    '${FLAKE_TARGET}') so filesystems/swap/initrd match this machine's real disks."
+                echo "    This does NOT fix hardware-specific settings that live outside hardware-configuration.nix"
+                echo "    (e.g. boot.loader is set per-host in default.nix, not hardware-configuration.nix) —"
+                echo "    ${HOST}'s own values for those still apply, and networking.hostName will still be '${HOST}'."
+            else
+                echo "⚠️  No hardware-substitution target for '${HOST}' on '${NATURAL_HOST}' (one of them has no"
+                echo "    hardware-configuration.nix, e.g. wsl) — proceeding with ${HOST}'s own hardware config as-is."
+            fi
             if [ "$FORCE" = true ]; then
                 echo "⚠️  --force given: activating ${HOST}'s config on this machine (${NATURAL_HOST}) without confirmation."
             else
@@ -307,7 +344,7 @@ git diff -U0 ./*glob*.nix
 echo "NixOS Rebuilding ${HOST_IDENTIFIER} (subcommand: ${REBUILD_SUBCOMMAND})..."
 
 # Build the nixos-rebuild command with optional verbose flags
-NIXOS_CMD="sudo nixos-rebuild ${REBUILD_SUBCOMMAND} --flake .#${HOST}"
+NIXOS_CMD="sudo nixos-rebuild ${REBUILD_SUBCOMMAND} --flake .#${FLAKE_TARGET}"
 if [ "$VERBOSE" = true ]; then
   NIXOS_CMD="$NIXOS_CMD --show-trace"
 fi
