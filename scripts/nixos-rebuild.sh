@@ -3,6 +3,25 @@
 # Parse command-line arguments
 VERBOSE=false
 REBUILD_SUBCOMMAND="switch"
+HOST_OVERRIDE=""
+FORCE=false
+
+print_usage() {
+    echo "Usage: $0 [-v|--verbose] [-t|--dry-activate] [-T|--test|--temp] [-b|--boot] [--dry-build] [--force] [HOST]"
+    echo "  -v, --verbose            Show full output with --show-trace"
+    echo "  -t, --dry-activate       Build but show what would be activated without activating"
+    echo "  -T, --test, --temp       Build and activate, but don't add to bootloader"
+    echo "  -b, --boot               Build and add to bootloader, activate on next boot"
+    echo "  --dry-build              Show what would be built without building"
+    echo "  --force                  Skip the confirmation prompt when activating another host's config on this machine"
+    echo "  HOST                     Target a different flake host instead of this machine's auto-detected one"
+    echo ""
+    echo "Default: switch (build, activate, and add to bootloader) for this machine's own host"
+    echo ""
+    echo "⚠️  --dry-build and --dry-activate are safe to run against any HOST (preview only, nothing is activated)."
+    echo "⚠️  switch/boot/test against a different HOST will ACTIVATE that host's config on THIS machine's"
+    echo "    hardware and require interactive confirmation (or --force)."
+}
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -26,17 +45,25 @@ while [[ $# -gt 0 ]]; do
             REBUILD_SUBCOMMAND="dry-build"
             shift
             ;;
-        *)
+        --force)
+            FORCE=true
+            shift
+            ;;
+        -*)
             echo "Unknown option: $1"
-            echo "Usage: $0 [-v|--verbose] [-t|--dry-activate] [-T|--test|--temp] [-b|--boot] [--dry-build]"
-            echo "  -v, --verbose            Show full output with --show-trace"
-            echo "  -t, --dry-activate       Build but show what would be activated without activating"
-            echo "  -T, --test, --temp       Build and activate, but don't add to bootloader"
-            echo "  -b, --boot               Build and add to bootloader, activate on next boot"
-            echo "  --dry-build              Show what would be built without building"
             echo ""
-            echo "Default: switch (build, activate, and add to bootloader)"
+            print_usage
             exit 1
+            ;;
+        *)
+            if [ -n "$HOST_OVERRIDE" ]; then
+                echo "Unknown option: $1 (host already set to '${HOST_OVERRIDE}')"
+                echo ""
+                print_usage
+                exit 1
+            fi
+            HOST_OVERRIDE="$1"
+            shift
             ;;
     esac
 done
@@ -82,10 +109,47 @@ annex_logging_disabled_notice() {
 scotty_log_event() { annex_logging_disabled_notice; }
 log_build_performance() { annex_logging_disabled_notice; }
 
-# Enhanced host detection with intelligent WSL mapping
-# Use auto-detected hostname, don't treat arguments as hostname
-export HOST=$(detect_flake_target)
+# Enhanced host detection with intelligent WSL mapping.
+# NATURAL_HOST is what this machine would build/activate with no override,
+# used below to detect when HOST_OVERRIDE points at a *different* machine.
+NATURAL_HOST=$(detect_flake_target)
+export HOST=$(detect_flake_target "$HOST_OVERRIDE")
 export HOST_IDENTIFIER=$(get_host_identifier "$HOST")
+
+# Building a foreign host's config is always safe (and how test-rebuild/test-home
+# verify the cache). Activating it is not: switch/boot/test run that config's
+# activation scripts against THIS machine's running kernel and hardware, which
+# can be wrong (different GPU drivers, disk layout, etc.) for another host's
+# profile. dry-build/dry-activate never touch real state, so they're exempt.
+if [ -n "$HOST_OVERRIDE" ] && [ "$HOST" != "$NATURAL_HOST" ]; then
+    case "$REBUILD_SUBCOMMAND" in
+        switch|boot|test)
+            if [ "$FORCE" = true ]; then
+                echo "⚠️  --force given: activating ${HOST}'s config on this machine (${NATURAL_HOST}) without confirmation."
+            else
+                echo ""
+                echo "⚠️  WARNING: this will run 'nixos-rebuild ${REBUILD_SUBCOMMAND}' for host '${HOST}', but you're"
+                echo "    physically on '${NATURAL_HOST}'. That activates ${HOST}'s config (drivers, disk layout,"
+                echo "    services) against this machine's actual hardware, not ${HOST}'s."
+                echo ""
+                if [ -t 0 ] && [ -t 1 ]; then
+                    read -p "Continue activating '${HOST}' on '${NATURAL_HOST}'? [y/N] " -n 1 -r
+                    echo
+                    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                        echo "Aborted. Use '--dry-activate' for a safe preview, or pass --force to skip this prompt."
+                        exit 1
+                    fi
+                else
+                    echo "❌ Non-interactive terminal - refusing to activate a different host's config without --force."
+                    exit 1
+                fi
+            fi
+            ;;
+        *)
+            : # dry-build / dry-activate are previews only — no state is touched
+            ;;
+    esac
+fi
 
 authenticate_sudo() {
     echo "🔐 NixOS rebuild requires sudo access for ${HOST_IDENTIFIER}..."
