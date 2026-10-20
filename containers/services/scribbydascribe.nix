@@ -28,7 +28,7 @@
   ...
 }:
 let
-  imageFile = inputs.scribbydascribe.packages.${pkgs.system}.default;
+  imageFile = inputs.scribbydascribe.packages.${pkgs.stdenv.hostPlatform.system}.default;
 in
 {
   sops.secrets.scribbydascribe-env = { };
