@@ -2,6 +2,7 @@
   inputs,
   configLib,
   lib,
+  pkgs,
   ...
 }:
 # roll-flow (rf) Home-Manager module, redistributed via gigpkgs.
@@ -33,7 +34,7 @@ in
 
   programs.roll-flow = {
     enable = true;
-    package = pkgs.unstable.roll-flow
+    package = pkgs.unstable.roll-flow;
     settings = {
       inherit (configVars) username;
       hosts = builtins.attrNames hostActive; # [ ganoslal merlin spacedock wsl ]
