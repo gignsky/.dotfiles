@@ -10,7 +10,11 @@ while [[ $# -gt 0 ]]; do
             VERBOSE=true
             shift
             ;;
-        -t|--test)
+        -t|--dry-activate)
+            REBUILD_SUBCOMMAND="dry-activate"
+            shift
+            ;;
+        -T|--test|--temp)
             REBUILD_SUBCOMMAND="test"
             shift
             ;;
@@ -22,18 +26,14 @@ while [[ $# -gt 0 ]]; do
             REBUILD_SUBCOMMAND="dry-build"
             shift
             ;;
-        --dry-activate)
-            REBUILD_SUBCOMMAND="dry-activate"
-            shift
-            ;;
         *)
             echo "Unknown option: $1"
-            echo "Usage: $0 [-v|--verbose] [-t|--test] [-b|--boot] [--dry-build] [--dry-activate]"
-            echo "  -v, --verbose       Show full output with --show-trace"
-            echo "  -t, --test          Build and activate, but don't add to bootloader"
-            echo "  -b, --boot          Build and add to bootloader, activate on next boot"
-            echo "  --dry-build         Show what would be built without building"
-            echo "  --dry-activate      Build but show what would be activated without activating"
+            echo "Usage: $0 [-v|--verbose] [-t|--dry-activate] [-T|--test|--temp] [-b|--boot] [--dry-build]"
+            echo "  -v, --verbose            Show full output with --show-trace"
+            echo "  -t, --dry-activate       Build but show what would be activated without activating"
+            echo "  -T, --test, --temp       Build and activate, but don't add to bootloader"
+            echo "  -b, --boot               Build and add to bootloader, activate on next boot"
+            echo "  --dry-build              Show what would be built without building"
             echo ""
             echo "Default: switch (build, activate, and add to bootloader)"
             exit 1

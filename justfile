@@ -151,6 +151,10 @@ rebuild-full args="":
 	just rebuild {{args}}
 	just home {{args}}
 
+# Dry-activate rebuild: build and show what would be activated, without activating
+rebuild-test args="":
+	just rebuild -t {{args}}
+
 
 # Test rebuild commands (dry-run evaluation without applying)
 # Build (never activate) a host's system closure, then push it to the cache so
