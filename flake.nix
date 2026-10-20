@@ -170,7 +170,15 @@
       # Switched from `inputs.gigpkgs.*` to `inputs.nixpkgs.*` with the swap to native `gigpkgs`
       # as `nixpkgs` -- TODO remove this comment later should everything work out (07/20/2026)
       customPkgs = import ./pkgs { pkgs = inputs.nixpkgs.legacyPackages.${system}; };
-      pkgs = inputs.nixpkgs.legacyPackages.${system} // customPkgs;
+      # `pkgs.unstable` mirrors the `unstable-packages` overlay in overlays/default.nix.
+      pkgs = (inputs.nixpkgs.legacyPackages.${system} // customPkgs) // {
+        unstable =
+          (import inputs.nixpkgs-unstable {
+            inherit system;
+            config.allowUnfree = true;
+          }).extend
+            inputs.nixpkgs-unstable.overlays.default;
+      };
     in
     {
       # NixOS configuration entrypoint
@@ -534,8 +542,8 @@
             locker
             #necessary for bootstrapping
             ripgrep
-            unstable.roll-flow
             ;
+          inherit (pkgs.unstable) roll-flow;
         };
 
         shellHook = ''
