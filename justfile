@@ -71,7 +71,7 @@ dont-fuck-my-build:
   nix flake update nix-secrets --commit-lock-file
   @nix-shell -p lolcat --run 'echo "Very little chance your build is fucked! 👍" | lolcat 2> /dev/null'
 
-switch args="":
+switch *args:
 	just rebuild {{args}}
 	just home {{args}}
 
@@ -135,24 +135,24 @@ rebuild-post:
 	-just cache-push /run/current-system
 
 # Rebuild the system
-rebuild args="":
+rebuild *args:
 	just rebuild-pre
-	@nix-shell -p lolcat --run 'echo "[REBUILD] Attempting Rebuild..." | lolcat' 2> /dev/null 
+	@nix-shell -p lolcat --run 'echo "[REBUILD] Attempting Rebuild..." | lolcat' 2> /dev/null
 	nix run .#nixos-rebuild -- {{args}}
 	just rebuild-post
 
 # Rebuild-full with new shell
-rebuild-full-new args="":
+rebuild-full-new *args:
         just rebuild-full {{args}}
         nu
 
 # Rebuild the system and check sops and home manager
-rebuild-full args="":
+rebuild-full *args:
 	just rebuild {{args}}
 	just home {{args}}
 
 # Dry-activate rebuild: build and show what would be activated, without activating
-rebuild-test args="":
+rebuild-test *args:
 	just rebuild -t {{args}}
 
 
