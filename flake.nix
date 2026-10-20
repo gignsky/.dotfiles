@@ -534,7 +534,7 @@
             locker
             #necessary for bootstrapping
             ripgrep
-            roll-flow
+            unstable.roll-flow
             ;
         };
 
