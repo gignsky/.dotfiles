@@ -82,6 +82,11 @@
 
     avec-moi.url = "github:gignsky/avecmoi";
 
+    # giglab.dev -- interim image only (static-web-server over the Astro
+    # build); no Rust keeper/container-config.nix/inputMan discovery yet.
+    # See containers/services/giglab-dev.nix.
+    giglab-dev.url = "git+https://github.com/gignsky/giglab.dev?ref=master";
+
     # Discord voice-call recorder/transcriber, run as a container on spacedock
     scribbydascribe = {
       url = "github:gignsky/scribbydascribe/master";
