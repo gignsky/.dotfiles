@@ -90,8 +90,8 @@
         exit 1
       fi
 
-      # Captured first so `-e` fails closed on a git error (e.g. dubious ownership running as root here) instead of $(...) going empty and passing silently; --no-optional-locks avoids fighting interactive roll-flow for .git/index.lock.
-      status=$(git -c safe.directory="$dotfiles" -C "$dotfiles" --no-optional-locks status --porcelain)
+      # Captured first so `-e` fails closed on a git error (e.g. dubious ownership running as root here) instead of $(...) going empty and passing silently; --no-optional-locks avoids fighting interactive roll-flow for .git/index.lock; core.excludesFile points at gig's own global ignore (root's $HOME has none) so this doesn't flag gig-ignored cruft as dirty.
+      status=$(git -c safe.directory="$dotfiles" -c core.excludesFile=/home/gig/.config/git/ignore -C "$dotfiles" --no-optional-locks status --porcelain)
       if [ -n "$status" ]; then
         echo "$dotfiles is dirty, refusing to switch against it" >&2
         exit 1
