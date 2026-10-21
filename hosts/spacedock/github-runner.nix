@@ -35,6 +35,14 @@
     "kottonmouth/cloudflare-api-token" = {
       restartUnits = [ "github-runner-kottonmouth.service" ];
     };
+    # Read-only GitHub deploy key for kottonmouth-rolling-deploy.service below
+    # -- root has no SSH credentials of its own, and gig's personal key only
+    # exists in a per-session tmpfs (home-manager sops-nix), so it isn't
+    # available when gig is logged out.
+    "kottonmouth/rolling-deploy-key" = {
+      owner = "root";
+      mode = "0400";
+    };
   };
   services.github-runners = {
     gigpkgs = {
@@ -63,29 +71,77 @@
     };
   };
 
-  # Scoped to exactly what rolling-preview.yml runs as root -- not blanket
-  # sudo for the runner's service user. Interpolating `${pkgs.foo}/bin/...`
-  # (the same `pkgs.nixos-rebuild` as extraPackages above) rather than a
-  # `/run/current-system/sw/bin/...` path, so sudoers' exact-argument match
-  # lines up with whatever nixos-rebuild the runner actually resolves on its
-  # PATH -- a wrapper/PATH path wouldn't match a hardcoded store path.
-  security.sudo.extraRules = [
-    {
-      users = [ "github-runner-kottonmouth" ];
-      commands = [
-        {
-          command = "${pkgs.nixos-rebuild}/bin/nixos-rebuild switch --flake /home/gig/.dotfiles#spacedock";
-          options = [ "NOPASSWD" ];
+  # Privileged refresh+rebuild for deploy-beta, run as real root on demand via `systemctl start` (the sandboxed runner above can't gain root itself -- see the polkit rule below).
+  systemd.services."kottonmouth-rolling-deploy" = {
+    description = "Switch spacedock to the current tip of kottonmouth's rolling branch";
+    restartIfChanged = false;
+    unitConfig.X-StopOnRemoval = false;
+    serviceConfig.Type = "oneshot";
+    environment =
+      config.nix.envVars
+      // {
+        inherit (config.environment.sessionVariables) NIX_PATH;
+        HOME = "/root";
+        GIT_SSH_COMMAND = "${config.programs.ssh.package}/bin/ssh -i ${
+          config.sops.secrets."kottonmouth/rolling-deploy-key".path
+        } -o IdentitiesOnly=yes";
+      }
+      // config.networking.proxy.envVars;
+    path = with pkgs; [
+      coreutils
+      gnutar
+      xz.bin
+      gzip
+      gitMinimal
+      config.nix.package.out
+      config.programs.ssh.package
+    ];
+    script = ''
+      dotfiles=/home/gig/.dotfiles
+
+      # A branch that merely has github-runner.nix but not this unit (e.g. mid-graduation) would switch to a config missing the runner/polkit/unit entirely.
+      if ! grep -q kottonmouth-rolling-deploy "$dotfiles/hosts/spacedock/github-runner.nix" 2>/dev/null; then
+        echo "checked-out branch at $dotfiles lacks the deploy unit, refusing" >&2
+        exit 1
+      fi
+
+      # Captured first so `-e` fails closed on a git error (e.g. dubious ownership running as root here) instead of $(...) going empty and passing silently; --no-optional-locks avoids fighting interactive roll-flow for .git/index.lock; core.excludesFile points at gig's own global ignore (root's $HOME has none) so this doesn't flag gig-ignored cruft as dirty.
+      status=$(git -c safe.directory="$dotfiles" -c core.excludesFile=/home/gig/.config/git/ignore -C "$dotfiles" --no-optional-locks status --porcelain)
+      if [ -n "$status" ]; then
+        echo "$dotfiles is dirty, refusing to switch against it" >&2
+        exit 1
+      fi
+
+      # nix's flake fetcher opens this repo via libgit2, which enforces the same gig-owned/root-reading ownership check as `git` itself -- unlike the `-c` above, that needs the exception in root's actual gitconfig, not a one-off flag.
+      git config --global --get-all safe.directory 2>/dev/null | grep -qx "$dotfiles" \
+        || git config --global --add safe.directory "$dotfiles"
+
+      # --refresh: nix caches a ref's resolved rev for tarball-ttl (1h) otherwise, which could deploy a stale `rolling` push and still report success.
+      ${config.system.build.nixos-rebuild}/bin/nixos-rebuild switch \
+        --flake "$dotfiles#spacedock" \
+        --override-input kottonmouth-rolling "git+ssh://git@github.com/gignsky/kottonmouth.git?ref=rolling" \
+        --no-write-lock-file \
+        --refresh
+    '';
+  };
+
+  # Scoped to exactly these two units for exactly this user, not blanket authorization -- same pattern as modules/nixos/binary-cache/watch.nix's pokeUsers rule.
+  security.polkit = {
+    enable = true;
+    extraConfig = ''
+      polkit.addRule(function (action, subject) {
+        if (action.id !== "org.freedesktop.systemd1.manage-units" ||
+            subject.user !== "github-runner-kottonmouth") {
+          return;
         }
-        {
-          command = "${pkgs.systemd}/bin/systemctl start podman-kottonmouth-keeper-dev.service";
-          options = [ "NOPASSWD" ];
+        var allowedVerbs = {
+          "podman-kottonmouth-keeper-dev.service": [ "start", "stop" ],
+          "kottonmouth-rolling-deploy.service": [ "start" ],
+        }[action.lookup("unit")];
+        if (allowedVerbs && allowedVerbs.indexOf(action.lookup("verb")) >= 0) {
+          return polkit.Result.YES;
         }
-        {
-          command = "${pkgs.systemd}/bin/systemctl stop podman-kottonmouth-keeper-dev.service";
-          options = [ "NOPASSWD" ];
-        }
-      ];
-    }
-  ];
+      });
+    '';
+  };
 }
