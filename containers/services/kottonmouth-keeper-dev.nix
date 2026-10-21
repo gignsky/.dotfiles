@@ -44,7 +44,7 @@ in
   systemd.tmpfiles.rules = [ "d /var/lib/kottonmouth-keeper-dev 0700 ${uid} ${uid} -" ];
 
   virtualisation.oci-containers.containers.kottonmouth-keeper-dev = {
-    imageFile = inputs.kottonmouth-rolling.packages.${pkgs.system}.keeper-image;
+    imageFile = inputs.kottonmouth-rolling.packages.${pkgs.stdenv.hostPlatform.system}.keeper-image;
     # keeper-image always bakes the tag `kottonmouth-keeper:latest`, the same
     # as the main keeper's image (it's the same package attribute, just built
     # off a different flake input/ref) -- `image` has to match what the

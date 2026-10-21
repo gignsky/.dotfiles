@@ -81,29 +81,32 @@
       config.nix.package.out
       config.programs.ssh.package
     ];
+    # Private clone of the dotfiles repo owned by this unit alone (/var/lib/kottonmouth-deploy), so deploys never read gig's live checkout -- roll-flow moves that between branches mid-graduation, which used to trip the guard below (2026-10-20 23:45).
+    serviceConfig.StateDirectory = "kottonmouth-deploy";
     script = ''
-      dotfiles=/home/gig/.dotfiles
+      clone=/var/lib/kottonmouth-deploy/dotfiles
+      # Branch the deploy follows; the public repo needs no credentials, so the deploy key above stays scoped to the kottonmouth repo.
+      ref=develop
 
-      # A branch that merely has github-runner.nix but not this unit (e.g. mid-graduation) would switch to a config missing the runner/polkit/unit entirely.
-      if ! grep -q kottonmouth-rolling-deploy "$dotfiles/hosts/spacedock/github-runner.nix" 2>/dev/null; then
-        echo "checked-out branch at $dotfiles lacks the deploy unit, refusing" >&2
-        exit 1
+      if [ ! -d "$clone/.git" ]; then
+        git init --quiet "$clone"
+        git -C "$clone" remote add origin https://github.com/gignsky/.dotfiles.git
       fi
 
-      # Captured first so `-e` fails closed on a git error (e.g. dubious ownership running as root here) instead of $(...) going empty and passing silently; --no-optional-locks avoids fighting interactive roll-flow for .git/index.lock; core.excludesFile points at gig's own global ignore (root's $HOME has none) so this doesn't flag gig-ignored cruft as dirty.
-      status=$(git -c safe.directory="$dotfiles" -c core.excludesFile=/home/gig/.config/git/ignore -C "$dotfiles" --no-optional-locks status --porcelain)
-      if [ -n "$status" ]; then
-        echo "$dotfiles is dirty, refusing to switch against it" >&2
+      # Shallow fetch + hard reset: the clone is disposable and holds no local state, so there is nothing to be dirty and nothing to race.
+      git -C "$clone" fetch --quiet --depth 1 origin "$ref"
+      git -C "$clone" reset --quiet --hard FETCH_HEAD
+      git -C "$clone" clean --quiet -fdx
+
+      # A tip that merely has github-runner.nix but not this unit would switch to a config missing the runner/polkit/unit entirely.
+      if ! grep -q kottonmouth-rolling-deploy "$clone/hosts/spacedock/github-runner.nix" 2>/dev/null; then
+        echo "origin/$ref lacks the deploy unit, refusing" >&2
         exit 1
       fi
-
-      # nix's flake fetcher opens this repo via libgit2, which enforces the same gig-owned/root-reading ownership check as `git` itself -- unlike the `-c` above, that needs the exception in root's actual gitconfig, not a one-off flag.
-      git config --global --get-all safe.directory 2>/dev/null | grep -qx "$dotfiles" \
-        || git config --global --add safe.directory "$dotfiles"
 
       # --refresh: nix caches a ref's resolved rev for tarball-ttl (1h) otherwise, which could deploy a stale `rolling` push and still report success.
       ${config.system.build.nixos-rebuild}/bin/nixos-rebuild switch \
-        --flake "$dotfiles#spacedock" \
+        --flake "$clone#spacedock" \
         --override-input kottonmouth-rolling "git+ssh://git@github.com/gignsky/kottonmouth.git?ref=rolling" \
         --no-write-lock-file \
         --refresh
