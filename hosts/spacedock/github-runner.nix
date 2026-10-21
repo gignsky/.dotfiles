@@ -83,6 +83,10 @@
         exit 1
       fi
 
+      # nix's flake fetcher opens this repo via libgit2, which enforces the same gig-owned/root-reading ownership check as `git` itself -- unlike the `-c` above, that needs the exception in root's actual gitconfig, not a one-off flag.
+      git config --global --get-all safe.directory 2>/dev/null | grep -qx "$dotfiles" \
+        || git config --global --add safe.directory "$dotfiles"
+
       # --refresh: nix caches a ref's resolved rev for tarball-ttl (1h) otherwise, which could deploy a stale `rolling` push and still report success.
       ${config.system.build.nixos-rebuild}/bin/nixos-rebuild switch \
         --flake "$dotfiles#spacedock" \
