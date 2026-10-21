@@ -10,5 +10,6 @@ _: {
     ./avec-moi-app.nix
     ./scribbydascribe.nix # Discord voice transcriber — needs the `scribbydascribe-env` sops key first
     ./kottonmouth-keeper.nix # kottonmouthband.com keeper — needs its sops secrets + tunnel first
+    ./kottonmouth-keeper-dev.nix # beta.kottonmouthband.com keeper — autoStart = false; started/stopped by rolling-preview.yml
   ];
 }
