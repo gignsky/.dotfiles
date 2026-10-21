@@ -62,11 +62,16 @@
     restartIfChanged = false;
     unitConfig.X-StopOnRemoval = false;
     serviceConfig.Type = "oneshot";
-    environment = config.nix.envVars // {
-      inherit (config.environment.sessionVariables) NIX_PATH;
-      HOME = "/root";
-      GIT_SSH_COMMAND = "${config.programs.ssh.package}/bin/ssh -i ${config.sops.secrets."kottonmouth/rolling-deploy-key".path} -o IdentitiesOnly=yes";
-    } // config.networking.proxy.envVars;
+    environment =
+      config.nix.envVars
+      // {
+        inherit (config.environment.sessionVariables) NIX_PATH;
+        HOME = "/root";
+        GIT_SSH_COMMAND = "${config.programs.ssh.package}/bin/ssh -i ${
+          config.sops.secrets."kottonmouth/rolling-deploy-key".path
+        } -o IdentitiesOnly=yes";
+      }
+      // config.networking.proxy.envVars;
     path = with pkgs; [
       coreutils
       gnutar
