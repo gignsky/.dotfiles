@@ -32,6 +32,14 @@
     "kottonmouth/cloudflare-api-token" = {
       restartUnits = [ "github-runner-kottonmouth.service" ];
     };
+    # Read-only GitHub deploy key for kottonmouth-rolling-deploy.service below
+    # -- root has no SSH credentials of its own, and gig's personal key only
+    # exists in a per-session tmpfs (home-manager sops-nix), so it isn't
+    # available when gig is logged out.
+    "kottonmouth/rolling-deploy-key" = {
+      owner = "root";
+      mode = "0400";
+    };
   };
 
   services.github-runners.kottonmouth = {
@@ -57,6 +65,7 @@
     environment = config.nix.envVars // {
       inherit (config.environment.sessionVariables) NIX_PATH;
       HOME = "/root";
+      GIT_SSH_COMMAND = "${config.programs.ssh.package}/bin/ssh -i ${config.sops.secrets."kottonmouth/rolling-deploy-key".path} -o IdentitiesOnly=yes";
     } // config.networking.proxy.envVars;
     path = with pkgs; [
       coreutils
