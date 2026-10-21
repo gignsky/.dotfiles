@@ -89,16 +89,21 @@
 #      Sonarr shows them as imported, and spot-check a couple of filenames'
 #      dates against TVDB's air dates
 #      (thetvdb.com/series/wan-show, thetvdb.com/series/techquickie).
-#      - WAN Show is a live show, so Floatplane post date == air date.
-#      - Techquickie is the one to watch: LMG often posts to Floatplane as
-#        EARLY ACCESS, a day or so before the YouTube publish date TVDB
-#        records, and Sonarr's daily matching is an exact-date match. If
-#        Techquickie files sit in the folder unimported while WAN Show files
-#        import fine, that's why — it then needs a different mapping for
-#        that show (e.g. a post-processing rename against Sonarr's API, or
-#        Sonarr's manual import), not a tweak to this file.
-#      - A WAN Show mismatch, by contrast, usually means the container's TZ
-#        isn't being honored as expected.
+#      VERIFIED 2026-10-20 on the first live run: Sonarr imported both
+#      series' files via RescanSeries within minutes, and every Techquickie
+#      filename date matched Sonarr's air date (the early-access worry did
+#      not materialise: Floatplane and TVDB dates agree for that show). The
+#      one miss was a WAN Show VOD posted just after midnight Pacific and
+#      so dated Saturday — the reason TZ below is UTC-12, see its comment.
+#      Two things to know about what Sonarr sees:
+#      - The tool downloads to `<name>.partial` and muxes into `<name>.mp4`
+#        as it goes, so Sonarr can import an mp4 that is still growing. It
+#        records the size at that moment and corrects it on a later rescan;
+#        harmless, but a freshly imported episode may be unplayable for a
+#        few minutes.
+#      - `extras_downloadArtwork` plus the tool's default saveNfo and
+#        downloadCaptions put .jpg/.nfo/.en.vtt beside each video. Sonarr
+#        picks up the .vtt as a subtitle and ignores the rest.
 #      If the earliest WAN Show file is more recent than expected: the
 #      matcher above requires a specific Floatplane channel id that this
 #      creator only appears to have used from roughly 2023 onward, so the
@@ -108,6 +113,15 @@
 #        (post) => post.title?.toLowerCase().includes('- wan show')
 #      set `floatplane_videosToSearch` back to the backfill value and start
 #      the service back up.
+#
+#   If the service ever crash-loops with `Unable to authenticate with
+#   floatplane... unexpected HTTP response status code` /
+#   `OAUTH_RESPONSE_IS_NOT_CONFORM`: stop it first (`sudo systemctl stop
+#   podman-floatplane-wan-show`) so it stops hammering auth.floatplane.com,
+#   wait ~10 minutes for any 429 to clear, then check (a) the image digest
+#   below is current (see the `image` comment) and (b) `db/auth.json` is
+#   less than 90 days old — past that the refresh token is dead and step 2's
+#   interactive login has to be redone.
 #
 #   IMPORTANT: never run Sonarr's "Rename Files"/organize on these series.
 #   Floatplane-Downloader tracks each video by its exact file size at its
@@ -164,14 +178,42 @@ in
   };
 
   virtualisation.oci-containers.containers.floatplane-wan-show = {
-    image = "docker.io/inrix/floatplane-downloader:latest";
+    # Pinned by manifest-list digest, not the `latest` tag. The default
+    # `pull = "missing"` never re-pulls a tag that already exists locally, so
+    # a floating `latest` silently went stale here: the host still had a
+    # January 2026 build of 5.19.4, whose bundled Floatplane library treated
+    # every OAuth token as already expired and refreshed it before nearly
+    # every API call. ~40 refreshes in, auth.floatplane.com returned a
+    # Cloudflare 429 and the process crashed (upstream issue #290, fixed
+    # 2026-09-17). This digest is 5.19.9, built 2026-10-10, which bundles
+    # the fixed library. To bump:
+    #   nix run nixpkgs#skopeo -- inspect --no-tags docker://docker.io/inrix/floatplane-downloader:latest | jq -r .Digest
+    # paste the new digest here, switch, then `sudo systemctl restart
+    # podman-floatplane-wan-show`. (The Digest skopeo prints for a tag is the
+    # multi-arch index digest, which podman also records under RepoDigests,
+    # so the two agree.)
+    image = "docker.io/inrix/floatplane-downloader@sha256:86f5743968376ebe810409708e4e56bacb98f79f4511cc310d02b8f2bfaf5aa9";
     autoStart = true;
     environment = {
-      # LMG is Vancouver-based and WAN Show airs Friday evenings local time;
-      # using the container's own TZ for %year%/%month%/%day% keeps the date
-      # Sonarr parses in sync with the air-date TVDB recorded, instead of
-      # shifting a Friday-night release into Saturday under a US-Eastern clock.
-      TZ = "America/Vancouver";
+      # %year%/%month%/%day% come from each post's release time in the
+      # container's TZ, and Sonarr needs that date to equal TVDB's air date.
+      # UTC-12 (POSIX sign: Etc/GMT+12 IS twelve hours BEHIND UTC), not
+      # Vancouver, on purpose. Checked against the release times of the 82
+      # posts the tool had seen by 2026-10-20 (db/attachments.json):
+      #   - WAN Show airs Friday ~16:30 Pacific and the VOD is posted 2-8h
+      #     later. Under America/Vancouver 5 of 42 Friday shows (Jan 30,
+      #     Mar 13, Mar 20, Aug 28, Oct 2 2026) were posted just after
+      #     midnight Pacific and got a SATURDAY date, which Sonarr can never
+      #     match. Under UTC-12 all 42 land on the Friday; the latest such
+      #     post (09:42 UTC Sat) still has 2h18m of margin.
+      #   - Techquickie posts 14:20-23:07 UTC (business hours Pacific), so
+      #     UTC-12 gives every one of the 36 the same date Vancouver did —
+      #     and those were verified equal to Sonarr's air dates.
+      #   - Two WAN episodes were posted the following MONDAY (Jan 24 and
+      #     Mar 6 2026); no timezone fixes those — Sonarr manual import.
+      # Anything posted before 12:00 UTC (04:00 Pacific) would shift a day
+      # EARLY under this setting; nothing in either channel's history does.
+      TZ = "Etc/GMT+12";
       headless = "true";
       # %channelTitle% is the channel `title` from settings.json ("The WAN
       # Show" / "Techquickie"); each `/fp/videos/<title>` directory is a bind
@@ -198,6 +240,15 @@ in
     tmpfiles.rules = [
       "d /var/lib/floatplane-wan-show/db 0750 root root -"
     ];
+
+    # The oci-containers module gives the unit Restart=on-failure with systemd's
+    # default 100ms RestartSec. When Floatplane's auth endpoint rejects the
+    # token (rate limit, outage, or a refresh token that finally expired after
+    # its 90 days), that meant a fresh container every ~2.5s, each one hitting
+    # the OAuth endpoint again — 118 restarts in six minutes on 2026-10-20,
+    # which only deepens a 429. Two minutes between attempts still recovers
+    # from transient failures on its own, at a rate the endpoint tolerates.
+    services.podman-floatplane-wan-show.serviceConfig.RestartSec = "2min";
 
     # Sonarr import trigger. Not strictly required — Sonarr's own scheduled
     # Refresh Series task already picks up new files within its default ~12h
