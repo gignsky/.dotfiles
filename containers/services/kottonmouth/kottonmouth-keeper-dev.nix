@@ -23,6 +23,7 @@
   ...
 }:
 let
+  keeperImage = inputs.kottonmouth-rolling.packages.${pkgs.stdenv.hostPlatform.system}.keeper-image;
   # Same tunnel as kottonmouth-keeper.nix -- this file only adds one more
   # ingress hostname to it.
   tunnelId = "1a878786-561d-427c-90cd-358f1b82aea4";
@@ -44,14 +45,14 @@ in
   systemd.tmpfiles.rules = [ "d /var/lib/kottonmouth-keeper-dev 0700 ${uid} ${uid} -" ];
 
   virtualisation.oci-containers.containers.kottonmouth-keeper-dev = {
-    imageFile = inputs.kottonmouth-rolling.packages.${pkgs.system}.keeper-image;
+    imageFile = keeperImage;
     # keeper-image always bakes the tag `kottonmouth-keeper:latest`, the same
     # as the main keeper's image (it's the same package attribute, just built
     # off a different flake input/ref) -- `image` has to match what the
     # pre-start load actually tagged, or podman can't find it locally and
     # tries (and fails) to pull it from a registry instead. See
     # kottonmouth-keeper.nix for the same pattern.
-    image = "kottonmouth-keeper:latest";
+    image = "${keeperImage.imageName}:${keeperImage.imageTag}";
     # Started/stopped by rolling-preview.yml based on rolling-vs-main
     # divergence, not on boot.
     autoStart = false;
@@ -63,8 +64,21 @@ in
       GITHUB_BRANCH = "rolling";
       NOTIFY_TO = "kottonmouthband@gmail.com";
       NOTIFY_FROM = "Kottonmouth beta <keeper@kottonmouthband.com>";
+      # Served at beta.kottonmouthband.com/admin: the beta Worker proxies
+      # /admin/* here, stripping the prefix, so links must be emitted with it.
+      # PROXY_SECRET (must equal the Worker's ADMIN_PROXY_SECRET) goes in the
+      # kottonmouth-keeper-dev-env sops file, not here.
+      BASE_PATH = "/admin";
+      # On every start, import main's subscribers/bookings/RSVPs (read-only;
+      # beta rows win; never written back).
+      MAIN_DB_SEED = "/seed/keeper.db";
     };
-    volumes = [ "/var/lib/kottonmouth-keeper-dev:/data" ];
+    volumes = [
+      "/var/lib/kottonmouth-keeper-dev:/data"
+      # Not `:ro`: reading a WAL-mode database needs to touch its -shm file.
+      # The keeper opens the file with SQLite `mode=ro`, so it can't write rows.
+      "/var/lib/kottonmouth-keeper:/seed"
+    ];
     ports = [ "127.0.0.1:${toString adminPort}:8790/tcp" ];
   };
 

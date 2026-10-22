@@ -19,10 +19,19 @@
   # When applied, the unstable nixpkgs set (declared in the flake inputs) will
   # be accessible through 'pkgs.unstable'
   unstable-packages = final: _prev: {
-    unstable = import inputs.nixpkgs-unstable {
-      inherit (final.stdenv.hostPlatform) system;
-      config.allowUnfree = true;
-    };
+    unstable =
+      let
+        inherit (final.stdenv.hostPlatform) system;
+      in
+      (import inputs.nixpkgs-unstable {
+        inherit system;
+        config.allowUnfree = true;
+      }).extend
+        # `import <gigpkgs> {}` goes through gigpkgs's default.nix shim, which doesn't
+        # pass `inputs` to pkgs/inputs/*, so input-backed packages (roll-flow) are
+        # broken there. Re-splice them from the flake `packages` output, which does.
+        # (`.extend` so this lands after the shim's own overlay.)
+        (_: _: { inherit (inputs.nixpkgs-unstable.packages.${system}) roll-flow; });
   };
   # local-packages = final: _prev: {
   #   unstable = import inputs.nixpkgs-local {
