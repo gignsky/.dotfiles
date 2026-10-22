@@ -10,8 +10,6 @@ _: {
     ./floatplane-wan-show.nix # Floatplane downloader (WAN Show + Techquickie) → Sonarr, see file header
     ./avec-moi-app.nix
     ./scribbydascribe.nix # Discord voice transcriber — needs the `scribbydascribe-env` sops key first
-    ./kottonmouth-keeper.nix # kottonmouthband.com keeper — needs its sops secrets + tunnel first
-    ./kottonmouth-keeper-dev.nix # beta.kottonmouthband.com keeper — autoStart = false; started/stopped by rolling-preview.yml
-    ./kottonmouth-dns.nix # DNS records for the tunnel hostnames above — needs a DNS-edit Cloudflare token
+    ./kottonmouth # kottonmouthband.com keeper (main + beta) and tunnel DNS, see kottonmouth/default.nix
   ];
 }
