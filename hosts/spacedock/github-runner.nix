@@ -52,6 +52,14 @@
     extraPackages = with pkgs; [
       nodejs_22
       git
+      # kottonmouth's rolling-preview.yml check-divergence job builds the
+      # keeper with plain `cargo build` (faster than `nix build` for the
+      # incremental case -- Nix recompiles the whole dependency graph on
+      # every new derivation, Cargo's target/ cache doesn't). rusqlite's
+      # `bundled` feature compiles its own sqlite3.c, hence gcc.
+      cargo
+      rustc
+      gcc
     ];
     serviceOverrides.EnvironmentFile = config.sops.secrets."kottonmouth/cloudflare-api-token".path;
   };
