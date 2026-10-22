@@ -34,7 +34,7 @@
   # # wrap packages overlay example
   # wrap-packages = final: _prev: {
   #   wrap = {
-  #     recursive-tarballs = inputs.wrap.packages.${final.system}.default;
+  #     recursive-tarballs = inputs.wrap.packages.${final.stdenv.hostPlatform.system}.default;
   #   };
   # };
 }

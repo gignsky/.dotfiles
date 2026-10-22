@@ -182,6 +182,7 @@
       # as `nixpkgs` -- TODO remove this comment later should everything work out (07/20/2026)
       customPkgs = import ./pkgs { pkgs = inputs.nixpkgs.legacyPackages.${system}; };
       pkgs = inputs.nixpkgs.legacyPackages.${system} // customPkgs;
+      unstable = inputs.nixpkgs-unstable.legacyPackages.${system};
     in
     {
       # NixOS configuration entrypoint
@@ -537,16 +538,15 @@
             deadnix
             nix
             fzf
-            #unstable packages
-            # unstable.statix
             # personal packages
             quick-results
             upjust
             locker
             #necessary for bootstrapping
             ripgrep
-            roll-flow
             ;
+          #unstable packages
+          inherit (unstable) roll-flow;
         };
 
         shellHook = ''
