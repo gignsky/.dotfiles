@@ -102,7 +102,10 @@ in
       Type = "oneshot";
       RemainAfterExit = true;
       EnvironmentFile = config.sops.secrets."kottonmouth/cloudflare-api-token".path;
-      ExecStart = "${lib.getExe upsert} ${lib.escapeShellArgs hosts}";
+      # Leading `-`: a failed upsert is logged (journalctl -u kottonmouth-dns)
+      # but doesn't fail the unit, so a DNS/token problem can't make
+      # `nixos-rebuild switch` exit non-zero and take the rolling deploy with it.
+      ExecStart = "-${lib.getExe upsert} ${lib.escapeShellArgs hosts}";
       DynamicUser = true;
     };
   };
