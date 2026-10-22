@@ -63,8 +63,21 @@ in
       GITHUB_BRANCH = "rolling";
       NOTIFY_TO = "kottonmouthband@gmail.com";
       NOTIFY_FROM = "Kottonmouth beta <keeper@kottonmouthband.com>";
+      # Served at beta.kottonmouthband.com/admin: the beta Worker proxies
+      # /admin/* here, stripping the prefix, so links must be emitted with it.
+      # PROXY_SECRET (must equal the Worker's ADMIN_PROXY_SECRET) goes in the
+      # kottonmouth-keeper-dev-env sops file, not here.
+      BASE_PATH = "/admin";
+      # On every start, import main's subscribers/bookings/RSVPs (read-only;
+      # beta rows win; never written back).
+      MAIN_DB_SEED = "/seed/keeper.db";
     };
-    volumes = [ "/var/lib/kottonmouth-keeper-dev:/data" ];
+    volumes = [
+      "/var/lib/kottonmouth-keeper-dev:/data"
+      # Not `:ro`: reading a WAL-mode database needs to touch its -shm file.
+      # The keeper opens the file with SQLite `mode=ro`, so it can't write rows.
+      "/var/lib/kottonmouth-keeper:/seed"
+    ];
     ports = [ "127.0.0.1:${toString adminPort}:8790/tcp" ];
   };
 
