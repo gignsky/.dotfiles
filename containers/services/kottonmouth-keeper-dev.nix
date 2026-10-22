@@ -23,6 +23,7 @@
   ...
 }:
 let
+  keeperImage = inputs.kottonmouth-rolling.packages.${pkgs.stdenv.hostPlatform.system}.keeper-image;
   # Same tunnel as kottonmouth-keeper.nix -- this file only adds one more
   # ingress hostname to it.
   tunnelId = "1a878786-561d-427c-90cd-358f1b82aea4";
@@ -44,14 +45,14 @@ in
   systemd.tmpfiles.rules = [ "d /var/lib/kottonmouth-keeper-dev 0700 ${uid} ${uid} -" ];
 
   virtualisation.oci-containers.containers.kottonmouth-keeper-dev = {
-    imageFile = inputs.kottonmouth-rolling.packages.${pkgs.stdenv.hostPlatform.system}.keeper-image;
+    imageFile = keeperImage;
     # keeper-image always bakes the tag `kottonmouth-keeper:latest`, the same
     # as the main keeper's image (it's the same package attribute, just built
     # off a different flake input/ref) -- `image` has to match what the
     # pre-start load actually tagged, or podman can't find it locally and
     # tries (and fails) to pull it from a registry instead. See
     # kottonmouth-keeper.nix for the same pattern.
-    image = "kottonmouth-keeper:latest";
+    image = "${keeperImage.imageName}:${keeperImage.imageTag}";
     # Started/stopped by rolling-preview.yml based on rolling-vs-main
     # divergence, not on boot.
     autoStart = false;
