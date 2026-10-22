@@ -32,6 +32,13 @@
     "kottonmouth/cloudflare-api-token" = {
       restartUnits = [ "github-runner-kottonmouth.service" ];
     };
+    # Beta Worker secrets for rolling-preview.yml's "Restore beta Worker
+    # secrets" step, as EnvironmentFile lines: BETA_ADMIN_PROXY_SECRET,
+    # BETA_KEEPER_TOKEN, BETA_RSVP_SALT, optional BETA_TURNSTILE_SECRET. Values
+    # must match kottonmouth-keeper-dev-env (PROXY_SECRET, KEEPER_TOKEN).
+    "kottonmouth/beta-worker-secrets" = {
+      restartUnits = [ "github-runner-kottonmouth.service" ];
+    };
     # Read-only GitHub deploy key for kottonmouth-rolling-deploy.service below
     # -- root has no SSH credentials of its own, and gig's personal key only
     # exists in a per-session tmpfs (home-manager sops-nix), so it isn't
@@ -53,7 +60,10 @@
       nodejs_22
       git
     ];
-    serviceOverrides.EnvironmentFile = config.sops.secrets."kottonmouth/cloudflare-api-token".path;
+    serviceOverrides.EnvironmentFile = [
+      config.sops.secrets."kottonmouth/cloudflare-api-token".path
+      config.sops.secrets."kottonmouth/beta-worker-secrets".path
+    ];
   };
 
   # Privileged refresh+rebuild for deploy-beta, run as real root on demand via `systemctl start` (the sandboxed runner above can't gain root itself -- see the polkit rule below).
