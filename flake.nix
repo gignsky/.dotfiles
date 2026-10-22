@@ -95,6 +95,17 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Same keeper image, built off the `rolling` branch instead of `main` --
+    # the dev keeper behind beta.kottonmouthband.com. See
+    # containers/services/kottonmouth-keeper-dev.nix. Updated with
+    # `nix flake update kottonmouth-rolling` by rolling-preview.yml whenever
+    # `rolling` diverges from `main`, not on a fixed schedule like the
+    # `main` input above.
+    kottonmouth-rolling = {
+      url = "git+ssh://git@github.com/gignsky/kottonmouth.git?ref=rolling";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # # tax-matrix - currently on develop branch
     # tax-matrix = {
     #   url = "github:gignsky/tax-matrix/develop";
@@ -171,6 +182,7 @@
       # as `nixpkgs` -- TODO remove this comment later should everything work out (07/20/2026)
       customPkgs = import ./pkgs { pkgs = inputs.nixpkgs.legacyPackages.${system}; };
       pkgs = inputs.nixpkgs.legacyPackages.${system} // customPkgs;
+      unstable = inputs.nixpkgs-unstable.legacyPackages.${system};
     in
     {
       # NixOS configuration entrypoint
@@ -526,16 +538,15 @@
             deadnix
             nix
             fzf
-            #unstable packages
-            # unstable.statix
             # personal packages
             quick-results
             upjust
             locker
             #necessary for bootstrapping
             ripgrep
-            roll-flow
             ;
+          #unstable packages
+          inherit (unstable) roll-flow;
         };
 
         shellHook = ''
