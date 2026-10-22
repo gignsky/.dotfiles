@@ -60,6 +60,7 @@
 
   # Git
   lg = "lazygit";
+  gpp = "git push --set-upstream origin HEAD"; # push new local branch, same name on origin (zsh + nushell safe)
 
   # Keygen
   new-age = "nix-shell -p age --run 'age-keygen -o key.txt'";

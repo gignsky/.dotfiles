@@ -7,8 +7,11 @@ _: {
   imports = [
     # ./pihole.nix # Pi-hole DNS — runs as a service via the container engine
     ./tdarr-node.nix # Tdarr node — needs CIFS mounts + samba creds first
+    ./floatplane-wan-show.nix # Floatplane downloader (WAN Show + Techquickie) → Sonarr, see file header
     ./avec-moi-app.nix
     ./scribbydascribe.nix # Discord voice transcriber — needs the `scribbydascribe-env` sops key first
     ./kottonmouth-keeper.nix # kottonmouthband.com keeper — needs its sops secrets + tunnel first
+    ./kottonmouth-keeper-dev.nix # beta.kottonmouthband.com keeper — autoStart = false; started/stopped by rolling-preview.yml
+    ./kottonmouth-dns.nix # DNS records for the tunnel hostnames above — needs a DNS-edit Cloudflare token
   ];
 }
