@@ -2075,11 +2075,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1791488971,
-        "narHash": "sha256-sdBp3maBQl68czW0n/C7qqKS9CgovRDk8ShJnKER/Mg=",
+        "lastModified": 1792689425,
+        "narHash": "sha256-B9nx+gyn8hBnwer7qfhG0U7TJn1umJv2W3aBsMfFBvs=",
         "ref": "rolling",
-        "rev": "75cbc2553c1fbd0b076c20467570ceacebe467a5",
-        "revCount": 90,
+        "rev": "15dc042aed0841e4f21a2556c5b13c6c4022c0e3",
+        "revCount": 128,
         "type": "git",
         "url": "ssh://git@github.com/gignsky/kottonmouth.git"
       },
