@@ -26,6 +26,9 @@
 }:
 {
   sops.secrets = {
+    "gigpkgs/github-runner-token" = {
+      restartUnits = [ "github-runner-gigpkgs.service" ];
+    };
     "kottonmouth/github-runner-token" = {
       restartUnits = [ "github-runner-kottonmouth.service" ];
     };
@@ -48,30 +51,37 @@
       mode = "0400";
     };
   };
-
-  services.github-runners.kottonmouth = {
-    enable = true;
-    url = "https://github.com/gignsky/kottonmouth";
-    tokenFile = config.sops.secrets."kottonmouth/github-runner-token".path;
-    # Default labels already include self-hosted/Linux/X64; this is what
-    # `runs-on: [self-hosted, spacedock]` in rolling-preview.yml matches on.
-    extraLabels = [ "spacedock" ];
-    extraPackages = with pkgs; [
-      nodejs_22
-      git
-      # kottonmouth's rolling-preview.yml check-divergence job builds the
-      # keeper with plain `cargo build` (faster than `nix build` for the
-      # incremental case -- Nix recompiles the whole dependency graph on
-      # every new derivation, Cargo's target/ cache doesn't). rusqlite's
-      # `bundled` feature compiles its own sqlite3.c, hence gcc.
-      cargo
-      rustc
-      gcc
-    ];
-    serviceOverrides.EnvironmentFile = [
-      config.sops.secrets."kottonmouth/cloudflare-api-token".path
-      config.sops.secrets."kottonmouth/beta-worker-secrets".path
-    ];
+  services.github-runners = {
+    gigpkgs = {
+      enable = true;
+      url = "https://github.com/gignsky/gigpkgs";
+      tokenFile = config.sops.secrets."gigpkgs/github-runner-token".path;
+      extraLabels = [ "spacedock" ];
+      extraPackages = with pkgs; [
+        gnused
+        gnugrep
+        cargo
+        rustc
+        gcc
+      ];
+    };
+    kottonmouth = {
+      enable = true;
+      url = "https://github.com/gignsky/kottonmouth";
+      tokenFile = config.sops.secrets."kottonmouth/github-runner-token".path;
+      # Default labels already include self-hosted/Linux/X64; this is what
+      # `runs-on: [self-hosted, spacedock]` in rolling-preview.yml matches on.
+      extraLabels = [ "spacedock" ];
+      extraPackages = with pkgs; [
+        nodejs_22
+        nixos-rebuild
+        git
+        cargo
+        rustc
+        gcc
+      ];
+      serviceOverrides.EnvironmentFile = config.sops.secrets."kottonmouth/cloudflare-api-token".path;
+    };
   };
 
   # Privileged refresh+rebuild for deploy-beta, run as real root on demand via `systemctl start` (the sandboxed runner above can't gain root itself -- see the polkit rule below).
