@@ -42,9 +42,17 @@ let
       api=https://api.cloudflare.com/client/v4
       auth="Authorization: Bearer $CLOUDFLARE_API_TOKEN"
 
+      # Prints the response body; on an API error, logs Cloudflare's own error
+      # list (curl -f would hide it behind a bare "returned error: 403").
       call() { # method path [json-body]
-        curl -fsS -X "$1" -H "$auth" -H "Content-Type: application/json" \
-          ''${3:+--data "$3"} "$api$2"
+        local out
+        out=$(curl -sS -X "$1" -H "$auth" -H "Content-Type: application/json" \
+          ''${3:+--data "$3"} "$api$2")
+        if ! jq -e '.success' <<<"$out" >/dev/null 2>&1; then
+          echo "Cloudflare API $1 $2 failed: $(jq -c '.errors // .' <<<"$out" 2>/dev/null || echo "$out")" >&2
+          return 1
+        fi
+        printf '%s' "$out"
       }
 
       zone_id=$(call GET "/zones?name=${zone}" | jq -er '.result[0].id')
