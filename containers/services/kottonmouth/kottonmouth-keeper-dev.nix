@@ -1,29 +1,34 @@
 # beta.kottonmouthband.com keeper -- same service as kottonmouth-keeper.nix,
 # but tracking the `rolling` branch instead of `main`, behind the beta
-# wrangler environment instead of production. Packaged from the
-# `kottonmouth-rolling` flake input (`packages.<system>.keeper-image`, same
-# derivation as the main keeper, built off a different ref).
+# wrangler environment instead of production. The image is NOT a flake
+# input: kottonmouth-rolling-deploy.service (hosts/spacedock/github-runner.nix)
+# builds `keeper-image` off rolling's tip at runtime and copies it into podman
+# as `imageRef` below, so beta deploys never rebuild or switch the system and
+# can't revert whatever roll branch spacedock is currently on.
 #
 # Unlike the main keeper, this one is NOT always on: `autoStart = false`.
 # It only runs while `rolling` differs from `main` -- there's nothing to
 # preview once a roll has been promoted. rolling-preview.yml (in the
 # kottonmouth repo) starts and stops `podman-kottonmouth-keeper-dev.service`
 # via a self-hosted Actions runner on this host (see ./github-runner.nix),
-# refreshing the `kottonmouth-rolling` flake input and switching first so
-# the running image always matches rolling's current HEAD.
+# running the deploy unit first so the image matches rolling's current HEAD.
+#
+# On a fresh host (or after `podman image prune -a`) the image doesn't exist
+# until the deploy unit has run once: `systemctl start kottonmouth-rolling-deploy`.
 #
 # Inbound: none from the LAN, same as the main keeper -- loopback only,
 # reached through the *same* cloudflared tunnel on a second hostname. No
 # second tunnel/credentials needed; NixOS merges `services.cloudflared.
 # tunnels.<id>.ingress` across files.
 {
-  inputs,
   config,
-  pkgs,
   ...
 }:
 let
-  keeperImage = inputs.kottonmouth-rolling.packages.${pkgs.stdenv.hostPlatform.system}.keeper-image;
+  # Loaded by kottonmouth-rolling-deploy.service under its own name -- the
+  # image bakes `kottonmouth-keeper:latest`, the main keeper's tag, so a plain
+  # `podman load` would clobber it.
+  imageRef = "localhost/kottonmouth-keeper-dev:rolling";
   # Same tunnel as kottonmouth-keeper.nix -- this file only adds one more
   # ingress hostname to it.
   tunnelId = "1a878786-561d-427c-90cd-358f1b82aea4";
@@ -45,14 +50,9 @@ in
   systemd.tmpfiles.rules = [ "d /var/lib/kottonmouth-keeper-dev 0700 ${uid} ${uid} -" ];
 
   virtualisation.oci-containers.containers.kottonmouth-keeper-dev = {
-    imageFile = keeperImage;
-    # keeper-image always bakes the tag `kottonmouth-keeper:latest`, the same
-    # as the main keeper's image (it's the same package attribute, just built
-    # off a different flake input/ref) -- `image` has to match what the
-    # pre-start load actually tagged, or podman can't find it locally and
-    # tries (and fails) to pull it from a registry instead. See
-    # kottonmouth-keeper.nix for the same pattern.
-    image = "${keeperImage.imageName}:${keeperImage.imageTag}";
+    image = imageRef;
+    # Local-only image; never try a registry.
+    pull = "never";
     # Started/stopped by rolling-preview.yml based on rolling-vs-main
     # divergence, not on boot.
     autoStart = false;
