@@ -49,6 +49,23 @@
         "type": "github"
       }
     },
+    "christina-website": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1792732144,
+        "narHash": "sha256-6f4MJD+IehUVVBMwYTcEPQnh7ukBFCWDUkH1NDk0gU8=",
+        "ref": "rolling",
+        "rev": "db6501d04e1ea9a8fb8a324eb97deb0056f2e631",
+        "revCount": 56,
+        "type": "git",
+        "url": "ssh://git@github.com/gignsky/christina-website.git"
+      },
+      "original": {
+        "ref": "rolling",
+        "type": "git",
+        "url": "ssh://git@github.com/gignsky/christina-website.git"
+      }
+    },
     "claude-desktop": {
       "inputs": {
         "flake-utils": "flake-utils_2",
@@ -3889,6 +3906,7 @@
     "root": {
       "inputs": {
         "avec-moi": "avec-moi",
+        "christina-website": "christina-website",
         "fancy-fonts": "fancy-fonts",
         "git-aliases": "git-aliases",
         "home-manager": [
