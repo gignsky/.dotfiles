@@ -80,7 +80,10 @@
         rustc
         gcc
       ];
-      serviceOverrides.EnvironmentFile = config.sops.secrets."kottonmouth/cloudflare-api-token".path;
+      serviceOverrides.EnvironmentFile = [
+        config.sops.secrets."kottonmouth/cloudflare-api-token".path
+        config.sops.secrets."kottonmouth/beta-worker-secrets".path
+      ];
     };
   };
 
