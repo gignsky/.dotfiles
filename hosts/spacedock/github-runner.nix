@@ -20,6 +20,7 @@
 # convention as the oci-container `environmentFiles` secrets elsewhere in
 # this repo) and loaded into the runner's service environment below.
 {
+  inputs,
   config,
   pkgs,
   ...
@@ -80,20 +81,23 @@
         rustc
         gcc
       ];
-      serviceOverrides.EnvironmentFile = config.sops.secrets."kottonmouth/cloudflare-api-token".path;
+      serviceOverrides.EnvironmentFile = [
+        config.sops.secrets."kottonmouth/cloudflare-api-token".path
+        config.sops.secrets."kottonmouth/beta-worker-secrets".path
+      ];
     };
   };
 
-  # Privileged refresh+rebuild for deploy-beta, run as real root on demand via `systemctl start` (the sandboxed runner above can't gain root itself -- see the polkit rule below).
+  # Privileged image refresh for deploy-beta, run as real root on demand via `systemctl start` (the sandboxed runner above can't gain root itself -- see the polkit rule below).
+  # Builds only the dev keeper's image off rolling's tip and loads it into podman -- no nixos-rebuild, so a beta deploy never resets spacedock to some branch's config (reverting roll work) or restarts this runner mid-job.
   systemd.services."kottonmouth-rolling-deploy" = {
-    description = "Switch spacedock to the current tip of kottonmouth's rolling branch";
+    description = "Load the dev keeper image from the current tip of kottonmouth's rolling branch";
     restartIfChanged = false;
     unitConfig.X-StopOnRemoval = false;
     serviceConfig.Type = "oneshot";
     environment =
       config.nix.envVars
       // {
-        inherit (config.environment.sessionVariables) NIX_PATH;
         HOME = "/root";
         GIT_SSH_COMMAND = "${config.programs.ssh.package}/bin/ssh -i ${
           config.sops.secrets."kottonmouth/rolling-deploy-key".path
@@ -102,42 +106,35 @@
       // config.networking.proxy.envVars;
     path = with pkgs; [
       coreutils
-      gnutar
-      xz.bin
-      gzip
       gitMinimal
+      skopeo
       config.nix.package.out
       config.programs.ssh.package
+      config.virtualisation.podman.package
+      config.systemd.package
     ];
-    # Private clone of the dotfiles repo owned by this unit alone (/var/lib/kottonmouth-deploy), so deploys never read gig's live checkout -- roll-flow moves that between branches mid-graduation, which used to trip the guard below (2026-10-20 23:45).
+    # Holds the out-link that GC-roots the current image.
     serviceConfig.StateDirectory = "kottonmouth-deploy";
     script = ''
-      clone=/var/lib/kottonmouth-deploy/dotfiles
-      # Branch the deploy follows; the public repo needs no credentials, so the deploy key above stays scoped to the kottonmouth repo.
-      ref=develop
+      state=/var/lib/kottonmouth-deploy
+      # Leftover dotfiles clone from when this unit ran nixos-rebuild.
+      rm -rf "$state/dotfiles"
 
-      if [ ! -d "$clone/.git" ]; then
-        git init --quiet "$clone"
-        git -C "$clone" remote add origin https://github.com/gignsky/.dotfiles.git
-      fi
+      # --refresh: nix caches a ref's resolved rev for tarball-ttl (1h) otherwise, which could load a stale `rolling` push and still report success.
+      # nixpkgs pinned to the system's so the image matches what the old flake-input build produced (and hits the binary cache).
+      nix build --refresh \
+        'git+ssh://git@github.com/gignsky/kottonmouth.git?ref=rolling#keeper-image' \
+        --override-input nixpkgs 'path:${inputs.nixpkgs}' \
+        --out-link "$state/keeper-image"
 
-      # Shallow fetch + hard reset: the clone is disposable and holds no local state, so there is nothing to be dirty and nothing to race.
-      git -C "$clone" fetch --quiet --depth 1 origin "$ref"
-      git -C "$clone" reset --quiet --hard FETCH_HEAD
-      git -C "$clone" clean --quiet -fdx
+      # Copied under its own name: the archive bakes `kottonmouth-keeper:latest`, which is the main keeper's tag.
+      skopeo copy --quiet \
+        "docker-archive:$(readlink -f "$state/keeper-image")" \
+        containers-storage:${config.virtualisation.oci-containers.containers.kottonmouth-keeper-dev.image}
 
-      # A tip that merely has github-runner.nix but not this unit would switch to a config missing the runner/polkit/unit entirely.
-      if ! grep -q kottonmouth-rolling-deploy "$clone/hosts/spacedock/github-runner.nix" 2>/dev/null; then
-        echo "origin/$ref lacks the deploy unit, refusing" >&2
-        exit 1
-      fi
-
-      # --refresh: nix caches a ref's resolved rev for tarball-ttl (1h) otherwise, which could deploy a stale `rolling` push and still report success.
-      ${config.system.build.nixos-rebuild}/bin/nixos-rebuild switch \
-        --flake "$clone#spacedock" \
-        --override-input kottonmouth-rolling "git+ssh://git@github.com/gignsky/kottonmouth.git?ref=rolling" \
-        --no-write-lock-file \
-        --refresh
+      # A running container keeps its old image, and the workflow's `systemctl start` is a no-op on it.
+      systemctl try-restart podman-kottonmouth-keeper-dev.service
+      podman image prune -f
     '';
   };
 
