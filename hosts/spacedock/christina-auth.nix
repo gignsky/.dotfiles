@@ -19,10 +19,10 @@
 # Needs the sops secret `christina-website/auth-env`, systemd EnvironmentFile
 # syntax, with INSTAGRAM_APP_ID, INSTAGRAM_APP_SECRET, INSTAGRAM_REDIRECT_URI
 # (https://auth.christinasceramics.com/auth/instagram/callback, registered in
-# the Meta app), AUTH_USER and AUTH_PASSWORD. Also needs a proxied CNAME
-# `auth.christinasceramics.com -> <tunnel-id>.cfargotunnel.com`;
-# kottonmouth-dns.nix only upserts records in its own zone, so create it by
-# hand in the Cloudflare dashboard.
+# the Meta app), AUTH_USER and AUTH_PASSWORD. The proxied CNAME
+# `auth.christinasceramics.com -> <tunnel-id>.cfargotunnel.com` is upserted on
+# every switch by the christina-dns unit in
+# containers/services/kottonmouth/kottonmouth-dns.nix.
 {
   config,
   inputs,
@@ -66,41 +66,43 @@ in
   };
   users.groups.christina-auth = { };
 
-  systemd.services.christina-auth = {
-    description = "Log in with Instagram for christinasceramics.com";
-    wantedBy = [ "multi-user.target" ];
-    after = [ "network-online.target" ];
-    wants = [ "network-online.target" ];
-    environment = {
-      HOST = "127.0.0.1";
-      PORT = toString port;
-      TOKEN_FILE = tokenFile;
+  systemd = {
+    services.christina-auth = {
+      description = "Log in with Instagram for christinasceramics.com";
+      wantedBy = [ "multi-user.target" ];
+      after = [ "network-online.target" ];
+      wants = [ "network-online.target" ];
+      environment = {
+        HOST = "127.0.0.1";
+        PORT = toString port;
+        TOKEN_FILE = tokenFile;
+      };
+      serviceConfig = hardening // {
+        ExecStart = "${node} ${script}";
+        EnvironmentFile = config.sops.secrets."christina-website/auth-env".path;
+        Restart = "on-failure";
+        RestartSec = "10s";
+      };
     };
-    serviceConfig = hardening // {
-      ExecStart = "${node} ${script}";
-      EnvironmentFile = config.sops.secrets."christina-website/auth-env".path;
-      Restart = "on-failure";
-      RestartSec = "10s";
-    };
-  };
 
-  systemd.services.christina-auth-refresh = {
-    description = "Extend the stored Instagram token for christinasceramics.com";
-    after = [ "network-online.target" ];
-    wants = [ "network-online.target" ];
-    environment.TOKEN_FILE = tokenFile;
-    serviceConfig = hardening // {
-      Type = "oneshot";
-      ExecStart = "${node} ${script} --refresh";
+    services.christina-auth-refresh = {
+      description = "Extend the stored Instagram token for christinasceramics.com";
+      after = [ "network-online.target" ];
+      wants = [ "network-online.target" ];
+      environment.TOKEN_FILE = tokenFile;
+      serviceConfig = hardening // {
+        Type = "oneshot";
+        ExecStart = "${node} ${script} --refresh";
+      };
     };
-  };
 
-  systemd.timers.christina-auth-refresh = {
-    wantedBy = [ "timers.target" ];
-    timerConfig = {
-      OnCalendar = "weekly";
-      Persistent = true;
-      RandomizedDelaySec = "1h";
+    timers.christina-auth-refresh = {
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnCalendar = "weekly";
+        Persistent = true;
+        RandomizedDelaySec = "1h";
+      };
     };
   };
 
