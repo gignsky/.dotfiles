@@ -18,6 +18,7 @@
   ...
 }:
 let
+  keeperImage = inputs.kottonmouth.packages.${pkgs.stdenv.hostPlatform.system}.keeper-image;
   tunnelId = "1a878786-561d-427c-90cd-358f1b82aea4";
   adminPort = 8790;
   # Loopback port nginx listens on, between cloudflared and the keeper.
@@ -51,8 +52,8 @@ in
   systemd.tmpfiles.rules = [ "d /var/lib/kottonmouth-keeper 0700 ${uid} ${uid} -" ];
 
   virtualisation.oci-containers.containers.kottonmouth-keeper = {
-    imageFile = inputs.kottonmouth.packages.${pkgs.stdenv.hostPlatform.system}.keeper-image;
-    image = "kottonmouth-keeper:latest";
+    imageFile = keeperImage;
+    image = "${keeperImage.imageName}:${keeperImage.imageTag}";
     autoStart = true;
     environmentFiles = [ config.sops.secrets."kottonmouth/kottonmouth-keeper-env".path ];
     environment = {

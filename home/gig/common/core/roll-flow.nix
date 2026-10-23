@@ -1,5 +1,6 @@
 {
   inputs,
+  pkgs,
   configLib,
   lib,
   ...
@@ -33,6 +34,7 @@ in
 
   programs.roll-flow = {
     enable = true;
+    package = pkgs.unstable.roll-flow;
     settings = {
       inherit (configVars) username;
       hosts = builtins.attrNames hostActive; # [ ganoslal merlin spacedock wsl ]

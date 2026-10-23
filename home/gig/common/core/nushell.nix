@@ -27,6 +27,22 @@ let
     remote = spec.remote or "nu -l -c 'als stats --json'";
     enabled = hostActive.${name} or true;
   }) fleetTargets;
+
+  # Carapace's nushell bridge, patched for the completer API change in nushell
+  # 0.116: completers now get a record and `{|spans|}` triggers a deprecation
+  # warning on every Tab. The login shell (pkgs.unstable.nushell) and HM's
+  # nushell (pkgs.nushell) can differ in version but share this config.nu, so
+  # the closure takes `place` and accepts both shapes: a record whose
+  # `place.command` is the token list (>= 0.116), or the bare spans list
+  # passed positionally (older). The grep fails the build if upstream changes
+  # the closure header, so this patch can't silently stop applying.
+  carapaceNuConfig = pkgs.runCommand "carapace-nushell-config.nu" { } ''
+    ${lib.getExe pkgs.carapace} _carapace nushell \
+      | sed 's|"/homeless-shelter|$"($env.HOME)|g' > raw.nu
+    grep -q 'let carapace_completer = {|spans|' raw.nu
+    sed 's/let carapace_completer = {|spans|/let carapace_completer = {|place|\n  let spans = (if ($place | describe | str starts-with "list") { $place } else { $place.command })/' \
+      raw.nu > "$out"
+  '';
 in
 {
   # overlays
@@ -64,6 +80,8 @@ in
       ];
       extraConfig = ''
         overlay use ${inputs.git-aliases}/git-aliases.nu
+
+        source ${carapaceNuConfig}
 
         # Direnv integration
         $env.config = ($env.config? | default {})
@@ -107,7 +125,8 @@ in
     carapace = {
       enable = true;
       package = pkgs.carapace;
-      enableNushellIntegration = true;
+      # Sourced via carapaceNuConfig in nushell.extraConfig instead, see there.
+      enableNushellIntegration = false;
     };
   };
 }
