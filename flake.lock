@@ -49,9 +49,31 @@
         "type": "github"
       }
     },
+    "christina-website": {
+      "inputs": {
+        "flake-utils": "flake-utils",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1792732144,
+        "narHash": "sha256-nZIVTZtcVJR0caC4xDcBHWLzYsA3S4zt5enLx2M/MII=",
+        "ref": "rolling",
+        "rev": "db6501d04e1ea9a8fb8a324eb97deb0056f2e631",
+        "revCount": 56,
+        "type": "git",
+        "url": "ssh://git@github.com/gignsky/christina-website.git"
+      },
+      "original": {
+        "ref": "rolling",
+        "type": "git",
+        "url": "ssh://git@github.com/gignsky/christina-website.git"
+      }
+    },
     "claude-desktop": {
       "inputs": {
-        "flake-utils": "flake-utils_2",
+        "flake-utils": "flake-utils_3",
         "nixpkgs": [
           "nixpkgs",
           "nixpkgs"
@@ -73,7 +95,7 @@
     },
     "claude-desktop_2": {
       "inputs": {
-        "flake-utils": "flake-utils_3",
+        "flake-utils": "flake-utils_4",
         "nixpkgs": [
           "nixpkgs-unstable",
           "nixpkgs"
@@ -597,7 +619,25 @@
     },
     "flake-utils_3": {
       "inputs": {
-        "systems": "systems_4"
+        "systems": "systems_3"
+      },
+      "locked": {
+        "lastModified": 1731533236,
+        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "flake-utils_4": {
+      "inputs": {
+        "systems": "systems_5"
       },
       "locked": {
         "lastModified": 1731533236,
@@ -1372,7 +1412,7 @@
     },
     "kottonmouth": {
       "inputs": {
-        "flake-utils": "flake-utils",
+        "flake-utils": "flake-utils_2",
         "nixpkgs": [
           "nixpkgs"
         ]
@@ -1495,10 +1535,10 @@
     "nix-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1792712962,
-        "narHash": "sha256-wBbjRoa8uiO7EEQKc6zaUxtwIFUIZlm/Wqwjx/MNVgk=",
+        "lastModified": 1792731902,
+        "narHash": "sha256-8uYQRcFtDnqK8+9cAJB15g8RAqDXdO2R+4TBjewHuJY=",
         "ref": "main",
-        "rev": "fd60eae235eb43d1bfa7bbcc471df57e16fbf75c",
+        "rev": "1c70f178433b57fbb82679653cb6f892fe568ab0",
         "shallow": true,
         "type": "git",
         "url": "ssh://git@github.com/gignsky/nix-secrets.git"
@@ -2947,7 +2987,7 @@
           "gigvim",
           "nixpkgs"
         ],
-        "systems": "systems_3"
+        "systems": "systems_4"
       },
       "locked": {
         "lastModified": 1780042000,
@@ -2974,7 +3014,7 @@
           "gigvim",
           "nixpkgs"
         ],
-        "systems": "systems_5"
+        "systems": "systems_6"
       },
       "locked": {
         "lastModified": 1780042000,
@@ -3889,6 +3929,7 @@
     "root": {
       "inputs": {
         "avec-moi": "avec-moi",
+        "christina-website": "christina-website",
         "fancy-fonts": "fancy-fonts",
         "git-aliases": "git-aliases",
         "home-manager": [
@@ -4123,6 +4164,21 @@
         "type": "github"
       }
     },
+    "systems_7": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
     "treefmt-nix": {
       "inputs": {
         "nixpkgs": [
@@ -4191,7 +4247,7 @@
         "nixpkgs": "nixpkgs_20",
         "process-compose-flake": "process-compose-flake",
         "rust-flake": "rust-flake",
-        "systems": "systems_6",
+        "systems": "systems_7",
         "treefmt-nix": "treefmt-nix_2"
       },
       "locked": {
