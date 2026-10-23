@@ -30,6 +30,9 @@
     "gigpkgs/github-runner-token" = {
       restartUnits = [ "github-runner-gigpkgs.service" ];
     };
+    "christina-website/github-runner-token" = {
+      restartUnits = [ "github-runner-christina-website.service" ];
+    };
     "kottonmouth/github-runner-token" = {
       restartUnits = [ "github-runner-kottonmouth.service" ];
     };
@@ -65,6 +68,26 @@
         rustc
         gcc
       ];
+    };
+    christina-website = {
+      enable = true;
+      url = "https://github.com/gignsky/christina-website";
+      tokenFile = config.sops.secrets."christina-website/github-runner-token".path;
+      # Default labels already include self-hosted/Linux/X64; this is what
+      # `runs-on: [self-hosted, spacedock]` in rolling-preview.yml matches on.
+      extraLabels = [ "spacedock" ];
+      extraPackages = with pkgs; [
+        nodejs_22
+        nixos-rebuild
+        git
+        cargo
+        rustc
+        gcc
+      ];
+      # serviceOverrides.EnvironmentFile = [
+      #   config.sops.secrets."kottonmouth/cloudflare-api-token".path
+      #   config.sops.secrets."kottonmouth/beta-worker-secrets".path
+      # ];
     };
     kottonmouth = {
       enable = true;
