@@ -95,13 +95,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Christina's site (private repo, so ssh like kottonmouth). Only its
-    # scripts/instagram-auth-server.mjs is used, run by Node, so it is not a flake.
+    # Christina's site (private repo, so ssh like kottonmouth). Its
+    # scripts/instagram-auth-server.mjs is run by Node on spacedock.
     # Follows `rolling`: a roll graduating there changes beta, never master.
     # See hosts/spacedock/christina-auth.nix.
     christina-website = {
       url = "git+ssh://git@github.com/gignsky/christina-website.git?ref=rolling";
-      flake = false;
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # No `rolling` input: the dev keeper's image is built and loaded at
