@@ -38,6 +38,9 @@
     # Self-hosted Actions runner driving kottonmouth's rolling-preview.yml
     # (beta.kottonmouthband.com + kottonmouth-keeper-dev start/stop).
     (configLib.relativeToRoot "hosts/spacedock/github-runner.nix")
+
+    # Always-on Instagram login + weekly token refresh for christinasceramics.com.
+    (configLib.relativeToRoot "hosts/spacedock/christina-auth.nix")
   ];
   # gigpkgs container engine — the module is injected in flake.nix as
   # `inputs.nixpkgs.nixosModules.containers`. Provides the OCI runtime for

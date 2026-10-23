@@ -83,10 +83,12 @@
         nodejs_22
         git
       ];
-      # CLOUDFLARE_API_TOKEN (wrangler deploy --env beta) and INSTAGRAM_ACCESS_TOKEN
-      # (the build's real feed), one KEY=value per line, same convention as the
-      # kottonmouth runner above.
+      # CLOUDFLARE_API_TOKEN for `wrangler deploy --env beta`, one KEY=value per line,
+      # same convention as the kottonmouth runner above. The Instagram token is not
+      # here: christina-auth.service keeps it in /var/lib/christina-auth/token.json
+      # (christina-auth.nix) and the workflow reads it at build time.
       serviceOverrides.EnvironmentFile = config.sops.secrets."christina-website/beta-env".path;
+      serviceOverrides.SupplementaryGroups = [ "christina-auth" ];
     };
     kottonmouth = {
       enable = true;
