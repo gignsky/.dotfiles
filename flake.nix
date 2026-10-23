@@ -95,16 +95,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Same keeper image, built off the `rolling` branch instead of `main` --
-    # the dev keeper behind beta.kottonmouthband.com. See
-    # containers/services/kottonmouth-keeper-dev.nix. Updated with
-    # `nix flake update kottonmouth-rolling` by rolling-preview.yml whenever
-    # `rolling` diverges from `main`, not on a fixed schedule like the
-    # `main` input above.
-    kottonmouth-rolling = {
-      url = "git+ssh://git@github.com/gignsky/kottonmouth.git?ref=rolling";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    # No `rolling` input: the dev keeper's image is built and loaded at
+    # runtime by kottonmouth-rolling-deploy.service (hosts/spacedock/
+    # github-runner.nix), so beta deploys never rebuild the system.
 
     # # tax-matrix - currently on develop branch
     # tax-matrix = {
