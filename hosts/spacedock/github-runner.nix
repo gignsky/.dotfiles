@@ -26,10 +26,20 @@
 }:
 {
   sops.secrets = {
+    "gigpkgs/github-runner-token" = {
+      restartUnits = [ "github-runner-gigpkgs.service" ];
+    };
     "kottonmouth/github-runner-token" = {
       restartUnits = [ "github-runner-kottonmouth.service" ];
     };
     "kottonmouth/cloudflare-api-token" = {
+      restartUnits = [ "github-runner-kottonmouth.service" ];
+    };
+    # Beta Worker secrets for rolling-preview.yml's "Restore beta Worker
+    # secrets" step, as EnvironmentFile lines: BETA_ADMIN_PROXY_SECRET,
+    # BETA_KEEPER_TOKEN, BETA_RSVP_SALT, optional BETA_TURNSTILE_SECRET. Values
+    # must match kottonmouth-keeper-dev-env (PROXY_SECRET, KEEPER_TOKEN).
+    "kottonmouth/beta-worker-secrets" = {
       restartUnits = [ "github-runner-kottonmouth.service" ];
     };
     # Read-only GitHub deploy key for kottonmouth-rolling-deploy.service below
@@ -41,19 +51,37 @@
       mode = "0400";
     };
   };
-
-  services.github-runners.kottonmouth = {
-    enable = true;
-    url = "https://github.com/gignsky/kottonmouth";
-    tokenFile = config.sops.secrets."kottonmouth/github-runner-token".path;
-    # Default labels already include self-hosted/Linux/X64; this is what
-    # `runs-on: [self-hosted, spacedock]` in rolling-preview.yml matches on.
-    extraLabels = [ "spacedock" ];
-    extraPackages = with pkgs; [
-      nodejs_22
-      git
-    ];
-    serviceOverrides.EnvironmentFile = config.sops.secrets."kottonmouth/cloudflare-api-token".path;
+  services.github-runners = {
+    gigpkgs = {
+      enable = true;
+      url = "https://github.com/gignsky/gigpkgs";
+      tokenFile = config.sops.secrets."gigpkgs/github-runner-token".path;
+      extraLabels = [ "spacedock" ];
+      extraPackages = with pkgs; [
+        gnused
+        gnugrep
+        cargo
+        rustc
+        gcc
+      ];
+    };
+    kottonmouth = {
+      enable = true;
+      url = "https://github.com/gignsky/kottonmouth";
+      tokenFile = config.sops.secrets."kottonmouth/github-runner-token".path;
+      # Default labels already include self-hosted/Linux/X64; this is what
+      # `runs-on: [self-hosted, spacedock]` in rolling-preview.yml matches on.
+      extraLabels = [ "spacedock" ];
+      extraPackages = with pkgs; [
+        nodejs_22
+        nixos-rebuild
+        git
+        cargo
+        rustc
+        gcc
+      ];
+      serviceOverrides.EnvironmentFile = config.sops.secrets."kottonmouth/cloudflare-api-token".path;
+    };
   };
 
   # Privileged refresh+rebuild for deploy-beta, run as real root on demand via `systemctl start` (the sandboxed runner above can't gain root itself -- see the polkit rule below).
