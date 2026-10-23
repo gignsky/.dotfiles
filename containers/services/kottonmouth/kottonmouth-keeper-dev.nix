@@ -61,7 +61,13 @@ in
       TZ = "America/New_York";
       EDGE_URL = "https://beta.kottonmouthband.com";
       GITHUB_REPO = "gignsky/kottonmouth";
-      GITHUB_BRANCH = "rolling";
+      # Throwaway branch, not `rolling`: beta admin edits (shows, settings)
+      # must never reach main via a promote. rolling-preview.yml recreates it
+      # from rolling + main's data on every deploy and deletes it on teardown.
+      GITHUB_BRANCH = "beta-content";
+      # Beta is disposable: clear the keeper DB on every start, then re-seed
+      # from main's (MAIN_DB_SEED below).
+      RESET_ON_START = "1";
       NOTIFY_TO = "kottonmouthband@gmail.com";
       NOTIFY_FROM = "Kottonmouth beta <keeper@kottonmouthband.com>";
       # Served at beta.kottonmouthband.com/admin: the beta Worker proxies
