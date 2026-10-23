@@ -1,0 +1,122 @@
+{ pkgs, configLib, ... }:
+
+# Wayland-native alternative to bspwm.nix. niri's own config is plain KDL
+# text rather than a typed settings attrset, same reasoning as bspwm's
+# extraConfig/sxhkd: it keeps every binary referenced by absolute store
+# path and avoids depending on exactly how complete home-manager's niri
+# module is.
+{
+  imports = [
+    ./waybar.nix
+    ./mako.nix
+    ./swaylock.nix
+  ];
+
+  home.packages = with pkgs; [
+    fuzzel # Application launcher (replaces rofi, which is X11-only)
+    swaybg # Wallpaper setter (replaces feh, which is X11-only)
+  ];
+
+  # Same wallpaper resource bspwm.nix uses.
+  home.file.".background-image" = {
+    source = configLib.relativeToRoot "home/gig/common/resources/wallpapers/SGA/Stargate_Atlantis_Gate_Fixed_Centered_5K.png";
+  };
+
+  xdg.configFile."niri/config.kdl".text = ''
+    input {
+        keyboard {
+            xkb {
+                layout "us"
+            }
+        }
+
+        touchpad {
+            tap
+            natural-scroll
+            dwt
+            middle-emulation
+        }
+    }
+
+    // No output block -- let niri auto-detect eDP-1. Merlin is a single-
+    // display laptop; the docked-monitor case was already unused (commented
+    // out) in the bspwm-era resource file, so it's not ported either.
+
+    spawn-at-startup "${pkgs.swaybg}/bin/swaybg" "-i" "$HOME/.background-image" "-m" "fill"
+    spawn-at-startup "${pkgs.waybar}/bin/waybar"
+    spawn-at-startup "${pkgs.mako}/bin/mako"
+
+    screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
+
+    binds {
+        Mod+Return { spawn "${pkgs.wezterm}/bin/wezterm"; }
+        Mod+Space { spawn "${pkgs.fuzzel}/bin/fuzzel"; }
+
+        Mod+W { close-window; }
+        Mod+Shift+F { fullscreen-window; }
+        Mod+F { toggle-window-floating; }
+
+        // Focus/move. niri's column/row model, not bspwm's binary tree --
+        // mapped semantically rather than forced 1:1.
+        Mod+H { focus-column-left; }
+        Mod+J { focus-window-down; }
+        Mod+K { focus-window-up; }
+        Mod+L { focus-column-right; }
+        Mod+Shift+H { move-column-left; }
+        Mod+Shift+J { move-window-down; }
+        Mod+Shift+K { move-window-up; }
+        Mod+Shift+L { move-column-right; }
+
+        Mod+Left { focus-column-left; }
+        Mod+Down { focus-window-down; }
+        Mod+Up { focus-window-up; }
+        Mod+Right { focus-column-right; }
+        Mod+Shift+Left { move-column-left; }
+        Mod+Shift+Down { move-window-down; }
+        Mod+Shift+Up { move-window-up; }
+        Mod+Shift+Right { move-column-right; }
+
+        // Workspaces
+        Mod+1 { focus-workspace 1; }
+        Mod+2 { focus-workspace 2; }
+        Mod+3 { focus-workspace 3; }
+        Mod+4 { focus-workspace 4; }
+        Mod+5 { focus-workspace 5; }
+        Mod+6 { focus-workspace 6; }
+        Mod+7 { focus-workspace 7; }
+        Mod+8 { focus-workspace 8; }
+        Mod+9 { focus-workspace 9; }
+        Mod+0 { focus-workspace 10; }
+        Mod+Shift+1 { move-column-to-workspace 1; }
+        Mod+Shift+2 { move-column-to-workspace 2; }
+        Mod+Shift+3 { move-column-to-workspace 3; }
+        Mod+Shift+4 { move-column-to-workspace 4; }
+        Mod+Shift+5 { move-column-to-workspace 5; }
+        Mod+Shift+6 { move-column-to-workspace 6; }
+        Mod+Shift+7 { move-column-to-workspace 7; }
+        Mod+Shift+8 { move-column-to-workspace 8; }
+        Mod+Shift+9 { move-column-to-workspace 9; }
+        Mod+Shift+0 { move-column-to-workspace 10; }
+
+        // Screenshots -- niri has this built in, no more maim/xclip/xdotool.
+        Print { screenshot; }
+        Mod+Print { screenshot-screen; }
+
+        // Lock screen -- new, bspwm never had one.
+        Mod+Shift+Escape { spawn "${pkgs.swaylock}/bin/swaylock"; }
+
+        // Volume (same pactl calls bspwm's sxhkd config used)
+        XF86AudioRaiseVolume { spawn "${pkgs.pulseaudio}/bin/pactl" "set-sink-volume" "@DEFAULT_SINK@" "+5%"; }
+        XF86AudioLowerVolume { spawn "${pkgs.pulseaudio}/bin/pactl" "set-sink-volume" "@DEFAULT_SINK@" "-5%"; }
+        XF86AudioMute { spawn "${pkgs.pulseaudio}/bin/pactl" "set-sink-mute" "@DEFAULT_SINK@" "toggle"; }
+
+        // Brightness (same brightnessctl calls bspwm's sxhkd config used)
+        XF86MonBrightnessUp { spawn "${pkgs.brightnessctl}/bin/brightnessctl" "set" "+10%"; }
+        XF86MonBrightnessDown { spawn "${pkgs.brightnessctl}/bin/brightnessctl" "set" "10%-"; }
+        Mod+Plus { spawn "${pkgs.brightnessctl}/bin/brightnessctl" "set" "+10%"; }
+        Mod+Minus { spawn "${pkgs.brightnessctl}/bin/brightnessctl" "set" "10%-"; }
+
+        Mod+Shift+Slash { show-hotkey-overlay; }
+    }
+  '';
+}
