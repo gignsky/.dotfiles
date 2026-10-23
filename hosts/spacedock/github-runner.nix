@@ -82,6 +82,8 @@
       extraPackages = with pkgs; [
         nodejs_22
         git
+        # actions/checkout with `lfs: true` shells out to git-lfs (images are LFS-tracked).
+        git-lfs
       ];
       # CLOUDFLARE_API_TOKEN for `wrangler deploy --env beta`, one KEY=value per line,
       # same convention as the kottonmouth runner above. The Instagram token is not
