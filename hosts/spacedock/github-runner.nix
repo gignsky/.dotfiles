@@ -33,6 +33,9 @@
     "christina-website/github-runner-token" = {
       restartUnits = [ "github-runner-christina-website.service" ];
     };
+    "christina-website/beta-env" = {
+      restartUnits = [ "github-runner-christina-website.service" ];
+    };
     "kottonmouth/github-runner-token" = {
       restartUnits = [ "github-runner-kottonmouth.service" ];
     };
@@ -78,16 +81,12 @@
       extraLabels = [ "spacedock" ];
       extraPackages = with pkgs; [
         nodejs_22
-        nixos-rebuild
         git
-        cargo
-        rustc
-        gcc
       ];
-      # serviceOverrides.EnvironmentFile = [
-      #   config.sops.secrets."kottonmouth/cloudflare-api-token".path
-      #   config.sops.secrets."kottonmouth/beta-worker-secrets".path
-      # ];
+      # CLOUDFLARE_API_TOKEN (wrangler deploy --env beta) and INSTAGRAM_ACCESS_TOKEN
+      # (the build's real feed), one KEY=value per line, same convention as the
+      # kottonmouth runner above.
+      serviceOverrides.EnvironmentFile = config.sops.secrets."christina-website/beta-env".path;
     };
     kottonmouth = {
       enable = true;
