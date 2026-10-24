@@ -29,5 +29,9 @@
   # same split bspwm.nix uses.
   environment.systemPackages = with pkgs; [
     tuigreet
+    # X11 apps (Steam, Discord, AnyDesk, ...). niri has no built-in Xwayland
+    # and the NixOS module does not ship it; niri spawns this on demand and
+    # exports DISPLAY itself whenever it is on PATH.
+    xwayland-satellite
   ];
 }
