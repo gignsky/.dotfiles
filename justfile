@@ -85,7 +85,7 @@ clean:
   rm -rfv ~/.config/zsh/zplug
   rm -rfv ~/.config/roll-flow
   rm -rfv result
-  rm -rfv ~/.thunderbird/
+  # rm -rfv ~/.thunderbird/
   rm -rfv ~/.local/share/nvf/themery/state.json
   
   # Smart OpenCode cleanup - preserve history, clean configuration
