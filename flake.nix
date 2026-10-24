@@ -95,6 +95,15 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Christina's site (private repo, so ssh like kottonmouth). Its
+    # scripts/instagram-auth-server.mjs is run by Node on spacedock.
+    # Follows `rolling`: a roll graduating there changes beta, never master.
+    # See hosts/spacedock/christina-auth.nix.
+    christina-website = {
+      url = "git+ssh://git@github.com/gignsky/christina-website.git?ref=rolling";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # No `rolling` input: the dev keeper's image is built and loaded at
     # runtime by kottonmouth-rolling-deploy.service (hosts/spacedock/
     # github-runner.nix), so beta deploys never rebuild the system.

@@ -1,4 +1,4 @@
-# DNS for the kottonmouthband.com tunnel hostnames.
+# DNS for the tunnel hostnames, in kottonmouthband.com and christinasceramics.com.
 #
 # `services.cloudflared.tunnels.<id>.ingress` only tells the tunnel where to
 # *send* a hostname's traffic; it never creates the DNS record that makes
@@ -17,6 +17,10 @@
 # Zone -> DNS -> Edit for kottonmouthband.com, in addition to whatever wrangler
 # needs. A token without it fails this unit loudly ("Authentication error");
 # the switch itself still completes.
+#
+# christinasceramics.com (auth.* from hosts/spacedock/christina-auth.nix) gets
+# its own unit, christina-dns, using `christina-website/beta-env`: that token
+# needs Zone -> DNS -> Edit on her zone anyway (wrangler custom domains).
 {
   config,
   lib,
@@ -25,12 +29,10 @@
 }:
 let
   tunnelId = "1a878786-561d-427c-90cd-358f1b82aea4";
-  zone = "kottonmouthband.com";
   target = "${tunnelId}.cfargotunnel.com";
 
-  hosts = lib.filter (h: h == zone || lib.hasSuffix ".${zone}" h) (
-    lib.attrNames config.services.cloudflared.tunnels.${tunnelId}.ingress
-  );
+  ingressHosts = lib.attrNames config.services.cloudflared.tunnels.${tunnelId}.ingress;
+  hostsIn = zone: lib.filter (h: h == zone || lib.hasSuffix ".${zone}" h) ingressHosts;
 
   upsert = pkgs.writeShellApplication {
     name = "kottonmouth-dns-upsert";
@@ -55,7 +57,9 @@ let
         printf '%s' "$out"
       }
 
-      zone_id=$(call GET "/zones?name=${zone}" | jq -er '.result[0].id')
+      zone=$1
+      shift
+      zone_id=$(call GET "/zones?name=$zone" | jq -er '.result[0].id')
 
       for host in "$@"; do
         want=$(jq -n --arg n "$host" --arg c "${target}" \
@@ -89,24 +93,40 @@ let
       exit "''${failed:-0}"
     '';
   };
+  # One oneshot per zone: a tunnel can serve hostnames from any zone in its
+  # Cloudflare account, but each zone is edited with a token scoped to it.
+  mkDns =
+    { zone, tokenFile }:
+    {
+      description = "Upsert Cloudflare DNS for the ${zone} tunnel hostnames";
+      wantedBy = [ "multi-user.target" ];
+      wants = [ "network-online.target" ];
+      after = [ "network-online.target" ];
+      # The hostname list is baked into ExecStart, so a changed ingress changes
+      # the unit and `nixos-rebuild switch` re-runs it.
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        EnvironmentFile = tokenFile;
+        # Leading `-`: a failed upsert is logged (journalctl -u <unit>)
+        # but doesn't fail the unit, so a DNS/token problem can't make
+        # `nixos-rebuild switch` exit non-zero and take the rolling deploy with it.
+        ExecStart = "-${lib.getExe upsert} ${lib.escapeShellArgs ([ zone ] ++ hostsIn zone)}";
+        DynamicUser = true;
+      };
+    };
 in
 {
-  systemd.services.kottonmouth-dns = {
-    description = "Upsert Cloudflare DNS for the kottonmouthband.com tunnel hostnames";
-    wantedBy = [ "multi-user.target" ];
-    wants = [ "network-online.target" ];
-    after = [ "network-online.target" ];
-    # The hostname list is baked into ExecStart, so a changed ingress changes
-    # the unit and `nixos-rebuild switch` re-runs it.
-    serviceConfig = {
-      Type = "oneshot";
-      RemainAfterExit = true;
-      EnvironmentFile = config.sops.secrets."kottonmouth/cloudflare-api-token".path;
-      # Leading `-`: a failed upsert is logged (journalctl -u kottonmouth-dns)
-      # but doesn't fail the unit, so a DNS/token problem can't make
-      # `nixos-rebuild switch` exit non-zero and take the rolling deploy with it.
-      ExecStart = "-${lib.getExe upsert} ${lib.escapeShellArgs hosts}";
-      DynamicUser = true;
-    };
+  systemd.services.kottonmouth-dns = mkDns {
+    zone = "kottonmouthband.com";
+    tokenFile = config.sops.secrets."kottonmouth/cloudflare-api-token".path;
+  };
+
+  # auth.christinasceramics.com (hosts/spacedock/christina-auth.nix). Uses the
+  # beta deploy token, which already needs Zone -> DNS -> Edit on this zone for
+  # wrangler's custom-domain route, so no other token is widened.
+  systemd.services.christina-dns = mkDns {
+    zone = "christinasceramics.com";
+    tokenFile = config.sops.secrets."christina-website/beta-env".path;
   };
 }
