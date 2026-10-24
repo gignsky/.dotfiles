@@ -31,6 +31,7 @@
       discord
       # anydesk
       gpu-viewer
+      anydesk
     ];
 
     # NOTE: the autorandr profiles that used to live here were removed — they
