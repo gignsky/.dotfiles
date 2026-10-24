@@ -40,7 +40,7 @@ let
 in
 {
   sops.secrets = {
-    # KEEPER_TOKEN / GITHUB_TOKEN for the beta environment -- distinct from
+    # KEEPER_TOKEN / GITHUB_TOKEN (+ CF_ACCOUNT_ID / CF_API_TOKEN for email) for the beta environment -- distinct from
     # the main keeper's, so this only ever drains kottonmouth-edge-beta.
     "kottonmouth/kottonmouth-keeper-dev-env" = {
       restartUnits = [ "podman-kottonmouth-keeper-dev.service" ];
@@ -68,8 +68,13 @@ in
       # Beta is disposable: clear the keeper DB on every start, then re-seed
       # from main's (MAIN_DB_SEED below).
       RESET_ON_START = "1";
-      NOTIFY_TO = "kottonmouthband@gmail.com";
-      NOTIFY_FROM = "Kottonmouth beta <keeper@kottonmouthband.com>";
+      # Email: visitor mail (welcome, booking confirmation) goes to the test
+      # inbox instead of the visitor; band alerts still reach the band, marked
+      # [BETA], so a real booking made here by accident is not lost. Needs
+      # CF_ACCOUNT_ID / CF_API_TOKEN in the sops env file; band alert
+      # recipients default to keeper@kottonmouthband.com (editable in the admin).
+      MAIL_MODE = "redirect";
+      MAIL_REDIRECT_TO = "maxwell@giglab.dev";
       # Served at beta.kottonmouthband.com/admin: the beta Worker proxies
       # /admin/* here, stripping the prefix, so links must be emitted with it.
       # PROXY_SECRET (must equal the Worker's ADMIN_PROXY_SECRET) goes in the
