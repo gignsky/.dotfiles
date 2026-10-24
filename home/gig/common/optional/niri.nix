@@ -22,11 +22,11 @@
     swaybg # Wallpaper setter (replaces feh, which is X11-only)
   ];
 
-  # LOTR wallpaper (Gandalf and the Balrog). The source art is 1080x607, so
-  # swaybg upscales it on the 2560x1600 panel; swap in a 4K version from
-  # resources/wallpapers/tolkien/ when one is available (see its notes file).
+  # LOTR wallpaper (Gandalf and the Balrog). The only desktop art in the repo
+  # is 1080x607, so this is a 4x Real-ESRGAN upscale of it; swap in the real
+  # 4K version when available (see the tolkien/ notes file).
   home.file.".background-image" = {
-    source = configLib.relativeToRoot "home/gig/common/resources/wallpapers/tolkien/desktop/less than 1080/gandalf-and-balrog-horizontal.webp";
+    source = configLib.relativeToRoot "home/gig/common/resources/wallpapers/tolkien/desktop/upscaled/gandalf-and-balrog-upscaled-4x.webp";
   };
 
   xdg.configFile."niri/config.kdl".text = ''
