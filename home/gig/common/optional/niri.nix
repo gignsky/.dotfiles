@@ -116,6 +116,17 @@ in
       // workspace; see the Mod+N binds.
       workspace "minimized"
 
+      // WezTerm on Wayland waits for a configure event with a zero size
+      // before it will draw, so a window niri gives a concrete width (the
+      // default 50% column) can stay blank or never map. It hit ganoslal's
+      // 5120-wide DP-5 but not the 1920-wide DP-1. An empty
+      // default-column-width lets WezTerm pick its own size. Workaround from
+      // niri's Application-Issues wiki.
+      window-rule {
+          match app-id=r#"^org\.wezfurlong\.wezterm$"#
+          default-column-width {}
+      }
+
       spawn-at-startup "${pkgs.swaybg}/bin/swaybg" "-i" "${config.home.homeDirectory}/.background-image" "-m" "fill"
       spawn-at-startup "${pkgs.waybar}/bin/waybar"
       spawn-at-startup "${pkgs.mako}/bin/mako"
