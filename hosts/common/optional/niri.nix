@@ -19,7 +19,7 @@
       # (logout), so another session can still be picked -- same reason
       # bspwm.nix keeps LightDM's greeter enabled alongside autologin.
       default_session = {
-        command = "${pkgs.greetd.tuigreet}/bin/tuigreet --remember --remember-user-session --cmd niri-session";
+        command = "${pkgs.tuigreet}/bin/tuigreet --remember --remember-user-session --cmd niri-session";
       };
     };
   };
@@ -28,6 +28,6 @@
   # bar, notifications, lock screen, wallpaper) live in home-manager instead,
   # same split bspwm.nix uses.
   environment.systemPackages = with pkgs; [
-    greetd.tuigreet
+    tuigreet
   ];
 }
