@@ -1,4 +1,5 @@
 {
+  config,
   pkgs,
   configLib,
   ...
@@ -53,6 +54,22 @@ let
       exec "$displays" refresh
     fi
     exec ${pkgs.bspwm}/bin/bspc wm -r
+  '';
+
+  # super + Return. Ask the running GUI for a new window and only start a GUI
+  # process when there is none. On ganoslal a bare `wezterm` means
+  # `wezterm connect unix` (home/gig/common/core/wezterm.nix), and `connect`
+  # ALWAYS starts a fresh GUI process -- a second GUI attached to the same mux
+  # server re-opens every existing window a second time. `wezterm cli` talks
+  # to the GUI that is already up instead, and with --no-auto-start it fails
+  # fast when there is none, which is precisely the after-a-crash case where
+  # the plain `wezterm` is wanted: it reconnects to the surviving mux server
+  # and restores every window. On hosts without the mux config both branches
+  # do what the old binding did.
+  wezterm = config.programs.wezterm.package;
+  newTerminal = pkgs.writeShellScript "bspwm-new-terminal" ''
+    ${wezterm}/bin/wezterm cli --no-auto-start spawn --new-window >/dev/null 2>&1 && exit 0
+    exec ${wezterm}/bin/wezterm
   '';
 in
 
@@ -192,8 +209,8 @@ in
   services.sxhkd = {
     enable = true;
     keybindings = {
-      # Terminal (using your preferred wezterm)
-      "super + Return" = "wezterm";
+      # Terminal (wezterm; see newTerminal above for why not a bare `wezterm`)
+      "super + Return" = "${newTerminal}";
 
       # Application launcher
       "super + space" = "rofi -show drun";
