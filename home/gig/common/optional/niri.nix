@@ -1,4 +1,9 @@
-{ pkgs, configLib, ... }:
+{
+  config,
+  pkgs,
+  configLib,
+  ...
+}:
 
 # Wayland-native alternative to bspwm.nix. niri's own config is plain KDL
 # text rather than a typed settings attrset, same reasoning as bspwm's
@@ -17,9 +22,11 @@
     swaybg # Wallpaper setter (replaces feh, which is X11-only)
   ];
 
-  # Same wallpaper resource bspwm.nix uses.
+  # LOTR wallpaper (Gandalf and the Balrog). The source art is 1080x607, so
+  # swaybg upscales it on the 2560x1600 panel; swap in a 4K version from
+  # resources/wallpapers/tolkien/ when one is available (see its notes file).
   home.file.".background-image" = {
-    source = configLib.relativeToRoot "home/gig/common/resources/wallpapers/SGA/Stargate_Atlantis_Gate_Fixed_Centered_5K.png";
+    source = configLib.relativeToRoot "home/gig/common/resources/wallpapers/tolkien/desktop/less than 1080/gandalf-and-balrog-horizontal.webp";
   };
 
   xdg.configFile."niri/config.kdl".text = ''
@@ -51,7 +58,7 @@
     // workspace; see the Mod+N binds.
     workspace "minimized"
 
-    spawn-at-startup "${pkgs.swaybg}/bin/swaybg" "-i" "$HOME/.background-image" "-m" "fill"
+    spawn-at-startup "${pkgs.swaybg}/bin/swaybg" "-i" "${config.home.homeDirectory}/.background-image" "-m" "fill"
     spawn-at-startup "${pkgs.waybar}/bin/waybar"
     spawn-at-startup "${pkgs.mako}/bin/mako"
 
