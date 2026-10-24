@@ -47,6 +47,10 @@
         scale 1.25
     }
 
+    // niri has no minimize. Emulate it by parking windows on this named
+    // workspace; see the Mod+N binds.
+    workspace "minimized"
+
     spawn-at-startup "${pkgs.swaybg}/bin/swaybg" "-i" "$HOME/.background-image" "-m" "fill"
     spawn-at-startup "${pkgs.waybar}/bin/waybar"
     spawn-at-startup "${pkgs.mako}/bin/mako"
@@ -65,6 +69,13 @@
         // column width of the screen, Mod+Shift+M expands to the edges.
         Mod+M { maximize-column; }
         Mod+Shift+M { maximize-window-to-edges; }
+
+        // "Minimize": send the window to the minimized workspace without
+        // following it. Mod+Shift+N jumps there (and back, if pressed again);
+        // Mod+Shift+1..9 from that workspace restores a window to workspace N.
+        Mod+N { move-window-to-workspace "minimized" focus=false; }
+        Mod+Shift+N { focus-workspace "minimized"; }
+        Mod+Ctrl+N { focus-workspace-previous; }
 
         // Keyboard resize (works on tiled and floating windows). Mouse
         // resize is built in: hold Mod and right-drag a window, or drag a
