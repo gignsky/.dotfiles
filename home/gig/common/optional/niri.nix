@@ -47,8 +47,19 @@
         scale 1.25
     }
 
-    // niri has no minimize. Emulate it by parking windows on this named
-    // workspace; see the Mod+N binds.
+    // niri orders named workspaces first, in declaration order. Declare 1-9
+    // explicitly so "minimized" lands in slot 10 (the 0 key) instead of
+    // shifting everything up. niri has no minimize; windows are parked on
+    // "minimized" instead, see the Mod+N binds.
+    workspace "1"
+    workspace "2"
+    workspace "3"
+    workspace "4"
+    workspace "5"
+    workspace "6"
+    workspace "7"
+    workspace "8"
+    workspace "9"
     workspace "minimized"
 
     spawn-at-startup "${pkgs.swaybg}/bin/swaybg" "-i" "$HOME/.background-image" "-m" "fill"
@@ -71,8 +82,8 @@
         Mod+Shift+M { maximize-window-to-edges; }
 
         // "Minimize": send the window to the minimized workspace without
-        // following it. Mod+Shift+N jumps there (and back, if pressed again);
-        // Mod+Shift+1..9 from that workspace restores a window to workspace N.
+        // following it. Mod+0 (or Mod+Shift+N) jumps there, Mod+Ctrl+N
+        // returns to the previous workspace; Mod+Shift+1..9 from that workspace restores a window to workspace N.
         Mod+N { move-window-to-workspace "minimized" focus=false; }
         Mod+Shift+N { focus-workspace "minimized"; }
         Mod+Ctrl+N { focus-workspace-previous; }
@@ -125,7 +136,7 @@
         Mod+7 { focus-workspace 7; }
         Mod+8 { focus-workspace 8; }
         Mod+9 { focus-workspace 9; }
-        Mod+0 { focus-workspace 10; }
+        Mod+0 { focus-workspace "minimized"; }
         Mod+Shift+1 { move-column-to-workspace 1; }
         Mod+Shift+2 { move-column-to-workspace 2; }
         Mod+Shift+3 { move-column-to-workspace 3; }
@@ -135,7 +146,7 @@
         Mod+Shift+7 { move-column-to-workspace 7; }
         Mod+Shift+8 { move-column-to-workspace 8; }
         Mod+Shift+9 { move-column-to-workspace 9; }
-        Mod+Shift+0 { move-column-to-workspace 10; }
+        Mod+Shift+0 { move-column-to-workspace "minimized"; }
 
         // Screenshots -- niri has this built in, no more maim/xclip/xdotool.
         Print { screenshot; }
