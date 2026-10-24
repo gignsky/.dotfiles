@@ -29,6 +29,10 @@
     # gigpkgs container engine configured below.
     (configLib.relativeToRoot "containers/services")
 
+    # Keep the router first in resolv.conf so spacedock never depends on its
+    # own Pi-hole for DNS (image pulls, nix, the runner) once DHCP hands out .2.
+    (configLib.relativeToRoot "hosts/common/optional/dns.nix")
+
     # Users
     (configLib.relativeToRoot "hosts/common/users/gig")
 
