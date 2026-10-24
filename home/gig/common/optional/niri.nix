@@ -61,6 +61,29 @@
         Mod+Shift+F { fullscreen-window; }
         Mod+F { toggle-window-floating; }
 
+        // Maximize without fullscreen: bars/gaps stay. Mod+M fills the
+        // column width of the screen, Mod+Shift+M expands to the edges.
+        Mod+M { maximize-column; }
+        Mod+Shift+M { maximize-window-to-edges; }
+
+        // Keyboard resize (works on tiled and floating windows). Mouse
+        // resize is built in: hold Mod and right-drag a window, or drag a
+        // floating window's edge; Mod+left-drag moves it.
+        Mod+Ctrl+H { set-window-width "-5%"; }
+        Mod+Ctrl+L { set-window-width "+5%"; }
+        Mod+Ctrl+K { set-window-height "-5%"; }
+        Mod+Ctrl+J { set-window-height "+5%"; }
+        Mod+Ctrl+Left { set-window-width "-5%"; }
+        Mod+Ctrl+Right { set-window-width "+5%"; }
+        Mod+Ctrl+Up { set-window-height "-5%"; }
+        Mod+Ctrl+Down { set-window-height "+5%"; }
+
+        // Two-finger touchpad scroll to move between windows. Held with Mod
+        // because niri can't intercept an unmodified scroll without
+        // stealing it from apps. Three-finger swipe does this natively.
+        Mod+TouchpadScrollLeft cooldown-ms=150 { focus-column-left; }
+        Mod+TouchpadScrollRight cooldown-ms=150 { focus-column-right; }
+
         // Focus/move. niri's column/row model, not bspwm's binary tree --
         // mapped semantically rather than forced 1:1.
         Mod+H { focus-column-left; }
