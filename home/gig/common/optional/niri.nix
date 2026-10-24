@@ -38,9 +38,14 @@
         }
     }
 
-    // No output block -- let niri auto-detect eDP-1. Merlin is a single-
-    // display laptop; the docked-monitor case was already unused (commented
-    // out) in the bspwm-era resource file, so it's not ported either.
+    // Merlin is a single-display laptop; the docked-monitor case was already
+    // unused (commented out) in the bspwm-era resource file, so it's not
+    // ported. niri's auto scale picked 1.5 (1706x1066 logical) on this
+    // 2560x1600 panel, which made text too big -- pin it lower. Try 1.0 for
+    // even smaller, 1.25 -> 1.33 -> 1.5 for larger.
+    output "eDP-1" {
+        scale 1.25
+    }
 
     spawn-at-startup "${pkgs.swaybg}/bin/swaybg" "-i" "$HOME/.background-image" "-m" "fill"
     spawn-at-startup "${pkgs.waybar}/bin/waybar"
