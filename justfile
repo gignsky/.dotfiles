@@ -68,7 +68,7 @@ rebuild-pre:
 dont-fuck-my-build:
   @nix develop -c echo '*The Pre-Commit has been given a chance to Update!*'
   git ls-files --others --exclude-standard -- '*.nix' '*.sh' | xargs -r git add -v
-  nix flake update nix-secrets --commit-lock-file
+  fupdate -y nix-secrets
   @nix-shell -p lolcat --run 'echo "Very little chance your build is fucked! 👍" | lolcat 2> /dev/null'
 
 switch *args:
