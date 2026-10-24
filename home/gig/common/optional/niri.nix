@@ -108,6 +108,8 @@
         Mod+J { focus-window-down; }
         Mod+K { focus-window-up; }
         Mod+L { focus-column-right; }
+        Mod+Ctrl+J { focus-workspace-down; }
+        Mod+Ctrl+K { focus-workspace-up; }
         Mod+Shift+H { move-column-left; }
         Mod+Shift+J { move-window-down; }
         Mod+Shift+K { move-window-up; }
