@@ -15,9 +15,19 @@
         position = "top";
         height = 30;
 
-        modules-left = [ "niri/workspaces" "niri/window" ];
+        modules-left = [
+          "niri/workspaces"
+          "niri/window"
+        ];
         modules-center = [ "clock" ];
-        modules-right = [ "pulseaudio" "network" "cpu" "memory" "battery" "tray" ];
+        modules-right = [
+          "pulseaudio"
+          "network"
+          "cpu"
+          "memory"
+          "battery"
+          "tray"
+        ];
 
         "niri/workspaces" = {
           format = "{index}";
