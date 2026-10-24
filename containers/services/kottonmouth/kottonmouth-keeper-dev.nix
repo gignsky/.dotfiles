@@ -3,8 +3,10 @@
 # wrangler environment instead of production. The image is NOT a flake
 # input: kottonmouth-rolling-deploy.service (hosts/spacedock/github-runner.nix)
 # builds `keeper-image` off rolling's tip at runtime and copies it into podman
-# as `imageRef` below, so beta deploys never rebuild or switch the system and
-# can't revert whatever roll branch spacedock is currently on.
+# as `imageRepo`:<version> (the keeper's Cargo.toml version on rolling, the
+# same tag the main keeper's image carries), so beta deploys never rebuild or
+# switch the system and can't revert whatever roll branch spacedock is
+# currently on.
 #
 # Unlike the main keeper, this one is NOT always on: `autoStart = false`.
 # It only runs while `rolling` differs from `main` -- there's nothing to
@@ -22,13 +24,17 @@
 # tunnels.<id>.ingress` across files.
 {
   config,
+  lib,
   ...
 }:
 let
   # Loaded by kottonmouth-rolling-deploy.service under its own name -- the
-  # image bakes `kottonmouth-keeper:latest`, the main keeper's tag, so a plain
-  # `podman load` would clobber it.
-  imageRef = "localhost/kottonmouth-keeper-dev:rolling";
+  # image bakes `kottonmouth-keeper:<version>`, which is the main keeper's
+  # ref whenever rolling and main share a version, so a plain `podman load`
+  # would clobber it.
+  imageRepo = "localhost/kottonmouth-keeper-dev";
+  # Written by the deploy unit: KEEPER_DEV_TAG=<rolling's keeper version>.
+  tagEnvFile = "/var/lib/kottonmouth-deploy/dev-tag.env";
   # Same tunnel as kottonmouth-keeper.nix -- this file only adds one more
   # ingress hostname to it.
   tunnelId = "1a878786-561d-427c-90cd-358f1b82aea4";
@@ -50,7 +56,10 @@ in
   systemd.tmpfiles.rules = [ "d /var/lib/kottonmouth-keeper-dev 0700 ${uid} ${uid} -" ];
 
   virtualisation.oci-containers.containers.kottonmouth-keeper-dev = {
-    image = imageRef;
+    # Expanded by the unit's shell script at start (oci-containers doesn't
+    # escape `image`), so the tag follows whatever the last deploy loaded;
+    # `rolling` is only a fallback for before the first tagged deploy.
+    image = "${imageRepo}:\${KEEPER_DEV_TAG:-rolling}";
     # Local-only image; never try a registry.
     pull = "never";
     # Started/stopped by rolling-preview.yml based on rolling-vs-main
@@ -92,6 +101,18 @@ in
     ];
     ports = [ "127.0.0.1:${toString adminPort}:8790/tcp" ];
   };
+
+  systemd.services.podman-kottonmouth-keeper-dev.serviceConfig.EnvironmentFile = "-${tagEnvFile}";
+
+  # The image ref above only works while upstream leaves `image` unescaped in
+  # the generated script -- fail the build, not the container start, if that
+  # ever changes.
+  assertions = [
+    {
+      assertion = lib.hasInfix " ${imageRepo}:\${KEEPER_DEV_TAG:-rolling}" config.systemd.services.podman-kottonmouth-keeper-dev.script;
+      message = "kottonmouth-keeper-dev: oci-containers now escapes `image`; the version tag needs another way in.";
+    }
+  ];
 
   # Same basic-auth gate pattern as the main keeper, reusing its htpasswd
   # secret -- one shared band password for both admins.
