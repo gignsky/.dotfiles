@@ -53,15 +53,15 @@
         };
 
         pulseaudio = {
-          format = " {volume}%";
-          format-muted = " muted";
+          format = " {volume}%";
+          format-muted = " muted";
           scroll-step = 5;
           on-click = "${pkgs.pulseaudio}/bin/pactl set-sink-mute @DEFAULT_SINK@ toggle";
         };
 
         network = {
           format-wifi = "WiFi: {essid} ({signalStrength}%) ↓{bandwidthDownBytes} ↑{bandwidthUpBytes}";
-          format-ethernet = " {ipaddr}";
+          format-ethernet = " {ipaddr}";
           format-disconnected = "";
           interval = 3;
         };
@@ -71,7 +71,7 @@
           adapter = "AC1";
           full-at = 98;
           format = "BAT: {capacity}%";
-          format-charging = " {capacity}%";
+          format-charging = " {capacity}%";
           states = {
             warning = 25;
             critical = 10;
