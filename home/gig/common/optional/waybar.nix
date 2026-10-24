@@ -60,7 +60,7 @@
         };
 
         network = {
-          format-wifi = "WiFi: {essid} ({signalStrength}%)";
+          format-wifi = "WiFi: {essid} ({signalStrength}%) ↓{bandwidthDownBytes} ↑{bandwidthUpBytes}";
           format-ethernet = " {ipaddr}";
           format-disconnected = "";
           interval = 3;
