@@ -6,6 +6,13 @@
   ...
 }:
 let
+  # Everything below that drives the layout through xrandr/bspc only makes
+  # sense in the bspwm (X11) session. Under niri the compositor owns the
+  # outputs itself (home/gig/ganoslal.nix), and these units would otherwise
+  # poke Xwayland -- the verify timer is gated only on DISPLAY, which
+  # xwayland-satellite sets -- so they are switched off with bspwm.
+  bspwmSession = config.services.xserver.windowManager.bspwm.enable;
+
   # Applies the 4-monitor layout. Invoked from FIVE places, all the same store
   # path, dispatched on the context argument:
   #
@@ -429,7 +436,9 @@ in
 #   GTX 970 (NVIDIA-G0, Sink Output — driven via PRIME output offload)
 #     DP-1-1    1920x1080@60   top center (LG IPS235)
 #
-# The monitor layout is applied in displayManager.sessionCommands below.
+# Under bspwm the monitor layout is applied in displayManager.sessionCommands
+# below. Under niri (no X server) the names above do not apply: KMS names the
+# connectors itself and the layout lives in home/gig/ganoslal.nix.
 # DP-1-1 in particular reports connected with a valid mode list but is never
 # given a CRTC automatically, so it stays dark unless explicitly enabled.
 #
@@ -505,17 +514,49 @@ in
 
     # Runs per-session, after login, before the window manager starts — so the
     # monitors exist by the time bspwmrc assigns desktops to them.
-    displayManager.sessionCommands = "${applyDisplays}/bin/ganoslal-displays login";
+    displayManager.sessionCommands = lib.mkIf bspwmSession "${applyDisplays}/bin/ganoslal-displays login";
   };
 
-  # `ganoslal-displays` on PATH, so the layout can also be re-applied by hand
-  # (super + shift + d) or every output power-cycled (super + alt + r); both in
-  # home/gig/common/optional/bspwm.nix.
-  environment.systemPackages = [ applyDisplays ];
+  environment = {
+    # `ganoslal-displays` on PATH, so the layout can also be re-applied by hand
+    # (super + shift + d) or every output power-cycled (super + alt + r); both in
+    # home/gig/common/optional/bspwm.nix.
+    systemPackages = lib.mkIf bspwmSession [ applyDisplays ];
+
+    # niri on the proprietary driver: without this profile the driver keeps a
+    # large pool of freed buffers around and niri's VRAM use climbs to ~1GB.
+    # Recommended by upstream:
+    #   https://github.com/YaLTeR/niri/wiki/Nvidia
+    etc."nvidia/nvidia-application-profiles-rc.d/50-limit-free-buffer-pool-in-wayland-compositors.json" =
+      lib.mkIf config.programs.niri.enable {
+        text = builtins.toJSON {
+          rules = [
+            {
+              pattern = {
+                feature = "procname";
+                matches = "niri";
+              };
+              profile = "Limit Free Buffer Pool On Wayland Compositors";
+            }
+          ];
+          profiles = [
+            {
+              name = "Limit Free Buffer Pool On Wayland Compositors";
+              settings = [
+                {
+                  key = "GLVidHeapReuseRatio";
+                  value = 0;
+                }
+              ];
+            }
+          ];
+        };
+      };
+  };
 
   # All the systemd units this host needs for its displays live in one attrset
   # so `systemd` is assigned exactly once (statix: "Avoid repeated keys").
-  systemd = {
+  systemd = lib.mkIf bspwmSession {
 
     # Re-apply the layout on wake.
     #
