@@ -1378,11 +1378,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792715095,
-        "narHash": "sha256-xL/C6ZP+rTbKBFEbYBjgVK7r8yAenfq9BLXzL1nUdg0=",
+        "lastModified": 1792818853,
+        "narHash": "sha256-oune7tJ3Kng9eMPb36kCD1PtdyOYmWpdssYcpXaNAYI=",
         "ref": "main",
-        "rev": "54f5e5ec7ef99c5ab4f11abe141a345badd748e8",
-        "revCount": 177,
+        "rev": "0bc108672985a631913342d6a9ca10c5d61aa092",
+        "revCount": 223,
         "type": "git",
         "url": "ssh://git@github.com/gignsky/kottonmouth.git"
       },
@@ -1495,10 +1495,10 @@
     "nix-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1792731902,
-        "narHash": "sha256-8uYQRcFtDnqK8+9cAJB15g8RAqDXdO2R+4TBjewHuJY=",
+        "lastModified": 1792815825,
+        "narHash": "sha256-pD8M1oWKhAfcFQkxv6bqdFi+HmecABfre8It5eIBsT8=",
         "ref": "main",
-        "rev": "1c70f178433b57fbb82679653cb6f892fe568ab0",
+        "rev": "06de1472a6b34f149e5ed529ddfc7cc59aac1e72",
         "shallow": true,
         "type": "git",
         "url": "ssh://git@github.com/gignsky/nix-secrets.git"
