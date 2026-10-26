@@ -31,8 +31,9 @@
 #
 # Admins: put Steam ID64s in <Administrators> as <string>7656119...</string>.
 #
-# Stop/restart is graceful: SIGTERM runs `taskkill` inside Wine so the server
-# saves and exits, and the unit waits up to 3 minutes for it. A nightly timer
+# Stop/restart is graceful: the entrypoint turns SIGTERM into a Ctrl+C event
+# for the server, which saves and exits (verified), and the unit waits up to
+# 3 minutes for it. A nightly timer
 # restarts the service, which is also how game updates are picked up.
 {
   lib,
@@ -63,19 +64,99 @@ let
   # Wine maps the container's / to Z:\.
   winPath = p: "Z:" + lib.replaceStrings [ "/" ] [ "\\" ] p;
 
-  # Seed config. Session settings left out take the game's vanilla defaults.
+  # Seed config. <SessionSettings> mirrors the <Settings> block of Keen's "Star
+  # System" scenario (Content/CustomWorlds/Star System/Sandbox.sbc, game
+  # 01_210), with OnlineMode/MaxPlayers overridden; the config's settings are
+  # applied to the world on every start, and anything left out would fall back
+  # to engine defaults (e.g. ProceduralDensity 0 = no asteroids).
   defaultConfig = pkgs.writeText "SpaceEngineers-Dedicated.cfg" ''
     <?xml version="1.0"?>
     <MyConfigDedicated xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
       <SessionSettings>
         <GameMode>Survival</GameMode>
+        <InventorySizeMultiplier>3</InventorySizeMultiplier>
+        <AssemblerSpeedMultiplier>3</AssemblerSpeedMultiplier>
+        <AssemblerEfficiencyMultiplier>3</AssemblerEfficiencyMultiplier>
+        <RefinerySpeedMultiplier>3</RefinerySpeedMultiplier>
         <OnlineMode>PUBLIC</OnlineMode>
         <MaxPlayers>${toString maxPlayers}</MaxPlayers>
-        <AutoSaveInMinutes>5</AutoSaveInMinutes>
+        <MaxFloatingObjects>100</MaxFloatingObjects>
         <MaxBackupSaves>5</MaxBackupSaves>
-        <EnableSaving>true</EnableSaving>
+        <MaxGridSize>0</MaxGridSize>
+        <MaxBlocksPerPlayer>0</MaxBlocksPerPlayer>
+        <TotalPCU>100000</TotalPCU>
+        <MaxFactionsCount>0</MaxFactionsCount>
+        <BlockLimitsEnabled>GLOBALLY</BlockLimitsEnabled>
+        <EnableRemoteBlockRemoval>true</EnableRemoteBlockRemoval>
+        <EnvironmentHostility>NORMAL</EnvironmentHostility>
+        <AutoHealing>true</AutoHealing>
+        <EnableCopyPaste>false</EnableCopyPaste>
+        <WeaponsEnabled>true</WeaponsEnabled>
+        <ShowPlayerNamesOnHud>true</ShowPlayerNamesOnHud>
+        <ThrusterDamage>true</ThrusterDamage>
+        <EnableSpectator>false</EnableSpectator>
+        <WorldSizeKm>0</WorldSizeKm>
+        <MinimumWorldSize>6000</MinimumWorldSize>
+        <RespawnShipDelete>false</RespawnShipDelete>
+        <ResetOwnership>false</ResetOwnership>
+        <WelderSpeedMultiplier>2</WelderSpeedMultiplier>
+        <GrinderSpeedMultiplier>2</GrinderSpeedMultiplier>
+        <RealisticSound>false</RealisticSound>
+        <HackSpeedMultiplier>0.33</HackSpeedMultiplier>
+        <PermanentDeath>false</PermanentDeath>
+        <AutoSaveInMinutes>5</AutoSaveInMinutes>
+        <SpawnShipTimeMultiplier>0</SpawnShipTimeMultiplier>
+        <ProceduralDensity>0.35</ProceduralDensity>
+        <RandomizeSeed>true</RandomizeSeed>
+        <ProceduralSeed>0</ProceduralSeed>
+        <DestructibleBlocks>true</DestructibleBlocks>
+        <EnableIngameScripts>false</EnableIngameScripts>
+        <ViewDistance>15000</ViewDistance>
+        <FloraDensity>20</FloraDensity>
+        <EnableToolShake>false</EnableToolShake>
+        <EnableOxygen>true</EnableOxygen>
+        <EnableResearch>true</EnableResearch>
+        <EnableOxygenPressurization>true</EnableOxygenPressurization>
+        <Enable3rdPersonView>true</Enable3rdPersonView>
+        <EnableFlora>true</EnableFlora>
+        <EnableConvertToStation>true</EnableConvertToStation>
+        <StationVoxelSupport>false</StationVoxelSupport>
+        <EnableSunRotation>true</EnableSunRotation>
+        <EnableRespawnShips>true</EnableRespawnShips>
+        <ScenarioEditMode>false</ScenarioEditMode>
+        <Scenario>false</Scenario>
+        <CanJoinRunning>false</CanJoinRunning>
+        <PhysicsIterations>8</PhysicsIterations>
+        <SunRotationIntervalMinutes>119.999992</SunRotationIntervalMinutes>
+        <EnableJetpack>true</EnableJetpack>
+        <SpawnWithTools>true</SpawnWithTools>
+        <StartInRespawnScreen>false</StartInRespawnScreen>
+        <EnableVoxelDestruction>true</EnableVoxelDestruction>
+        <MaxDrones>5</MaxDrones>
+        <EnableWolfs>true</EnableWolfs>
+        <EnableSpiders>true</EnableSpiders>
+        <FloraDensityMultiplier>1</FloraDensityMultiplier>
+        <EnableStructuralSimulation>false</EnableStructuralSimulation>
+        <MaxActiveFracturePieces>50</MaxActiveFracturePieces>
+        <BlockTypeLimits>
+          <dictionary />
+        </BlockTypeLimits>
+        <EnableScripterRole>false</EnableScripterRole>
         <ExperimentalMode>false</ExperimentalMode>
-        <EnableIngameScripts>true</EnableIngameScripts>
+        <EnableVoxelHand>true</EnableVoxelHand>
+        <HasPlanets>true</HasPlanets>
+        <EnableSpaceSuitRespawn>false</EnableSpaceSuitRespawn>
+        <EnableEconomy>true</EnableEconomy>
+        <DepositsCountCoefficient>1</DepositsCountCoefficient>
+        <DepositSizeDenominator>60</DepositSizeDenominator>
+        <HarvestRatioMultiplier>0.8</HarvestRatioMultiplier>
+        <TradeFactionsCount>10</TradeFactionsCount>
+        <ScrapEnabled>false</ScrapEnabled>
+        <EnableRadiation>true</EnableRadiation>
+        <SolarRadiationIntensity>0</SolarRadiationIntensity>
+        <FoodConsumptionRate>0.5</FoodConsumptionRate>
+        <EnableSurvivalBuffs>true</EnableSurvivalBuffs>
+        <EnableReducedStatsOnRespawn>true</EnableReducedStatsOnRespawn>
       </SessionSettings>
       <LoadWorld />
       <IP>0.0.0.0</IP>
@@ -219,9 +300,20 @@ let
     se_pid=$!
 
     stop() {
+      # Wine turns SIGINT on the server process into a console Ctrl+C event,
+      # which the server handles by saving and shutting down (~1 s when
+      # empty). taskkill does not work here: with -noconsole there is no
+      # window for its WM_CLOSE. `wine foo.exe` runs the real process under a
+      # start.exe wrapper, so find it by its Windows command line.
       echo "== stop requested: asking the server to save and exit"
-      if ! wine taskkill /IM SpaceEngineersDedicated.exe; then
-        echo "taskkill failed, sending SIGTERM to wine"
+      pid=$(pgrep -f '^Z:.*SpaceEngineersDedicated\.exe' | head -1 || true)
+      kill -INT "''${pid:-$se_pid}" 2>/dev/null || true
+      for i in $(seq 1 150); do
+        kill -0 "$se_pid" 2>/dev/null || break
+        sleep 1
+      done
+      if kill -0 "$se_pid" 2>/dev/null; then
+        echo "server still running after 150s, sending SIGTERM"
         kill "$se_pid" 2>/dev/null || true
       fi
       wait "$se_pid" || true
