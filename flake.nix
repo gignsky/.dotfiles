@@ -108,7 +108,7 @@
     # (`nix flake update christina-website-stable`) once a roll is promoted,
     # like kottonmouth's `main`. See containers/services/christina/christina-keeper.nix.
     christina-website-stable = {
-      url = "git+ssh://git@github.com/gignsky/christina-website.git?ref=master";
+      url = "git+ssh://git@github.com/gignsky/christina-website.git?ref=rolling";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
