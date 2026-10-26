@@ -18,6 +18,8 @@ systemd-managed OCI containers via `virtualisation.oci-containers`.
 - `services/pihole.nix` (+ `pihole-config.nix`) — Pi-hole (enabled; needs the `pihole/*`
   sops keys) + nebula-sync, as slave to the memory-alpha master.
 - `services/tdarr-node.nix` — Tdarr transcode node (needs CIFS mounts + samba creds).
+- `services/space-engineers.nix` — Space Engineers dedicated server (Windows build under
+  Wine, `devidian/spaceengineers` image). State in `/var/lib/space-engineers`, UDP 27016.
 
 Enable one by uncommenting its import in `services/default.nix`. The host must
 import `containers/services` (spacedock does) and have the engine on:
