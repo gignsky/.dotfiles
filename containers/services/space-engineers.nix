@@ -14,7 +14,7 @@
 #   /var/lib/space-engineers/game       SteamCMD install of app 298740 (~8 GB)
 #   /var/lib/space-engineers/instances  one dir per instance: config, Saves/, logs
 #   /var/lib/space-engineers/plugins    drop .dll plugins here; added to the config on start
-#   /var/lib/space-engineers/steamcmd   SteamCMD's own state (/root/.steam)
+#   /var/lib/space-engineers/steamcmd   SteamCMD itself and its state
 #   /var/lib/space-engineers/wine       the Wine prefix (copied from the image on first
 #                                       start, then given the VC++ x64 runtime; see below)
 #
@@ -205,17 +205,30 @@ let
     # Replace element $1 (self-closing or single-line) in $CFG with $2.
     setelem() { sed -i -E "s=<$1 */>|<$1>.*</$1>=$(sedesc "$2")=" "$CFG"; }
 
+    # bash is PID 1 here, so without a handler SIGTERM is simply ignored and
+    # podman has to SIGKILL after --stop-timeout. Bash also defers traps until
+    # a foreground child exits, so long steps run backgrounded under `await`,
+    # which `wait`s (interruptible) and lets the trap kill the child.
+    child=""
+    await() { "$@" & child=$!; local rc=0; wait "$child" || rc=$?; child=""; return "$rc"; }
+    pre_stop() {
+      echo "== stop requested before the server started"
+      [ -n "$child" ] && kill "$child" 2>/dev/null
+      exit 143
+    }
+    trap pre_stop TERM INT
+
     echo "== SteamCMD: install/update Space Engineers Dedicated Server (app 298740)"
     for attempt in 1 2 3; do
       # Platform type and install dir must be set before login, or SteamCMD
       # fails with "Missing configuration".
-      if /usr/games/steamcmd +@sSteamCmdForcePlatformType windows +force_install_dir "$GAME_DIR" \
+      if await /usr/games/steamcmd +@sSteamCmdForcePlatformType windows +force_install_dir "$GAME_DIR" \
            +login anonymous +app_update 298740 +quit \
          && [ -f "$EXE" ]; then
         break
       fi
       echo "steamcmd attempt $attempt did not produce the server binary, retrying in 20s"
-      sleep 20
+      await sleep 20
     done
     if [ ! -f "$EXE" ]; then
       echo "server binary still missing after SteamCMD, giving up"
@@ -235,15 +248,19 @@ let
       echo "seeding $WINEPREFIX from the image's prefix"
       cp -a /root/server/. "$WINEPREFIX/"
     fi
-    if ! grep -q 'VC\\\\Runtimes\\\\X64' "$WINEPREFIX/system.reg"; then
+    marker=$WINEPREFIX/.vc-redist-x64-installed
+    if [ ! -f "$marker" ] && ! grep -q 'VC\\\\Runtimes\\\\X64' "$WINEPREFIX/system.reg"; then
       echo "installing the VC++ 2015-2022 x64 runtime into the prefix (one-time)"
       curl -fsSL -o /tmp/vc_redist.x64.exe https://aka.ms/vs/17/release/vc_redist.x64.exe
       rm -f /tmp/.X99-lock
       Xvfb :99 -screen 0 1024x768x16 >/dev/null 2>&1 &
       xvfb_pid=$!
       sleep 1
-      DISPLAY=:99 wine /tmp/vc_redist.x64.exe /install /quiet /norestart
-      wineserver -w || true
+      # Synchronous; ~20 s. Do NOT `wineserver -w` afterwards: that waits for
+      # the .NET native-image service the prefix boot spawns, which can take
+      # 15+ minutes.
+      DISPLAY=:99 await wine /tmp/vc_redist.x64.exe /install /quiet /norestart
+      touch "$marker"
       kill "$xvfb_pid" 2>/dev/null || true
       rm -f /tmp/vc_redist.x64.exe
     fi
@@ -343,7 +360,10 @@ in
       "${stateDir}/game:${appdata}/SpaceEngineersDedicated"
       "${stateDir}/instances:${appdata}/instances"
       "${stateDir}/plugins:${appdata}/plugins"
-      "${stateDir}/steamcmd:/root/.steam"
+      # The image's steamcmd wrapper installs SteamCMD under ~/.local/share/Steam
+      # (and only symlinks ~/.steam to it), so persist that or it re-downloads
+      # itself on every start.
+      "${stateDir}/steamcmd:/root/.local/share/Steam"
       "${stateDir}/wine:${appdata}/wine"
       "${entrypoint}:/opt/se/entrypoint.sh:ro"
       "${defaultConfig}:/opt/se/SpaceEngineers-Dedicated.cfg:ro"
