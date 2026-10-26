@@ -11,5 +11,6 @@ _: {
     ./avec-moi-app.nix
     ./scribbydascribe.nix # Discord voice transcriber — needs the `scribbydascribe-env` sops key first
     ./kottonmouth # kottonmouthband.com keeper (main + beta) and tunnel DNS, see kottonmouth/default.nix
+    ./christina # admin.christinasceramics.com keeper, see christina/default.nix
   ];
 }
