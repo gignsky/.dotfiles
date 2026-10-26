@@ -52,6 +52,54 @@ let
     WEZTERM_LOG="window::os::wayland=debug,info" exec ${wezterm}/bin/wezterm
   '';
 
+  # Mod+W. `close-window` is the wrong verb for a WezTerm window on
+  # ganoslal: every window there belongs to the `unix` mux domain, and
+  # WezTerm answers a compositor close on a mux-client window by detaching
+  # from the domain, not by killing anything (mux/src/lib.rs
+  # remove_window_internal -> Domain::detach; ClientPane reports a window
+  # close as safe to do without a prompt). Detaching drops every window of
+  # that domain at once, the GUI exits, and the next Mod+Return reconnects
+  # and brings them all back untouched. Observed on niri 2026-10-26; the GUI
+  # log ends in "detaching domain" / "domain detached panes: [...]".
+  #
+  # So for WezTerm, kill the panes of the focused window on the mux server
+  # instead. The server records each client's focused pane (ClientPane
+  # forwards it with SetFocusedPane), so `list-clients` names the pane under
+  # the cursor, `list` gives the window it belongs to, and `kill-pane` on
+  # each pane of that window makes the GUI drop just that window. Pane and
+  # window ids differ between the GUI socket and the server socket, so
+  # everything here talks to the server explicitly. Anything else, and any
+  # lookup failure, falls back to a plain close-window.
+  closeWindow = pkgs.writeShellScript "niri-close-window" ''
+    niri=${pkgs.niri}/bin/niri
+    jq=${pkgs.jq}/bin/jq
+    wezterm=${wezterm}/bin/wezterm
+    fallback() { exec "$niri" msg action close-window; }
+
+    app_id=$("$niri" msg --json focused-window | "$jq" -r '.app_id // empty') || fallback
+    [ "$app_id" = "org.wezfurlong.wezterm" ] || fallback
+
+    export WEZTERM_UNIX_SOCKET="''${XDG_RUNTIME_DIR:-/run/user/$(${pkgs.coreutils}/bin/id -u)}/wezterm/sock"
+    cli() { "$wezterm" cli --no-auto-start "$@"; }
+
+    # Several clients (a second GUI, `wezterm cli` itself) may be attached;
+    # the one that acted most recently is the GUI the user is looking at.
+    pane=$(cli list-clients --format json | "$jq" -r '
+      map(select(.focused_pane_id != null))
+      | sort_by(.idle_time.secs, .idle_time.nanos)
+      | .[0].focused_pane_id // empty') || fallback
+    [ -n "$pane" ] || fallback
+
+    panes=$(cli list --format json | "$jq" -r --argjson p "$pane" '
+      (map(select(.pane_id == $p)) | .[0].window_id) as $w
+      | if $w == null then empty else map(select(.window_id == $w) | .pane_id) | .[] end') || fallback
+    [ -n "$panes" ] || fallback
+
+    for p in $panes; do
+      cli kill-pane --pane-id "$p"
+    done
+  '';
+
   # Mod+Alt+R. niri port of `ganoslal-displays refresh` (bspwm's super + alt
   # + r), the cure for a panel that stays dark after sleep while the
   # compositor believes it is lit -- ganoslal's DP-5 ultrawide, observed
@@ -167,7 +215,7 @@ in
           Mod+Return { spawn "${newTerminal}"; }
           Mod+Space { spawn "${pkgs.fuzzel}/bin/fuzzel"; }
 
-          Mod+W { close-window; }
+          Mod+W { spawn "${closeWindow}"; }
           Mod+Shift+F { fullscreen-window; }
           Mod+F { toggle-window-floating; }
 
