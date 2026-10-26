@@ -30,6 +30,12 @@
     "gigpkgs/github-runner-token" = {
       restartUnits = [ "github-runner-gigpkgs.service" ];
     };
+    "christina-website/github-runner-token" = {
+      restartUnits = [ "github-runner-christina-website.service" ];
+    };
+    "christina-website/beta-env" = {
+      restartUnits = [ "github-runner-christina-website.service" ];
+    };
     "kottonmouth/github-runner-token" = {
       restartUnits = [ "github-runner-kottonmouth.service" ];
     };
@@ -65,6 +71,26 @@
         rustc
         gcc
       ];
+    };
+    christina-website = {
+      enable = true;
+      url = "https://github.com/gignsky/christina-website";
+      tokenFile = config.sops.secrets."christina-website/github-runner-token".path;
+      # Default labels already include self-hosted/Linux/X64; this is what
+      # `runs-on: [self-hosted, spacedock]` in rolling-preview.yml matches on.
+      extraLabels = [ "spacedock" ];
+      extraPackages = with pkgs; [
+        nodejs_22
+        git
+        # actions/checkout with `lfs: true` shells out to git-lfs (images are LFS-tracked).
+        git-lfs
+      ];
+      # CLOUDFLARE_API_TOKEN for `wrangler deploy --env beta`, one KEY=value per line,
+      # same convention as the kottonmouth runner above. The Instagram token is not
+      # here: christina-auth.service keeps it in /var/lib/christina-auth/token.json
+      # (christina-auth.nix) and the workflow reads it at build time.
+      serviceOverrides.EnvironmentFile = config.sops.secrets."christina-website/beta-env".path;
+      serviceOverrides.SupplementaryGroups = [ "christina-auth" ];
     };
     kottonmouth = {
       enable = true;
@@ -107,6 +133,9 @@
     path = with pkgs; [
       coreutils
       gitMinimal
+      gnutar
+      gzip
+      jq
       skopeo
       config.nix.package.out
       config.programs.ssh.package
@@ -127,9 +156,17 @@
         --override-input nixpkgs 'path:${inputs.nixpkgs}' \
         --out-link "$state/keeper-image"
 
-      # Copied under its own name: the archive bakes `kottonmouth-keeper:latest`, which is the main keeper's tag.
+      # Tag the dev image with rolling's keeper version, read from the tag the archive bakes (`kottonmouth-keeper:<version>`).
+      archive=$(readlink -f "$state/keeper-image")
+      KEEPER_DEV_TAG=$(tar -xzOf "$archive" manifest.json | jq -er '.[0].RepoTags[0] | split(":") | last')
+      # podman-kottonmouth-keeper-dev reads this as its EnvironmentFile to pick the same tag.
+      echo "KEEPER_DEV_TAG=$KEEPER_DEV_TAG" > "$state/dev-tag.env.tmp"
+      mv "$state/dev-tag.env.tmp" "$state/dev-tag.env"
+
+      # Copied under its own name: the archive bakes `kottonmouth-keeper:<version>`, which is the main keeper's ref whenever rolling and main share a version.
+      # The image string expands `$KEEPER_DEV_TAG` set above.
       skopeo copy --quiet \
-        "docker-archive:$(readlink -f "$state/keeper-image")" \
+        "docker-archive:$archive" \
         containers-storage:${config.virtualisation.oci-containers.containers.kottonmouth-keeper-dev.image}
 
       # A running container keeps its old image, and the workflow's `systemctl start` is a no-op on it.

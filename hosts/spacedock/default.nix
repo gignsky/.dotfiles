@@ -29,6 +29,10 @@
     # gigpkgs container engine configured below.
     (configLib.relativeToRoot "containers/services")
 
+    # Keep the router first in resolv.conf so spacedock never depends on its
+    # own Pi-hole for DNS (image pulls, nix, the runner) once DHCP hands out .2.
+    (configLib.relativeToRoot "hosts/common/optional/dns.nix")
+
     # Users
     (configLib.relativeToRoot "hosts/common/users/gig")
 
@@ -38,6 +42,9 @@
     # Self-hosted Actions runner driving kottonmouth's rolling-preview.yml
     # (beta.kottonmouthband.com + kottonmouth-keeper-dev start/stop).
     (configLib.relativeToRoot "hosts/spacedock/github-runner.nix")
+
+    # Always-on Instagram login + weekly token refresh for christinasceramics.com.
+    (configLib.relativeToRoot "hosts/spacedock/christina-auth.nix")
   ];
   # gigpkgs container engine — the module is injected in flake.nix as
   # `inputs.nixpkgs.nixosModules.containers`. Provides the OCI runtime for
