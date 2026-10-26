@@ -66,17 +66,39 @@
       --    GUI process that started it. `default_domain` makes a window
       --    spawned through the running GUI (`wezterm cli spawn`) land in the
       --    mux too, not in the GUI-local domain that dies with it.
+      --
+      -- Everything above is the X11 (bspwm) story. Under niri (Wayland) the
+      -- WebGpu front end is the thing that broke (2026-10-26): the first
+      -- GUI of the session, launched by Mod+Return right after login,
+      -- painted its "Connect to Socket(...)" connection window once and
+      -- never again (not on resize, not on focus), and closing it
+      -- segfaulted every wezterm-gui process at ip=0000000000000000, a
+      -- call through a NULL function pointer. NVIDIA has an open report of
+      -- exactly that NULL call from vkQueuePresentKHR on Wayland once a
+      -- VkInstance in the process is torn down (drivers 570 through 580),
+      -- and wezterm holds one VkInstance per window. The same launch
+      -- replayed later in the session rendered and closed cleanly with
+      -- either front end, so this is a bet rather than a proof: EGL on
+      -- Wayland (libnvidia-egl-wayland) is a different path from the X11
+      -- one that dies above, so OpenGL gets its turn there. If a window
+      -- freezes or a GUI dies again, read
+      -- $XDG_RUNTIME_DIR/wezterm/wezterm-gui-log-<pid>.txt (the niri
+      -- launcher logs the Wayland backend at debug) and `coredumpctl list`.
       if wezterm.hostname() == "ganoslal" then
-        config.front_end = "WebGpu"
-        if wezterm.gui then
-          for _, gpu in ipairs(wezterm.gui.enumerate_gpus()) do
-            if
-              gpu.backend == "Vulkan"
-              and gpu.device_type == "DiscreteGpu"
-              and gpu.name:find("RTX 3060 Ti", 1, true)
-            then
-              config.webgpu_preferred_adapter = gpu
-              break
+        if os.getenv("WAYLAND_DISPLAY") then
+          config.front_end = "OpenGL"
+        else
+          config.front_end = "WebGpu"
+          if wezterm.gui then
+            for _, gpu in ipairs(wezterm.gui.enumerate_gpus()) do
+              if
+                gpu.backend == "Vulkan"
+                and gpu.device_type == "DiscreteGpu"
+                and gpu.name:find("RTX 3060 Ti", 1, true)
+              then
+                config.webgpu_preferred_adapter = gpu
+                break
+              end
             end
           end
         end

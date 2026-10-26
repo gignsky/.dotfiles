@@ -16,10 +16,40 @@ let
   # reason: on ganoslal a bare `wezterm` means `wezterm connect unix`, which
   # always starts a second GUI that re-opens every mux window. Ask the running
   # GUI for a window first; fall back to a fresh one only when none is up.
+  #
+  # Before that fresh GUI, make sure the mux server is already listening.
+  # Left to itself `wezterm connect` spawns the server from inside its
+  # "Connecting..." window and then swaps the first mux tab into that same
+  # window. On niri the first GUI of the session came up frozen at exactly
+  # that point, showing "Connect to Socket(...)" forever (2026-10-26; the
+  # front-end side of it is in home/gig/common/core/wezterm.nix). Starting
+  # the server here keeps the GUI out of the spawn path, and the GUI gets
+  # its Wayland backend logged at debug level so a repeat leaves evidence in
+  # $XDG_RUNTIME_DIR/wezterm/wezterm-gui-log-<pid>.txt.
   wezterm = config.programs.wezterm.package;
+  #
+  # The GUI check is a pgrep, not just the `wezterm cli` exit code: with no
+  # GUI up but the mux server alive (every GUI crashed, which is how the
+  # 2026-10-26 session ended), `wezterm cli spawn` happily talks to the mux
+  # server instead, creates a window nobody can see and exits 0, so this key
+  # would do nothing visible. Verified against a bare mux server.
   newTerminal = pkgs.writeShellScript "niri-new-terminal" ''
-    ${wezterm}/bin/wezterm cli --no-auto-start spawn --new-window >/dev/null 2>&1 && exit 0
-    exec ${wezterm}/bin/wezterm
+    if ${pkgs.procps}/bin/pgrep -u "$(${pkgs.coreutils}/bin/id -u)" -x wezterm-gui >/dev/null; then
+      ${wezterm}/bin/wezterm cli --no-auto-start spawn --new-window >/dev/null 2>&1 && exit 0
+    fi
+
+    sock="''${XDG_RUNTIME_DIR:-/run/user/$(${pkgs.coreutils}/bin/id -u)}/wezterm/sock"
+    mux_up() {
+      WEZTERM_UNIX_SOCKET="$sock" ${wezterm}/bin/wezterm cli --no-auto-start list >/dev/null 2>&1
+    }
+    if ! mux_up; then
+      ${wezterm}/bin/wezterm-mux-server --daemonize
+      for _ in $(${pkgs.coreutils}/bin/seq 1 50); do
+        mux_up && break
+        ${pkgs.coreutils}/bin/sleep 0.1
+      done
+    fi
+    WEZTERM_LOG="window::os::wayland=debug,info" exec ${wezterm}/bin/wezterm
   '';
 
   # Mod+Alt+R. niri port of `ganoslal-displays refresh` (bspwm's super + alt
