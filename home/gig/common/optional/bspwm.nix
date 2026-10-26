@@ -1,4 +1,5 @@
 {
+  config,
   pkgs,
   configLib,
   ...
@@ -34,6 +35,41 @@ let
     if [ -f "$HOME/.background-image" ]; then
       ${pkgs.feh}/bin/feh --bg-fill "$HOME/.background-image"
     fi
+  '';
+
+  # super + alt + r. On ganoslal this is a full display refresh: every output
+  # is powered off and back on (a real modeset, which retrains the DP link),
+  # polybar is restarted and bspwm is restarted last. That is the cure for a
+  # monitor that stays dark after sleep while X still believes it is lit -- a
+  # state in which `bspc wm -r` and a plain layout re-apply both do nothing,
+  # because neither changes the geometry. Elsewhere this key is the bspwm
+  # restart it always was.
+  #
+  # `ganoslal-displays` is a SYSTEM package (hosts/ganoslal/nvidia.nix), so it
+  # has no store path this module can name; the system profile is the next
+  # most stable thing, and it does not depend on whatever PATH sxhkd has.
+  refreshDisplays = pkgs.writeShellScript "bspwm-refresh-displays" ''
+    displays=/run/current-system/sw/bin/ganoslal-displays
+    if [ -x "$displays" ]; then
+      exec "$displays" refresh
+    fi
+    exec ${pkgs.bspwm}/bin/bspc wm -r
+  '';
+
+  # super + Return. Ask the running GUI for a new window and only start a GUI
+  # process when there is none. On ganoslal a bare `wezterm` means
+  # `wezterm connect unix` (home/gig/common/core/wezterm.nix), and `connect`
+  # ALWAYS starts a fresh GUI process -- a second GUI attached to the same mux
+  # server re-opens every existing window a second time. `wezterm cli` talks
+  # to the GUI that is already up instead, and with --no-auto-start it fails
+  # fast when there is none, which is precisely the after-a-crash case where
+  # the plain `wezterm` is wanted: it reconnects to the surviving mux server
+  # and restores every window. On hosts without the mux config both branches
+  # do what the old binding did.
+  wezterm = config.programs.wezterm.package;
+  newTerminal = pkgs.writeShellScript "bspwm-new-terminal" ''
+    ${wezterm}/bin/wezterm cli --no-auto-start spawn --new-window >/dev/null 2>&1 && exit 0
+    exec ${wezterm}/bin/wezterm
   '';
 in
 
@@ -110,11 +146,16 @@ in
       pointer_action1 = "move";
       pointer_action2 = "resize_side";
       pointer_action3 = "resize_corner";
-      # No manual padding for polybar: it sets _NET_WM_STRUT_PARTIAL and bspwm
-      # honours struts, so reserving 30px here as well would double-count and
-      # leave a gap under the bar. (If windows end up *behind* the bar instead,
-      # put this back to 30 -- that means struts aren't being applied.)
-      top_padding = 0;
+      # No top_padding here, not even 0. polybar sets _NET_WM_STRUT_PARTIAL and
+      # bspwm turns that into per-monitor padding when a bar maps (30px on every
+      # screen here). But bspwmrc is re-run by `bspc wm -r` -- the last step of
+      # super + alt + r and of the display verify job -- and a
+      # `bspc config top_padding 0` in it resets the padding on EVERY monitor to
+      # 0, wiping the strut-derived value. That is what put the top 17px of each
+      # window under the bar (13px window gap vs. a 30px bar). bspwm takes
+      # MAX(strut, padding), never the sum, so an explicit 30 would also be
+      # safe; relying on the strut keeps the bar height defined in one place
+      # (polybar.nix) and survives `bspc wm -r`, which restores padding.
     };
     rules = {
       "Discord" = {
@@ -156,8 +197,8 @@ in
       fi
 
       # Wallpaper. Set from bspwmrc rather than from the X session script so it
-      # is re-applied by `bspc wm -r` (super + alt + r), which is also what
-      # re-runs the monitor/desktop assignment above.
+      # is re-applied by `bspc wm -r` (the last step of super + alt + r), which
+      # is also what re-runs the monitor/desktop assignment above.
       if [ -f "$HOME/.background-image" ]; then
         ${pkgs.feh}/bin/feh --bg-fill "$HOME/.background-image" &
       fi
@@ -168,8 +209,8 @@ in
   services.sxhkd = {
     enable = true;
     keybindings = {
-      # Terminal (using your preferred wezterm)
-      "super + Return" = "wezterm";
+      # Terminal (wezterm; see newTerminal above for why not a bare `wezterm`)
+      "super + Return" = "${newTerminal}";
 
       # Application launcher
       "super + space" = "rofi -show drun";
@@ -222,7 +263,9 @@ in
 
         <b>System:</b>
         super + alt + Escape             Quit bspwm
-        super + alt + r                  Restart bspwm
+        super + alt + r                  Full display refresh: power-cycle every
+                                         monitor, then restart bspwm (ganoslal;
+                                         plain bspwm restart elsewhere)
         super + shift + d                Re-apply the monitor layout (ganoslal)
 
         <b>Audio:</b>
@@ -245,8 +288,9 @@ in
       # Quit bspwm
       "super + alt + Escape" = "bspc quit";
 
-      # Restart bspwm
-      "super + alt + r" = "bspc wm -r";
+      # Full display refresh (ganoslal) / restart bspwm (elsewhere). See the
+      # refreshDisplays note at the top of this file.
+      "super + alt + r" = "${refreshDisplays}";
 
       # Re-apply the monitor layout by hand. Only ganoslal ships
       # `ganoslal-displays` (see hosts/ganoslal/nvidia.nix); the guard keeps

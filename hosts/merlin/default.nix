@@ -21,10 +21,13 @@
 
     # optional
     # (configLib.relativeToRoot "hosts/common/optional/xfce.nix")
-    (configLib.relativeToRoot "hosts/common/optional/bspwm.nix") # Enable bspwm window manager
-    (configLib.relativeToRoot "hosts/common/optional/autorandr.nix") # Monitor profile switching (was implicit via bspwm.nix)
+    (configLib.relativeToRoot "hosts/common/optional/niri.nix") # Enable niri window manager (Wayland)
+    # autorandr is bspwm-only (its postswitch hook runs `bspc wm -r`); niri
+    # configures outputs itself and merlin is a single-eDP-1 laptop, so it's
+    # dropped rather than ported.
     (configLib.relativeToRoot "hosts/common/optional/dns.nix") # Pin LAN DNS to the router
     (configLib.relativeToRoot "hosts/common/optional/firefox.nix")
+    (configLib.relativeToRoot "hosts/common/optional/nix-build-throttle.nix") # Keep nix builds from starving interactive use
     (configLib.relativeToRoot "hosts/common/optional/audio.nix") # Enable PipeWire audio system
     (configLib.relativeToRoot "hosts/common/optional/bluetooth.nix") # Enable Bluetooth support
     (configLib.relativeToRoot "hosts/common/optional/brightness-control.nix") # Enable brightness control for Framework laptops
@@ -74,32 +77,10 @@
     efi.canTouchEfiVariables = true;
   };
 
-  # Configure keymap in X11
-  services.xserver.xkb = {
-    layout = "us";
-    variant = "";
-  };
-
-  # Enable libinput for touchpad support with palm rejection
-  services.libinput = {
-    enable = true;
-    touchpad = {
-      # Enable palm rejection (disable while typing)
-      disableWhileTyping = true;
-
-      # Enable tap-to-click
-      tapping = true;
-
-      # Enable natural scrolling (disable if you prefer traditional scrolling)
-      naturalScrolling = true;
-
-      # Middle mouse button emulation (three finger tap/click)
-      middleEmulation = true;
-
-      # Disable touchpad while external mouse is connected (optional)
-      # sendEventsMode = "disabled-on-external-mouse";
-    };
-  };
+  # Keyboard layout and touchpad behavior now live in niri's own KDL config
+  # (home/gig/common/optional/niri.nix, `input.keyboard.xkb` /
+  # `input.touchpad`) -- `services.xserver.xkb` and `services.libinput` only
+  # take effect under `services.xserver`, which niri doesn't use.
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;

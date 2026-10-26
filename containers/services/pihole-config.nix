@@ -9,17 +9,18 @@ let
   # The core attributes of the Pi-hole container
   coreConfig = {
     # NixOS oci-containers attributes
-    image = "docker.io/pihole/pihole:2025.10.3";
+    image = "docker.io/pihole/pihole:2026.10.0";
     autoStart = true;
     volumes = [
       "/var/lib/pihole/etc-pihole:/etc/pihole"
       "/var/lib/pihole/etc-dnsmasq.d:/etc/dnsmasq.d"
     ];
+    # Pi-hole v6 FTLCONF_* names. The admin password is NOT here — it comes
+    # from the `pihole-env` sops secret (FTLCONF_webserver_api_password).
     environment = {
-      WEBPASSWORD = "password";
       TZ = "America/New_York";
-      # DNSMASQ_LISTENING = "all";
-      PIHOLE_DNS_ = "1.1.1.1;8.8.8.8";
+      FTLCONF_dns_upstreams = "1.1.1.1;8.8.8.8";
+      # Queries arrive from the podman bridge, not a local subnet.
       FTLCONF_dns_listeningMode = "all";
     };
     ports = [
