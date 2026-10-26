@@ -18,7 +18,8 @@
 # needs. A token without it fails this unit loudly ("Authentication error");
 # the switch itself still completes.
 #
-# christinasceramics.com (auth.* from hosts/spacedock/christina-auth.nix) gets
+# christinasceramics.com (auth.* from hosts/spacedock/christina-auth.nix, admin.*
+# from ../christina/christina-keeper.nix) gets
 # its own unit, christina-dns, using `christina-website/beta-env`: that token
 # needs Zone -> DNS -> Edit on her zone anyway (wrangler custom domains).
 {
@@ -122,7 +123,8 @@ in
     tokenFile = config.sops.secrets."kottonmouth/cloudflare-api-token".path;
   };
 
-  # auth.christinasceramics.com (hosts/spacedock/christina-auth.nix). Uses the
+  # auth.christinasceramics.com (hosts/spacedock/christina-auth.nix) and
+  # admin.christinasceramics.com (../christina/christina-keeper.nix). Uses the
   # beta deploy token, which already needs Zone -> DNS -> Edit on this zone for
   # wrangler's custom-domain route, so no other token is widened.
   systemd.services.christina-dns = mkDns {
