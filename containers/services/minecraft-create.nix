@@ -72,7 +72,7 @@ let
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1">
-      <title>Gignsky Create Server</title>
+      <title>Lord Gig's Create Server</title>
       <style>
         body { font: 16px/1.5 system-ui, sans-serif; max-width: 40rem; margin: 2rem auto; padding: 0 1rem; }
         code { background: #8882; padding: 0 .3em; border-radius: 3px; }
@@ -80,7 +80,7 @@ let
       </style>
     </head>
     <body>
-      <h1>Gignsky Create Server</h1>
+      <h1>Lord Gig's Create Server</h1>
       <p>Minecraft Java ${minecraftVersion} with NeoForge ${neoforgeVersion} and the Create mod.</p>
       <p>Server address: <code>games.gignsky.com</code></p>
       <p><a class="button" href="/mods.zip">Download mods.zip</a></p>
@@ -124,7 +124,7 @@ in
       # JVM heap. spacedock has ~15 GB shared with tdarr, pihole, etc.
       MEMORY = "6G";
       USE_AIKAR_FLAGS = "TRUE";
-      MOTD = "Gignsky Create Server";
+      MOTD = "Lord Gig's Create Server";
       MODE = "survival";
       DIFFICULTY = "normal";
       ONLINE_MODE = "TRUE";
