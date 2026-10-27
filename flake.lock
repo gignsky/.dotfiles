@@ -79,11 +79,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793058748,
-        "narHash": "sha256-2PVs/gTFB322cD/DmaKHJmRmfPgsK0ZHE6QL4Syzv8I=",
+        "lastModified": 1793044626,
+        "narHash": "sha256-1RJQOCnFzvJR1SSfbYY+5ve8ZMifdFNEDsNuMtcY9mA=",
         "ref": "rolling",
-        "rev": "9e3ce1301d2e9aa7a6eb9111cf3c45c5cb415e23",
-        "revCount": 137,
+        "rev": "5536056807dd956c2271251dcdd30be10c771fb4",
+        "revCount": 128,
         "type": "git",
         "url": "ssh://git@github.com/gignsky/christina-website.git"
       },
