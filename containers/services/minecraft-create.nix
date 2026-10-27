@@ -56,6 +56,11 @@ let
     "jei:iv3KiVkE" # Just Enough Items 19.64.0.455 -- recipe lookup
     "jade:eYz2YBGT" # Jade 15.10.6 -- shows what you're looking at
     "appleskin:uAKA6Laj" # AppleSkin 3.0.9 -- food/saturation display
+    # Steam 'n' Rails: the official project stops at 1.20.1; this is the
+    # unofficial 1.21.1 port (github.com/Porters-of-Railways/Railway-1.21.1),
+    # still beta. Built against Create 6.0.10, needs NeoForge >= 21.1.233.
+    # Back up the world before bumping it.
+    "create-steam-n-rails-1.21.1:czVeSmZo" # 0.3.0-beta.2
     # JEI's required config library. It has only ever published beta builds,
     # which is why MODRINTH_ALLOWED_VERSION_TYPE below is "beta".
     "mezzconfig:RdGonQpr" # MezzConfig 0.6.9
