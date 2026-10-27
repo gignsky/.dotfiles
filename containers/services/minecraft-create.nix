@@ -49,13 +49,16 @@ let
   neoforgeVersion = "21.1.265";
 
   # Modrinth "slug:versionId". Pinned so a restart never silently upgrades the
-  # server out from under the players' mods.zip. Required dependencies
-  # (e.g. JEI's mezzconfig) are pulled in automatically.
+  # server out from under the players' mods.zip. Other required dependencies
+  # are pulled in automatically.
   mods = [
     "create:UjX6dr61" # Create 6.0.10+mc1.21.1
     "jei:iv3KiVkE" # Just Enough Items 19.64.0.455 -- recipe lookup
     "jade:eYz2YBGT" # Jade 15.10.6 -- shows what you're looking at
     "appleskin:uAKA6Laj" # AppleSkin 3.0.9 -- food/saturation display
+    # JEI's required config library. It has only ever published beta builds,
+    # which is why MODRINTH_ALLOWED_VERSION_TYPE below is "beta".
+    "mezzconfig:RdGonQpr" # MezzConfig 0.6.9
   ];
 
   site = pkgs.writeTextDir "index.html" ''
@@ -109,6 +112,10 @@ in
       NEOFORGE_VERSION = neoforgeVersion;
       MODRINTH_PROJECTS = lib.concatStringsSep "," mods;
       MODRINTH_DOWNLOAD_DEPENDENCIES = "required";
+      # Release-only (the default) can't resolve mezzconfig, and the server
+      # exits before downloading anything else. "beta" allows release or
+      # beta; it only affects dependency lookups, since `mods` is pinned.
+      MODRINTH_ALLOWED_VERSION_TYPE = "beta";
       # JVM heap. spacedock has ~15 GB shared with tdarr, pihole, etc.
       MEMORY = "6G";
       USE_AIKAR_FLAGS = "TRUE";
@@ -144,7 +151,11 @@ in
       "d ${webDir} 0755 root root -"
     ];
 
-    services.podman-minecraft-create.serviceConfig.TimeoutStopSec = lib.mkForce 180;
+    services.podman-minecraft-create.serviceConfig = {
+      TimeoutStopSec = lib.mkForce 180;
+      # The default 100ms restart hammers Modrinth when a mod fails to resolve.
+      RestartSec = "30s";
+    };
 
     # mods.zip for the website: every jar the server is running, so a client
     # that unzips it is guaranteed to match. Written to a temp name and moved
