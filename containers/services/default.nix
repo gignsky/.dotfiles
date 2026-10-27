@@ -10,6 +10,7 @@ _: {
     ./floatplane-wan-show.nix # Floatplane downloader (WAN Show + Techquickie) → Sonarr, see file header
     ./avec-moi-app.nix
     ./scribbydascribe.nix # Discord voice transcriber — needs the `scribbydascribe-env` sops key first
+    ./minecraft-create.nix # Create (NeoForge) Minecraft server + games.gignsky.com site on :1801, see file header
     ./kottonmouth # kottonmouthband.com keeper (main + beta) and tunnel DNS, see kottonmouth/default.nix
   ];
 }
