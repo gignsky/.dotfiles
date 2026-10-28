@@ -12,5 +12,6 @@ _: {
     ./scribbydascribe.nix # Discord voice transcriber — needs the `scribbydascribe-env` sops key first
     ./minecraft-create.nix # Create (NeoForge) Minecraft server + games.gignsky.com site on :1801, see file header
     ./kottonmouth # kottonmouthband.com keeper (main + beta) and tunnel DNS, see kottonmouth/default.nix
+    ./christina # admin.christinasceramics.com keeper, see christina/default.nix
   ];
 }

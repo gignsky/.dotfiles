@@ -64,7 +64,11 @@ in
     isSystemUser = true;
     group = "christina-auth";
   };
-  users.groups.christina-auth = { };
+  # Pinned so the keeper containers can join the group by number
+  # (`--group-add`) and read token.json. An existing state dir keeps its old
+  # dynamic gid until christina-auth.service restarts; if not,
+  # `chgrp -R christina-auth /var/lib/christina-auth`.
+  users.groups.christina-auth.gid = 8794;
 
   systemd = {
     services.christina-auth = {
