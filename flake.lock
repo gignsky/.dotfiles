@@ -57,11 +57,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792800673,
-        "narHash": "sha256-2o8WwVPmYZEOS6ed/FXgtTL8sPbr+kVL1BNbm7vSFos=",
+        "lastModified": 1793044626,
+        "narHash": "sha256-1RJQOCnFzvJR1SSfbYY+5ve8ZMifdFNEDsNuMtcY9mA=",
         "ref": "rolling",
-        "rev": "7629b74e5131a38ca878be02b8869ee075d42a97",
-        "revCount": 108,
+        "rev": "5536056807dd956c2271251dcdd30be10c771fb4",
+        "revCount": 128,
         "type": "git",
         "url": "ssh://git@github.com/gignsky/christina-website.git"
       },
@@ -1535,10 +1535,10 @@
     "nix-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1793069822,
-        "narHash": "sha256-4v02Mq0DmYJ++OyOgumwhoTI9cC782gKqR+hUQM/oQA=",
+        "lastModified": 1793046255,
+        "narHash": "sha256-XPKpBmsjQqOpapPN2NpLO7PRkQ/7hrMk10K4vh2mrgw=",
         "ref": "main",
-        "rev": "21ebf7f6c4a94f467dbd8c4340a1270e3003aa92",
+        "rev": "f4ed62e81d3f603140b68e946258afbfdfa24a6f",
         "shallow": true,
         "type": "git",
         "url": "ssh://git@github.com/gignsky/nix-secrets.git"
