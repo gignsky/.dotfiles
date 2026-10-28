@@ -3,23 +3,22 @@
 # (`packages.<system>.keeper-image`), the same pattern as kottonmouth-keeper.nix
 # and modelled on it: see docs/keeper.md in that repo.
 #
-# The input follows `rolling`, so the admin changes when a roll graduates, not
-# when it is promoted to master. Roll 1 is a status page proving the path
-# works (build, host, uptime, who the gate let in, which Cloudflare data centre
-# the tunnel came through); nothing on the public site calls it, so if this is
-# down visitors see nothing.
+# The image comes from the `christina-website-stable` input (`master`), updated
+# by hand with `nix flake update christina-website-stable` once a roll has been
+# promoted, like kottonmouth's `main`. The `christina-website` input (`rolling`)
+# only serves the auth script. The beta twin of this keeper is
+# christina-keeper-dev.nix.
 #
 # Inbound: none from the LAN. The keeper is published on loopback only; the
 # cloudflared tunnel (shared with kottonmouth's admin and auth.christinasceramics.com)
 # is its one door in, and a local nginx gate in front of it does HTTP Basic
 # Auth with one shared password. nginx forwards the htpasswd user as
-# X-Remote-User, which the keeper's "Signed in as" row reports. ADMIN_EMAILS
-# is deliberately unset: it only means anything behind Cloudflare Access.
+# X-Remote-User (overwriting anything a client sent), which the admin reports
+# and uses as the signed-in identity. ADMIN_EMAILS is deliberately unset: it
+# only means anything behind Cloudflare Access.
 #
-# Until a roll carrying keeper/ graduates into `rolling` and the lock is
-# updated (`nix flake update christina-website`), the input has no
-# keeper-image; this file then defines nothing and warns, so an unrelated
-# rebuild still goes through.
+# Until `master` carries a keeper-image (and the lock is updated), this file
+# defines nothing and warns, so an unrelated rebuild still goes through.
 {
   inputs,
   config,
@@ -28,9 +27,9 @@
   ...
 }:
 let
-  # `or` guards the whole chain: the current `rolling` has no `packages` output at all.
+  # `or` guards the whole chain: `master` has no `packages` output until the keeper is promoted.
   keeperImage =
-    inputs.christina-website.packages.${pkgs.stdenv.hostPlatform.system}.keeper-image or null;
+    inputs.christina-website-stable.packages.${pkgs.stdenv.hostPlatform.system}.keeper-image or null;
   # Same tunnel as kottonmouth-keeper.nix and christina-auth.nix; this file
   # only adds one more ingress hostname to it. The christina-dns unit
   # (kottonmouth/kottonmouth-dns.nix) upserts the proxied CNAME for it.
@@ -40,6 +39,9 @@ let
   gatePort = 8796;
   # Matches the image's `User`; owns the state dir on the host.
   uid = "8795";
+  # Pinned in hosts/spacedock/christina-auth.nix so containers can join the
+  # group (and read token.json) by number.
+  authGid = toString config.users.groups.christina-auth.gid;
   htpasswd = config.sops.secrets."christina-website/admin-htpasswd".path;
 in
 # mkMerge/mkIf, not `// optionalAttrs`: the condition reads `pkgs`, and the set of
@@ -47,13 +49,16 @@ in
 lib.mkMerge [
   {
     warnings = lib.optional (keeperImage == null) ''
-      christina-keeper: the christina-website input (${inputs.christina-website.rev or "dirty"})
+      christina-keeper: the christina-website-stable input (${
+        inputs.christina-website-stable.rev or "dirty"
+      })
       has no packages.${pkgs.stdenv.hostPlatform.system}.keeper-image, so
-      admin.christinasceramics.com is not configured. Graduate the keeper roll
-      into `rolling`, then `nix flake update christina-website`.
+      admin.christinasceramics.com is not configured. Promote the keeper roll
+      to `master`, then `nix flake update christina-website-stable`.
     '';
-  }
-  (lib.mkIf (keeperImage != null) {
+
+    # Also used by the dev gate (christina-keeper-dev.nix), so defined whether
+    # or not the main image exists yet.
     # htpasswd-format line(s), e.g. `christina:$2y$10$...` -- generate with
     # `nix shell nixpkgs#apacheHttpd -c htpasswd -nBC 10 christina`. The user
     # name is what the status page shows as "Signed in as", so one line per
@@ -62,6 +67,14 @@ lib.mkMerge [
       owner = "nginx";
       restartUnits = [ "nginx.service" ];
     };
+  }
+  (lib.mkIf (keeperImage != null) {
+    # KEEPER_TOKEN / GITHUB_TOKEN as unquoted KEY=value lines; optional
+    # CF_ACCOUNT_ID + CF_API_TOKEN (Cloudflare Email Service) turn the emails on.
+    # restartUnits: rotating the file's content doesn't restart the unit alone.
+    sops.secrets."christina-website/keeper-env" = {
+      restartUnits = [ "podman-christina-keeper.service" ];
+    };
 
     systemd.tmpfiles.rules = [ "d /var/lib/christina-keeper 0700 ${uid} ${uid} -" ];
 
@@ -69,16 +82,24 @@ lib.mkMerge [
       imageFile = keeperImage;
       image = "${keeperImage.imageName}:${keeperImage.imageTag}";
       autoStart = true;
+      environmentFiles = [ config.sops.secrets."christina-website/keeper-env".path ];
       environment = {
         TZ = "America/New_York";
         # What the status page calls the machine; otherwise it would show the
         # container ID. KEEPER_BIND is baked into the image (0.0.0.0:8795).
         KEEPER_HOST = config.networking.hostName;
-        # INSTAGRAM_TOKEN_FILE stays unset: /var/lib/christina-auth/token.json
-        # is readable only by the christina-auth group, whose gid is not pinned,
-        # so the container can't be given it reliably yet (docs/keeper.md).
+        EDGE_URL = "https://christinasceramics.com";
+        GITHUB_REPO = "gignsky/christina-website";
+        GITHUB_BRANCH = "master";
+        # Written by christina-auth.service; the status row and gallery feed read it.
+        INSTAGRAM_TOKEN_FILE = "/auth/token.json";
       };
-      volumes = [ "/var/lib/christina-keeper:/data" ];
+      volumes = [
+        "/var/lib/christina-keeper:/data"
+        "/var/lib/christina-auth:/auth:ro"
+      ];
+      # token.json is 0640 root:christina-auth (dir 0750); join the group by number.
+      extraOptions = [ "--group-add=${authGid}" ];
       ports = [ "127.0.0.1:${toString adminPort}:8795/tcp" ];
     };
 
@@ -100,6 +121,8 @@ lib.mkMerge [
             auth_basic_user_file ${htpasswd};
             # Who the gate let in, for the keeper's "Signed in as" row.
             proxy_set_header X-Remote-User $remote_user;
+            proxy_set_header Host $host;
+            proxy_set_header X-Forwarded-Host $host;
           '';
         };
       };
