@@ -104,8 +104,8 @@ in
       # the jars the client instance gets; a missing one fails loudly at
       # NeoForge load instead of being fetched here and drifting.
       MODRINTH_DOWNLOAD_DEPENDENCIES = "none";
-      # mezzconfig only publishes betas. Pinned ids should bypass this, but
-      # keep it so a pinned beta is never rejected.
+      # mezzconfig only publishes betas; with release-only (the default) the
+      # server once failed to resolve it and exited. Kept as a safeguard.
       MODRINTH_ALLOWED_VERSION_TYPE = "beta";
       # JVM heap. spacedock has ~15 GB shared with tdarr, pihole, etc.
       MEMORY = "6G";

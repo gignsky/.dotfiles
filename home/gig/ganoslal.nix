@@ -17,6 +17,7 @@
     # ./common/optional/bspwm.nix # Enable bspwm window manager configuration
     ./common/optional/thunderbird.nix # WorkMail account, declaratively configured
     ./common/optional/thunderbird-gmail.nix # Personal Gmail accounts, OAuth2
+    ./common/optional/minecraft-create.nix # Prism Launcher + instance matching the spacedock Create server
     # ./cams-countertop.nix
   ];
 
@@ -83,9 +84,6 @@
       claude-desktop
       ytmusic
       steam
-      # Minecraft client for testing the Create server (spacedock): make a
-      # NeoForge 1.21.1 instance and drop the server's mods.zip into it.
-      prismlauncher
       plex-desktop
       remmina
       # bitwarden-cli
