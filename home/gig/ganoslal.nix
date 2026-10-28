@@ -83,6 +83,9 @@
       claude-desktop
       ytmusic
       steam
+      # Minecraft client for testing the Create server (spacedock): make a
+      # NeoForge 1.21.1 instance and drop the server's mods.zip into it.
+      prismlauncher
       plex-desktop
       remmina
       # bitwarden-cli
