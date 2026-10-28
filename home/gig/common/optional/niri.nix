@@ -141,6 +141,33 @@ let
     done
     log "outputs on: $outputs"
   '';
+  # Mod+V clipboard history. The db lives in XDG_RUNTIME_DIR (tmpfs), so
+  # history starts empty after a reboot and never lands on disk.
+  cliphistDb = "\${XDG_RUNTIME_DIR:-/tmp}/cliphist.db";
+  clipboardWatch = pkgs.writeShellScript "niri-clipboard-watch" ''
+    export PATH=${
+      lib.makeBinPath [
+        pkgs.wl-clipboard
+        pkgs.cliphist
+      ]
+    }:$PATH
+    wl-paste --type text --watch cliphist -db-path "${cliphistDb}" store &
+    wl-paste --type image --watch cliphist -db-path "${cliphistDb}" store &
+    wait
+  '';
+  clipboardHistory = pkgs.writeShellScript "niri-clipboard-history" ''
+    export PATH=${
+      lib.makeBinPath [
+        pkgs.wl-clipboard
+        pkgs.cliphist
+        pkgs.fuzzel
+      ]
+    }:$PATH
+    cliphist -db-path "${cliphistDb}" list \
+      | fuzzel --dmenu --prompt "clipboard> " \
+      | cliphist -db-path "${cliphistDb}" decode \
+      | wl-copy
+  '';
 in
 {
   options.niriHostConfig = lib.mkOption {
@@ -208,12 +235,17 @@ in
       spawn-at-startup "${pkgs.swaybg}/bin/swaybg" "-i" "${config.home.homeDirectory}/.background-image" "-m" "fill"
       spawn-at-startup "${pkgs.waybar}/bin/waybar"
       spawn-at-startup "${pkgs.mako}/bin/mako"
+      spawn-at-startup "${clipboardWatch}"
+      // A Wayland clipboard dies with the app that owns it; this keeps a copy
+      // alive after the source window closes.
+      spawn-at-startup "${pkgs.wl-clip-persist}/bin/wl-clip-persist" "--clipboard" "regular"
 
       screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
 
       binds {
           Mod+Return { spawn "${newTerminal}"; }
           Mod+Space { spawn "${pkgs.fuzzel}/bin/fuzzel"; }
+          Mod+V { spawn "${clipboardHistory}"; }
 
           Mod+W { spawn "${closeWindow}"; }
           Mod+Shift+F { fullscreen-window; }
