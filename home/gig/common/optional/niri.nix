@@ -330,16 +330,16 @@ in
           Mod+8 { focus-workspace 8; }
           Mod+9 { focus-workspace 9; }
           Mod+0 { focus-workspace 10; }
-          Mod+Shift+1 { move-column-to-workspace 1; }
-          Mod+Shift+2 { move-column-to-workspace 2; }
-          Mod+Shift+3 { move-column-to-workspace 3; }
-          Mod+Shift+4 { move-column-to-workspace 4; }
-          Mod+Shift+5 { move-column-to-workspace 5; }
-          Mod+Shift+6 { move-column-to-workspace 6; }
-          Mod+Shift+7 { move-column-to-workspace 7; }
-          Mod+Shift+8 { move-column-to-workspace 8; }
-          Mod+Shift+9 { move-column-to-workspace 9; }
-          Mod+Shift+0 { move-column-to-workspace 10; }
+          Mod+Shift+1 { move-column-to-workspace 1 focus=false; }
+          Mod+Shift+2 { move-column-to-workspace 2 focus=false; }
+          Mod+Shift+3 { move-column-to-workspace 3 focus=false; }
+          Mod+Shift+4 { move-column-to-workspace 4 focus=false; }
+          Mod+Shift+5 { move-column-to-workspace 5 focus=false; }
+          Mod+Shift+6 { move-column-to-workspace 6 focus=false; }
+          Mod+Shift+7 { move-column-to-workspace 7 focus=false; }
+          Mod+Shift+8 { move-column-to-workspace 8 focus=false; }
+          Mod+Shift+9 { move-column-to-workspace 9 focus=false; }
+          Mod+Shift+0 { move-column-to-workspace 10 focus=false; }
 
           // Screenshots -- niri has this built in, no more maim/xclip/xdotool.
           Print { screenshot; }
