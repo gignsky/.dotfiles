@@ -104,8 +104,16 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # No `rolling` input: the dev keeper's image is built and loaded at
-    # runtime by kottonmouth-rolling-deploy.service (hosts/spacedock/
+    # The main christina-keeper image comes from `master`, updated by hand
+    # (`nix flake update christina-website-stable`) once a roll is promoted,
+    # like kottonmouth's `main`. See containers/services/christina/christina-keeper.nix.
+    christina-website-stable = {
+      url = "git+ssh://git@github.com/gignsky/christina-website.git?ref=master";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
+    # No `rolling` input for the dev keepers: their image is built and loaded at
+    # runtime by kottonmouth-/christina-rolling-deploy.service (hosts/spacedock/
     # github-runner.nix), so beta deploys never rebuild the system.
 
     # # tax-matrix - currently on develop branch
