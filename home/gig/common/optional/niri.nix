@@ -208,6 +208,9 @@ in
       spawn-at-startup "${pkgs.swaybg}/bin/swaybg" "-i" "${config.home.homeDirectory}/.background-image" "-m" "fill"
       spawn-at-startup "${pkgs.waybar}/bin/waybar"
       spawn-at-startup "${pkgs.mako}/bin/mako"
+      // A Wayland clipboard dies with the app that owns it; this keeps a copy
+      // alive after the source window closes.
+      spawn-at-startup "${pkgs.wl-clip-persist}/bin/wl-clip-persist" "--clipboard" "regular"
 
       screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
 
