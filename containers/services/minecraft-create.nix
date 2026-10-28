@@ -31,10 +31,10 @@
 #        _minecraft._tcp.games.gignsky.com  SRV  0 5 25565 mc.gignsky.com
 #      No DDNS is wired up: if the home IP changes, DNS has to follow it.
 #
-# Bumping mods: pick the new Modrinth version id (the 8-char id on the
-# version page, or `/v2/project/<slug>/version?loaders=["neoforge"]&
-# game_versions=["1.21.1"]`), change it below, switch, and tell players to
-# re-download mods.zip. Back up the world first for a Create bump.
+# Mods, versions and the Minecraft/NeoForge versions live in
+# ./minecraft-create-modpack.nix, shared with the Prism Launcher client
+# instance in home/gig/common/optional/minecraft-create.nix -- bump them
+# there, then tell players to re-download mods.zip.
 {
   lib,
   pkgs,
@@ -45,26 +45,10 @@ let
   webDir = "/var/lib/minecraft-create-web";
   # Plain-HTTP port for the website, behind the separate TLS-terminating nginx.
   webPort = 1801;
-  minecraftVersion = "1.21.1";
-  neoforgeVersion = "21.1.265";
-
-  # Modrinth "slug:versionId". Pinned so a restart never silently upgrades the
-  # server out from under the players' mods.zip. Other required dependencies
-  # are pulled in automatically.
-  mods = [
-    "create:UjX6dr61" # Create 6.0.10+mc1.21.1
-    "jei:iv3KiVkE" # Just Enough Items 19.64.0.455 -- recipe lookup
-    "jade:eYz2YBGT" # Jade 15.10.6 -- shows what you're looking at
-    "appleskin:uAKA6Laj" # AppleSkin 3.0.9 -- food/saturation display
-    # Steam 'n' Rails: the official project stops at 1.20.1; this is the
-    # unofficial 1.21.1 port (github.com/Porters-of-Railways/Railway-1.21.1),
-    # still beta. Built against Create 6.0.10, needs NeoForge >= 21.1.233.
-    # Back up the world before bumping it.
-    "create-steam-n-rails-1.21.1:czVeSmZo" # 0.3.0-beta.2
-    # JEI's required config library. It has only ever published beta builds,
-    # which is why MODRINTH_ALLOWED_VERSION_TYPE below is "beta".
-    "mezzconfig:RdGonQpr" # MezzConfig 0.6.9
-  ];
+  modpack = import ./minecraft-create-modpack.nix;
+  inherit (modpack) minecraftVersion neoforgeVersion;
+  # Modrinth "slug:versionId" for the image.
+  mods = map (m: "${m.slug}:${m.version}") modpack.mods;
 
   site = pkgs.writeTextDir "index.html" ''
     <!doctype html>
@@ -116,10 +100,12 @@ in
       VERSION = minecraftVersion;
       NEOFORGE_VERSION = neoforgeVersion;
       MODRINTH_PROJECTS = lib.concatStringsSep "," mods;
-      MODRINTH_DOWNLOAD_DEPENDENCIES = "required";
-      # Release-only (the default) can't resolve mezzconfig, and the server
-      # exits before downloading anything else. "beta" allows release or
-      # beta; it only affects dependency lookups, since `mods` is pinned.
+      # The modpack lists every dependency itself, so the server runs exactly
+      # the jars the client instance gets; a missing one fails loudly at
+      # NeoForge load instead of being fetched here and drifting.
+      MODRINTH_DOWNLOAD_DEPENDENCIES = "none";
+      # mezzconfig only publishes betas. Pinned ids should bypass this, but
+      # keep it so a pinned beta is never rejected.
       MODRINTH_ALLOWED_VERSION_TYPE = "beta";
       # JVM heap. spacedock has ~15 GB shared with tdarr, pihole, etc.
       MEMORY = "6G";
