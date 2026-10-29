@@ -15,6 +15,7 @@
     ./common/optional/niri.nix # Enable niri window manager configuration (Wayland; pulls in waybar/mako/swaylock)
     ./common/optional/thunderbird.nix # WorkMail account, declaratively configured
     ./common/optional/thunderbird-gmail.nix # Personal Gmail accounts, OAuth2
+    ./common/optional/minecraft-create.nix
     # ./common/optional/vscode
     # ./cams-countertop.nix
   ];
