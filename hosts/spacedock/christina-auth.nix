@@ -3,8 +3,8 @@
 # auth/instagram instead of a dev tunnel, and the token renews itself.
 #
 # christina-auth.service runs scripts/instagram-auth-server.mjs from the
-# christina-website flake input (the `rolling` branch, so graduating a roll
-# changes beta and never `master`). It is dependency-free Node, so nothing is
+# christina-website flake input (the `master` branch, so it changes only once
+# a roll is promoted and the input updated). It is dependency-free Node, so nothing is
 # built on the box. It writes the 60-day token to
 # /var/lib/christina-auth/token.json; the beta workflow
 # (github-runner.nix) reads that file at build time, so no sops commit or

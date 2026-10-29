@@ -57,37 +57,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1793044626,
-        "narHash": "sha256-1RJQOCnFzvJR1SSfbYY+5ve8ZMifdFNEDsNuMtcY9mA=",
-        "ref": "rolling",
-        "rev": "5536056807dd956c2271251dcdd30be10c771fb4",
-        "revCount": 128,
-        "type": "git",
-        "url": "ssh://git@github.com/gignsky/christina-website.git"
-      },
-      "original": {
-        "ref": "rolling",
-        "type": "git",
-        "url": "ssh://git@github.com/gignsky/christina-website.git"
-      }
-    },
-    "christina-website-stable": {
-      "inputs": {
-        "flake-utils": "flake-utils_2",
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1793068858,
-        "narHash": "sha256-jXPg+sxgdclU5em6BN1G9+7t1zGFpgxJ9C/kC6DXBfA=",
+        "lastModified": 1793070382,
+        "lfs": true,
+        "narHash": "sha256-caL69czD8AP4KDvkNGVk7+nxrLR6UTyEAQ6kIq+ROj4=",
         "ref": "master",
-        "rev": "d24fe9ad50df962c6acf66cf97befe7f744f5d24",
-        "revCount": 130,
+        "rev": "edb2a3af10476f31e5f876864ada5cd771e3bf85",
+        "revCount": 133,
         "type": "git",
         "url": "ssh://git@github.com/gignsky/christina-website.git"
       },
       "original": {
+        "lfs": true,
         "ref": "master",
         "type": "git",
         "url": "ssh://git@github.com/gignsky/christina-website.git"
@@ -95,7 +75,7 @@
     },
     "claude-desktop": {
       "inputs": {
-        "flake-utils": "flake-utils_4",
+        "flake-utils": "flake-utils_3",
         "nixpkgs": [
           "nixpkgs",
           "nixpkgs"
@@ -811,7 +791,7 @@
     },
     "kottonmouth": {
       "inputs": {
-        "flake-utils": "flake-utils_3",
+        "flake-utils": "flake-utils_2",
         "nixpkgs": [
           "nixpkgs"
         ]
@@ -2178,7 +2158,6 @@
       "inputs": {
         "avec-moi": "avec-moi",
         "christina-website": "christina-website",
-        "christina-website-stable": "christina-website-stable",
         "fancy-fonts": "fancy-fonts",
         "git-aliases": "git-aliases",
         "home-manager": [
