@@ -101,7 +101,7 @@
     # (containers/services/christina/christina-keeper.nix) and
     # scripts/instagram-auth-server.mjs (hosts/spacedock/christina-auth.nix).
     christina-website = {
-      url = "git+ssh://git@github.com/gignsky/christina-website.git?ref=master";
+      url = "git+ssh://git@github.com/gignsky/christina-website.git?ref=master&lfs=1";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 

@@ -58,6 +58,7 @@
       },
       "locked": {
         "lastModified": 1793070382,
+        "lfs": true,
         "narHash": "sha256-caL69czD8AP4KDvkNGVk7+nxrLR6UTyEAQ6kIq+ROj4=",
         "ref": "master",
         "rev": "edb2a3af10476f31e5f876864ada5cd771e3bf85",
@@ -66,6 +67,7 @@
         "url": "ssh://git@github.com/gignsky/christina-website.git"
       },
       "original": {
+        "lfs": true,
         "ref": "master",
         "type": "git",
         "url": "ssh://git@github.com/gignsky/christina-website.git"
