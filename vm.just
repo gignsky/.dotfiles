@@ -6,7 +6,7 @@ default_vm_host := `scripts/get-flake-target.sh`
 
 # Build and run a NixOS VM for testing configurations
 # Usage: just vm [host]
-vm host=default_vm_host:
+vm host=default_vm_host: sudo-keepalive
     @echo "🔧 Building VM for {{host}}..."
     nixos-rebuild build-vm --flake .#{{host}} --print-build-logs
     @echo "🚀 Starting VM for {{host}}..."
@@ -21,7 +21,7 @@ vm-build host=default_vm_host:
 
 # Run a previously built VM
 # Usage: just vm-run [host]
-vm-run host=default_vm_host:
+vm-run host=default_vm_host: sudo-keepalive
     @test -f ./result/bin/run-{{host}}-vm || (echo "❌ No VM found for {{host}}. Build first with: just vm-build {{host}}" && exit 1)
     @echo "🚀 Starting VM for {{host}}..."
     sudo ./result/bin/run-{{host}}-vm

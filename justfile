@@ -38,7 +38,7 @@ pull:
   just pull-nix-secrets
   just post-pull-stash
 
-pull-rebuild:
+pull-rebuild: sudo-keepalive
   just pull
   @nix-shell -p lolcat --run "echo 'Rebuilding...' | lolcat 2> /dev/null"
   just rebuild
@@ -50,7 +50,7 @@ pull-home:
   just home 
   @nix-shell -p lolcat --run "echo 'Home-Manager Rebuilt.' | lolcat 2> /dev/null"
 
-pull-rebuild-full:
+pull-rebuild-full: sudo-keepalive
   @nix-shell -p lolcat --run "echo 'Full Rebuild Running...' | lolcat 2> /dev/null"
   just pull-rebuild
   just pull-home
@@ -58,6 +58,17 @@ pull-rebuild-full:
 
 pull-nix-secrets:
   cd ~/nix-secrets && git fetch && git pull && cd ~/.dotfiles
+
+# Ask for the sudo password up front, then keep the credential fresh in the
+# background until the calling `just` process exits. Add as a dependency to any
+# recipe that eventually calls sudo, so the prompt shows up immediately instead
+# of minutes later (after pre-commit/eval) when you've switched desktops.
+[private]
+sudo-keepalive:
+	#!/usr/bin/env bash
+	sudo -v || exit 1
+	just_pid=$PPID
+	(while kill -0 "$just_pid" 2>/dev/null; do sudo -n -v 2>/dev/null; sleep 60; done) </dev/null >/dev/null 2>&1 &
 
 # Run before every rebuild, every time
 rebuild-pre:
@@ -71,7 +82,7 @@ dont-fuck-my-build:
   fupdate -y nix-secrets
   @nix-shell -p lolcat --run 'echo "Very little chance your build is fucked! 👍" | lolcat 2> /dev/null'
 
-switch *args:
+switch *args: sudo-keepalive
 	just rebuild {{args}}
 	just home {{args}}
 
@@ -135,24 +146,24 @@ rebuild-post:
 	-just cache-push /run/current-system
 
 # Rebuild the system
-rebuild *args:
+rebuild *args: sudo-keepalive
 	just rebuild-pre
 	@nix-shell -p lolcat --run 'echo "[REBUILD] Attempting Rebuild..." | lolcat' 2> /dev/null
 	nix run .#nixos-rebuild -- {{args}}
 	just rebuild-post
 
 # Rebuild-full with new shell
-rebuild-full-new *args:
+rebuild-full-new *args: sudo-keepalive
         just rebuild-full {{args}}
         nu
 
 # Rebuild the system and check sops and home manager
-rebuild-full *args:
+rebuild-full *args: sudo-keepalive
 	just rebuild {{args}}
 	just home {{args}}
 
 # Dry-activate rebuild: build and show what would be activated, without activating
-rebuild-test *args:
+rebuild-test *args: sudo-keepalive
 	just rebuild -t {{args}}
 
 
@@ -187,17 +198,17 @@ update-no-commit:
 	nix flake update
 
 # Rebuild the system and update the flake
-update-rebuild-no-commit:
+update-rebuild-no-commit: sudo-keepalive
 	just update-no-commit
 	just rebuild
 
 # Rebuild the system and update the flake
-update-rebuild:
+update-rebuild: sudo-keepalive
 	just update
 	just rebuild
 
 # Rebuild the system and update the flake with rebuild-post
-update-rebuild-full:
+update-rebuild-full: sudo-keepalive
 	just update
 	just rebuild
 	just home
@@ -485,7 +496,7 @@ check-hardware:
 	nix run .#check-hardware-config
 
 # Pull the latest tdarr-node image and restart the container (spacedock)
-update-tdarr:
+update-tdarr: sudo-keepalive
   @nix-shell -p lolcat --run 'echo "Pulling latest tdarr-node image..." | lolcat 2> /dev/null'
   sudo podman pull ghcr.io/haveagitgat/tdarr_node:latest
   @nix-shell -p lolcat --run 'echo "Restarting podman-tdarr-node.service..." | lolcat 2> /dev/null'
