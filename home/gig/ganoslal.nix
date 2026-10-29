@@ -80,7 +80,16 @@
 
     packages = with pkgs; [
       # ytmdesktop
-      claude-desktop-with-fhs
+      # Upstream only rewraps bin/; point the .desktop Exec lines at the FHS wrapper too
+      (symlinkJoin {
+        name = "claude-desktop-with-fhs";
+        paths = [ claude-desktop-with-fhs ];
+        postBuild = ''
+          f=$out/share/applications/com.anthropic.Claude.desktop
+          src=$(readlink -f "$f"); rm "$f"
+          sed "s|^Exec=[^ ]*/bin/claude-desktop|Exec=$out/bin/claude-desktop|" "$src" > "$f"
+        '';
+      })
       ytmusic
       steam
       plex-desktop
