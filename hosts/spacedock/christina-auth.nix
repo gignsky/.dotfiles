@@ -65,10 +65,31 @@ in
     group = "christina-auth";
   };
   # Pinned so the keeper containers can join the group by number
-  # (`--group-add`) and read token.json. An existing state dir keeps its old
-  # dynamic gid until christina-auth.service restarts; if not,
-  # `chgrp -R christina-auth /var/lib/christina-auth`.
+  # (`--group-add`) and read token.json.
   users.groups.christina-auth.gid = 8794;
+
+  # update-users-groups never renumbers a group that already exists, so a box
+  # that made christina-auth before the pin keeps its old dynamic gid and the
+  # keepers get "Permission denied" on /auth/token.json. Move the group (and
+  # the state dir's files) to the pinned gid, and restart the service so the
+  # tokens it writes from now on carry it too. A no-op once they match.
+  system.activationScripts.christina-auth-gid = {
+    deps = [ "users" ];
+    text = ''
+      want=${toString config.users.groups.christina-auth.gid}
+      have=$(${pkgs.getent}/bin/getent group christina-auth | cut -d: -f3)
+      if [ -n "$have" ] && [ "$have" != "$want" ]; then
+        echo "christina-auth: moving gid $have -> $want"
+        ${pkgs.shadow}/bin/groupmod -g "$want" christina-auth
+        if [ -d /var/lib/christina-auth ]; then
+          ${pkgs.findutils}/bin/find /var/lib/christina-auth -gid "$have" -exec chgrp -h "$want" {} +
+        fi
+        if [ -d /run/systemd/system ]; then
+          systemctl try-restart christina-auth.service || true
+        fi
+      fi
+    '';
+  };
 
   systemd = {
     services.christina-auth = {
