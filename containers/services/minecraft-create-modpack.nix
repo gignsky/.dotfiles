@@ -65,6 +65,94 @@
       sha512 = "def5c767467bf7863e2efc1a8cc3bf3442e1090ee1504e447c4120b9ff4ff6780de93d2a7d1bf696cd19407010d465b99f00bbf780776b0a9648804fa1b45f75";
     }
     {
+      # Create: Power Loader 2.0.5 -- chunk loaders driven by Create
+      # rotation, so trains and factories keep running with nobody nearby.
+      slug = "create-power-loader";
+      version = "3Y4r0ItR";
+      file = "create_power_loader-2.0.5-mc1.21.1.jar";
+      url = "https://cdn.modrinth.com/data/wPQ6GgFE/versions/3Y4r0ItR/create_power_loader-2.0.5-mc1.21.1.jar";
+      sha512 = "e4f06cfe79eafa538a2edf45d0b173051475f2a20d6c2352668f6980f4433078f2cdd8ffdd047984c30dfd903142ea37eadde48ff71a3892f18154662f20eb57";
+    }
+    {
+      # Copycats+ 3.0.9 -- copycat stairs, slabs, panels, fences etc. that
+      # take the look of any block; work on contraptions.
+      slug = "copycats";
+      version = "bPYeUWZx";
+      file = "copycats-3.0.9+mc.1.21.1-neoforge.jar";
+      url = "https://cdn.modrinth.com/data/UT2M39wf/versions/bPYeUWZx/copycats-3.0.9%2Bmc.1.21.1-neoforge.jar";
+      sha512 = "432b5cde473976476b0729172710d32805576d0c3a5fd66d21f882d96cef0c4eef1b85e4e3a1a316e2adc473784b11e156b0265b0f62bcfd5b035a6ff7dfcc6e";
+    }
+    {
+      # Create: Connected 1.3.3 -- extra Create parts (brass gearbox,
+      # sequenced pulse generator, inventory bridge, ...).
+      slug = "create-connected";
+      version = "Xe7EqzfQ";
+      file = "create_connected-1.3.3-mc1.21.1.jar";
+      url = "https://cdn.modrinth.com/data/Vg5TIO6d/versions/Xe7EqzfQ/create_connected-1.3.3-mc1.21.1.jar";
+      sha512 = "485675693980a266611669857fa9cd348e2a29140b87bf0a8ab3e13c3591422cceaa36b7a2eb90084d35ec1868c8eec9f924383bb4dada2dddcb72e9f09361b0";
+    }
+    {
+      # Create Deco 2.1.3 -- industrial building blocks. Declares
+      # create [6.0.7,6.1.0): bump it together with Create 6.1.
+      slug = "create-deco";
+      version = "qrcMVoBD";
+      file = "createdeco-2.1.3.jar";
+      url = "https://cdn.modrinth.com/data/sMvUb4Rb/versions/qrcMVoBD/createdeco-2.1.3.jar";
+      sha512 = "c536662f9d47ad57a37419165ded14835b23ad6c3e82a920298ecd7ee074244b0b6062ef9cc7ea4501ddd35919a840faccd7fc64e43eb8df31e12076681c3c0d";
+    }
+    {
+      # Design n' Decor 2.2b -- decorative Create blocks. Needs Flywheel
+      # and Ponder, which the Create jar bundles.
+      slug = "create-design-n-decor";
+      version = "uQsIRky8";
+      file = "Design-n-Decor-1.21.1-2.2b.jar";
+      url = "https://cdn.modrinth.com/data/x49wilh8/versions/uQsIRky8/Design-n-Decor-1.21.1-2.2b.jar";
+      sha512 = "d888553c8a254c3654f8da2ae2cae0bb642594546c71988739c93bf6b18668145e0ce5b1c20ae0544b9b6019f17e4da944bd5bc17e4c6b73e7f1374cfa2c9db9";
+    }
+    {
+      # Farmer's Delight 1.3.4 -- cooking, crops and meals with buffs.
+      slug = "farmers-delight";
+      version = "XTVZDOol";
+      file = "FarmersDelight-1.21.1-1.3.4.jar";
+      url = "https://cdn.modrinth.com/data/R2OftAxM/versions/XTVZDOol/FarmersDelight-1.21.1-1.3.4.jar";
+      sha512 = "1f6f8796469f747cff36f477b4f589a3d69613882399f9ee7f86db36c7bca9aa4828731f43db15dc6c7f5a4c1bbe3d4092a232e8cef010b09cec0581848fda90";
+    }
+    {
+      # Create: Dragons Plus 1.11.9 -- library, required by Central Kitchen.
+      slug = "create-dragons-plus";
+      version = "b0u9vk8C";
+      file = "CreateDragonsPlus-1.11.9.jar";
+      url = "https://cdn.modrinth.com/data/dzb1a5WV/versions/b0u9vk8C/CreateDragonsPlus-1.11.9.jar";
+      sha512 = "43299e49afe7132515aa8ad545b8c9566d90f12cfb39456b3d6e1ebc8e03f05787fbc420e7cc9495df4d6b585d13e7a4c4c7385f82f20aeb829c9491b725af53";
+    }
+    {
+      # Create: Central Kitchen 2.6.2b -- automates Farmer's Delight
+      # cooking with Create machines.
+      slug = "create-central-kitchen";
+      version = "qZxkZR8W";
+      file = "create-central-kitchen-2.6.2b.jar";
+      url = "https://cdn.modrinth.com/data/btq68HMO/versions/qZxkZR8W/create-central-kitchen-2.6.2b.jar";
+      sha512 = "d4d0a383b5288a7272392ae475d67bc947cd019bc627612bd01992f5ecd702bda078fe75302b83c9619eb26a754195e9ef5f2212cb200eef802bb7d49c255358";
+    }
+    {
+      # Sophisticated Core 1.5.19.2434 -- library, required by
+      # Sophisticated Backpacks.
+      slug = "sophisticated-core";
+      version = "p1iOw2RH";
+      file = "sophisticatedcore-1.21.1-1.5.19.2434.jar";
+      url = "https://cdn.modrinth.com/data/nmoqTijg/versions/p1iOw2RH/sophisticatedcore-1.21.1-1.5.19.2434.jar";
+      sha512 = "a8ef09646497a372e7e00d12366465d2d18809ff4d8c1358e40303c8567bc9e7100d76940908c563095167777c5cb5bbed50cc3bbb371573fcab40490cf01321";
+    }
+    {
+      # Sophisticated Backpacks 3.26.17.2232 -- tiered, upgradeable
+      # backpacks.
+      slug = "sophisticated-backpacks";
+      version = "7V3OGECb";
+      file = "sophisticatedbackpacks-1.21.1-3.26.17.2232.jar";
+      url = "https://cdn.modrinth.com/data/TyCTlI4b/versions/7V3OGECb/sophisticatedbackpacks-1.21.1-3.26.17.2232.jar";
+      sha512 = "f01ef419bfdd6744acb4a7536751535bd0aa6ea4b2807468cad1c63e59878c8875324375247c84c3baae21f34d7599860a1db05238a89ad20aa6d6c5a7cb528a";
+    }
+    {
       # MezzConfig 0.6.9 -- JEI's required config library. It has only ever
       # published beta builds.
       slug = "mezzconfig";
