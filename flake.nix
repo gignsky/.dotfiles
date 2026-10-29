@@ -95,19 +95,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Christina's site (private repo, so ssh like kottonmouth). Its
-    # scripts/instagram-auth-server.mjs is run by Node on spacedock.
-    # Follows `rolling`: a roll graduating there changes beta, never master.
-    # See hosts/spacedock/christina-auth.nix.
+    # Christina's site (private repo, so ssh like kottonmouth). Follows
+    # `master`, updated by hand (`nix flake update christina-website`) once a
+    # roll is promoted, like kottonmouth's `main`. Serves the main keeper image
+    # (containers/services/christina/christina-keeper.nix) and
+    # scripts/instagram-auth-server.mjs (hosts/spacedock/christina-auth.nix).
     christina-website = {
-      url = "git+ssh://git@github.com/gignsky/christina-website.git?ref=rolling";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
-    # The main christina-keeper image comes from `master`, updated by hand
-    # (`nix flake update christina-website-stable`) once a roll is promoted,
-    # like kottonmouth's `main`. See containers/services/christina/christina-keeper.nix.
-    christina-website-stable = {
       url = "git+ssh://git@github.com/gignsky/christina-website.git?ref=master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
