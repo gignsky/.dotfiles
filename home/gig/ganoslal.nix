@@ -86,7 +86,7 @@
 
     packages = with pkgs; [
       # ytmdesktop
-      claude-desktop
+      claude-desktop-with-fhs
       ytmusic
       steam
       plex-desktop
