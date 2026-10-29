@@ -69,6 +69,12 @@
         scale 1
         position x=320 y=1080
         focus-at-startup
+
+        // niri's stock 50% column is a bit narrow on the ultrawide; 60% is
+        // where Mod+Ctrl+L x2 (+5% each) used to land it by hand.
+        layout {
+            default-column-width { proportion 0.6; }
+        }
     }
 
     debug {
