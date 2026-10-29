@@ -11,7 +11,8 @@
 # including an op's.
 #
 # How players get in:
-#   game     games.gignsky.com:25565 (router forwards it here)
+#   game     games.gignsky.com:25565 (router forwards it here; its NAT
+#            loopback makes the name work from the LAN too)
 #   website  https://games.gignsky.com -> the separate front nginx (which
 #            owns TLS) -> plain HTTP on spacedock:1801 (nginx below): join
 #            instructions + mods.zip, rebuilt whenever the server's mods
@@ -45,10 +46,34 @@ let
   webDir = "/var/lib/minecraft-create-web";
   # Plain-HTTP port for the website, behind the separate TLS-terminating nginx.
   webPort = 1801;
+  gamePort = 25565;
   modpack = import ./minecraft-create-modpack.nix;
   inherit (modpack) minecraftVersion neoforgeVersion;
   # Modrinth "slug:versionId" for the image.
   mods = map (m: "${m.slug}:${m.version}") modpack.mods;
+
+  # netavark sometimes misses its teardown when the container goes down (seen
+  # 2026-10-29 after a switch): the old container's DNAT rule for the game port
+  # stays behind, sits ahead of the new one, and sends every connection to a
+  # dead 10.88.x.x address -- clients hang on "Connecting to the server...".
+  # Runs before each start, when no live container owns the port, so every
+  # NETAVARK nat rule for it is stale; netavark re-adds the real ones on start.
+  clearStaleDnat = pkgs.writeShellApplication {
+    name = "minecraft-create-clear-stale-dnat";
+    runtimeInputs = [
+      pkgs.iptables
+      pkgs.gnugrep
+    ];
+    text = ''
+      # No match is the normal case; don't let grep's exit 1 fail the start.
+      iptables-save -t nat |
+        { grep -E -- "^-A NETAVARK[^ ]* .*--dport ${toString gamePort}( |$)" || true; } |
+        while IFS= read -r rule; do
+          echo "removing stale rule: $rule"
+          eval "iptables -t nat ''${rule/#-A/-D}" || true
+        done
+    '';
+  };
 
   site = pkgs.writeTextDir "index.html" ''
     <!doctype html>
@@ -121,7 +146,7 @@ in
       VIEW_DISTANCE = "10";
     };
     volumes = [ "${dataDir}:/data" ];
-    ports = [ "25565:25565/tcp" ];
+    ports = [ "${toString gamePort}:${toString gamePort}/tcp" ];
     # The image saves the world on SIGTERM; give it time to finish rather
     # than podman's default 10 s.
     extraOptions = [ "--stop-timeout=120" ];
@@ -130,7 +155,7 @@ in
   networking.firewall = {
     enable = true;
     allowedTCPPorts = [
-      25565
+      gamePort
       webPort
     ];
   };
@@ -146,6 +171,9 @@ in
       TimeoutStopSec = lib.mkForce 180;
       # The default 100ms restart hammers Modrinth when a mod fails to resolve.
       RestartSec = "30s";
+      # Appended after oci-containers' own pre-start, which removes the old
+      # container.
+      ExecStartPre = [ "${clearStaleDnat}/bin/minecraft-create-clear-stale-dnat" ];
     };
 
     # mods.zip for the website: every jar the server is running, so a client
