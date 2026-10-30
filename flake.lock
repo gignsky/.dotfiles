@@ -57,12 +57,12 @@
         ]
       },
       "locked": {
-        "lastModified": 1793070382,
+        "lastModified": 1793320760,
         "lfs": true,
-        "narHash": "sha256-caL69czD8AP4KDvkNGVk7+nxrLR6UTyEAQ6kIq+ROj4=",
+        "narHash": "sha256-jDK2FGWeag/M0e+joJafX8cPiIHQRedslBB5mMleZUg=",
         "ref": "master",
-        "rev": "edb2a3af10476f31e5f876864ada5cd771e3bf85",
-        "revCount": 133,
+        "rev": "36c441012857a319be12fa4e31f7a7bc376e356f",
+        "revCount": 190,
         "type": "git",
         "url": "ssh://git@github.com/gignsky/christina-website.git"
       },
@@ -97,7 +97,7 @@
     },
     "claude-desktop_2": {
       "inputs": {
-        "flake-utils": "flake-utils_6",
+        "flake-utils": "flake-utils_5",
         "nixpkgs": [
           "nixpkgs-unstable",
           "nixpkgs"
@@ -466,24 +466,6 @@
         "systems": "systems_4"
       },
       "locked": {
-        "lastModified": 1731533236,
-        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "type": "github"
-      }
-    },
-    "flake-utils_5": {
-      "inputs": {
-        "systems": "systems_5"
-      },
-      "locked": {
         "lastModified": 1791914995,
         "narHash": "sha256-Zf/xfQEAasnwnmEfHqW/4hjDE/s44yn2hD4RuVIZRjA=",
         "owner": "numtide",
@@ -497,9 +479,9 @@
         "type": "github"
       }
     },
-    "flake-utils_6": {
+    "flake-utils_5": {
       "inputs": {
-        "systems": "systems_7"
+        "systems": "systems_6"
       },
       "locked": {
         "lastModified": 1731533236,
@@ -515,9 +497,9 @@
         "type": "github"
       }
     },
-    "flake-utils_7": {
+    "flake-utils_6": {
       "inputs": {
-        "systems": "systems_8"
+        "systems": "systems_7"
       },
       "locked": {
         "lastModified": 1791914995,
@@ -571,7 +553,7 @@
     },
     "giglab-dev": {
       "inputs": {
-        "flake-utils": "flake-utils_5",
+        "flake-utils": "flake-utils_4",
         "nixpkgs": [
           "nixpkgs",
           "nixpkgs-unstable"
@@ -593,7 +575,7 @@
     },
     "giglab-dev_2": {
       "inputs": {
-        "flake-utils": "flake-utils_7",
+        "flake-utils": "flake-utils_6",
         "nixpkgs": [
           "nixpkgs-unstable",
           "nixpkgs-unstable"
@@ -1375,7 +1357,7 @@
           "gigvim",
           "nixpkgs"
         ],
-        "systems": "systems_6"
+        "systems": "systems_5"
       },
       "locked": {
         "lastModified": 1780042000,
@@ -1402,7 +1384,7 @@
           "gigvim",
           "nixpkgs"
         ],
-        "systems": "systems_9"
+        "systems": "systems_8"
       },
       "locked": {
         "lastModified": 1780042000,
@@ -2290,21 +2272,6 @@
         "type": "github"
       }
     },
-    "systems_10": {
-      "locked": {
-        "lastModified": 1681028828,
-        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
-        "owner": "nix-systems",
-        "repo": "default",
-        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-systems",
-        "repo": "default",
-        "type": "github"
-      }
-    },
     "systems_2": {
       "locked": {
         "lastModified": 1681028828,
@@ -2493,7 +2460,7 @@
         "nixpkgs": "nixpkgs_8",
         "process-compose-flake": "process-compose-flake",
         "rust-flake": "rust-flake",
-        "systems": "systems_10",
+        "systems": "systems_9",
         "treefmt-nix": "treefmt-nix_2"
       },
       "locked": {
