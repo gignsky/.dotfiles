@@ -171,6 +171,44 @@
       url = "https://cdn.modrinth.com/data/qlc8dxM6/versions/HcYWpI7G/Stargate.Journey-1.21.1-0.6.52.jar";
       sha512 = "af9796b0ac81f6f092f7e37e2924f5a3c58885eb4da37e7b74a0f708c725f264f85da2ffcc09715a690c40384a068743409d09b35fcbe908fff464eb9b1190ed";
     }
+    {
+      # Xaero's Minimap 26.6.0 -- minimap with waypoints. Client-side, but
+      # optional on the server, so it rides along in mods.zip. Bundles Xaero
+      # Lib (jar-in-jar); no separate entry needed.
+      slug = "xaeros-minimap";
+      version = "irjR7dHk";
+      file = "xaerominimap-neoforge-1.21.1-26.6.0.jar";
+      url = "https://cdn.modrinth.com/data/1bokaNcj/versions/irjR7dHk/xaerominimap-neoforge-1.21.1-26.6.0.jar";
+      sha512 = "d56b93ddb921285624b491d6a85aba23748bec9974867399c881c257eb25a746df92a735473adf3a6875e0928a56ff78245d5238eb9207b0e45c3fec20c896dc";
+    }
+    {
+      # CraftedCore 5.8.3 -- library, required by Woodwalkers and RemorphED.
+      slug = "crafted-core";
+      version = "T4KaObAV";
+      file = "craftedcore-5.8.3.jar";
+      url = "https://cdn.modrinth.com/data/Dg7PHdkJ/versions/T4KaObAV/craftedcore-5.8.3.jar";
+      sha512 = "33f76a90d6c819b50062c1787943ae38602eaaf5146aeb1b723baa1bbcfa0c3ef979f5c8dd0a041db1b39bc9675e7b19b36dce3f31f759869b584879cda5bb00";
+    }
+    {
+      # Woodwalkers 5.8.13 -- the shape-shifting engine, required by
+      # RemorphED.
+      slug = "woodwalkers";
+      version = "k5PBmBwF";
+      file = "walkers-5.8.13.jar";
+      url = "https://cdn.modrinth.com/data/Sr1HeD8z/versions/k5PBmBwF/walkers-5.8.13.jar";
+      sha512 = "218a69fc90cc9f9faff44f6715f09e0678b12e8730d4a05d40fb168f2124de4a9633718a149de2bad57c88d091c1709fab9d607222d0f52ffce3f1bc1b28270b";
+    }
+    {
+      # RemorphED 4.2 -- morph into any mob you have killed. Its last 1.21.1
+      # build (2024) and it declares walkers [5.2,): every Walkers and
+      # CraftedCore class/method it calls was checked against the versions
+      # above. Re-check before bumping Woodwalkers or CraftedCore.
+      slug = "remorphed";
+      version = "JcEPAMP3";
+      file = "remorphed-4.2.jar";
+      url = "https://cdn.modrinth.com/data/8aeV5uJW/versions/JcEPAMP3/remorphed-4.2.jar";
+      sha512 = "0283d0144fbaf33986053255fdf41aab7f1c3f239b0a5d29ef57838e9dd781e5d378b47d88e0aec69e446997f6df8a0065881f7cab62d98cb1a7a6ba6d2cc4fe";
+    }
   ];
 
   # Optional client-only mods for shaders. Never on the server (Iris crashes a
