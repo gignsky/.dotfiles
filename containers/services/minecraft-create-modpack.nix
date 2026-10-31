@@ -161,5 +161,80 @@
       url = "https://cdn.modrinth.com/data/7tEfOcA7/versions/RdGonQpr/mezz_config-1.21.1-neoforge-0.6.9-standalone.jar";
       sha512 = "2a20fdcca268c0f80547806582c94d79de6d339aabd3714af4bc5cf25ce983028f72ae707d52b44786adeb4e4c1976bebd7dbc4a75a3bf4575ec44c2bcd28dc3";
     }
+    {
+      # Stargate Journey 0.6.52 -- stargates, DHDs and gate networks; gates
+      # generate with the world, so they only appear in fresh chunks. Beta
+      # (it has only ever published betas). No required deps.
+      slug = "sgjourney";
+      version = "HcYWpI7G";
+      file = "Stargate.Journey-1.21.1-0.6.52.jar";
+      url = "https://cdn.modrinth.com/data/qlc8dxM6/versions/HcYWpI7G/Stargate.Journey-1.21.1-0.6.52.jar";
+      sha512 = "af9796b0ac81f6f092f7e37e2924f5a3c58885eb4da37e7b74a0f708c725f264f85da2ffcc09715a690c40384a068743409d09b35fcbe908fff464eb9b1190ed";
+    }
+  ];
+
+  # Optional client-only mods for shaders. Never on the server (Iris crashes a
+  # dedicated server), so they are not in mods.zip: the website links them
+  # separately and the Prism instance installs them. Iris 1.8 needs Sodium
+  # 0.8; Create's Flywheel accepts Sodium >= 0.6.
+  clientMods = [
+    {
+      # Sodium 0.8.13 -- renderer, required by Iris.
+      slug = "sodium";
+      version = "uMOpc5uV";
+      file = "sodium-neoforge-0.8.13+mc1.21.1.jar";
+      url = "https://cdn.modrinth.com/data/AANobbMI/versions/uMOpc5uV/sodium-neoforge-0.8.13%2Bmc1.21.1.jar";
+      sha512 = "4f537696af95411e9daf15795fb5fcbc49913d488a96fa912fa8f1d7db408710995e8a1461190f3cd0f8217bf9e35e9539176592428ed587ca2d7aa84450a390";
+    }
+    {
+      # Iris 1.8.14-beta.1 -- loads shader packs.
+      slug = "iris";
+      version = "KduFYu4t";
+      file = "iris-neoforge-1.8.14-beta.1+mc1.21.1.jar";
+      url = "https://cdn.modrinth.com/data/YL57xq9U/versions/KduFYu4t/iris-neoforge-1.8.14-beta.1%2Bmc1.21.1.jar";
+      sha512 = "33fddb430e16222902eac75b8b3d57c381b0f3cc729f3b56c4628df12ca108f23a0b11e2feb167923d6d14d1fc7e8ee1a977ec421b19d1951bdca74c4092b9c5";
+    }
+  ];
+
+  # Shader packs (need Sodium + Iris above) and resource packs, offered on the
+  # website and installed into the Prism instance. Their licenses forbid
+  # re-hosting, so the website links Modrinth's CDN rather than mirroring.
+  # `name` is the label on the website.
+  shaderpacks = [
+    {
+      name = "Complementary Reimagined r5.9.3";
+      file = "ComplementaryReimagined_r5.9.3.zip";
+      url = "https://cdn.modrinth.com/data/HVnmMxH1/versions/Bqen1mJX/ComplementaryReimagined_r5.9.3.zip";
+      sha512 = "45304b1d7862afdb2177b7e6226fc9c6737911d17a4ad46cc9c519ca4deb935f05072cd337cd8b19a15bb8062b57b54eceec7bdee4cd572d94858e2946d37d85";
+    }
+    {
+      name = "Complementary Unbound r5.9.3";
+      file = "ComplementaryUnbound_r5.9.3.zip";
+      url = "https://cdn.modrinth.com/data/R6NEzAwj/versions/B1kyfoUZ/ComplementaryUnbound_r5.9.3.zip";
+      sha512 = "a085d1d8cda67cd17a2b414eeba48bbd809da069f269bab46246235ec8fe714a275013c70d0504527b0987d810deddddba4564332414ab3b3bd7435932ff808c";
+    }
+    {
+      name = "BSL Shaders 10.1.8";
+      file = "BSL_v10.1.8.zip";
+      url = "https://cdn.modrinth.com/data/Q1vvjJYV/versions/Y68yiql9/BSL_v10.1.8.zip";
+      sha512 = "94a3c25d6820868db624e11347873e6b572e7cd571967d9ac6f4690ca5d37ca302a7645d85eec800e0654541e3825fba14d37b5a25d3996aaf038178552be26f";
+    }
+  ];
+
+  # Plain vanilla packs only: no CIT/EMF/ETF-dependent ones, which need
+  # extra mods to do anything.
+  resourcepacks = [
+    {
+      name = "Faithful 32x (1.21.1)";
+      file = "Faithful 32x - 1.21.1.zip";
+      url = "https://cdn.modrinth.com/data/w0TnApzs/versions/ruZOIEZE/Faithful%2032x%20-%201.21.1.zip";
+      sha512 = "5ceaff9539f1440434a7255a5ede1118b00491f85db5c414fb4463872bd041a590e84275daa3bfaecd52772967f114d09c53dc97070e6d3959752f31d4a63885";
+    }
+    {
+      name = "Better Leaves 9.6";
+      file = "Better-Leaves-9.6.zip";
+      url = "https://cdn.modrinth.com/data/uvpymuxq/versions/w4ReEpuG/Better-Leaves-9.6.zip";
+      sha512 = "793dacaca4c200656e8875195e42975ecb628af114e13aad2059368b51cf45f00280f86075368e9adf492e847718a9d593bdf481664e10cf1aa9628d2a51a8d6";
+    }
   ];
 }
