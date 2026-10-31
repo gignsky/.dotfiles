@@ -65,18 +65,38 @@ in
   # without any setup.
   programs.prismlauncher.enable = true;
 
+  # The server's mods plus the client-only shader mods, and the shader and
+  # resource packs (enable those in Prism/in game; they're only installed).
   xdg.dataFile = lib.listToAttrs (
-    map (
-      m:
-      lib.nameValuePair "${instance}/minecraft/mods/${m.file}" {
-        source = pkgs.fetchurl {
-          inherit (m) url sha512;
-          # The URL basename can be percent-encoded, which a store path
-          # name can't hold.
-          name = m.file;
-        };
-      }
-    ) modpack.mods
+    lib.concatMap
+      (
+        { dir, files }:
+        map (
+          m:
+          lib.nameValuePair "${instance}/minecraft/${dir}/${m.file}" {
+            source = pkgs.fetchurl {
+              inherit (m) url sha512;
+              # The URL basename can be percent-encoded, and some file names
+              # have spaces, neither of which a store path name can hold.
+              name = lib.strings.sanitizeDerivationName m.file;
+            };
+          }
+        ) files
+      )
+      [
+        {
+          dir = "mods";
+          files = modpack.mods ++ modpack.clientMods;
+        }
+        {
+          dir = "shaderpacks";
+          files = modpack.shaderpacks;
+        }
+        {
+          dir = "resourcepacks";
+          files = modpack.resourcepacks;
+        }
+      ]
   );
 
   home.activation.minecraftCreateInstance = lib.hm.dag.entryAfter [ "writeBoundary" ] ''

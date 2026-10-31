@@ -52,6 +52,9 @@ let
   # Modrinth "slug:versionId" for the image.
   mods = map (m: "${m.slug}:${m.version}") modpack.mods;
 
+  # <li> download links for the website's optional extras.
+  links = lib.concatMapStrings (p: ''<li><a href="${p.url}">${p.name or p.file}</a></li>'');
+
   # netavark sometimes misses its teardown when the container goes down (seen
   # 2026-10-29 after a switch): the old container's DNAT rule for the game port
   # stays behind, sits ahead of the new one, and sends every connection to a
@@ -90,7 +93,7 @@ let
     </head>
     <body>
       <h1>Lord Gig's Create Server</h1>
-      <p>Minecraft Java ${minecraftVersion} with NeoForge ${neoforgeVersion} and the Create mod.</p>
+      <p>Minecraft Java ${minecraftVersion} with NeoForge ${neoforgeVersion}, the Create mod and Stargate Journey.</p>
       <p>Server address: <code>games.gignsky.com</code></p>
       <p><a class="button" href="/mods.zip">Download mods.zip</a></p>
       <h2>Joining with the official launcher</h2>
@@ -106,7 +109,19 @@ let
         <li>In the launcher, pick the <em>neoforge</em> profile, press Play, then
           Multiplayer &rarr; Add Server &rarr; <code>games.gignsky.com</code>.</li>
       </ol>
-      <p>When the server's mods change, download mods.zip again and replace the contents of your mods folder.</p>
+      <p>When the server's mods change, download mods.zip again and replace the contents of your mods folder
+        (then put the shader mods below back, if you use them).</p>
+      <h2>Optional: shaders</h2>
+      <p>Shader packs need these two mods, client side only. Drop both jars into your <code>mods</code>
+        folder next to the ones from mods.zip; the server doesn't have or need them.</p>
+      <ul>${links modpack.clientMods}</ul>
+      <p>Then put a shader pack zip (don't unzip it) in <code>.minecraft/shaderpacks</code> and pick it under
+        Options &rarr; Video Settings &rarr; Shader Packs.</p>
+      <ul>${links modpack.shaderpacks}</ul>
+      <h2>Optional: resource packs</h2>
+      <p>Put the zip (don't unzip it) in <code>.minecraft/resourcepacks</code> and enable it under
+        Options &rarr; Resource Packs. No extra mods needed.</p>
+      <ul>${links modpack.resourcepacks}</ul>
     </body>
     </html>
   '';
@@ -144,6 +159,12 @@ in
       # kick riders; this is the usual setting for Create servers.
       ALLOW_FLIGHT = "TRUE";
       VIEW_DISTANCE = "10";
+      # The world. SEED only applies when LEVEL's folder is first generated,
+      # so a new seed means a new LEVEL name too; old worlds stay in
+      # ${dataDir} (the first one is "world"). Reset 2026-10-30 so Stargate
+      # Journey's gates generate.
+      LEVEL = "world-stargate";
+      SEED = "1819714931898554571";
     };
     volumes = [ "${dataDir}:/data" ];
     ports = [ "${toString gamePort}:${toString gamePort}/tcp" ];
