@@ -209,6 +209,30 @@
       url = "https://cdn.modrinth.com/data/8aeV5uJW/versions/JcEPAMP3/remorphed-4.2.jar";
       sha512 = "0283d0144fbaf33986053255fdf41aab7f1c3f239b0a5d29ef57838e9dd781e5d378b47d88e0aec69e446997f6df8a0065881f7cab62d98cb1a7a6ba6d2cc4fe";
     }
+    {
+      # Sable 2.0.6 -- physics library ("sub-levels"), required by
+      # Aeronautics. Bundles Veil and Sable Companion (jar-in-jar). Ships a
+      # Rapier native that only links glibc, so it loads on NixOS too.
+      # Declares sodium incompatible below 0.8.12-alpha.2: keep clientMods'
+      # Sodium at or above that.
+      slug = "sable";
+      version = "fg9dTRz9";
+      file = "sable-neoforge-1.21.1-2.0.6.jar";
+      url = "https://cdn.modrinth.com/data/T9PomCSv/versions/fg9dTRz9/sable-neoforge-1.21.1-2.0.6.jar";
+      sha512 = "76d293ce751a01cb9c095a3659b0a41e03e005480bc9d76dfdc73ec7c2eabf7923740c7b077921d42616673c496cd5143569f2085ddcebe174fd91d81e2a04b8";
+    }
+    {
+      # Create: Aeronautics 1.3.2 -- physics airships, boats, planes and
+      # cars built from Create blocks; the 1.21.1 stand-in for Valkyrien
+      # Skies + Eureka, which stop at 1.20.1. Bundled jar: Aeronautics,
+      # Simulated and Offroad. Needs create >= 6.0.10 and sable [2.0,3.0).
+      # Back up the world before bumping it.
+      slug = "create-aeronautics";
+      version = "44pLdPGg";
+      file = "create-aeronautics-bundled-1.21.1-1.3.2.jar";
+      url = "https://cdn.modrinth.com/data/oWaK0Q19/versions/44pLdPGg/create-aeronautics-bundled-1.21.1-1.3.2.jar";
+      sha512 = "dc7e8e1148fa442243889ba29412207137e1bb86206e6c92bc0a589f1374a466e93de22bdbf14f753984d86c29308fbbdc0f14a4b9618b14c0ac1666a36b46f5";
+    }
   ];
 
   # Optional client-only mods for shaders. Never on the server (Iris crashes a
