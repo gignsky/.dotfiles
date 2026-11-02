@@ -1,0 +1,46 @@
+{ pkgs, ... }:
+
+# Wayland-native alternative to bspwm.nix. Enables niri itself plus the
+# display-manager wiring needed to boot straight into it, same autologin
+# spirit as bspwm.nix's LightDM setup, but niri needs no `services.xserver`
+# at all.
+{
+  programs.niri.enable = true;
+
+  # programs.niri turns this on by default. It was never on under bspwm, and
+  # on an autologin host it only hurts: greetd's initial_session hands PAM no
+  # password, so pam_gnome_keyring cannot unlock anything, and the first
+  # libsecret client of the session (Bitwarden, via XDG autostart) then
+  # prompts for the keyring password at every boot (ganoslal, 2026-10-26).
+  # Without a Secret Service those apps fall back to the plain storage they
+  # used under bspwm.
+  services.gnome.gnome-keyring.enable = false;
+
+  services.greetd = {
+    enable = true;
+    settings = {
+      # Boots straight into niri as `gig`, no visible greeter.
+      initial_session = {
+        command = "niri-session";
+        user = "gig";
+      };
+      # Fallback greeter shown if the initial session is ever exited
+      # (logout), so another session can still be picked -- same reason
+      # bspwm.nix keeps LightDM's greeter enabled alongside autologin.
+      default_session = {
+        command = "${pkgs.tuigreet}/bin/tuigreet --remember --remember-user-session --cmd niri-session";
+      };
+    };
+  };
+
+  # System-level packages required for niri. User-facing tools (launcher,
+  # bar, notifications, lock screen, wallpaper) live in home-manager instead,
+  # same split bspwm.nix uses.
+  environment.systemPackages = with pkgs; [
+    tuigreet
+    # X11 apps (Steam, Discord, AnyDesk, ...). niri has no built-in Xwayland
+    # and the NixOS module does not ship it; niri spawns this on demand and
+    # exports DISPLAY itself whenever it is on PATH.
+    xwayland-satellite
+  ];
+}

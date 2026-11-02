@@ -25,10 +25,17 @@
     # drives all four monitors correctly, so leave XFCE out — that also keeps a
     # session that cannot work off the display manager's session list.
     # (configLib.relativeToRoot "hosts/common/optional/xfce.nix")
-    (configLib.relativeToRoot "hosts/common/optional/bspwm.nix") # Enable bspwm window manager
+    (configLib.relativeToRoot "hosts/common/optional/niri.nix") # Enable niri window manager (Wayland)
+    # bspwm is the previous, known-good X11 desktop for this host. To go back,
+    # swap it in for niri.nix here AND in home/gig/ganoslal.nix -- the two use
+    # different display managers (LightDM vs. greetd), so they are not
+    # imported side by side. ./nvidia.nix keys its xrandr layout machinery off
+    # bspwm being enabled, so it comes back with it.
+    # (configLib.relativeToRoot "hosts/common/optional/bspwm.nix") # Enable bspwm window manager
     (configLib.relativeToRoot "hosts/common/optional/audio.nix") # Enable PipeWire audio system
     (configLib.relativeToRoot "hosts/common/optional/dns.nix") # Pin LAN DNS to the router
     (configLib.relativeToRoot "hosts/common/optional/firefox.nix")
+    (configLib.relativeToRoot "hosts/common/optional/nix-build-throttle.nix") # Keep nix builds from starving interactive use
     # ../common/optional/xrdp.nix
     # NOTE: autorandr is deliberately not imported — this host has a fixed
     # 4-monitor set, and two of its panels have byte-identical EDIDs so

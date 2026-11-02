@@ -1,29 +1,40 @@
 # beta.kottonmouthband.com keeper -- same service as kottonmouth-keeper.nix,
 # but tracking the `rolling` branch instead of `main`, behind the beta
-# wrangler environment instead of production. Packaged from the
-# `kottonmouth-rolling` flake input (`packages.<system>.keeper-image`, same
-# derivation as the main keeper, built off a different ref).
+# wrangler environment instead of production. The image is NOT a flake
+# input: kottonmouth-rolling-deploy.service (hosts/spacedock/github-runner.nix)
+# builds `keeper-image` off rolling's tip at runtime and copies it into podman
+# as `imageRepo`:<version> (the keeper's Cargo.toml version on rolling, the
+# same tag the main keeper's image carries), so beta deploys never rebuild or
+# switch the system and can't revert whatever roll branch spacedock is
+# currently on.
 #
 # Unlike the main keeper, this one is NOT always on: `autoStart = false`.
 # It only runs while `rolling` differs from `main` -- there's nothing to
 # preview once a roll has been promoted. rolling-preview.yml (in the
 # kottonmouth repo) starts and stops `podman-kottonmouth-keeper-dev.service`
 # via a self-hosted Actions runner on this host (see ./github-runner.nix),
-# refreshing the `kottonmouth-rolling` flake input and switching first so
-# the running image always matches rolling's current HEAD.
+# running the deploy unit first so the image matches rolling's current HEAD.
+#
+# On a fresh host (or after `podman image prune -a`) the image doesn't exist
+# until the deploy unit has run once: `systemctl start kottonmouth-rolling-deploy`.
 #
 # Inbound: none from the LAN, same as the main keeper -- loopback only,
 # reached through the *same* cloudflared tunnel on a second hostname. No
 # second tunnel/credentials needed; NixOS merges `services.cloudflared.
 # tunnels.<id>.ingress` across files.
 {
-  inputs,
   config,
-  pkgs,
+  lib,
   ...
 }:
 let
-  keeperImage = inputs.kottonmouth-rolling.packages.${pkgs.stdenv.hostPlatform.system}.keeper-image;
+  # Loaded by kottonmouth-rolling-deploy.service under its own name -- the
+  # image bakes `kottonmouth-keeper:<version>`, which is the main keeper's
+  # ref whenever rolling and main share a version, so a plain `podman load`
+  # would clobber it.
+  imageRepo = "localhost/kottonmouth-keeper-dev";
+  # Written by the deploy unit: KEEPER_DEV_TAG=<rolling's keeper version>.
+  tagEnvFile = "/var/lib/kottonmouth-deploy/dev-tag.env";
   # Same tunnel as kottonmouth-keeper.nix -- this file only adds one more
   # ingress hostname to it.
   tunnelId = "1a878786-561d-427c-90cd-358f1b82aea4";
@@ -35,7 +46,7 @@ let
 in
 {
   sops.secrets = {
-    # KEEPER_TOKEN / GITHUB_TOKEN for the beta environment -- distinct from
+    # KEEPER_TOKEN / GITHUB_TOKEN (+ CF_ACCOUNT_ID / CF_API_TOKEN for email) for the beta environment -- distinct from
     # the main keeper's, so this only ever drains kottonmouth-edge-beta.
     "kottonmouth/kottonmouth-keeper-dev-env" = {
       restartUnits = [ "podman-kottonmouth-keeper-dev.service" ];
@@ -45,14 +56,12 @@ in
   systemd.tmpfiles.rules = [ "d /var/lib/kottonmouth-keeper-dev 0700 ${uid} ${uid} -" ];
 
   virtualisation.oci-containers.containers.kottonmouth-keeper-dev = {
-    imageFile = keeperImage;
-    # keeper-image always bakes the tag `kottonmouth-keeper:latest`, the same
-    # as the main keeper's image (it's the same package attribute, just built
-    # off a different flake input/ref) -- `image` has to match what the
-    # pre-start load actually tagged, or podman can't find it locally and
-    # tries (and fails) to pull it from a registry instead. See
-    # kottonmouth-keeper.nix for the same pattern.
-    image = "${keeperImage.imageName}:${keeperImage.imageTag}";
+    # Expanded by the unit's shell script at start (oci-containers doesn't
+    # escape `image`), so the tag follows whatever the last deploy loaded;
+    # `rolling` is only a fallback for before the first tagged deploy.
+    image = "${imageRepo}:\${KEEPER_DEV_TAG:-rolling}";
+    # Local-only image; never try a registry.
+    pull = "never";
     # Started/stopped by rolling-preview.yml based on rolling-vs-main
     # divergence, not on boot.
     autoStart = false;
@@ -61,9 +70,20 @@ in
       TZ = "America/New_York";
       EDGE_URL = "https://beta.kottonmouthband.com";
       GITHUB_REPO = "gignsky/kottonmouth";
-      GITHUB_BRANCH = "rolling";
-      NOTIFY_TO = "kottonmouthband@gmail.com";
-      NOTIFY_FROM = "Kottonmouth beta <keeper@kottonmouthband.com>";
+      # Throwaway branch, not `rolling`: beta admin edits (shows, settings)
+      # must never reach main via a promote. rolling-preview.yml recreates it
+      # from rolling + main's data on every deploy and deletes it on teardown.
+      GITHUB_BRANCH = "beta-content";
+      # Beta is disposable: clear the keeper DB on every start, then re-seed
+      # from main's (MAIN_DB_SEED below).
+      RESET_ON_START = "1";
+      # Email: visitor mail (welcome, booking confirmation) goes to the test
+      # inbox instead of the visitor; band alerts still reach the band, marked
+      # [BETA], so a real booking made here by accident is not lost. Needs
+      # CF_ACCOUNT_ID / CF_API_TOKEN in the sops env file; band alert
+      # recipients default to keeper@kottonmouthband.com (editable in the admin).
+      MAIL_MODE = "redirect";
+      MAIL_REDIRECT_TO = "maxwell@giglab.dev";
       # Served at beta.kottonmouthband.com/admin: the beta Worker proxies
       # /admin/* here, stripping the prefix, so links must be emitted with it.
       # PROXY_SECRET (must equal the Worker's ADMIN_PROXY_SECRET) goes in the
@@ -81,6 +101,18 @@ in
     ];
     ports = [ "127.0.0.1:${toString adminPort}:8790/tcp" ];
   };
+
+  systemd.services.podman-kottonmouth-keeper-dev.serviceConfig.EnvironmentFile = "-${tagEnvFile}";
+
+  # The image ref above only works while upstream leaves `image` unescaped in
+  # the generated script -- fail the build, not the container start, if that
+  # ever changes.
+  assertions = [
+    {
+      assertion = lib.hasInfix " ${imageRepo}:\${KEEPER_DEV_TAG:-rolling}" config.systemd.services.podman-kottonmouth-keeper-dev.script;
+      message = "kottonmouth-keeper-dev: oci-containers now escapes `image`; the version tag needs another way in.";
+    }
+  ];
 
   # Same basic-auth gate pattern as the main keeper, reusing its htpasswd
   # secret -- one shared band password for both admins.

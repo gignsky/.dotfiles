@@ -2,15 +2,17 @@
 #
 # The container runtime is provided by the gigpkgs container engine
 # (`gigpkgs.containers.enable = true` on the host). Uncomment a payload to run
-# it. pihole is enabled so spacedock has a working container out of the box.
+# it.
 _: {
   imports = [
-    # ./pihole.nix # Pi-hole DNS — runs as a service via the container engine
+    ./pihole.nix # Pi-hole DNS slave, synced from memory-alpha — needs the `pihole/*` sops keys, see file header
     ./tdarr-node.nix # Tdarr node — needs CIFS mounts + samba creds first
     ./floatplane-wan-show.nix # Floatplane downloader (WAN Show + Techquickie) → Sonarr, see file header
     ./avec-moi-app.nix
     ./giglab-dev.nix # giglab.dev — interim static image, no TLS/front door yet
     ./scribbydascribe.nix # Discord voice transcriber — needs the `scribbydascribe-env` sops key first
+    ./minecraft-create.nix # Create (NeoForge) Minecraft server + games.gignsky.com site on :1801, see file header
     ./kottonmouth # kottonmouthband.com keeper (main + beta) and tunnel DNS, see kottonmouth/default.nix
+    ./christina # admin.christinasceramics.com keeper, see christina/default.nix
   ];
 }

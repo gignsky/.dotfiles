@@ -7,15 +7,16 @@ flake as part of the spacedock onboarding (dotfiles#14).
 Two mechanisms are preserved — a container can run **as a service** or **adhoc** —
 split hybrid-style: the generic *engine* lives in **gigpkgs**
 (`gigpkgs.nixosModules.containers` → the `gigpkgs.containers.*` options), and the
-spacedock-specific *payloads* live here as data. **Everything here is disabled by
-default.**
+spacedock-specific *payloads* live here as data. Payloads are opt-in: only the
+ones imported by `services/default.nix` run.
 
 ## As a service — `containers/services/`
 
 systemd-managed OCI containers via `virtualisation.oci-containers`.
 
-- `services/default.nix` — aggregator; imports **nothing** until you uncomment a payload.
-- `services/pihole.nix` (+ `pihole-config.nix`) — Pi-hole + nebula-sync.
+- `services/default.nix` — aggregator; lists which payloads are enabled.
+- `services/pihole.nix` (+ `pihole-config.nix`) — Pi-hole (enabled; needs the `pihole/*`
+  sops keys) + nebula-sync, as slave to the memory-alpha master.
 - `services/tdarr-node.nix` — Tdarr transcode node (needs CIFS mounts + samba creds).
 
 Enable one by uncommenting its import in `services/default.nix`. The host must
@@ -38,9 +39,8 @@ gigpkgs.containers.services.myapp = {
 };
 ```
 
-⚠️ The ported payloads carry placeholder secrets (e.g. Pi-hole `WEBPASSWORD`) and
-hardcoded LAN IPs (`192.168.51.x`). Move secrets to sops-nix and confirm the IPs
-before enabling.
+⚠️ Some ported payloads carry hardcoded LAN IPs (`192.168.51.x`). Confirm them,
+and keep secrets in sops-nix, before enabling.
 
 ## Adhoc — `containers/buzz/`, `containers/mini/`
 

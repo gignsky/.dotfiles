@@ -100,16 +100,19 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Same keeper image, built off the `rolling` branch instead of `main` --
-    # the dev keeper behind beta.kottonmouthband.com. See
-    # containers/services/kottonmouth-keeper-dev.nix. Updated with
-    # `nix flake update kottonmouth-rolling` by rolling-preview.yml whenever
-    # `rolling` diverges from `main`, not on a fixed schedule like the
-    # `main` input above.
-    kottonmouth-rolling = {
-      url = "git+ssh://git@github.com/gignsky/kottonmouth.git?ref=rolling";
+    # Christina's site (private repo, so ssh like kottonmouth). Follows
+    # `master`, updated by hand (`nix flake update christina-website`) once a
+    # roll is promoted, like kottonmouth's `main`. Serves the main keeper image
+    # (containers/services/christina/christina-keeper.nix) and
+    # scripts/instagram-auth-server.mjs (hosts/spacedock/christina-auth.nix).
+    christina-website = {
+      url = "git+ssh://git@github.com/gignsky/christina-website.git?ref=master&lfs=1";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # No `rolling` input for the dev keepers: their image is built and loaded at
+    # runtime by kottonmouth-/christina-rolling-deploy.service (hosts/spacedock/
+    # github-runner.nix), so beta deploys never rebuild the system.
 
     # # tax-matrix - currently on develop branch
     # tax-matrix = {

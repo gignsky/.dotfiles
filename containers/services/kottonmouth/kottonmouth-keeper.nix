@@ -29,7 +29,9 @@ in
 {
   sops.secrets = {
     # KEEPER_TOKEN / GITHUB_TOKEN, as unquoted KEY=value lines. Optional
-    # SMTP_URL enables booking emails; until then they wait, owed, in the db.
+    # CF_ACCOUNT_ID + CF_API_TOKEN (Cloudflare Email Service) turn the emails
+    # on; until then they wait, owed, in the db. Band alerts default to
+    # keeper@kottonmouthband.com and are edited on the admin's Email page.
     # restartUnits: a nixos-rebuild switch doesn't restart a unit just
     # because a secret *file*'s content changed underneath it -- only if
     # the unit definition itself changes. Without these, rotating either
@@ -61,8 +63,6 @@ in
       EDGE_URL = "https://kottonmouthband.com";
       GITHUB_REPO = "gignsky/kottonmouth";
       GITHUB_BRANCH = "main";
-      NOTIFY_TO = "kottonmouthband@gmail.com";
-      NOTIFY_FROM = "Kottonmouth site <keeper@kottonmouthband.com>";
     };
     volumes = [ "/var/lib/kottonmouth-keeper:/data" ];
     ports = [ "127.0.0.1:${toString adminPort}:8790/tcp" ];
