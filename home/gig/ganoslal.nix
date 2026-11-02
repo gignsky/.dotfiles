@@ -17,6 +17,7 @@
     # ./common/optional/bspwm.nix # Enable bspwm window manager configuration
     ./common/optional/thunderbird.nix # WorkMail account, declaratively configured
     ./common/optional/thunderbird-gmail.nix # Personal Gmail accounts, OAuth2
+    ./common/optional/minecraft-create.nix # Prism Launcher + instance matching the spacedock Create server
     # ./cams-countertop.nix
   ];
 
@@ -69,6 +70,12 @@
         scale 1
         position x=320 y=1080
         focus-at-startup
+
+        // niri's stock 50% column is a bit narrow on the ultrawide; 60% is
+        // where Mod+Ctrl+L x2 (+5% each) used to land it by hand.
+        layout {
+            default-column-width { proportion 0.6; }
+        }
     }
 
     debug {
@@ -80,7 +87,7 @@
 
     packages = with pkgs; [
       # ytmdesktop
-      claude-desktop
+      claude-desktop-with-fhs
       ytmusic
       steam
       plex-desktop

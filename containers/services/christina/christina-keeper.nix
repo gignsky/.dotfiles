@@ -3,11 +3,9 @@
 # (`packages.<system>.keeper-image`), the same pattern as kottonmouth-keeper.nix
 # and modelled on it: see docs/keeper.md in that repo.
 #
-# The image comes from the `christina-website-stable` input (`master`), updated
-# by hand with `nix flake update christina-website-stable` once a roll has been
-# promoted, like kottonmouth's `main`. The `christina-website` input (`rolling`)
-# only serves the auth script. The beta twin of this keeper is
-# christina-keeper-dev.nix.
+# The input follows `master`, updated by hand with `nix flake update
+# christina-website` once a roll has been promoted, like kottonmouth's `main`.
+# The beta twin of this keeper is christina-keeper-dev.nix.
 #
 # Inbound: none from the LAN. The keeper is published on loopback only; the
 # cloudflared tunnel (shared with kottonmouth's admin and auth.christinasceramics.com)
@@ -29,7 +27,7 @@
 let
   # `or` guards the whole chain: `master` has no `packages` output until the keeper is promoted.
   keeperImage =
-    inputs.christina-website-stable.packages.${pkgs.stdenv.hostPlatform.system}.keeper-image or null;
+    inputs.christina-website.packages.${pkgs.stdenv.hostPlatform.system}.keeper-image or null;
   # Same tunnel as kottonmouth-keeper.nix and christina-auth.nix; this file
   # only adds one more ingress hostname to it. The christina-dns unit
   # (kottonmouth/kottonmouth-dns.nix) upserts the proxied CNAME for it.
@@ -49,12 +47,10 @@ in
 lib.mkMerge [
   {
     warnings = lib.optional (keeperImage == null) ''
-      christina-keeper: the christina-website-stable input (${
-        inputs.christina-website-stable.rev or "dirty"
-      })
+      christina-keeper: the christina-website input (${inputs.christina-website.rev or "dirty"})
       has no packages.${pkgs.stdenv.hostPlatform.system}.keeper-image, so
       admin.christinasceramics.com is not configured. Promote the keeper roll
-      to `master`, then `nix flake update christina-website-stable`.
+      to `master`, then `nix flake update christina-website`.
     '';
 
     # Also used by the dev gate (christina-keeper-dev.nix), so defined whether
