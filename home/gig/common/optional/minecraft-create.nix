@@ -25,6 +25,9 @@
 let
   modpack = import (configLib.relativeToRoot "containers/services/minecraft-create-modpack.nix");
   instance = "PrismLauncher/instances/create-server";
+  # Minecraft 1.21.1 / NeoForge need Java 21; the same JDK the Prism wrapper
+  # puts on PRISMLAUNCHER_JAVA_PATHS.
+  javaPath = "${pkgs.jdk21}/bin/java";
 
   mmcPack = pkgs.writeText "mmc-pack.json" (
     builtins.toJSON {
@@ -61,8 +64,8 @@ let
   );
 in
 {
-  # The nixpkgs build wraps Java 8/17/21, so the instance finds Java 21
-  # without any setup.
+  # The nixpkgs build wraps Java 8/17/21/25; the instance is pinned to 21 by
+  # the activation script below.
   programs.prismlauncher.enable = true;
 
   # The server's mods plus the client-only shader mods, and the shader and
@@ -105,6 +108,19 @@ in
     run install -m644 ${mmcPack} "$dir/mmc-pack.json"
     if [ ! -e "$dir/instance.cfg" ]; then
       run install -m644 ${instanceCfg} "$dir/instance.cfg"
+    fi
+
+    # Pin the instance to Java 21 on every switch, since the store path moves
+    # with nixpkgs. Prism's first-run setup can leave the global Java on 8.
+    if [ -e "$dir/instance.cfg" ]; then
+      for kv in "OverrideJavaLocation=true" "JavaPath=${javaPath}"; do
+        key="''${kv%%=*}"
+        if grep -q "^$key=" "$dir/instance.cfg"; then
+          run sed -i "s|^$key=.*|$kv|" "$dir/instance.cfg"
+        else
+          run sed -i "/^\[General\]$/a $kv" "$dir/instance.cfg"
+        fi
+      done
     fi
   '';
 }
