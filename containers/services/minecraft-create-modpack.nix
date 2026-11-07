@@ -1,5 +1,6 @@
 # The Create server's modpack, shared by the server (./minecraft-create.nix,
-# spacedock) and the client instance (home/gig/common/optional/
+# spacedock), the packwiz pack players' Prism instances sync from (served by
+# the same file) and the client instance (home/gig/common/optional/
 # minecraft-create.nix, Prism Launcher). Plain data, not a module -- it is
 # imported, never listed in ./default.nix.
 #
@@ -18,7 +19,7 @@
   neoforgeVersion = "21.1.265";
 
   # Pinned so a restart never silently upgrades the server out from under the
-  # players' mods.zip.
+  # players' mods.
   mods = [
     {
       # Create 6.0.10+mc1.21.1
@@ -172,6 +173,28 @@
       sha512 = "af9796b0ac81f6f092f7e37e2924f5a3c58885eb4da37e7b74a0f708c725f264f85da2ffcc09715a690c40384a068743409d09b35fcbe908fff464eb9b1190ed";
     }
     {
+      # The Time Vortex 1.3.7-beta -- build a TARDIS piece by piece, bigger
+      # on the inside, flown through the vortex. Beta and updated often.
+      # No required deps; JEI, Jade, Create and Aeronautics integrations
+      # switch on because they're in the pack. Each TARDIS interior is its
+      # own dimension, so no world reset needed. Back up the world before
+      # bumping it.
+      slug = "the-time-vortex";
+      version = "KPrrqwse";
+      file = "timevortex-neoforge-1.3.7-beta+1.21.1.jar";
+      url = "https://cdn.modrinth.com/data/werC9r1q/versions/KPrrqwse/timevortex-neoforge-1.3.7-beta%2B1.21.1.jar";
+      sha512 = "be49bdd8272e7bd89098b629417f0005572ae155d7df4c90f9261ac74cd2065ec949ff9cc6e59906dade070baacfbc28113a6a1b31dc163dbbf8e1faaf1a4813";
+    }
+    {
+      # GraveStone Mod 1.0.40 -- dying leaves a grave holding your items;
+      # break or right-click it to get them back. Jade shows the owner.
+      slug = "gravestone-mod";
+      version = "rMGJpjaM";
+      file = "gravestone-neoforge-1.21.1-1.0.40.jar";
+      url = "https://cdn.modrinth.com/data/RYtXKJPr/versions/rMGJpjaM/gravestone-neoforge-1.21.1-1.0.40.jar";
+      sha512 = "5504a222d4085da1898ff6d4dff8eb1821fd14a8caaaac785554277147f984262e63925a411db3f1a34e9c7874652fb6737176bea4c0c3f01243f5eae4ea6eaa";
+    }
+    {
       # Xaero's Minimap 26.6.0 -- minimap with waypoints. Client-side, but
       # optional on the server, so it rides along in mods.zip. Bundles Xaero
       # Lib (jar-in-jar); no separate entry needed.
@@ -280,6 +303,13 @@
       file = "BSL_v10.1.8.zip";
       url = "https://cdn.modrinth.com/data/Q1vvjJYV/versions/Y68yiql9/BSL_v10.1.8.zip";
       sha512 = "94a3c25d6820868db624e11347873e6b572e7cd571967d9ac6f4690ca5d37ca302a7645d85eec800e0654541e3825fba14d37b5a25d3996aaf038178552be26f";
+    }
+    {
+      # SixthSurge's shader pack -- not the Photon VFX mod dropped earlier.
+      name = "Photon Shaders v1.4";
+      file = "photon_v1.4.zip";
+      url = "https://cdn.modrinth.com/data/lLqFfGNs/versions/BnGklH5y/photon_v1.4.zip";
+      sha512 = "2dec87084dccf91a72a06235ecbfb3627f066699b5f70583f06077cba61433aedbfa6af28eb68bf1cdc726149cc3d9a587517cfab59e6a24e9d6a40b6874d655";
     }
   ];
 
