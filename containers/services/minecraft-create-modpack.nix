@@ -304,6 +304,13 @@
       url = "https://cdn.modrinth.com/data/Q1vvjJYV/versions/Y68yiql9/BSL_v10.1.8.zip";
       sha512 = "94a3c25d6820868db624e11347873e6b572e7cd571967d9ac6f4690ca5d37ca302a7645d85eec800e0654541e3825fba14d37b5a25d3996aaf038178552be26f";
     }
+    {
+      # SixthSurge's shader pack -- not the Photon VFX mod dropped earlier.
+      name = "Photon Shaders v1.4";
+      file = "photon_v1.4.zip";
+      url = "https://cdn.modrinth.com/data/lLqFfGNs/versions/BnGklH5y/photon_v1.4.zip";
+      sha512 = "2dec87084dccf91a72a06235ecbfb3627f066699b5f70583f06077cba61433aedbfa6af28eb68bf1cdc726149cc3d9a587517cfab59e6a24e9d6a40b6874d655";
+    }
   ];
 
   # Plain vanilla packs only: no CIT/EMF/ETF-dependent ones, which need
