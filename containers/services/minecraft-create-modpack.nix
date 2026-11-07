@@ -1,5 +1,6 @@
 # The Create server's modpack, shared by the server (./minecraft-create.nix,
-# spacedock) and the client instance (home/gig/common/optional/
+# spacedock), the packwiz pack players' Prism instances sync from (served by
+# the same file) and the client instance (home/gig/common/optional/
 # minecraft-create.nix, Prism Launcher). Plain data, not a module -- it is
 # imported, never listed in ./default.nix.
 #
@@ -18,7 +19,7 @@
   neoforgeVersion = "21.1.265";
 
   # Pinned so a restart never silently upgrades the server out from under the
-  # players' mods.zip.
+  # players' mods.
   mods = [
     {
       # Create 6.0.10+mc1.21.1
@@ -170,6 +171,19 @@
       file = "Stargate.Journey-1.21.1-0.6.52.jar";
       url = "https://cdn.modrinth.com/data/qlc8dxM6/versions/HcYWpI7G/Stargate.Journey-1.21.1-0.6.52.jar";
       sha512 = "af9796b0ac81f6f092f7e37e2924f5a3c58885eb4da37e7b74a0f708c725f264f85da2ffcc09715a690c40384a068743409d09b35fcbe908fff464eb9b1190ed";
+    }
+    {
+      # The Time Vortex 1.3.7-beta -- build a TARDIS piece by piece, bigger
+      # on the inside, flown through the vortex. Beta and updated often.
+      # No required deps; JEI, Jade, Create and Aeronautics integrations
+      # switch on because they're in the pack. Each TARDIS interior is its
+      # own dimension, so no world reset needed. Back up the world before
+      # bumping it.
+      slug = "the-time-vortex";
+      version = "KPrrqwse";
+      file = "timevortex-neoforge-1.3.7-beta+1.21.1.jar";
+      url = "https://cdn.modrinth.com/data/werC9r1q/versions/KPrrqwse/timevortex-neoforge-1.3.7-beta%2B1.21.1.jar";
+      sha512 = "be49bdd8272e7bd89098b629417f0005572ae155d7df4c90f9261ac74cd2065ec949ff9cc6e59906dade070baacfbc28113a6a1b31dc163dbbf8e1faaf1a4813";
     }
     {
       # Xaero's Minimap 26.6.0 -- minimap with waypoints. Client-side, but
