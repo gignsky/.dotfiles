@@ -195,38 +195,6 @@
       sha512 = "5504a222d4085da1898ff6d4dff8eb1821fd14a8caaaac785554277147f984262e63925a411db3f1a34e9c7874652fb6737176bea4c0c3f01243f5eae4ea6eaa";
     }
     {
-      # LDLib2 2.2.45 -- library, required by Photon (>= 2.2.43). Published
-      # under the `ldlib` project. Bundles Kotlin stdlib, Taffy and Yoga
-      # (jar-in-jar).
-      slug = "ldlib";
-      version = "VcWs9ATV";
-      file = "ldlib2-neoforge-1.21.1-2.2.45-all.jar";
-      url = "https://cdn.modrinth.com/data/B1CBVXHX/versions/VcWs9ATV/ldlib2-neoforge-1.21.1-2.2.45-all.jar";
-      sha512 = "896af9d53a8322fcc92737929b78b4a5b14231609842283b091cd97bdf9cfdbba595391f634a52ebdf7af87c3792913b4c738eddb270b453c8d10306b6fdd1d1";
-    }
-    {
-      # Photon 2.2.10 -- particle/VFX engine, required by SorceryCraft for
-      # its technique effects. Bundles KilaGraph (jar-in-jar). Bump it
-      # together with LDLib2.
-      slug = "photon-editor";
-      version = "nGIszLwl";
-      file = "photon-neoforge-1.21.1-2.2.10-all.jar";
-      url = "https://cdn.modrinth.com/data/gzevkJbM/versions/nGIszLwl/photon-neoforge-1.21.1-2.2.10-all.jar";
-      sha512 = "c4d3e7dbad5ef39c19a9ce53255425859e13305eb7d7b5ad5eac3ed7e10a837fffdedb2bac301b04df250ed8a40838e0567ef691ec9c954ba366720bb348f06d";
-    }
-    {
-      # SorceryCraft 3.5.1 -- Jujutsu Kaisen cursed techniques tied into
-      # Minecraft's progression (MCreator mod; modId kaisencraft). Stands in
-      # for Jujutsu Craft / Sorcery Fight, which is Forge 1.20.1 only.
-      # Modrinth also lists Pehkui as required, but the jar never touches it
-      # (no classes, commands or data referencing it), so it's left out.
-      slug = "mugs-kaisen-craft";
-      version = "aXDMAgPF";
-      file = "sorcerycraft-3.5.1-neoforge-1.21.1.jar";
-      url = "https://cdn.modrinth.com/data/Mkz95AzS/versions/aXDMAgPF/sorcerycraft-3.5.1-neoforge-1.21.1.jar";
-      sha512 = "4737a8956669702a36f6f6fff750629e6155be3f0463bc1e367a23b61abe20c0f9eaa03296cf66aa9187223f1b93c739f9a5c1da31146394960773e8503bd447";
-    }
-    {
       # Xaero's Minimap 26.6.0 -- minimap with waypoints. Client-side, but
       # optional on the server, so it rides along in mods.zip. Bundles Xaero
       # Lib (jar-in-jar); no separate entry needed.
