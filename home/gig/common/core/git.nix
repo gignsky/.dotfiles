@@ -56,6 +56,7 @@
     # git-lfs
     # gitflow
 
+    gh
     gnupg
     # pinentry
     pinentry-curses
