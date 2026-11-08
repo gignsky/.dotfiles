@@ -16,6 +16,7 @@
 
     # Import your generated (nixos-generate-config) hardware configuration
     ./hardware-configuration.nix
+    ./audio-devices.nix # Expose headset + ModMic alongside S/PDIF
     # core utils
     (configLib.relativeToRoot "hosts/common/core")
 
