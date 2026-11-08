@@ -57,6 +57,19 @@
   # Tailscale configuration
   tailscale.enable = false;
 
+  services = {
+    # power-saver / balanced / performance via amd-pstate EPP -- Framework's
+    # recommended power manager (do not also enable TLP; they conflict).
+    # Switched from the waybar module (waybarPowerProfiles in
+    # home/gig/merlin.nix) or `powerprofilesctl set <profile>`.
+    power-profiles-daemon.enable = true;
+
+    # Firmware updates from LVFS (BIOS, NVMe, USB4 retimers, fingerprint
+    # reader). Never applies anything on its own:
+    #   fwupdmgr refresh; fwupdmgr get-updates; fwupdmgr update
+    fwupd.enable = true;
+  };
+
   # Grub installation
   boot.loader = {
     # Bootloader.
