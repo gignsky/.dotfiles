@@ -7,6 +7,14 @@
 # so this profile set opens them together: both outputs plus the mic show up as
 # their own sink/source and can be switched per-app (e.g. in Discord) or with
 # pavucontrol without changing the card profile.
+#
+# Two follow-ups make that actually behave:
+# - The HDA driver mirrors the analog PCM onto S/PDIF whenever the digital PCM
+#   is idle ("IEC958 Default PCM Playback Switch"), so headset-only audio (e.g.
+#   Discord) also came out of the speakers. That switch is turned off at boot.
+# - USB sources outrank onboard ones, so the webcam mic became the default
+#   input and apps that just record from the default (Claude Code voice) never
+#   used the ModMic. The ModMic gets a higher session priority.
 { pkgs, ... }:
 let
   profileSet = pkgs.writeText "ganoslal-onboard.conf" ''
@@ -62,8 +70,21 @@ in
       }
       {
         matches = [ { "node.name" = "~alsa_input.pci-0000_2f_00.4.analog-stereo*"; } ];
-        actions.update-props."node.description" = "ModMic (rear mic)";
+        actions.update-props = {
+          "node.description" = "ModMic (rear mic)";
+          "priority.session" = 2500;
+        };
       }
     ];
+  };
+
+  systemd.services.ganoslal-unshare-spdif = {
+    description = "Stop mirroring analog playback onto S/PDIF";
+    wantedBy = [ "sound.target" ];
+    after = [ "sound.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      ExecStart = "${pkgs.alsa-utils}/bin/amixer -c Generic cset name='IEC958 Default PCM Playback Switch' off";
+    };
   };
 }
