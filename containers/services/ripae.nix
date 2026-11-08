@@ -16,8 +16,7 @@
 #      dropped from the secret after the first boot.
 #   2. This flake input is already wired (flake.nix, `ripae` → `github:gignsky/ripae/master`).
 #
-# Exposed only on loopback; reach it through the host's existing reverse
-# proxy (TLS/hostname are the operator's choice, not this module's).
+# Exposed on the LAN at :8089 (plain HTTP, same as avec-moi-app.nix on :8081).
 {
   config,
   inputs,
@@ -44,6 +43,12 @@ in
     volumes = [ "/var/lib/ripae:/data" ];
     # Host 8089 -> ripae's default RIPAE_BIND of 0.0.0.0:8080 in the container.
     # No --health-cmd: the Nix image has no shell or wget to run one.
-    ports = [ "127.0.0.1:8089:8080" ];
+    ports = [
+      "8089:8080/tcp"
+    ];
+  };
+  networking.firewall = {
+    enable = true;
+    allowedTCPPorts = [ 8089 ];
   };
 }
