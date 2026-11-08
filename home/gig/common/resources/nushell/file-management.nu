@@ -90,6 +90,36 @@ export def --wrapped supercopy [
     ^cp ...$rest
 }
 
+# A gentle copy for big files: rsync capped at a bandwidth limit, run at idle
+# I/O and lowest CPU priority, so a long copy can't saturate the system SSD
+# (root + swap on one drive) and freeze the desktop. Resumable with --partial.
+# Override the cap per call: SLOWCOPY_LIMIT=80M slowcopy src dest
+export def --wrapped slowcopy [
+    ...rest # Sources then destination, plus any extra rsync flags
+] {
+    if ('--help' in $rest) or ($rest | length) < 2 {
+        print "usage: slowcopy [rsync flags] <source>... <destination>"
+        print "  bandwidth cap: $env.SLOWCOPY_LIMIT (default 40M = 40 MiB/s)"
+        return
+    }
+
+    let limit = ($env.SLOWCOPY_LIMIT? | default "40M")
+    let destination = ($rest | last)
+    let dir_to_create = (get-dir-to-create $destination)
+
+    try {
+        if not ($dir_to_create | path exists) {
+            mkdir -v $dir_to_create
+        }
+    } catch {|err|
+        print -e $"Error creating directory: ($dir_to_create). See error below."
+        print -e $err.msg
+    }
+
+    # -rt rather than -a: CIFS shares reject owner/group/perm preservation
+    ^ionice -c3 nice -n19 rsync -rt --partial --info=progress2 -h $"--bwlimit=($limit)" ...$rest
+}
+
 # A 'super' move command that automatically creates the destination directory path.
 # It wraps the built-in 'mv' command, preserving its arguments and help documentation.
 export def --wrapped supermove [
