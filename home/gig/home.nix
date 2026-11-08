@@ -76,6 +76,9 @@
     pdfarranger
     pdf4qt
 
+    #rar file's
+    unrar
+
     #calculator - RPN
     orpie
 
