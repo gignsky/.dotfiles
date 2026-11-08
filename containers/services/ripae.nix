@@ -25,7 +25,8 @@
   ...
 }:
 let
-  imageFile = inputs.ripae.packages.${pkgs.stdenv.hostPlatform.system}.default;
+  # `default` is the bare binary; `container` is the buildLayeredImage tarball.
+  imageFile = inputs.ripae.packages.${pkgs.stdenv.hostPlatform.system}.container;
 in
 {
   sops.secrets.ripae-env = { };
@@ -41,10 +42,8 @@ in
       RIPAE_DB_PATH = "/data/ripae.db";
     };
     volumes = [ "/var/lib/ripae:/data" ];
-    ports = [ "127.0.0.1:8080:8089" ];
-    extraOptions = [
-      "--health-cmd"
-      "wget -qO- http://127.0.0.1:8080/healthz || exit 1"
-    ];
+    # Host 8089 -> ripae's default RIPAE_BIND of 0.0.0.0:8080 in the container.
+    # No --health-cmd: the Nix image has no shell or wget to run one.
+    ports = [ "127.0.0.1:8089:8080" ];
   };
 }
