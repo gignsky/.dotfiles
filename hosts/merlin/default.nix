@@ -28,6 +28,7 @@
     (configLib.relativeToRoot "hosts/common/optional/dns.nix") # Pin LAN DNS to the router
     (configLib.relativeToRoot "hosts/common/optional/firefox.nix")
     (configLib.relativeToRoot "hosts/common/optional/nix-build-throttle.nix") # Keep nix builds from starving interactive use
+    (configLib.relativeToRoot "hosts/common/optional/memory-tuning.nix") # zram + swap/writeback tuning so big copies don't freeze the desktop
     (configLib.relativeToRoot "hosts/common/optional/audio.nix") # Enable PipeWire audio system
     (configLib.relativeToRoot "hosts/common/optional/bluetooth.nix") # Enable Bluetooth support
     (configLib.relativeToRoot "hosts/common/optional/brightness-control.nix") # Enable brightness control for Framework laptops
