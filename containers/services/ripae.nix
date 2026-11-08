@@ -41,7 +41,7 @@ in
       RIPAE_DB_PATH = "/data/ripae.db";
     };
     volumes = [ "/var/lib/ripae:/data" ];
-    ports = [ "127.0.0.1:8080:8080" ];
+    ports = [ "127.0.0.1:8080:8089" ];
     extraOptions = [
       "--health-cmd"
       "wget -qO- http://127.0.0.1:8080/healthz || exit 1"
