@@ -34,7 +34,9 @@ in
 
   virtualisation.oci-containers.containers.ripae = {
     inherit imageFile;
-    image = "ripae:0.1.0";
+    # Track the tarball's own name:tag, so a version bump upstream can't leave
+    # this pointing at a stale image still sitting in podman's store.
+    image = "${imageFile.imageName}:${imageFile.imageTag}";
     autoStart = true;
     environmentFiles = [ config.sops.secrets.ripae-env.path ];
     environment = {
