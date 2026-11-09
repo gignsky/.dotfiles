@@ -39,6 +39,8 @@ in
     environmentFiles = [ config.sops.secrets.ripae-env.path ];
     environment = {
       RIPAE_DB_PATH = "/data/ripae.db";
+      # Served over plain HTTP on the LAN; a `Secure` cookie would be dropped.
+      RIPAE_COOKIE_SECURE = "0";
     };
     volumes = [ "/var/lib/ripae:/data" ];
     # Host 8089 -> ripae's default RIPAE_BIND of 0.0.0.0:8080 in the container.
