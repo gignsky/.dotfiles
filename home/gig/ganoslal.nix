@@ -124,7 +124,14 @@ in
       discord
       # anydesk
       gpu-viewer
-      anydesk
+      # AnyDesk re-uploaded the 8.1.0 tarball in place (2026-11-03), breaking
+      # nixpkgs' pinned hash. Drop this override once nixpkgs catches up.
+      (anydesk.overrideAttrs (old: {
+        src = fetchurl {
+          inherit (old.src) urls;
+          hash = "sha256-zS5P2eyTHZY7cBW8mQ2Q6M0lXcx9VZZTtpG3Bb6u7IQ=";
+        };
+      }))
     ];
 
     # NOTE: the autorandr profiles that used to live here were removed — they
