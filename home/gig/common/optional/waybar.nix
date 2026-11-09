@@ -1,10 +1,20 @@
-{ pkgs, ... }:
 {
+  config,
+  lib,
+  pkgs,
+  ...
+}:
+{
+  # Opt-in rather than always on: the switcher needs the host to run
+  # services.power-profiles-daemon, which only laptops (merlin) do. Set from
+  # the host's home entry point, like niriHostConfig.
+  options.waybarPowerProfiles = lib.mkEnableOption "a power-profiles-daemon switcher on the bar (click cycles power-saver/balanced/performance)";
+
   # Status bar for niri. Not a line-for-line port of polybar.nix -- the two
   # bar frameworks differ enough (single bar vs. one-process-per-monitor,
   # different module systems) that a direct translation wouldn't be
   # meaningful. Same Nord-ish palette as polybar.nix for visual continuity.
-  programs.waybar = {
+  config.programs.waybar = {
     enable = true;
     # Autostart is handled by niri's spawn-at-startup instead.
     systemd.enable = false;
@@ -25,6 +35,9 @@
           "network"
           "cpu"
           "memory"
+        ]
+        ++ lib.optional config.waybarPowerProfiles "power-profiles-daemon"
+        ++ [
           "battery"
           "tray"
         ];
@@ -66,6 +79,12 @@
           interval = 3;
         };
 
+        # Left-click cycles power-saver -> balanced -> performance.
+        power-profiles-daemon = {
+          format = "PWR: {profile}";
+          tooltip-format = "Power profile: {profile}\nDriver: {driver}\nClick to cycle";
+        };
+
         battery = {
           bat = "BAT1";
           adapter = "AC1";
@@ -101,7 +120,7 @@
         color: #2E3440;
       }
 
-      #clock, #cpu, #memory, #pulseaudio, #network, #battery, #window, #tray {
+      #clock, #cpu, #memory, #pulseaudio, #network, #power-profiles-daemon, #battery, #window, #tray {
         padding: 0 8px;
       }
 
@@ -111,6 +130,14 @@
 
       #battery.critical {
         color: #BF616A;
+      }
+
+      #power-profiles-daemon.performance {
+        color: #BF616A;
+      }
+
+      #power-profiles-daemon.power-saver {
+        color: #A3BE8C;
       }
     '';
   };
