@@ -17,6 +17,7 @@
     # Import your generated (nixos-generate-config) hardware configuration
     ./hardware-configuration.nix
     ./audio-devices.nix # Expose headset + ModMic alongside S/PDIF
+    ./niri-render-gpu.nix # Hold niri back until the 3060 Ti is up, so it never renders on the 970
     # core utils
     (configLib.relativeToRoot "hosts/common/core")
 
