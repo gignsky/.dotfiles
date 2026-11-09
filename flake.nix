@@ -113,6 +113,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Ready Room — the ship's Computer, run as a service on spacedock
+    # (hosts/spacedock/ready-room.nix). Private repo, so ssh like kottonmouth;
+    # its trunk is `master`. Its nixpkgs is NOT made to follow the fleet's: the
+    # Python core needs fastembed and claude-agent-sdk from gigpkgs-unstable.
+    ready-room.url = "git+ssh://git@github.com/gignsky/ready-room.git?ref=master";
+
     # No `rolling` input for the dev keepers: their image is built and loaded at
     # runtime by kottonmouth-/christina-rolling-deploy.service (hosts/spacedock/
     # github-runner.nix), so beta deploys never rebuild the system.

@@ -1,0 +1,29 @@
+# Ready Room — the core on spacedock. No secret lives here: the door token
+# and the annex deploy key are sops-nix files the module hands to the service.
+# Reference: ready-room's ready-room.example.toml and docs/spacedock.md.
+
+state_dir = "/var/lib/ready-room"
+
+[door]
+# Loopback only; consoles tunnel in (`ssh -N -L 7474:127.0.0.1:7474 spacedock`).
+# The token file comes from the module as $RR_DOOR_TOKEN_FILE.
+bind = "127.0.0.1:7474"
+
+[watcher]
+interval_secs = 300
+nightly_hour = 3
+
+[index]
+# Keyword-only to start. "haiku" is one Claude call per file (1,199 today);
+# embeddings cost CPU and one model download into /var/lib/ready-room/models.
+summaries = "heuristic"
+embeddings = false
+
+[[repos]]
+name = "annex"
+# The module clones gignsky/annex here on first start, as the service user.
+path = "/var/lib/ready-room/clones/annex"
+pull = true
+# Never opened, listed or named. Law.
+sealed = ["library/sealed/"]
+law = "ANNEX.md"

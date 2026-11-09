@@ -45,6 +45,10 @@
 
     # Always-on Instagram login + weekly token refresh for christinasceramics.com.
     (configLib.relativeToRoot "hosts/spacedock/christina-auth.nix")
+
+    # Ready Room — the ship's Computer (MCP door onto the annex). Enabled once
+    # its two secrets are in nix-secrets; see the file.
+    (configLib.relativeToRoot "hosts/spacedock/ready-room.nix")
   ];
   # gigpkgs container engine — the module is injected in flake.nix as
   # `inputs.nixpkgs.nixosModules.containers`. Provides the OCI runtime for
