@@ -1529,11 +1529,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1794207325,
-        "narHash": "sha256-7zC15YjhTwLZ3WfFNTuekxX1tx8nM9znYbIbMBvi3kg=",
+        "lastModified": 1794208235,
+        "narHash": "sha256-0qs+o7t9ZsZHKEK2H/kZYLu9G2Y+fCKMyqtdDmF2HKs=",
         "owner": "gignsky",
         "repo": "ripae",
-        "rev": "2ab2ddcb993cc0eb652d64e068eab40ed408987e",
+        "rev": "31db7afcdafecd89985791887c451ffde4193fcc",
         "type": "github"
       },
       "original": {
