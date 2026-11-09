@@ -88,6 +88,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Ripae — org commodity-run ledger (axum/sqlx, SQLite), run as a container
+    # on spacedock. See containers/services/ripae.nix. The repo's trunk branch
+    # is `master` (not `main`), per gignsky/ripae's own convention.
+    ripae = {
+      url = "github:gignsky/ripae/master";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # kottonmouthband.com keeper image (private repo, so ssh like nix-secrets).
     # See containers/services/kottonmouth-keeper.nix.
     kottonmouth = {
