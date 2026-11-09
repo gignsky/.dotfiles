@@ -929,10 +929,10 @@
     "nix-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1793069822,
-        "narHash": "sha256-4v02Mq0DmYJ++OyOgumwhoTI9cC782gKqR+hUQM/oQA=",
+        "lastModified": 1794198203,
+        "narHash": "sha256-XCneAfKGml1YtnNSaeGl1s9g3M5vJkkdx0wN+mqqx2k=",
         "ref": "main",
-        "rev": "21ebf7f6c4a94f467dbd8c4340a1270e3003aa92",
+        "rev": "9b5bcad0af35ae48e1682d295659fa5889b5b65a",
         "shallow": true,
         "type": "git",
         "url": "ssh://git@github.com/gignsky/nix-secrets.git"
