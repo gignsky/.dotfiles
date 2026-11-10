@@ -38,5 +38,9 @@ in
       # For `summaries = "haiku"` the claude CLI must be on the service PATH:
       # extraPath = [ pkgs.claude-code ];
     };
+
+    # The door listens on the LAN (ready-room.toml binds 0.0.0.0:7474).
+    # LAN-facing only; do not forward it on the router.
+    networking.firewall.allowedTCPPorts = [ 7474 ];
   };
 }
