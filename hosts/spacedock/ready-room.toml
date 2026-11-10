@@ -5,9 +5,13 @@
 state_dir = "/var/lib/ready-room"
 
 [door]
-# Loopback only; consoles tunnel in (`ssh -N -L 7474:127.0.0.1:7474 spacedock`).
-# The token file comes from the module as $RR_DOOR_TOKEN_FILE.
-bind = "127.0.0.1:7474"
+# Open on the LAN (and loopback): dial http://192.168.51.2:7474/mcp. The
+# bearer token is the only lock, so keep it long. The token file comes from
+# the module as $RR_DOOR_TOKEN_FILE.
+bind = "0.0.0.0:7474"
+# The door refuses any Host header it does not know. Loopback names are always
+# accepted; these are the names LAN callers dial.
+allowed_hosts = ["192.168.51.2", "spacedock"]
 
 [watcher]
 interval_secs = 300
