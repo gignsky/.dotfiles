@@ -39,8 +39,27 @@ in
       # extraPath = [ pkgs.claude-code ];
     };
 
-    # The door listens on the LAN (ready-room.toml binds 0.0.0.0:7474).
-    # LAN-facing only; do not forward it on the router.
+    # The door listens on the LAN (ready-room.toml binds 0.0.0.0:7474). Do not
+    # forward it on the router: away from the house it is reached through the
+    # cloudflared tunnel below, which terminates TLS at Cloudflare.
     networking.firewall.allowedTCPPorts = [ 7474 ];
+
+    # Public road: https://ready-room.giglab.dev/mcp, for merlin and the phone
+    # (Pebble) away from home. Same tunnel as kottonmouth-keeper.nix and
+    # christina-auth.nix (NixOS merges tunnels.<id>.ingress across files);
+    # giglab.dev is in the same Cloudflare account as kottonmouthband.com.
+    # Only /mcp is routed, anything else gets the tunnel's 404. The door's
+    # bearer token is the sole lock (the phone client cannot do a Cloudflare
+    # Access login), so see docs in ready-room.toml before loosening anything.
+    #
+    # One-time, by hand, in the Cloudflare dashboard (giglab.dev -> DNS): a
+    # proxied CNAME  ready-room -> <tunnel-id>.cfargotunnel.com . It is not
+    # in the kottonmouth-dns upserter, which would need a giglab.dev-scoped
+    # DNS-edit token; the apex/DDNS records are left untouched.
+    services.cloudflared.tunnels."1a878786-561d-427c-90cd-358f1b82aea4".ingress."ready-room.giglab.dev" =
+      {
+        service = "http://127.0.0.1:7474";
+        path = "^/mcp";
+      };
   };
 }

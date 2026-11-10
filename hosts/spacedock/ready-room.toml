@@ -5,13 +5,16 @@
 state_dir = "/var/lib/ready-room"
 
 [door]
-# Open on the LAN (and loopback): dial http://192.168.51.2:7474/mcp. The
-# bearer token is the only lock, so keep it long. The token file comes from
+# Open on the LAN (and loopback): dial http://192.168.51.2:7474/mcp. Away from
+# home the same door is reached at https://ready-room.giglab.dev/mcp through
+# the cloudflared tunnel (hosts/spacedock/ready-room.nix). The bearer token is
+# the only lock on both roads, so keep it long (32+ random bytes) and rotate it
+# if a device is lost. The token file comes from
 # the module as $RR_DOOR_TOKEN_FILE.
 bind = "0.0.0.0:7474"
 # The door refuses any Host header it does not know. Loopback names are always
 # accepted; these are the names LAN callers dial.
-allowed_hosts = ["192.168.51.2", "spacedock"]
+allowed_hosts = ["192.168.51.2", "spacedock", "ready-room.giglab.dev"]
 
 [watcher]
 interval_secs = 300
