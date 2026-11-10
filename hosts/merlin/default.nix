@@ -68,7 +68,18 @@
     # reader). Never applies anything on its own:
     #   fwupdmgr refresh; fwupdmgr get-updates; fwupdmgr update
     fwupd.enable = true;
+
+    # Fingerprint reader (Goodix). Enabling fprintd makes NixOS add
+    # pam_fprintd to every PAM service whose `fprintAuth` defaults to it:
+    # sudo, polkit prompts, swaylock (see niri.nix). Enroll once with
+    # `fprintd-enroll` (and `fprintd-list gig` to verify).
+    fprintd.enable = true;
   };
+
+  # greetd's tuigreet prompt: keep it password-only. With pam_fprintd first in
+  # the stack the password prompt would stall until the fingerprint scan times
+  # out, and a login-time fingerprint cannot unlock the keyring anyway.
+  security.pam.services.greetd.fprintAuth = false;
 
   # Grub installation
   boot.loader = {

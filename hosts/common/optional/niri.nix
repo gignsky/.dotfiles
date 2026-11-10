@@ -33,6 +33,11 @@
     };
   };
 
+  # swaylock (home-manager) needs a matching PAM service or every unlock
+  # attempt is denied. Hosts with services.fprintd.enabled (merlin) get
+  # fingerprint unlock on it automatically via fprintAuth's default.
+  security.pam.services.swaylock = { };
+
   # System-level packages required for niri. User-facing tools (launcher,
   # bar, notifications, lock screen, wallpaper) live in home-manager instead,
   # same split bspwm.nix uses.
