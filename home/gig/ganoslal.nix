@@ -77,6 +77,16 @@ in
   niriHostConfig = ''
     spawn-at-startup "${checkRenderGpu}"
 
+    // WezTerm on Wayland waits for a configure event with a zero size before
+    // it will draw, so a concrete niri width can leave it blank. It hit this
+    // host's 5120-wide DP-5 but not the 1920-wide DP-1. An empty
+    // default-column-width lets WezTerm pick its own size. ganoslal only: on
+    // merlin it made new terminals sometimes open short until resized.
+    window-rule {
+        match app-id=r#"^org\.wezfurlong\.wezterm$"#
+        default-column-width {}
+    }
+
     output "HDMI-A-2" {
         mode "1920x1080"
         position x=0 y=0
