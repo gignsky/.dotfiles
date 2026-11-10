@@ -16,7 +16,7 @@ let
   #     annex-key:  <private half of a read-only deploy key on gignsky/annex>
   # Until then the service is declared but not enabled, so the host still
   # evaluates and builds.
-  haveSecrets = false;
+  haveSecrets = true;
 in
 {
   imports = [ inputs.ready-room.nixosModules.default ];
