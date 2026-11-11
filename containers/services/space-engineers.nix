@@ -17,8 +17,14 @@
 #   /var/lib/space-engineers/steamcmd   SteamCMD itself and its state
 #   /var/lib/space-engineers/wine       the Wine prefix (copied from the image on first
 #                                       start, then given the VC++ x64 runtime; see below)
-#   /var/lib/space-engineers/web        rendered website (index.html with the live password)
 #   /var/lib/space-engineers/password-salt  persisted PBKDF2 salt; see passwordConfigure below
+#
+# The rendered website (index.html with the live password) lives separately
+# at /var/lib/space-engineers-web, NOT under /var/lib/space-engineers -- that
+# directory is 0750 root-only, so nginx (its own unprivileged user) couldn't
+# even traverse into it to reach a nested web/ subdir (403, found the hard
+# way after the first deploy). Same split as minecraft-create.nix's
+# dataDir/webDir.
 #
 # Ports: UDP 27016 (game) and UDP 8766 (Steam) are opened on the LAN firewall
 # and the container shares the host network stack, so the server is reachable
@@ -75,6 +81,10 @@ let
   steamPort = 8766;
   instanceName = "spacedock";
   stateDir = "/var/lib/space-engineers";
+  # Separate from stateDir (0750, root-only) and world-readable instead, so
+  # nginx (running as its own unprivileged user) can actually traverse into
+  # it -- same split as minecraft-create.nix's dataDir/webDir.
+  webDir = "/var/lib/space-engineers-web";
   appdata = "/appdata/space-engineers";
   # Nightly restart (saves, exits, SteamCMD applies any game update on the way
   # back up). systemd.time(7) calendar expression, local time.
@@ -328,7 +338,7 @@ let
         "${defaultConfig}" \
         "${stateDir}/password-salt" \
         "${webTemplate}" \
-        "${stateDir}/web/index.html"
+        "${webDir}/index.html"
     '';
   };
 
@@ -546,7 +556,7 @@ in
       "d ${stateDir}/plugins 0750 root root -"
       "d ${stateDir}/steamcmd 0750 root root -"
       "d ${stateDir}/wine 0750 root root -"
-      "d ${stateDir}/web 0755 root root -"
+      "d ${webDir} 0755 root root -"
     ];
 
     services.podman-space-engineers.serviceConfig = {
@@ -587,7 +597,7 @@ in
 
   # Contributes to the shared `games-site` vhost owned by games-site.nix
   # (hub page at `/`, listening on :1801) rather than defining its own vhost.
-  # Aliased to the live render under stateDir, not a Nix store path -- see
+  # Aliased to the live render in webDir, not a Nix store path -- see
   # passwordConfigure above, which is what actually writes it.
-  services.nginx.virtualHosts."games-site".locations."/space-engineers/".alias = "${stateDir}/web/";
+  services.nginx.virtualHosts."games-site".locations."/space-engineers/".alias = "${webDir}/";
 }
