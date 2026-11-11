@@ -85,7 +85,7 @@
     #file manager
     # spaceFM # - Likely removed from nixpkgs
 
-    unstable.claude-code
+    # claude-code: programs.claude-code, in common/core/ready-room.nix
     claude-monitor
 
     vlc
