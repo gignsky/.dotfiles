@@ -91,6 +91,44 @@ space-engineers:
 Pick something easy to read off a phone screen and type on a game controller —
 it's displayed in plaintext on the website by design.
 
+## Addendum (same day): live status + a 403 fix
+
+After the first deploy, `/space-engineers/` 403'd: its rendered page lived
+under `/var/lib/space-engineers/web`, nested inside a `0750 root:root`
+directory (intentionally restrictive -- it holds the SteamCMD install etc.),
+so nginx's own unprivileged worker couldn't even traverse into it. Fixed by
+moving the render target to a separate `/var/lib/space-engineers-web` (0755),
+matching the `dataDir`/`webDir` split `minecraft-create.nix` already used.
+
+Also added live Online/Offline status (with player counts) to both pages and
+the hub:
+
+- **Minecraft:** a real Server List Ping (wiki.vg) against the published
+  game port, every 30s, written to `webDir/status.json`.
+- **Space Engineers:** a real Steam A2S_INFO query (the same protocol
+  Steam's own server browser uses, challenge-response included) against the
+  Steam query port, every 30s, written to `webDir/status.json`.
+- A shared `/status.js` (games-site.nix) polls each page's `status.json`
+  client-side and renders Online/Offline inline, on the hub too.
+
+Both status-check scripts are tested against hand-rolled fake servers that
+speak the real protocol (challenge flow included for A2S) -- not against a
+real Minecraft or Space Engineers server, which this session has no way to
+run. They're read-only queries against already-open ports, so a wrong parse
+just shows "Status unavailable" rather than doing anything harmful; worth a
+glance after deploy to confirm the numbers look right once players are on.
+
+## Addendum 2 (same day): research off + settings list
+
+Set `EnableResearch` to `false` (was `true`). A handful of gameplay settings
+(game mode, max players, scenario, environment hostility, resource/tool
+multipliers, oxygen, research, economy, radiation, asteroid density) are now
+named `let` bindings instead of bare XML literals, and the Space Engineers
+page renders a settings table straight from those same bindings -- so the
+website can't drift from what the cfg actually says. Verified by building
+the real `defaultConfig` and `webTemplate` derivations and running the
+password-configure script against them end to end (not just a syntax check).
+
 ## Not done / follow-ups
 
 - Deploy (`just rebuild` on spacedock) — needs to run on spacedock itself.

@@ -55,7 +55,11 @@
 # first start the copy on disk is the source of truth (delete it to re-seed).
 # <LoadWorld>, <Plugins> and the password elements are rewritten on every
 # start (the first two by the entrypoint, the password by the ExecStartPre
-# below).
+# below). A handful of gameplay-relevant settings (game mode, multipliers,
+# research, etc.) are named `let` bindings above the XML template instead of
+# bare literals, specifically so `settingsList` can list them on the website
+# without drifting from what's actually in the cfg -- if you add one of
+# those to `settingsList`, change the binding, not the XML literal.
 #
 # Admins: put Steam ID64s in <Administrators> as <string>7656119...</string>.
 #
@@ -77,6 +81,20 @@ let
   # ...). Only consulted until a save exists in the instance.
   scenario = "Star System";
   maxPlayers = 8;
+  # Gameplay settings worth telling players about before they join -- named
+  # here (rather than only as literals in the XML template below) so the
+  # website's settings list can't drift from what the server actually runs;
+  # see `settingsList` and its use in `webTemplate`.
+  gameMode = "Survival";
+  onlineMode = "PUBLIC";
+  environmentHostility = "NORMAL";
+  resourceMultiplier = 3; # inventory size, assembler speed/efficiency, refinery speed
+  toolSpeedMultiplier = 2; # welder, grinder
+  enableOxygen = true;
+  enableResearch = false;
+  enableEconomy = true;
+  enableRadiation = true;
+  proceduralDensity = 0.35; # asteroid density
   gamePort = 27016;
   steamPort = 8766;
   instanceName = "spacedock";
@@ -97,6 +115,137 @@ let
   # Wine maps the container's / to Z:\.
   winPath = p: "Z:" + lib.replaceStrings [ "/" ] [ "\\" ] p;
 
+  onOff = v: if v then "On" else "Off";
+
+  # Shown on the website so players know the rules before joining. Pulled
+  # from the same named bindings above that build the XML, not hand-copied,
+  # so this can't quietly drift from what the server actually runs.
+  settingsList = [
+    {
+      label = "Game mode";
+      value = gameMode;
+    }
+    {
+      label = "Max players";
+      value = toString maxPlayers;
+    }
+    {
+      label = "Starting scenario";
+      value = scenario;
+    }
+    {
+      label = "Environment hostility";
+      value = environmentHostility;
+    }
+    {
+      label = "Inventory/assembler/refinery rates";
+      value = "${toString resourceMultiplier}x";
+    }
+    {
+      label = "Welder/grinder speed";
+      value = "${toString toolSpeedMultiplier}x";
+    }
+    {
+      label = "Oxygen";
+      value = onOff enableOxygen;
+    }
+    {
+      label = "Research";
+      value = onOff enableResearch;
+    }
+    {
+      label = "Economy";
+      value = onOff enableEconomy;
+    }
+    {
+      label = "Radiation";
+      value = onOff enableRadiation;
+    }
+    {
+      label = "Asteroid density";
+      value = builtins.toJSON proceduralDensity;
+    }
+  ];
+
+  # Status check: Valve's A2S_INFO query (the same protocol Steam's own
+  # server browser uses), against the Steam query port on the host's own
+  # network namespace (the container runs --network=host). Handles the
+  # challenge-response flow modern servers require. Written to webDir, not
+  # the Nix store, so it can be refreshed on a timer; nginx serves it
+  # alongside the page since the whole directory is aliased. Tested against
+  # a hand-rolled fake A2S server (challenge flow + info response, and the
+  # server-down case), not a real Space Engineers server.
+  statusCheckPy = pkgs.writeText "space-engineers-status-check.py" ''
+    import json
+    import os
+    import socket
+    import sys
+
+    host, port_str, out_path = sys.argv[1:4]
+    port = int(port_str)
+
+    A2S_INFO_REQUEST = b"\xFF\xFF\xFF\xFF\x54Source Engine Query\x00"
+
+
+    def read_cstring(data, pos):
+        end = data.index(b"\x00", pos)
+        return data[pos:end].decode("utf-8", "replace"), end + 1
+
+
+    def query():
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.settimeout(3)
+        try:
+            sock.sendto(A2S_INFO_REQUEST, (host, port))
+            data, _ = sock.recvfrom(4096)
+            header = data[4]
+            if header == 0x41:  # challenge response
+                challenge = data[5:9]
+                sock.sendto(A2S_INFO_REQUEST + challenge, (host, port))
+                data, _ = sock.recvfrom(4096)
+                header = data[4]
+            if header != 0x49:  # not an info response
+                raise ValueError(f"unexpected A2S response header {header!r}")
+            pos = 5
+            pos += 1  # protocol
+            name, pos = read_cstring(data, pos)
+            _map_name, pos = read_cstring(data, pos)
+            _folder, pos = read_cstring(data, pos)
+            _game, pos = read_cstring(data, pos)
+            pos += 2  # app id
+            players = data[pos]
+            pos += 1
+            max_players = data[pos]
+            pos += 1
+            return {"name": name, "players": players, "max_players": max_players}
+        finally:
+            sock.close()
+
+
+    try:
+        info = query()
+        result = {
+            "online": True,
+            "players": info["players"],
+            "max_players": info["max_players"],
+        }
+    except Exception:
+        result = {"online": False}
+
+    tmp = out_path + ".tmp"
+    with open(tmp, "w") as f:
+        json.dump(result, f)
+    os.replace(tmp, out_path)
+  '';
+
+  statusCheck = pkgs.writeShellApplication {
+    name = "space-engineers-status-check";
+    runtimeInputs = [ pkgs.python3 ];
+    text = ''
+      python3 ${statusCheckPy} 127.0.0.1 ${toString steamPort} ${webDir}/status.json
+    '';
+  };
+
   # Seed config. <SessionSettings> mirrors the <Settings> block of Keen's "Star
   # System" scenario (Content/CustomWorlds/Star System/Sandbox.sbc, game
   # 01_210), with OnlineMode/MaxPlayers overridden; the config's settings are
@@ -106,12 +255,12 @@ let
     <?xml version="1.0"?>
     <MyConfigDedicated xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
       <SessionSettings>
-        <GameMode>Survival</GameMode>
-        <InventorySizeMultiplier>3</InventorySizeMultiplier>
-        <AssemblerSpeedMultiplier>3</AssemblerSpeedMultiplier>
-        <AssemblerEfficiencyMultiplier>3</AssemblerEfficiencyMultiplier>
-        <RefinerySpeedMultiplier>3</RefinerySpeedMultiplier>
-        <OnlineMode>PUBLIC</OnlineMode>
+        <GameMode>${gameMode}</GameMode>
+        <InventorySizeMultiplier>${toString resourceMultiplier}</InventorySizeMultiplier>
+        <AssemblerSpeedMultiplier>${toString resourceMultiplier}</AssemblerSpeedMultiplier>
+        <AssemblerEfficiencyMultiplier>${toString resourceMultiplier}</AssemblerEfficiencyMultiplier>
+        <RefinerySpeedMultiplier>${toString resourceMultiplier}</RefinerySpeedMultiplier>
+        <OnlineMode>${onlineMode}</OnlineMode>
         <MaxPlayers>${toString maxPlayers}</MaxPlayers>
         <MaxFloatingObjects>100</MaxFloatingObjects>
         <MaxBackupSaves>5</MaxBackupSaves>
@@ -121,7 +270,7 @@ let
         <MaxFactionsCount>0</MaxFactionsCount>
         <BlockLimitsEnabled>GLOBALLY</BlockLimitsEnabled>
         <EnableRemoteBlockRemoval>true</EnableRemoteBlockRemoval>
-        <EnvironmentHostility>NORMAL</EnvironmentHostility>
+        <EnvironmentHostility>${environmentHostility}</EnvironmentHostility>
         <AutoHealing>true</AutoHealing>
         <EnableCopyPaste>false</EnableCopyPaste>
         <WeaponsEnabled>true</WeaponsEnabled>
@@ -132,14 +281,14 @@ let
         <MinimumWorldSize>6000</MinimumWorldSize>
         <RespawnShipDelete>false</RespawnShipDelete>
         <ResetOwnership>false</ResetOwnership>
-        <WelderSpeedMultiplier>2</WelderSpeedMultiplier>
-        <GrinderSpeedMultiplier>2</GrinderSpeedMultiplier>
+        <WelderSpeedMultiplier>${toString toolSpeedMultiplier}</WelderSpeedMultiplier>
+        <GrinderSpeedMultiplier>${toString toolSpeedMultiplier}</GrinderSpeedMultiplier>
         <RealisticSound>false</RealisticSound>
         <HackSpeedMultiplier>0.33</HackSpeedMultiplier>
         <PermanentDeath>false</PermanentDeath>
         <AutoSaveInMinutes>5</AutoSaveInMinutes>
         <SpawnShipTimeMultiplier>0</SpawnShipTimeMultiplier>
-        <ProceduralDensity>0.35</ProceduralDensity>
+        <ProceduralDensity>${builtins.toJSON proceduralDensity}</ProceduralDensity>
         <RandomizeSeed>true</RandomizeSeed>
         <ProceduralSeed>0</ProceduralSeed>
         <DestructibleBlocks>true</DestructibleBlocks>
@@ -147,8 +296,8 @@ let
         <ViewDistance>15000</ViewDistance>
         <FloraDensity>20</FloraDensity>
         <EnableToolShake>false</EnableToolShake>
-        <EnableOxygen>true</EnableOxygen>
-        <EnableResearch>true</EnableResearch>
+        <EnableOxygen>${lib.boolToString enableOxygen}</EnableOxygen>
+        <EnableResearch>${lib.boolToString enableResearch}</EnableResearch>
         <EnableOxygenPressurization>true</EnableOxygenPressurization>
         <Enable3rdPersonView>true</Enable3rdPersonView>
         <EnableFlora>true</EnableFlora>
@@ -179,13 +328,13 @@ let
         <EnableVoxelHand>true</EnableVoxelHand>
         <HasPlanets>true</HasPlanets>
         <EnableSpaceSuitRespawn>false</EnableSpaceSuitRespawn>
-        <EnableEconomy>true</EnableEconomy>
+        <EnableEconomy>${lib.boolToString enableEconomy}</EnableEconomy>
         <DepositsCountCoefficient>1</DepositsCountCoefficient>
         <DepositSizeDenominator>60</DepositSizeDenominator>
         <HarvestRatioMultiplier>0.8</HarvestRatioMultiplier>
         <TradeFactionsCount>10</TradeFactionsCount>
         <ScrapEnabled>false</ScrapEnabled>
-        <EnableRadiation>true</EnableRadiation>
+        <EnableRadiation>${lib.boolToString enableRadiation}</EnableRadiation>
         <SolarRadiationIntensity>0</SolarRadiationIntensity>
         <FoodConsumptionRate>0.5</FoodConsumptionRate>
         <EnableSurvivalBuffs>true</EnableSurvivalBuffs>
@@ -235,13 +384,25 @@ let
       <style>
         body { font: 16px/1.5 system-ui, sans-serif; max-width: 40rem; margin: 2rem auto; padding: 0 1rem; }
         code { background: #8882; padding: 0 .3em; border-radius: 3px; }
+        .status.online { color: #2b8a3e; font-weight: 600; }
+        .status.offline { color: #999; }
+        .status.unknown { color: #d9822b; }
+        table.settings { border-collapse: collapse; }
+        table.settings td { padding: .15em .6em; }
+        table.settings td:first-child { color: #666; }
       </style>
     </head>
     <body>
       <p><a href="/">&larr; all servers</a></p>
       <h1>${serverName}: Space Engineers Server</h1>
-      <p>Survival, ${toString maxPlayers}-player cap, generated from the "${scenario}" scenario.
-        3x inventory/assembler/refinery rates, oxygen and research on.</p>
+      <p>Status: <span id="se-status" class="status">checking&hellip;</span></p>
+      <p>Started from the "${scenario}" scenario.</p>
+      <h2>Settings</h2>
+      <table class="settings">
+        ${lib.concatMapStrings (s: ''
+          <tr><td>${s.label}</td><td>${s.value}</td></tr>
+        '') settingsList}
+      </table>
       <h2>Joining</h2>
       <p>In Space Engineers: Multiplayer &rarr; Join World &rarr; search the public server list
         for <strong>${serverName}</strong>, then enter this password when prompted:</p>
@@ -251,6 +412,8 @@ let
         <code>games.gignsky.com:${toString gamePort}</code> (UDP).</p>
       <p>The server pauses the simulation whenever no one is connected, so it's fine to leave
         the save loaded between sessions.</p>
+      <script src="/status.js"></script>
+      <script>pollStatus("/space-engineers/status.json", "se-status");</script>
     </body>
     </html>
   '';
@@ -583,6 +746,21 @@ in
       timerConfig = {
         OnCalendar = restartCalendar;
         Persistent = false;
+      };
+    };
+
+    services.space-engineers-status-check = {
+      description = "Poll the Space Engineers server's status for the website";
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStart = "${statusCheck}/bin/space-engineers-status-check";
+      };
+    };
+    timers.space-engineers-status-check = {
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnBootSec = "30s";
+        OnUnitActiveSec = "30s";
       };
     };
   };

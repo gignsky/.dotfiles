@@ -8,9 +8,39 @@
 # its own file (minecraft-create.nix -> /minecraft/, space-engineers.nix ->
 # /space-engineers/). Keeping the vhost itself in one place means the two
 # pages share a domain/port instead of each needing its own front-nginx vhost.
+#
+# Also serves `/status.js`, shared JS each game's page (and this hub) uses to
+# poll that game's `status.json` (written by its own status-check timer, see
+# minecraft-create.nix / space-engineers.nix) and show Online/Offline.
 { pkgs, ... }:
 let
   webPort = 1801;
+
+  statusJs = pkgs.writeText "status.js" ''
+    async function loadStatus(url, elId) {
+      var el = document.getElementById(elId);
+      if (!el) return;
+      try {
+        var res = await fetch(url, { cache: "no-store" });
+        if (!res.ok) throw new Error("bad response");
+        var data = await res.json();
+        if (data.online) {
+          el.textContent = "Online — " + data.players + "/" + data.max_players + " players";
+          el.className = "status online";
+        } else {
+          el.textContent = "Offline";
+          el.className = "status offline";
+        }
+      } catch (e) {
+        el.textContent = "Status unavailable";
+        el.className = "status unknown";
+      }
+    }
+    function pollStatus(url, elId) {
+      loadStatus(url, elId);
+      setInterval(function () { loadStatus(url, elId); }, 30000);
+    }
+  '';
 
   hub = pkgs.writeTextDir "index.html" ''
     <!doctype html>
@@ -25,12 +55,23 @@ let
           display: block; padding: .8em 1.2em; margin: .6em 0; background: #2b6cb0;
           color: #fff; border-radius: 6px; text-decoration: none; text-align: center;
         }
+        .status-line { margin: -.4em 0 .8em; font-size: .9em; text-align: center; color: #666; }
+        .status.online { color: #2b8a3e; font-weight: 600; }
+        .status.offline { color: #999; }
+        .status.unknown { color: #d9822b; }
       </style>
     </head>
     <body>
       <h1>Lord Gig's Game Servers</h1>
       <a class="button" href="/minecraft/">Minecraft (Create)</a>
+      <p class="status-line">Status: <span id="mc-status" class="status">checking&hellip;</span></p>
       <a class="button" href="/space-engineers/">Space Engineers</a>
+      <p class="status-line">Status: <span id="se-status" class="status">checking&hellip;</span></p>
+      <script src="/status.js"></script>
+      <script>
+        pollStatus("/minecraft/status.json", "mc-status");
+        pollStatus("/space-engineers/status.json", "se-status");
+      </script>
     </body>
     </html>
   '';
@@ -48,6 +89,7 @@ in
         }
       ];
       root = hub;
+      locations."= /status.js".alias = "${statusJs}";
     };
   };
 }

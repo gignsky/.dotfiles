@@ -19,8 +19,10 @@ systemd-managed OCI containers via `virtualisation.oci-containers`.
   sops keys) + nebula-sync, as slave to the memory-alpha master.
 - `services/tdarr-node.nix` — Tdarr transcode node (needs CIFS mounts + samba creds).
 - `services/games-site.nix` — shared `games-site` nginx vhost (games.gignsky.com, :1801):
-  the hub page at `/`. `minecraft-create.nix` and `space-engineers.nix` each add their
-  own sub-page to the same vhost rather than running their own.
+  the hub page at `/` and the shared `/status.js` each sub-page polls. `minecraft-create.nix`
+  and `space-engineers.nix` each add their own sub-page to the same vhost (plus their own
+  `status.json`, refreshed on a timer via a real status-protocol query) rather than running
+  their own vhost.
 - `services/minecraft-create.nix` — Create (NeoForge) Minecraft server; its page lives at
   `/minecraft/` on `games-site`.
 - `services/space-engineers.nix` — Space Engineers dedicated server (Windows build under
