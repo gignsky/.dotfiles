@@ -11,9 +11,10 @@ _: {
     ./avec-moi-app.nix
     ./scribbydascribe.nix # Discord voice transcriber — needs the `scribbydascribe-env` sops key first
     ./ripae.nix # Org commodity-run ledger — needs the `ripae-env` sops key first, see file header
-    ./minecraft-create.nix # Create (NeoForge) Minecraft server + games.gignsky.com site on :1801, see file header
+    ./games-site.nix # games.gignsky.com hub page on :1801 — minecraft-create.nix and space-engineers.nix add their own sub-pages to it
+    ./minecraft-create.nix # Create (NeoForge) Minecraft server + its games.gignsky.com/minecraft/ page, see file header
     ./kottonmouth # kottonmouthband.com keeper (main + beta) and tunnel DNS, see kottonmouth/default.nix
     ./christina # admin.christinasceramics.com keeper, see christina/default.nix
-    ./space-engineers.nix # Space Engineers dedicated server under Wine — UDP 27016, see file header
+    ./space-engineers.nix # Space Engineers dedicated server under Wine — UDP 27016/8766, password-gated, see file header
   ];
 }

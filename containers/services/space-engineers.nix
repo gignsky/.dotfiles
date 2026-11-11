@@ -17,17 +17,39 @@
 #   /var/lib/space-engineers/steamcmd   SteamCMD itself and its state
 #   /var/lib/space-engineers/wine       the Wine prefix (copied from the image on first
 #                                       start, then given the VC++ x64 runtime; see below)
+#   /var/lib/space-engineers/web        rendered website (index.html with the live password)
+#   /var/lib/space-engineers/password-salt  persisted PBKDF2 salt; see passwordConfigure below
 #
 # Ports: UDP 27016 (game) and UDP 8766 (Steam) are opened on the LAN firewall
 # and the container shares the host network stack, so the server is reachable
-# at spacedock:27016 on the LAN. Reaching it from the internet still needs a
-# UDP 27016 forward on the router.
+# at spacedock:27016 on the LAN. Public internet play (the chosen setup, for
+# NISC members) needs both forwarded on the router to spacedock's LAN IP:
+# UDP 27016 (the game) and UDP 8766 (Steam's query port, so the server shows
+# up correctly -- name/ping/player count -- in the public server browser,
+# since OnlineMode is PUBLIC). Server address: games.gignsky.com:27016.
 #
-# Changing settings: edit instances/<name>/SpaceEngineers-Dedicated.cfg on the
-# host and `systemctl restart podman-space-engineers`. The file is seeded from
-# the template below only when it does not exist, so after the first start the
-# copy on disk is the source of truth (delete it to re-seed). <LoadWorld> and
-# <Plugins> are rewritten by the entrypoint on every start.
+# Website: https://games.gignsky.com/space-engineers/ (one page of the shared
+# `games-site` nginx vhost -- see games-site.nix for the hub and
+# minecraft-create.nix for the Minecraft page) shows the connect info and the
+# current password, rendered from `webTemplate` below by
+# space-engineers-password-configure.
+#
+# Password: the server is public (discoverable on Steam's server list) but
+# password-gated. Required because MyConfigDedicated has no plaintext
+# password field -- only <ServerPasswordHash>/<ServerPasswordSalt>, which
+# space-engineers-password-configure computes from the `space-engineers/password`
+# sops secret on every start (see that script's own header comment for the
+# algorithm and its caveats) and writes into both the live cfg and the
+# website. Rotate the password by changing the sops secret and running
+# `systemctl restart podman-space-engineers`.
+#
+# Changing other settings: edit instances/<name>/SpaceEngineers-Dedicated.cfg
+# on the host and `systemctl restart podman-space-engineers`. The file is
+# seeded from the template below only when it does not exist, so after the
+# first start the copy on disk is the source of truth (delete it to re-seed).
+# <LoadWorld>, <Plugins> and the password elements are rewritten on every
+# start (the first two by the entrypoint, the password by the ExecStartPre
+# below).
 #
 # Admins: put Steam ID64s in <Administrators> as <string>7656119...</string>.
 #
@@ -38,6 +60,7 @@
 {
   lib,
   pkgs,
+  config,
   ...
 }:
 let
@@ -166,6 +189,10 @@ let
       <Administrators />
       <Banned />
       <GroupID>0</GroupID>
+      <!-- Rewritten on every start by space-engineers-password-configure from the
+           `space-engineers/password` sops secret; see that script's header. -->
+      <ServerPasswordHash />
+      <ServerPasswordSalt />
       <ServerName>${serverName}</ServerName>
       <WorldName>${worldName}</WorldName>
       <PauseGameWhenEmpty>true</PauseGameWhenEmpty>
@@ -183,6 +210,127 @@ let
       <SaveChatToLog>true</SaveChatToLog>
     </MyConfigDedicated>
   '';
+
+  # Public info page content, baked at eval time -- NOT the live file nginx
+  # serves. `@SE_PASSWORD@` is substituted at runtime by
+  # space-engineers-password-configure so the plaintext password never lands
+  # in the Nix store.
+  webTemplate = pkgs.writeText "space-engineers-index.html" ''
+    <!doctype html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <title>${serverName}: Space Engineers Server</title>
+      <style>
+        body { font: 16px/1.5 system-ui, sans-serif; max-width: 40rem; margin: 2rem auto; padding: 0 1rem; }
+        code { background: #8882; padding: 0 .3em; border-radius: 3px; }
+      </style>
+    </head>
+    <body>
+      <p><a href="/">&larr; all servers</a></p>
+      <h1>${serverName}: Space Engineers Server</h1>
+      <p>Survival, ${toString maxPlayers}-player cap, generated from the "${scenario}" scenario.
+        3x inventory/assembler/refinery rates, oxygen and research on.</p>
+      <h2>Joining</h2>
+      <p>In Space Engineers: Multiplayer &rarr; Join World &rarr; search the public server list
+        for <strong>${serverName}</strong>, then enter this password when prompted:</p>
+      <p><code>@SE_PASSWORD@</code></p>
+      <p>For NISC members only &mdash; please don't share it further. If the server doesn't show
+        up in the list (NAT/firewall hiccups happen), the direct address is
+        <code>games.gignsky.com:${toString gamePort}</code> (UDP).</p>
+      <p>The server pauses the simulation whenever no one is connected, so it's fine to leave
+        the save loaded between sessions.</p>
+    </body>
+    </html>
+  '';
+
+  # PBKDF2-HMAC-SHA1(password, salt, 10000 iters, 20-byte key), both
+  # base64-encoded into <ServerPasswordHash>/<ServerPasswordSalt> -- the
+  # dedicated server has no plaintext password field, and this encoding is
+  # community-reverse-engineered (Keen's own Windows "Dedicated Server" GUI
+  # tool is the only thing that officially computes it; see
+  # privatesourcetech/se-shipyard and Stark-52/se-server-macos). Untested
+  # against a real client connect as of writing -- verify by actually joining
+  # with the password after the first deploy. If it doesn't work, the
+  # fallback is running that GUI tool once on a Windows box and pasting its
+  # two generated lines into the live cfg below by hand.
+  #
+  # The salt is generated once and persisted at /var/lib/space-engineers/password-salt
+  # so re-running this with an unchanged password reproduces the same hash
+  # instead of needlessly rewriting the cfg on every start.
+  passwordConfigurePy = pkgs.writeText "space-engineers-password-configure.py" ''
+    import base64
+    import hashlib
+    import os
+    import re
+    import shutil
+    import sys
+
+    password_file, cfg_path, seed_path, salt_path, web_template_path, web_out_path = sys.argv[1:7]
+
+    with open(password_file) as f:
+        password = f.read().strip()
+
+    if not os.path.exists(cfg_path):
+        os.makedirs(os.path.dirname(cfg_path), exist_ok=True)
+        shutil.copy(seed_path, cfg_path)
+
+    if os.path.exists(salt_path):
+        with open(salt_path) as f:
+            salt = base64.b64decode(f.read().strip())
+    else:
+        salt = os.urandom(16)
+        tmp = salt_path + ".tmp"
+        with open(tmp, "w") as f:
+            f.write(base64.b64encode(salt).decode())
+        os.replace(tmp, salt_path)
+
+    digest = hashlib.pbkdf2_hmac("sha1", password.encode("utf-8"), salt, 10000, dklen=20)
+    hash_b64 = base64.b64encode(digest).decode()
+    salt_b64 = base64.b64encode(salt).decode()
+
+    with open(cfg_path) as f:
+        cfg = f.read()
+
+    def setelem(cfg, tag, value):
+        pattern = re.compile(r"<" + tag + r"\s*/>|<" + tag + r">.*?</" + tag + r">", re.DOTALL)
+        if not pattern.search(cfg):
+            raise SystemExit(f"{tag} element not found in {cfg_path}; template out of sync")
+        return pattern.sub(f"<{tag}>{value}</{tag}>", cfg, count=1)
+
+    cfg = setelem(cfg, "ServerPasswordHash", hash_b64)
+    cfg = setelem(cfg, "ServerPasswordSalt", salt_b64)
+
+    tmp_cfg = cfg_path + ".tmp"
+    with open(tmp_cfg, "w") as f:
+        f.write(cfg)
+    os.replace(tmp_cfg, cfg_path)
+
+    os.makedirs(os.path.dirname(web_out_path), exist_ok=True)
+    with open(web_template_path) as f:
+        page = f.read()
+    page = page.replace("@SE_PASSWORD@", password)
+    tmp_page = web_out_path + ".tmp"
+    with open(tmp_page, "w") as f:
+        f.write(page)
+    os.chmod(tmp_page, 0o644)
+    os.replace(tmp_page, web_out_path)
+  '';
+
+  passwordConfigure = pkgs.writeShellApplication {
+    name = "space-engineers-password-configure";
+    runtimeInputs = [ pkgs.python3 ];
+    text = ''
+      python3 ${passwordConfigurePy} \
+        "${config.sops.secrets."space-engineers/password".path}" \
+        "${stateDir}/instances/${instanceName}/SpaceEngineers-Dedicated.cfg" \
+        "${defaultConfig}" \
+        "${stateDir}/password-salt" \
+        "${webTemplate}" \
+        "${stateDir}/web/index.html"
+    '';
+  };
 
   # Runs as PID 1 in the container via /bin/bash (the image's bash, not the
   # store's), so no nix shebang.
@@ -346,6 +494,15 @@ let
   '';
 in
 {
+  # Before the first switch, add to nix-secrets/secrets.yaml (`just sops`):
+  #   space-engineers:
+  #     password: <the shared passphrase for NISC members, shown on the website>
+  # Rotate it the same way; the restart below regenerates the cfg's hash/salt
+  # and the website's copy together.
+  sops.secrets."space-engineers/password" = {
+    restartUnits = [ "podman-space-engineers.service" ];
+  };
+
   virtualisation.oci-containers.containers.space-engineers = {
     image = "docker.io/devidian/spaceengineers:winestaging";
     autoStart = true;
@@ -389,6 +546,7 @@ in
       "d ${stateDir}/plugins 0750 root root -"
       "d ${stateDir}/steamcmd 0750 root root -"
       "d ${stateDir}/wine 0750 root root -"
+      "d ${stateDir}/web 0755 root root -"
     ];
 
     services.podman-space-engineers.serviceConfig = {
@@ -396,6 +554,10 @@ in
       Restart = lib.mkForce "always";
       RestartSec = "30s";
       TimeoutStopSec = lib.mkForce 180;
+      # Rewrites the live cfg's password hash/salt (and the website's copy of
+      # the plaintext password) from the sops secret before every start, so a
+      # password rotation just needs `systemctl restart podman-space-engineers`.
+      ExecStartPre = [ "${passwordConfigure}/bin/space-engineers-password-configure" ];
     };
 
     # Nightly restart = save + pick up game updates (SteamCMD runs on every start).
@@ -422,4 +584,10 @@ in
       steamPort
     ];
   };
+
+  # Contributes to the shared `games-site` vhost owned by games-site.nix
+  # (hub page at `/`, listening on :1801) rather than defining its own vhost.
+  # Aliased to the live render under stateDir, not a Nix store path -- see
+  # passwordConfigure above, which is what actually writes it.
+  services.nginx.virtualHosts."games-site".locations."/space-engineers/".alias = "${stateDir}/web/";
 }

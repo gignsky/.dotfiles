@@ -13,9 +13,11 @@
 # How players get in:
 #   game     games.gignsky.com:25565 (router forwards it here; its NAT
 #            loopback makes the name work from the LAN too)
-#   website  https://games.gignsky.com -> the separate front nginx (which
-#            owns TLS) -> plain HTTP on spacedock:1801 (nginx below): join
-#            instructions plus two ways to get the mods:
+#   website  https://games.gignsky.com/minecraft/ -> the separate front
+#            nginx (which owns TLS) -> plain HTTP on spacedock:1801, where
+#            the shared `games-site` nginx vhost (games-site.nix) serves the
+#            hub page at `/` and this file's locations below for everything
+#            under /minecraft/, plus two ways to get the mods:
 #              create-server.zip  a Prism Launcher instance whose pre-launch
 #                                 command runs packwiz-installer against
 #                                 /pack/pack.toml, so it syncs its mods to
@@ -28,7 +30,9 @@
 #   1. Router: forward TCP 25565 -> spacedock's LAN IP. DONE 2026-10-26.
 #   2. Front nginx: a games.gignsky.com vhost proxying to
 #      http://<spacedock LAN IP>:1801. Port 1801 is opened on spacedock's
-#      firewall (LAN-facing; don't forward it on the router).
+#      firewall by games-site.nix (LAN-facing; don't forward it on the
+#      router). The Space Engineers server's own page lives at
+#      /space-engineers/ on the same vhost (see space-engineers.nix).
 #   3. DNS: games.gignsky.com must resolve to the home WAN IP
 #      (24.211.162.59) and be DNS only (grey cloud) -- Cloudflare's proxy
 #      only carries HTTP, so an orange-cloud record breaks the game
@@ -53,8 +57,6 @@
 let
   dataDir = "/var/lib/minecraft-create";
   webDir = "/var/lib/minecraft-create-web";
-  # Plain-HTTP port for the website, behind the separate TLS-terminating nginx.
-  webPort = 1801;
   gamePort = 25565;
   modpack = import ./minecraft-create-modpack.nix;
   inherit (modpack) minecraftVersion neoforgeVersion;
@@ -222,6 +224,7 @@ let
       </style>
     </head>
     <body>
+      <p><a href="/">&larr; all servers</a></p>
       <h1>Lord Gig's Create Server</h1>
       <p>Minecraft Java ${minecraftVersion} with NeoForge ${neoforgeVersion}, the Create mod, Stargate Journey
         and The Time Vortex (TARDIS).</p>
@@ -323,7 +326,6 @@ in
     enable = true;
     allowedTCPPorts = [
       gamePort
-      webPort
     ];
   };
 
@@ -369,26 +371,17 @@ in
     };
   };
 
-  services.nginx = {
-    enable = true;
-    virtualHosts."minecraft-create-site" = {
-      listen = [
-        {
-          addr = "0.0.0.0";
-          port = webPort;
-        }
-      ];
-      root = site;
-      locations = {
-        "= /mods.zip".alias = "${webDir}/mods.zip";
-        "= /create-server.zip".alias = instanceZip;
-        # Revalidate each time so a launch right after a switch sees the new
-        # pack rather than a cached pack.toml.
-        "/pack/" = {
-          alias = "${pack}/";
-          extraConfig = "add_header Cache-Control no-cache;";
-        };
-      };
+  # Contributes to the shared `games-site` vhost owned by games-site.nix
+  # (hub page at `/`, listening on :1801) rather than defining its own vhost.
+  services.nginx.virtualHosts."games-site".locations = {
+    "/minecraft/".alias = "${site}/";
+    "= /mods.zip".alias = "${webDir}/mods.zip";
+    "= /create-server.zip".alias = instanceZip;
+    # Revalidate each time so a launch right after a switch sees the new
+    # pack rather than a cached pack.toml.
+    "/pack/" = {
+      alias = "${pack}/";
+      extraConfig = "add_header Cache-Control no-cache;";
     };
   };
 }

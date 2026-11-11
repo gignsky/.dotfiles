@@ -18,8 +18,15 @@ systemd-managed OCI containers via `virtualisation.oci-containers`.
 - `services/pihole.nix` (+ `pihole-config.nix`) — Pi-hole (enabled; needs the `pihole/*`
   sops keys) + nebula-sync, as slave to the memory-alpha master.
 - `services/tdarr-node.nix` — Tdarr transcode node (needs CIFS mounts + samba creds).
+- `services/games-site.nix` — shared `games-site` nginx vhost (games.gignsky.com, :1801):
+  the hub page at `/`. `minecraft-create.nix` and `space-engineers.nix` each add their
+  own sub-page to the same vhost rather than running their own.
+- `services/minecraft-create.nix` — Create (NeoForge) Minecraft server; its page lives at
+  `/minecraft/` on `games-site`.
 - `services/space-engineers.nix` — Space Engineers dedicated server (Windows build under
-  Wine, `devidian/spaceengineers` image). State in `/var/lib/space-engineers`, UDP 27016.
+  Wine, `devidian/spaceengineers` image). State in `/var/lib/space-engineers`, UDP
+  27016 (game) + 8766 (Steam). Password-gated via the `space-engineers/password` sops
+  key; its page lives at `/space-engineers/` on `games-site`.
 
 Enable one by uncommenting its import in `services/default.nix`. The host must
 import `containers/services` (spacedock does) and have the engine on:
