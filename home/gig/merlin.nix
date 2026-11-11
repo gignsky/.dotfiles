@@ -15,6 +15,7 @@
     ./common/optional/niri.nix # Enable niri window manager configuration (Wayland; pulls in waybar/mako/swaylock)
     ./common/optional/thunderbird.nix # WorkMail account, declaratively configured
     ./common/optional/thunderbird-gmail.nix # Personal Gmail accounts, OAuth2
+    ./common/optional/minecraft-create.nix
     # ./common/optional/vscode
     # ./cams-countertop.nix
   ];
@@ -29,6 +30,10 @@
         scale 1.25
     }
   '';
+
+  # Bar switcher for power-saver/balanced/performance; the daemon behind it is
+  # enabled in hosts/merlin/default.nix.
+  waybarPowerProfiles = true;
 
   home.packages = with pkgs; [
     plex-desktop

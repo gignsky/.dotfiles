@@ -88,6 +88,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Ripae — org commodity-run ledger (axum/sqlx, SQLite), run as a container
+    # on spacedock. See containers/services/ripae.nix. The repo's trunk branch
+    # is `master` (not `main`), per gignsky/ripae's own convention.
+    ripae = {
+      url = "github:gignsky/ripae/master";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # kottonmouthband.com keeper image (private repo, so ssh like nix-secrets).
     # See containers/services/kottonmouth-keeper.nix.
     kottonmouth = {
@@ -95,17 +103,18 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Christina's site (private repo, so ssh like kottonmouth). Its
-    # scripts/instagram-auth-server.mjs is run by Node on spacedock.
-    # Follows `rolling`: a roll graduating there changes beta, never master.
-    # See hosts/spacedock/christina-auth.nix.
+    # Christina's site (private repo, so ssh like kottonmouth). Follows
+    # `master`, updated by hand (`nix flake update christina-website`) once a
+    # roll is promoted, like kottonmouth's `main`. Serves the main keeper image
+    # (containers/services/christina/christina-keeper.nix) and
+    # scripts/instagram-auth-server.mjs (hosts/spacedock/christina-auth.nix).
     christina-website = {
-      url = "git+ssh://git@github.com/gignsky/christina-website.git?ref=rolling";
+      url = "git+ssh://git@github.com/gignsky/christina-website.git?ref=master&lfs=1";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # No `rolling` input: the dev keeper's image is built and loaded at
-    # runtime by kottonmouth-rolling-deploy.service (hosts/spacedock/
+    # No `rolling` input for the dev keepers: their image is built and loaded at
+    # runtime by kottonmouth-/christina-rolling-deploy.service (hosts/spacedock/
     # github-runner.nix), so beta deploys never rebuild the system.
 
     # # tax-matrix - currently on develop branch

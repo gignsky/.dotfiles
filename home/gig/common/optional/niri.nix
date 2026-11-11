@@ -141,6 +141,33 @@ let
     done
     log "outputs on: $outputs"
   '';
+  # Mod+V clipboard history. The db lives in XDG_RUNTIME_DIR (tmpfs), so
+  # history starts empty after a reboot and never lands on disk.
+  cliphistDb = "\${XDG_RUNTIME_DIR:-/tmp}/cliphist.db";
+  clipboardWatch = pkgs.writeShellScript "niri-clipboard-watch" ''
+    export PATH=${
+      lib.makeBinPath [
+        pkgs.wl-clipboard
+        pkgs.cliphist
+      ]
+    }:$PATH
+    wl-paste --type text --watch cliphist -db-path "${cliphistDb}" store &
+    wl-paste --type image --watch cliphist -db-path "${cliphistDb}" store &
+    wait
+  '';
+  clipboardHistory = pkgs.writeShellScript "niri-clipboard-history" ''
+    export PATH=${
+      lib.makeBinPath [
+        pkgs.wl-clipboard
+        pkgs.cliphist
+        pkgs.fuzzel
+      ]
+    }:$PATH
+    cliphist -db-path "${cliphistDb}" list \
+      | fuzzel --dmenu --prompt "clipboard> " \
+      | cliphist -db-path "${cliphistDb}" decode \
+      | wl-copy
+  '';
 in
 {
   options.niriHostConfig = lib.mkOption {
@@ -208,12 +235,17 @@ in
       spawn-at-startup "${pkgs.swaybg}/bin/swaybg" "-i" "${config.home.homeDirectory}/.background-image" "-m" "fill"
       spawn-at-startup "${pkgs.waybar}/bin/waybar"
       spawn-at-startup "${pkgs.mako}/bin/mako"
+      spawn-at-startup "${clipboardWatch}"
+      // A Wayland clipboard dies with the app that owns it; this keeps a copy
+      // alive after the source window closes.
+      spawn-at-startup "${pkgs.wl-clip-persist}/bin/wl-clip-persist" "--clipboard" "regular"
 
       screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
 
       binds {
           Mod+Return { spawn "${newTerminal}"; }
           Mod+Space { spawn "${pkgs.fuzzel}/bin/fuzzel"; }
+          Mod+V { spawn "${clipboardHistory}"; }
 
           Mod+W { spawn "${closeWindow}"; }
           Mod+Shift+F { fullscreen-window; }
@@ -298,16 +330,16 @@ in
           Mod+8 { focus-workspace 8; }
           Mod+9 { focus-workspace 9; }
           Mod+0 { focus-workspace 10; }
-          Mod+Shift+1 { move-column-to-workspace 1; }
-          Mod+Shift+2 { move-column-to-workspace 2; }
-          Mod+Shift+3 { move-column-to-workspace 3; }
-          Mod+Shift+4 { move-column-to-workspace 4; }
-          Mod+Shift+5 { move-column-to-workspace 5; }
-          Mod+Shift+6 { move-column-to-workspace 6; }
-          Mod+Shift+7 { move-column-to-workspace 7; }
-          Mod+Shift+8 { move-column-to-workspace 8; }
-          Mod+Shift+9 { move-column-to-workspace 9; }
-          Mod+Shift+0 { move-column-to-workspace 10; }
+          Mod+Shift+1 { move-column-to-workspace 1 focus=false; }
+          Mod+Shift+2 { move-column-to-workspace 2 focus=false; }
+          Mod+Shift+3 { move-column-to-workspace 3 focus=false; }
+          Mod+Shift+4 { move-column-to-workspace 4 focus=false; }
+          Mod+Shift+5 { move-column-to-workspace 5 focus=false; }
+          Mod+Shift+6 { move-column-to-workspace 6 focus=false; }
+          Mod+Shift+7 { move-column-to-workspace 7 focus=false; }
+          Mod+Shift+8 { move-column-to-workspace 8 focus=false; }
+          Mod+Shift+9 { move-column-to-workspace 9 focus=false; }
+          Mod+Shift+0 { move-column-to-workspace 10 focus=false; }
 
           // Screenshots -- niri has this built in, no more maim/xclip/xdotool.
           Print { screenshot; }

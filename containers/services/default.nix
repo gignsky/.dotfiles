@@ -10,6 +10,8 @@ _: {
     ./floatplane-wan-show.nix # Floatplane downloader (WAN Show + Techquickie) → Sonarr, see file header
     ./avec-moi-app.nix
     ./scribbydascribe.nix # Discord voice transcriber — needs the `scribbydascribe-env` sops key first
+    ./ripae.nix # Org commodity-run ledger — needs the `ripae-env` sops key first, see file header
+    ./minecraft-create.nix # Create (NeoForge) Minecraft server + games.gignsky.com site on :1801, see file header
     ./kottonmouth # kottonmouthband.com keeper (main + beta) and tunnel DNS, see kottonmouth/default.nix
     ./christina # admin.christinasceramics.com keeper, see christina/default.nix
     ./space-engineers.nix # Space Engineers dedicated server under Wine — UDP 27016, see file header

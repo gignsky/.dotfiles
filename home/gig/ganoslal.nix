@@ -5,6 +5,29 @@
   pkgs,
   ...
 }:
+let
+  # Shared with the render-drm-device pin below and with
+  # hosts/ganoslal/niri-render-gpu.nix, which holds niri back until it exists.
+  renderNode = "/dev/dri/by-path/pci-0000:2d:00.0-render";
+
+  # Safety net for that ordering. If niri still started on the GTX 970 (pin
+  # missed, PCI address changed, ...) the only symptom is a shimmer on every
+  # screen and an idle 3060 Ti -- easy to live with for days without knowing
+  # why (2026-11-08). Say so instead. The sleep gives mako, spawned alongside
+  # this, time to own the notification bus name.
+  checkRenderGpu = pkgs.writeShellScript "niri-check-render-gpu" ''
+    ${pkgs.coreutils}/bin/sleep 5
+    want=$(${pkgs.coreutils}/bin/readlink -f ${renderNode})
+    got=$(${pkgs.systemd}/bin/journalctl --user -b -t niri -o cat --no-pager \
+      --grep 'using as the render node' \
+      | ${pkgs.coreutils}/bin/tail -n1 \
+      | ${pkgs.gnugrep}/bin/grep -o '/dev/dri/renderD[0-9]*')
+    [ -n "$got" ] && [ "$got" = "$want" ] && exit 0
+    ${pkgs.util-linux}/bin/logger -t niri-check-render-gpu "niri renders on ''${got:-unknown}, expected $want (3060 Ti)"
+    ${pkgs.libnotify}/bin/notify-send -u critical "niri is on the wrong GPU" \
+      "Rendering on ''${got:-unknown} instead of the 3060 Ti ($want). Expect flicker; log out and back in."
+  '';
+in
 {
   # You can import other home-manager modules here
   imports = [
@@ -17,6 +40,7 @@
     # ./common/optional/bspwm.nix # Enable bspwm window manager configuration
     ./common/optional/thunderbird.nix # WorkMail account, declaratively configured
     ./common/optional/thunderbird-gmail.nix # Personal Gmail accounts, OAuth2
+    ./common/optional/minecraft-create.nix # Prism Launcher + instance matching the spacedock Create server
     # ./cams-countertop.nix
   ];
 
@@ -47,8 +71,12 @@
   # render-drm-device pins rendering to the 3060 Ti, mirroring the X BusID
   # pin in nvidia.nix: the kernel numbers the 970 renderD128, so it would
   # otherwise be picked as the primary GPU. by-path keeps this stable
-  # across boots; the 970's monitor is fed by a cross-GPU copy.
+  # across boots; the 970's monitor is fed by a cross-GPU copy. niri only
+  # tries the pin once at startup and silently falls back if the node is not
+  # there yet -- see hosts/ganoslal/niri-render-gpu.nix and checkRenderGpu.
   niriHostConfig = ''
+    spawn-at-startup "${checkRenderGpu}"
+
     output "HDMI-A-2" {
         mode "1920x1080"
         position x=0 y=0
@@ -69,10 +97,16 @@
         scale 1
         position x=320 y=1080
         focus-at-startup
+
+        // niri's stock 50% column is a bit narrow on the ultrawide; 60% is
+        // where Mod+Ctrl+L x2 (+5% each) used to land it by hand.
+        layout {
+            default-column-width { proportion 0.6; }
+        }
     }
 
     debug {
-        render-drm-device "/dev/dri/by-path/pci-0000:2d:00.0-render"
+        render-drm-device "${renderNode}"
     }
   '';
 
@@ -80,7 +114,7 @@
 
     packages = with pkgs; [
       # ytmdesktop
-      claude-desktop
+      claude-desktop-with-fhs
       ytmusic
       steam
       plex-desktop
@@ -90,7 +124,14 @@
       discord
       # anydesk
       gpu-viewer
-      anydesk
+      # AnyDesk re-uploaded the 8.1.0 tarball in place (2026-11-03), breaking
+      # nixpkgs' pinned hash. Drop this override once nixpkgs catches up.
+      (anydesk.overrideAttrs (old: {
+        src = fetchurl {
+          inherit (old.src) urls;
+          hash = "sha256-zS5P2eyTHZY7cBW8mQ2Q6M0lXcx9VZZTtpG3Bb6u7IQ=";
+        };
+      }))
     ];
 
     # NOTE: the autorandr profiles that used to live here were removed — they

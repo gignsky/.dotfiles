@@ -25,6 +25,27 @@
 
       config.window_decorations = "TITLE | RESIZE"
 
+      -- Releasing the mouse after a selection only fills PRIMARY by default,
+      -- so Ctrl+Shift+V (CLIPBOARD) pastes whatever was copied earlier while
+      -- Shift+Insert (PRIMARY) pastes the selection. Fill both.
+      config.mouse_bindings = {
+      	{
+      		event = { Up = { streak = 1, button = "Left" } },
+      		mods = "NONE",
+      		action = wezterm.action.CompleteSelectionOrOpenLinkAtMouseCursor("ClipboardAndPrimarySelection"),
+      	},
+      	{
+      		event = { Up = { streak = 2, button = "Left" } },
+      		mods = "NONE",
+      		action = wezterm.action.CompleteSelection("ClipboardAndPrimarySelection"),
+      	},
+      	{
+      		event = { Up = { streak = 3, button = "Left" } },
+      		mods = "NONE",
+      		action = wezterm.action.CompleteSelection("ClipboardAndPrimarySelection"),
+      	},
+      }
+
       -- config.keys = {
       --	{
       --		key = "Enter",
