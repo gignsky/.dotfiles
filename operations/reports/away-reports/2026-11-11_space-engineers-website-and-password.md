@@ -129,6 +129,33 @@ website can't drift from what the cfg actually says. Verified by building
 the real `defaultConfig` and `webTemplate` derivations and running the
 password-configure script against them end to end (not just a syntax check).
 
+## Addendum 3 (same day): A2S was the wrong protocol, status fixed
+
+After deploy, the website showed the Space Engineers server as offline even
+though it was running and joinable -- confirmed by hand on spacedock
+(`journalctl -u space-engineers-status-check.service`, and a raw UDP probe
+of port 8766) that nothing answers Valve's A2S_INFO query at all. Wrong
+assumption, now corrected: Space Engineers is Keen's own VRage engine, not
+Source engine, and doesn't implement that wire protocol, even though Steam's
+client-side server browser can still list it (by some other internal
+mechanism). Keen's documented alternative is the Dedicated Server's Remote
+API (`<RemoteApiEnabled>`/`<RemoteApiPort>`, still off), but its HTTP auth is
+an undocumented HMAC+timestamp scheme with no official reference -- not
+worth guessing at a second time in the same session.
+
+Replaced the whole A2S script with `systemctl is-active --quiet
+podman-space-engineers.service`: no player count this way, just
+online/offline, but it's an actually-correct signal instead of a
+plausible-looking wrong one. `status.js` now renders "Online" with no count
+when a status payload omits `players`/`max_players` (Minecraft's SLP-based
+check still returns both and is unaffected -- that protocol is real and
+core to every Minecraft server, so there's no reason to think it has the
+same problem, though it hasn't been confirmed against a live server either).
+
+If real Space Engineers player counts matter later, the Remote API is the
+path, but it needs someone to either find Keen's actual auth-signing spec or
+test the HMAC scheme against a live server rather than guess at it blind.
+
 ## Not done / follow-ups
 
 - Deploy (`just rebuild` on spacedock) — needs to run on spacedock itself.

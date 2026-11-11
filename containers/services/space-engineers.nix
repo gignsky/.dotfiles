@@ -167,86 +167,28 @@ let
     }
   ];
 
-  # Status check: Valve's A2S_INFO query (the same protocol Steam's own
-  # server browser uses), against the Steam query port on the host's own
-  # network namespace (the container runs --network=host). Handles the
-  # challenge-response flow modern servers require. Written to webDir, not
-  # the Nix store, so it can be refreshed on a timer; nginx serves it
-  # alongside the page since the whole directory is aliased. Tested against
-  # a hand-rolled fake A2S server (challenge flow + info response, and the
-  # server-down case), not a real Space Engineers server.
-  statusCheckPy = pkgs.writeText "space-engineers-status-check.py" ''
-    import json
-    import os
-    import socket
-    import sys
-
-    host, port_str, out_path = sys.argv[1:4]
-    port = int(port_str)
-
-    A2S_INFO_REQUEST = b"\xFF\xFF\xFF\xFF\x54Source Engine Query\x00"
-
-
-    def read_cstring(data, pos):
-        end = data.index(b"\x00", pos)
-        return data[pos:end].decode("utf-8", "replace"), end + 1
-
-
-    def query():
-        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock.settimeout(3)
-        try:
-            sock.sendto(A2S_INFO_REQUEST, (host, port))
-            data, _ = sock.recvfrom(4096)
-            header = data[4]
-            if header == 0x41:  # challenge response
-                challenge = data[5:9]
-                sock.sendto(A2S_INFO_REQUEST + challenge, (host, port))
-                data, _ = sock.recvfrom(4096)
-                header = data[4]
-            if header != 0x49:  # not an info response
-                raise ValueError(f"unexpected A2S response header {header!r}")
-            pos = 5
-            pos += 1  # protocol
-            name, pos = read_cstring(data, pos)
-            _map_name, pos = read_cstring(data, pos)
-            _folder, pos = read_cstring(data, pos)
-            _game, pos = read_cstring(data, pos)
-            pos += 2  # app id
-            players = data[pos]
-            pos += 1
-            max_players = data[pos]
-            pos += 1
-            return {"name": name, "players": players, "max_players": max_players}
-        finally:
-            sock.close()
-
-
-    try:
-        info = query()
-        result = {
-            "online": True,
-            "players": info["players"],
-            "max_players": info["max_players"],
-        }
-    except Exception as e:
-        # Logged (journalctl -u space-engineers-status-check.service) rather
-        # than swallowed, so a wrong assumption about the query protocol
-        # shows up instead of just quietly reporting offline forever.
-        print(f"space-engineers-status-check: {type(e).__name__}: {e}", file=sys.stderr)
-        result = {"online": False}
-
-    tmp = out_path + ".tmp"
-    with open(tmp, "w") as f:
-        json.dump(result, f)
-    os.replace(tmp, out_path)
-  '';
-
+  # Status check: NOT a protocol query -- tried Valve's A2S_INFO first
+  # (Steam's own server browser can list the server), but confirmed by hand
+  # against the real deployed server that nothing answers it on the Steam
+  # port: Space Engineers is Keen's own VRage engine, not Source engine, and
+  # doesn't speak that wire protocol despite Steam being able to list it
+  # some other way. Keen's actual answer is the Dedicated Server's Remote
+  # API (<RemoteApiEnabled>/<RemoteApiPort>, currently off), but its
+  # HTTP auth is an undocumented HMAC+timestamp scheme -- not worth guessing
+  # at a second time. So: just ask systemd whether the unit is active. No
+  # player count this way, only online/offline, but it's actually correct
+  # instead of plausible-looking and wrong.
   statusCheck = pkgs.writeShellApplication {
     name = "space-engineers-status-check";
-    runtimeInputs = [ pkgs.python3 ];
+    runtimeInputs = [ pkgs.systemd ];
     text = ''
-      python3 ${statusCheckPy} 127.0.0.1 ${toString steamPort} ${webDir}/status.json
+      if systemctl is-active --quiet podman-space-engineers.service; then
+        online=true
+      else
+        online=false
+      fi
+      printf '{"online": %s}' "$online" > ${webDir}/status.json.tmp
+      mv ${webDir}/status.json.tmp ${webDir}/status.json
     '';
   };
 
