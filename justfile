@@ -95,7 +95,8 @@ clean:
   rm -rfv ~/.cache/starship/
   rm -rfv ~/.config/zsh/zplug
   rm -rfv ~/.config/roll-flow
-  rm -rfv result
+  # Drop dotfiles result* links that spacedock already holds (pushes any it's missing)
+  nu scripts/clean-results.nu
   # rm -rfv ~/.thunderbird/
   rm -rfv ~/.local/share/nvf/themery/state.json
   
@@ -273,9 +274,15 @@ home-trace:
 	home-manager switch --flake ~/.dotfiles/. --show-trace
 	@nix-shell -p lolcat --run 'echo "[HOME-TRACE] Finished." | lolcat 2> /dev/null'
 
-gc:
-	@nix-shell -p lolcat --run 'nix-collect-garbage --delete-old | lolcat 2> /dev/null'
-	@nix-shell -p lolcat --run 'nix store gc | lolcat 2> /dev/null'
+# Flags: --dry-run | --older-than 14d | --keep-results | --no-optimise | --no-trim
+# On WSL also runs fstrim and stages the vhdx compaction script. See scripts/gc.nu.
+# Drop cached result links, delete old system+user generations, GC, optimise
+gc *args: sudo-keepalive
+	nu scripts/gc.nu {{args}}
+
+# Only remove dotfiles result* links that spacedock already holds (--dry-run, --force, --no-push)
+clean-results *args:
+	nu scripts/clean-results.nu {{args}}
 
 pre-build:
 	@nix-shell -p lolcat --run 'echo "Pre-Build Starting..." | lolcat 2> /dev/null'
