@@ -16,8 +16,19 @@
 - `tmp/wsl-gc-test/run.sh`: runs on WSL with `diagnose` | `apply` | `post`. Logs go to results/ and only
   this folder gets committed and pushed.
 
+## WSL test (2026-11-11, run directly on WSL in-session)
+- Diagnose: WSL 2.7.8, Optimize-VHD available, `--set-sparse` listed (no `--allow-unsafe`).
+  vhdx was **already sparse** but had 232.5 GB allocated against 177 GB used.
+- Dry runs of clean-results and gc ran OK on the client path. All 8 result links were confirmed on spacedock.
+- `just gc` applied: 218 system generations deleted, 127k paths / 57.6 GiB freed, optimise 0.7 GiB,
+  fstrim 862 GiB. df went from 177G to 112G.
+- vhdx allocation after fstrim alone (no shutdown): 232.5 GB to **178.5 GB**. Sparse + fstrim reclaims without the ps1.
+- Fixes: harness exports `WSLENV=WSL_UTF8` (without it wsl.exe printed UTF-16 and broke the sparse grep);
+  harness reports the sparse flag; the ps1 logs the sparse state and skips `--set-sparse` if already set.
+
 ## Still to do
-- Not yet tested on a client host (non-server path of clean-results) or on WSL.
-- Push the branch, then on WSL: `bash tmp/wsl-gc-test/run.sh`, then `... apply`, then the ps1, then `... post`.
-- Check `wsl --set-sparse` support/flags (newer builds may need `--allow-unsafe`) from the diagnose log.
+- Optional: run the ps1 (elevated) for a full Optimize-VHD pass, then `bash tmp/wsl-gc-test/run.sh post`.
+- Consider: when the vhdx is sparse, gc.nu could just say "fstrim done; space already returned" instead of
+  pushing the ps1 as the next step.
+- Not yet tested on a non-server, non-WSL client (merlin/ganoslal) with result links that need pushing.
 - Delete `tmp/wsl-gc-test/` before graduating.

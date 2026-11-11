@@ -36,7 +36,8 @@ if (-not $VhdPath) {
 if (-not (Test-Path $VhdPath)) { throw "vhdx not found: $VhdPath" }
 
 $before = (Get-Item $VhdPath).Length
-Log ("{0}: {1:N1} GB before compaction ({2})" -f $Distro, ($before / 1GB), $VhdPath)
+$isSparse = [bool]((Get-Item $VhdPath).Attributes -band [IO.FileAttributes]::SparseFile)
+Log ("{0}: {1:N1} GB before compaction ({2}, sparse: {3})" -f $Distro, ($before / 1GB), $VhdPath, $isSparse)
 
 Log "wsl --shutdown"
 wsl.exe --shutdown
@@ -61,7 +62,9 @@ if (Get-Command Optimize-VHD -ErrorAction SilentlyContinue) {
 $after = (Get-Item $VhdPath).Length
 Log ("{0}: {1:N1} GB after compaction (freed {2:N1} GB)" -f $Distro, ($after / 1GB), (($before - $after) / 1GB))
 
-if ($Sparse) {
+if ($Sparse -and $isSparse) {
+    Log "already sparse — skipping --set-sparse"
+} elseif ($Sparse) {
     Log "wsl --manage $Distro --set-sparse true"
     $out = wsl.exe --manage $Distro --set-sparse true 2>&1
     $out | ForEach-Object { Log "  $_" }

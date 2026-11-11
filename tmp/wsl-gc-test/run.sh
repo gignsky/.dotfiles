@@ -32,7 +32,7 @@ LOG="$DIR/results/$(date +%Y%m%d-%H%M%S)-$(hostname)-$MODE.log"
 exec 3>&1 4>&2
 exec > >(tee -a "$LOG") 2>&1
 TEE_PID=$!
-export WSL_UTF8=1
+export WSL_UTF8=1 WSLENV="WSL_UTF8${WSLENV:+:$WSLENV}"  # WSLENV forwards it to wsl.exe
 
 section() { printf '\n===== %s =====\n' "$*"; }
 run() {
@@ -44,7 +44,7 @@ ps() { powershell.exe -NoProfile -NonInteractive -Command "$1" 2>&1 | tr -d '\r'
 
 vhdx_size() {
 	section "vhdx on Windows"
-	ps '$d=$env:WSL_DISTRO_NAME; Get-ChildItem HKCU:\Software\Microsoft\Windows\CurrentVersion\Lxss | % { Get-ItemProperty $_.PSPath } | % { $p = Join-Path ($_.BasePath -replace "^\\\\\?\\","") "ext4.vhdx"; $s = if (Test-Path $p) { "{0:N1} GB" -f ((Get-Item $p).Length/1GB) } else { "missing" }; "{0}`t{1}`t{2}" -f $_.DistributionName,$s,$p }'
+	ps '$d=$env:WSL_DISTRO_NAME; Get-ChildItem HKCU:\Software\Microsoft\Windows\CurrentVersion\Lxss | % { Get-ItemProperty $_.PSPath } | % { $p = Join-Path ($_.BasePath -replace "^\\\\\?\\","") "ext4.vhdx"; $s = if (Test-Path $p) { "{0:N1} GB" -f ((Get-Item $p).Length/1GB) } else { "missing" }; $sp = if ((Test-Path $p) -and ((Get-Item $p).Attributes -band [IO.FileAttributes]::SparseFile)) { "sparse" } else { "-" }; "{0}`t{1}`t{2}`t{3}" -f $_.DistributionName,$s,$sp,$p }'
 }
 
 disk() {
