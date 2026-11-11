@@ -49,6 +49,10 @@
     # Ready Room — the ship's Computer (MCP door onto the annex). Enabled once
     # its two secrets are in nix-secrets; see the file.
     (configLib.relativeToRoot "hosts/spacedock/ready-room.nix")
+
+    # DNS records for every cloudflared tunnel hostname (kottonmouthband.com,
+    # christinasceramics.com, giglab.dev), one DNS-edit token for all of them.
+    (configLib.relativeToRoot "hosts/spacedock/cloudflare-dns.nix")
   ];
   # gigpkgs container engine — the module is injected in flake.nix as
   # `inputs.nixpkgs.nixosModules.containers`. Provides the OCI runtime for

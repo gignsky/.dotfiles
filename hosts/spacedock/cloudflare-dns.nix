@@ -1,4 +1,5 @@
-# DNS for the tunnel hostnames, in kottonmouthband.com and christinasceramics.com.
+# DNS for the cloudflared tunnel hostnames, across kottonmouthband.com,
+# christinasceramics.com and giglab.dev.
 #
 # `services.cloudflared.tunnels.<id>.ingress` only tells the tunnel where to
 # *send* a hostname's traffic; it never creates the DNS record that makes
@@ -12,16 +13,19 @@
 # Idempotent: records that already match are left alone. It never deletes
 # anything, and refuses to overwrite a non-CNAME record at the same name.
 #
-# Needs the Cloudflare API token at `kottonmouth/cloudflare-api-token` (the
-# same `CLOUDFLARE_API_TOKEN=...` file the GitHub runner uses) to carry
-# Zone -> DNS -> Edit for kottonmouthband.com, in addition to whatever wrangler
-# needs. A token without it fails this unit loudly ("Authentication error");
-# the switch itself still completes.
+# Needs the Cloudflare API token at `cloudflare/dns-edit-env` (a
+# `CLOUDFLARE_API_TOKEN=...` EnvironmentFile) with Zone -> DNS -> Edit and
+# Zone -> Zone -> Read on every zone below. It is DNS-only on purpose: the
+# runners' wrangler deploy tokens (kottonmouth/cloudflare-api-token,
+# christina-website/beta-env) keep their own, different permissions. A token
+# without DNS Edit fails the unit loudly ("Authentication error"); the switch
+# itself still completes.
 #
+# Zones, one unit each: kottonmouthband.com (admin.* from kottonmouth-keeper.nix),
 # christinasceramics.com (auth.* from hosts/spacedock/christina-auth.nix, admin.*
-# from ../christina/christina-keeper.nix) gets
-# its own unit, christina-dns, using `christina-website/beta-env`: that token
-# needs Zone -> DNS -> Edit on her zone anyway (wrangler custom domains).
+# from ../christina/christina-keeper.nix) and giglab.dev (ready-room.* from
+# hosts/spacedock/ready-room.nix). Other records in those zones, giglab.dev's
+# DDNS ones included, are never touched.
 {
   config,
   lib,
@@ -36,7 +40,7 @@ let
   hostsIn = zone: lib.filter (h: h == zone || lib.hasSuffix ".${zone}" h) ingressHosts;
 
   upsert = pkgs.writeShellApplication {
-    name = "kottonmouth-dns-upsert";
+    name = "cloudflare-dns-upsert";
     runtimeInputs = [
       pkgs.curl
       pkgs.jq
@@ -95,7 +99,9 @@ let
     '';
   };
   # One oneshot per zone: a tunnel can serve hostnames from any zone in its
-  # Cloudflare account, but each zone is edited with a token scoped to it.
+  # Cloudflare account, and the one DNS token covers them all.
+  dnsToken = config.sops.secrets."cloudflare/dns-edit-env".path;
+
   mkDns =
     { zone, tokenFile }:
     {
@@ -118,17 +124,25 @@ let
     };
 in
 {
-  systemd.services.kottonmouth-dns = mkDns {
-    zone = "kottonmouthband.com";
-    tokenFile = config.sops.secrets."kottonmouth/cloudflare-api-token".path;
-  };
+  sops.secrets."cloudflare/dns-edit-env" = { };
 
-  # auth.christinasceramics.com (hosts/spacedock/christina-auth.nix) and
-  # admin.christinasceramics.com (../christina/christina-keeper.nix). Uses the
-  # beta deploy token, which already needs Zone -> DNS -> Edit on this zone for
-  # wrangler's custom-domain route, so no other token is widened.
-  systemd.services.christina-dns = mkDns {
-    zone = "christinasceramics.com";
-    tokenFile = config.sops.secrets."christina-website/beta-env".path;
+  systemd.services = {
+    kottonmouth-dns = mkDns {
+      zone = "kottonmouthband.com";
+      tokenFile = dnsToken;
+    };
+
+    christina-dns = mkDns {
+      zone = "christinasceramics.com";
+      tokenFile = dnsToken;
+    };
+
+    # ready-room.giglab.dev (hosts/spacedock/ready-room.nix). The apex and the
+    # DDNS records here are left alone; the upserter only touches the names the
+    # tunnel serves, and refuses to overwrite a non-CNAME at one of them.
+    giglab-dns = mkDns {
+      zone = "giglab.dev";
+      tokenFile = dnsToken;
+    };
   };
 }

@@ -52,10 +52,9 @@ in
     # bearer token is the sole lock (the phone client cannot do a Cloudflare
     # Access login), so see docs in ready-room.toml before loosening anything.
     #
-    # One-time, by hand, in the Cloudflare dashboard (giglab.dev -> DNS): a
-    # proxied CNAME  ready-room -> <tunnel-id>.cfargotunnel.com . It is not
-    # in the kottonmouth-dns upserter, which would need a giglab.dev-scoped
-    # DNS-edit token; the apex/DDNS records are left untouched.
+    # Its proxied CNAME  ready-room -> <tunnel-id>.cfargotunnel.com  is
+    # upserted on every switch by giglab-dns (hosts/spacedock/
+    # cloudflare-dns.nix); the apex/DDNS records are left untouched.
     services.cloudflared.tunnels."1a878786-561d-427c-90cd-358f1b82aea4".ingress."ready-room.giglab.dev" =
       {
         service = "http://127.0.0.1:7474";
