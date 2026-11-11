@@ -13,9 +13,11 @@
 # How players get in:
 #   game     games.gignsky.com:25565 (router forwards it here; its NAT
 #            loopback makes the name work from the LAN too)
-#   website  https://games.gignsky.com -> the separate front nginx (which
-#            owns TLS) -> plain HTTP on spacedock:1801 (nginx below): join
-#            instructions plus two ways to get the mods:
+#   website  https://games.gignsky.com/minecraft/ -> the separate front
+#            nginx (which owns TLS) -> plain HTTP on spacedock:1801, where
+#            the shared `games-site` nginx vhost (games-site.nix) serves the
+#            hub page at `/` and this file's locations below for everything
+#            under /minecraft/, plus two ways to get the mods:
 #              create-server.zip  a Prism Launcher instance whose pre-launch
 #                                 command runs packwiz-installer against
 #                                 /pack/pack.toml, so it syncs its mods to
@@ -28,7 +30,9 @@
 #   1. Router: forward TCP 25565 -> spacedock's LAN IP. DONE 2026-10-26.
 #   2. Front nginx: a games.gignsky.com vhost proxying to
 #      http://<spacedock LAN IP>:1801. Port 1801 is opened on spacedock's
-#      firewall (LAN-facing; don't forward it on the router).
+#      firewall by games-site.nix (LAN-facing; don't forward it on the
+#      router). The Space Engineers server's own page lives at
+#      /space-engineers/ on the same vhost (see space-engineers.nix).
 #   3. DNS: games.gignsky.com must resolve to the home WAN IP
 #      (24.211.162.59) and be DNS only (grey cloud) -- Cloudflare's proxy
 #      only carries HTTP, so an orange-cloud record breaks the game
@@ -53,8 +57,6 @@
 let
   dataDir = "/var/lib/minecraft-create";
   webDir = "/var/lib/minecraft-create-web";
-  # Plain-HTTP port for the website, behind the separate TLS-terminating nginx.
-  webPort = 1801;
   gamePort = 25565;
   modpack = import ./minecraft-create-modpack.nix;
   inherit (modpack) minecraftVersion neoforgeVersion;
@@ -63,6 +65,129 @@ let
 
   # <li> download links for the website's optional extras.
   links = lib.concatMapStrings (p: ''<li><a href="${p.url}">${p.name or p.file}</a></li>'');
+
+  # Status check: a real Minecraft Server List Ping (wiki.vg), queried
+  # against the host's own published port -- not podman exec/rcon, so it
+  # works the same whether or not rcon is ever enabled, and an unreachable
+  # server just reports offline instead of erroring. Written to webDir (not
+  # the Nix store) so it can be refreshed on a timer; nginx serves it
+  # alongside mods.zip. Tested against a hand-rolled fake SLP server (status
+  # response, and the server-down case), not a real Minecraft server.
+  statusCheckPy = pkgs.writeText "minecraft-status-check.py" ''
+    import json
+    import os
+    import socket
+    import sys
+
+    host, port_str, out_path = sys.argv[1:4]
+    port = int(port_str)
+
+
+    def write_varint(value):
+        out = bytearray()
+        while True:
+            b = value & 0x7F
+            value >>= 7
+            if value:
+                out.append(b | 0x80)
+            else:
+                out.append(b)
+                break
+        return bytes(out)
+
+
+    def pack_string(s):
+        data = s.encode("utf-8")
+        return write_varint(len(data)) + data
+
+
+    def recv_exact(sock, n):
+        buf = b""
+        while len(buf) < n:
+            chunk = sock.recv(n - len(buf))
+            if not chunk:
+                raise ConnectionError("connection closed early")
+            buf += chunk
+        return buf
+
+
+    def read_varint_from_socket(sock):
+        value = 0
+        shift = 0
+        while True:
+            byte = recv_exact(sock, 1)[0]
+            value |= (byte & 0x7F) << shift
+            if not (byte & 0x80):
+                return value
+            shift += 7
+
+
+    def read_varint_from_bytes(data, pos):
+        value = 0
+        shift = 0
+        while True:
+            byte = data[pos]
+            pos += 1
+            value |= (byte & 0x7F) << shift
+            if not (byte & 0x80):
+                return value, pos
+            shift += 7
+
+
+    def query():
+        with socket.create_connection((host, port), timeout=3) as sock:
+            # Handshake (0x00): protocol version (unvalidated for a
+            # status-only ping), server address, server port, next state = 1
+            # (status).
+            handshake_payload = (
+                write_varint(0)
+                + pack_string(host)
+                + port.to_bytes(2, "big")
+                + write_varint(1)
+            )
+            handshake_packet = write_varint(0) + handshake_payload
+            sock.sendall(write_varint(len(handshake_packet)) + handshake_packet)
+
+            # Status Request (0x00): empty body.
+            status_request = write_varint(0)
+            sock.sendall(write_varint(len(status_request)) + status_request)
+
+            length = read_varint_from_socket(sock)
+            data = recv_exact(sock, length)
+            _packet_id, pos = read_varint_from_bytes(data, 0)
+            json_len, pos = read_varint_from_bytes(data, pos)
+            payload = data[pos : pos + json_len]
+            return json.loads(payload.decode("utf-8"))
+
+
+    try:
+        info = query()
+        players = info.get("players") or {}
+        result = {
+            "online": True,
+            "players": players.get("online", 0),
+            "max_players": players.get("max", 0),
+        }
+    except Exception as e:
+        # Logged (journalctl -u minecraft-status-check.service) rather than
+        # swallowed, so a protocol/parsing mistake shows up instead of just
+        # quietly reporting offline forever.
+        print(f"minecraft-status-check: {type(e).__name__}: {e}", file=sys.stderr)
+        result = {"online": False}
+
+    tmp = out_path + ".tmp"
+    with open(tmp, "w") as f:
+        json.dump(result, f)
+    os.replace(tmp, out_path)
+  '';
+
+  statusCheck = pkgs.writeShellApplication {
+    name = "minecraft-status-check";
+    runtimeInputs = [ pkgs.python3 ];
+    text = ''
+      python3 ${statusCheckPy} 127.0.0.1 ${toString gamePort} ${webDir}/status.json
+    '';
+  };
 
   siteUrl = "https://games.gignsky.com";
 
@@ -219,10 +344,15 @@ let
         body { font: 16px/1.5 system-ui, sans-serif; max-width: 40rem; margin: 2rem auto; padding: 0 1rem; }
         code { background: #8882; padding: 0 .3em; border-radius: 3px; }
         a.button { display: inline-block; padding: .6em 1.2em; background: #2b6cb0; color: #fff; border-radius: 6px; text-decoration: none; }
+        .status.online { color: #2b8a3e; font-weight: 600; }
+        .status.offline { color: #999; }
+        .status.unknown { color: #d9822b; }
       </style>
     </head>
     <body>
+      <p><a href="/">&larr; all servers</a></p>
       <h1>Lord Gig's Create Server</h1>
+      <p>Status: <span id="mc-status" class="status">checking&hellip;</span></p>
       <p>Minecraft Java ${minecraftVersion} with NeoForge ${neoforgeVersion}, the Create mod, Stargate Journey
         and The Time Vortex (TARDIS).</p>
       <p>Server address: <code>games.gignsky.com</code></p>
@@ -268,6 +398,8 @@ let
       <p>Put the zip (don't unzip it) in <code>.minecraft/resourcepacks</code> and enable it under
         Options &rarr; Resource Packs. No extra mods needed.</p>
       <ul>${links modpack.resourcepacks}</ul>
+      <script src="/status.js"></script>
+      <script>pollStatus("/minecraft/status.json", "mc-status");</script>
     </body>
     </html>
   '';
@@ -323,7 +455,6 @@ in
     enable = true;
     allowedTCPPorts = [
       gamePort
-      webPort
     ];
   };
 
@@ -367,28 +498,35 @@ in
       wantedBy = [ "multi-user.target" ];
       pathConfig.PathChanged = "${dataDir}/mods";
     };
+
+    services.minecraft-status-check = {
+      description = "Poll the Create server's status for the website";
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStart = "${statusCheck}/bin/minecraft-status-check";
+      };
+    };
+    timers.minecraft-status-check = {
+      wantedBy = [ "timers.target" ];
+      timerConfig = {
+        OnBootSec = "30s";
+        OnUnitActiveSec = "30s";
+      };
+    };
   };
 
-  services.nginx = {
-    enable = true;
-    virtualHosts."minecraft-create-site" = {
-      listen = [
-        {
-          addr = "0.0.0.0";
-          port = webPort;
-        }
-      ];
-      root = site;
-      locations = {
-        "= /mods.zip".alias = "${webDir}/mods.zip";
-        "= /create-server.zip".alias = instanceZip;
-        # Revalidate each time so a launch right after a switch sees the new
-        # pack rather than a cached pack.toml.
-        "/pack/" = {
-          alias = "${pack}/";
-          extraConfig = "add_header Cache-Control no-cache;";
-        };
-      };
+  # Contributes to the shared `games-site` vhost owned by games-site.nix
+  # (hub page at `/`, listening on :1801) rather than defining its own vhost.
+  services.nginx.virtualHosts."games-site".locations = {
+    "/minecraft/".alias = "${site}/";
+    "= /mods.zip".alias = "${webDir}/mods.zip";
+    "= /create-server.zip".alias = instanceZip;
+    "= /minecraft/status.json".alias = "${webDir}/status.json";
+    # Revalidate each time so a launch right after a switch sees the new
+    # pack rather than a cached pack.toml.
+    "/pack/" = {
+      alias = "${pack}/";
+      extraConfig = "add_header Cache-Control no-cache;";
     };
   };
 }
