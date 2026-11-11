@@ -108,7 +108,15 @@ def stage-compact [dir: path, dry_run: bool] {
     if not $dry_run { cp ($dir | path join scripts/wsl-compact-vhd.ps1) $dest }
     print $"  staged ($dest)"
     print ""
-    print "  The vhdx only shrinks once WSL is shut down and the disk is compacted."
-    print "  From an *elevated* PowerShell on Windows (this closes every WSL session):"
+    # A sparse vhdx hands trimmed blocks back to Windows on its own; compaction is then optional.
+    let q = $"$e = Get-ChildItem HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Lxss | % { Get-ItemProperty $_.PSPath } | ? { $_.DistributionName -eq '($distro)' } | select -First 1; if \($e) { $p = Join-Path \($e.BasePath -replace '^\\\\\\\\\\?\\\\','') 'ext4.vhdx'; [bool]\(\(Get-Item $p).Attributes -band [IO.FileAttributes]::SparseFile) }"
+    let sparse = (^powershell.exe -NoProfile -NonInteractive -Command $q | complete | get stdout | str trim) == "True"
+    if $sparse {
+        print "  The vhdx is sparse, so the fstrim above already returned freed space to Windows."
+        print "  Optional full compaction, from an *elevated* PowerShell (closes every WSL session):"
+    } else {
+        print "  The vhdx only shrinks once WSL is shut down and the disk is compacted."
+        print "  From an *elevated* PowerShell on Windows (this closes every WSL session):"
+    }
     print $"    powershell -ExecutionPolicy Bypass -File \"($win_home)\\wsl-compact-vhd.ps1\" -Distro ($distro)"
 }

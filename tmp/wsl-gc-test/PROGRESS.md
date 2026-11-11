@@ -26,9 +26,9 @@
 - Fixes: harness exports `WSLENV=WSL_UTF8` (without it wsl.exe printed UTF-16 and broke the sparse grep);
   harness reports the sparse flag; the ps1 logs the sparse state and skips `--set-sparse` if already set.
 
+- gc.nu now checks the vhdx sparse flag. When it's set, the ps1 is presented as optional (tested via dry run).
+
 ## Still to do
 - Optional: run the ps1 (elevated) for a full Optimize-VHD pass, then `bash tmp/wsl-gc-test/run.sh post`.
-- Consider: when the vhdx is sparse, gc.nu could just say "fstrim done; space already returned" instead of
-  pushing the ps1 as the next step.
 - Not yet tested on a non-server, non-WSL client (merlin/ganoslal) with result links that need pushing.
 - Delete `tmp/wsl-gc-test/` before graduating.
