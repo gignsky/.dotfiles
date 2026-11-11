@@ -326,7 +326,9 @@ let
       <SteamPort>${toString steamPort}</SteamPort>
       <ServerPort>${toString gamePort}</ServerPort>
       <AsteroidAmount>0</AsteroidAmount>
-      <Administrators>${lib.concatMapStrings (id: "<string>${id}</string>") administratorSteamIds}</Administrators>
+      <Administrators>${
+        lib.concatMapStrings (id: "<string>${id}</string>") administratorSteamIds
+      }</Administrators>
       <Banned />
       <GroupID>0</GroupID>
       <!-- Rewritten on every start by configSync from the
