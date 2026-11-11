@@ -17,7 +17,7 @@
 #   /var/lib/space-engineers/steamcmd   SteamCMD itself and its state
 #   /var/lib/space-engineers/wine       the Wine prefix (copied from the image on first
 #                                       start, then given the VC++ x64 runtime; see below)
-#   /var/lib/space-engineers/password-salt  persisted PBKDF2 salt; see passwordConfigure below
+#   /var/lib/space-engineers/password-salt  persisted PBKDF2 salt; see configSync below
 #
 # The rendered website (index.html with the live password) lives separately
 # at /var/lib/space-engineers-web, NOT under /var/lib/space-engineers -- that
@@ -37,34 +37,31 @@
 # Website: https://games.gignsky.com/space-engineers/ (one page of the shared
 # `games-site` nginx vhost -- see games-site.nix for the hub and
 # minecraft-create.nix for the Minecraft page) shows the connect info and the
-# current password, rendered from `webTemplate` below by
-# space-engineers-password-configure.
+# current password, rendered from `webTemplate` below by configSync.
 #
 # Password: the server is public (discoverable on Steam's server list) but
 # password-gated. Required because MyConfigDedicated has no plaintext
 # password field -- only <ServerPasswordHash>/<ServerPasswordSalt>, which
-# space-engineers-password-configure computes from the `space-engineers/password`
-# sops secret on every start (see that script's own header comment for the
-# algorithm and its caveats) and writes into both the live cfg and the
-# website. Rotate the password by changing the sops secret and running
-# `systemctl restart podman-space-engineers`.
+# configSync computes from the `space-engineers/password` sops secret on
+# every start (see that script's own header comment for the algorithm and
+# its caveats) and writes into both the live cfg and the website. Rotate
+# the password by changing the sops secret and running `systemctl restart
+# podman-space-engineers`.
 #
-# Changing other settings: edit instances/<name>/SpaceEngineers-Dedicated.cfg
-# on the host and `systemctl restart podman-space-engineers`. The file is
-# seeded from the template below only when it does not exist, so after the
-# first start the copy on disk is the source of truth (delete it to re-seed).
-# <LoadWorld>, <Plugins> and the password elements are rewritten on every
-# start (the first two by the entrypoint, the password by the ExecStartPre
-# below). A handful of gameplay-relevant settings (game mode, multipliers,
-# research, etc.) are named `let` bindings above the XML template instead of
-# bare literals, specifically so `settingsList` can list them on the website
-# without drifting from what's actually in the cfg -- if you add one of
-# those to `settingsList`, change the binding, not the XML literal.
+# Settings: the cfg is seeded from the template below only when it does not
+# exist, so after the first start the copy on disk is normally the source of
+# truth -- EXCEPT for the fields in `enforcedFields` (game mode, multipliers,
+# research, max players, administrators -- the same set `settingsList` draws
+# from for the website), which configSync re-applies on every start,
+# specifically so changing one of those bindings and rebuilding is enough:
+# no need to delete and re-seed the whole file. Anything NOT in
+# `enforcedFields` (ServerDescription, MessageOfTheDay, a tweak made through
+# the in-game admin menu, ...) is left alone and persists across restarts.
+# <LoadWorld> and <Plugins> are rewritten on every start too, but by the
+# entrypoint, not configSync -- see there for why.
 #
-# Admins: `administratorSteamIds` above, not a direct edit of the cfg --
-# like the other named settings, the cfg is only seeded from the template
-# once, so a new admin here only takes effect on a fresh instance (delete
-# the live cfg to re-seed) or by hand-editing <Administrators> on disk.
+# Admins: `administratorSteamIds` above, enforced the same way -- change it
+# and `just rebuild` is enough; no re-seed needed.
 #
 # Stop/restart is graceful: the entrypoint turns SIGTERM into a Ctrl+C event
 # for the server, which saves and exits (verified), and the unit waits up to
@@ -176,6 +173,34 @@ let
       value = builtins.toJSON proceduralDensity;
     }
   ];
+
+  # Re-applied to the live cfg on every start (by configSync below), keyed by
+  # the cfg's exact XML tag with the value already rendered as that
+  # element's inner text. This is what lets "change a binding, rebuild"
+  # actually take effect on an already-seeded server instead of silently
+  # doing nothing until someone remembers to re-seed the file by hand.
+  # Deliberately NOT everything in the cfg -- only what's named as a Nix
+  # binding above, same set `settingsList` draws from, plus Administrators.
+  # Anything else (ServerDescription, MessageOfTheDay, a setting tweaked via
+  # the in-game admin menu, ...) is left alone and persists across restarts.
+  enforcedFields = {
+    GameMode = gameMode;
+    OnlineMode = onlineMode;
+    EnvironmentHostility = environmentHostility;
+    InventorySizeMultiplier = toString resourceMultiplier;
+    AssemblerSpeedMultiplier = toString resourceMultiplier;
+    AssemblerEfficiencyMultiplier = toString resourceMultiplier;
+    RefinerySpeedMultiplier = toString resourceMultiplier;
+    WelderSpeedMultiplier = toString toolSpeedMultiplier;
+    GrinderSpeedMultiplier = toString toolSpeedMultiplier;
+    EnableOxygen = lib.boolToString enableOxygen;
+    EnableResearch = lib.boolToString enableResearch;
+    EnableEconomy = lib.boolToString enableEconomy;
+    EnableRadiation = lib.boolToString enableRadiation;
+    ProceduralDensity = builtins.toJSON proceduralDensity;
+    MaxPlayers = toString maxPlayers;
+    Administrators = lib.concatMapStrings (id: "<string>${id}</string>") administratorSteamIds;
+  };
 
   # Status check: NOT a protocol query -- tried Valve's A2S_INFO first
   # (Steam's own server browser can list the server), but confirmed by hand
@@ -304,7 +329,7 @@ let
       <Administrators>${lib.concatMapStrings (id: "<string>${id}</string>") administratorSteamIds}</Administrators>
       <Banned />
       <GroupID>0</GroupID>
-      <!-- Rewritten on every start by space-engineers-password-configure from the
+      <!-- Rewritten on every start by configSync from the
            `space-engineers/password` sops secret; see that script's header. -->
       <ServerPasswordHash />
       <ServerPasswordSalt />
@@ -327,9 +352,8 @@ let
   '';
 
   # Public info page content, baked at eval time -- NOT the live file nginx
-  # serves. `@SE_PASSWORD@` is substituted at runtime by
-  # space-engineers-password-configure so the plaintext password never lands
-  # in the Nix store.
+  # serves. `@SE_PASSWORD@` is substituted at runtime by configSync so the
+  # plaintext password never lands in the Nix store.
   webTemplate = pkgs.writeText "space-engineers-index.html" ''
     <!doctype html>
     <html lang="en">
@@ -388,15 +412,17 @@ let
   # The salt is generated once and persisted at /var/lib/space-engineers/password-salt
   # so re-running this with an unchanged password reproduces the same hash
   # instead of needlessly rewriting the cfg on every start.
-  passwordConfigurePy = pkgs.writeText "space-engineers-password-configure.py" ''
+  configSyncPy = pkgs.writeText "space-engineers-config-sync.py" ''
     import base64
     import hashlib
+    import json
     import os
     import re
     import shutil
     import sys
 
-    password_file, cfg_path, seed_path, salt_path, web_template_path, web_out_path = sys.argv[1:7]
+    password_file, cfg_path, seed_path, salt_path, web_template_path, web_out_path, enforced_fields_json = sys.argv[1:8]
+    enforced_fields = json.loads(enforced_fields_json)
 
     with open(password_file) as f:
         password = f.read().strip()
@@ -431,6 +457,11 @@ let
     cfg = setelem(cfg, "ServerPasswordHash", hash_b64)
     cfg = setelem(cfg, "ServerPasswordSalt", salt_b64)
 
+    # Nix-managed settings always win on disk; anything not in this dict
+    # (set by hand, or via the in-game admin menu) is left untouched.
+    for tag, value in enforced_fields.items():
+        cfg = setelem(cfg, tag, value)
+
     tmp_cfg = cfg_path + ".tmp"
     with open(tmp_cfg, "w") as f:
         f.write(cfg)
@@ -447,17 +478,18 @@ let
     os.replace(tmp_page, web_out_path)
   '';
 
-  passwordConfigure = pkgs.writeShellApplication {
-    name = "space-engineers-password-configure";
+  configSync = pkgs.writeShellApplication {
+    name = "space-engineers-config-sync";
     runtimeInputs = [ pkgs.python3 ];
     text = ''
-      python3 ${passwordConfigurePy} \
+      python3 ${configSyncPy} \
         "${config.sops.secrets."space-engineers/password".path}" \
         "${stateDir}/instances/${instanceName}/SpaceEngineers-Dedicated.cfg" \
         "${defaultConfig}" \
         "${stateDir}/password-salt" \
         "${webTemplate}" \
-        "${webDir}/index.html"
+        "${webDir}/index.html" \
+        ${lib.escapeShellArg (builtins.toJSON enforcedFields)}
     '';
   };
 
@@ -686,7 +718,7 @@ in
       # Rewrites the live cfg's password hash/salt (and the website's copy of
       # the plaintext password) from the sops secret before every start, so a
       # password rotation just needs `systemctl restart podman-space-engineers`.
-      ExecStartPre = [ "${passwordConfigure}/bin/space-engineers-password-configure" ];
+      ExecStartPre = [ "${configSync}/bin/space-engineers-config-sync" ];
     };
 
     # Nightly restart = save + pick up game updates (SteamCMD runs on every start).
@@ -732,6 +764,6 @@ in
   # Contributes to the shared `games-site` vhost owned by games-site.nix
   # (hub page at `/`, listening on :1801) rather than defining its own vhost.
   # Aliased to the live render in webDir, not a Nix store path -- see
-  # passwordConfigure above, which is what actually writes it.
+  # configSync above, which is what actually writes it.
   services.nginx.virtualHosts."games-site".locations."/space-engineers/".alias = "${webDir}/";
 }

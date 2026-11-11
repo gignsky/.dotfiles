@@ -207,6 +207,40 @@ spacedock at that moment to see what's actually running); a normal Sim Speed
 with still-bad rubber-banding points at the network path itself, which would
 need a traceroute/mtr from the remote player's side to narrow down.
 
+## Addendum 5 (same day): Nix-managed settings now self-apply on rebuild
+
+Added gig + Evan as admins (`administratorSteamIds` -> `<Administrators>`).
+Steam IDs aren't secret, so these are plain literals, not a sops secret.
+
+This surfaced a real gap: the cfg is normally seeded from the template only
+once, so the admin addition (and the earlier `EnableResearch: off` change)
+would NOT have taken effect on the already-running server without manually
+deleting the live cfg and letting it re-seed -- `just rebuild` alone
+wouldn't have been enough, which isn't what anyone actually wants.
+
+Renamed the password script (`space-engineers-password-configure` ->
+`configSync`/`space-engineers-config-sync`, same rename everywhere: Python
+script, shell wrapper, ExecStartPre, comments) and gave it a second job:
+`enforcedFields`, the same handful of Nix bindings `settingsList` already
+draws from (game mode, multipliers, research, max players, environment
+hostility) plus `Administrators`, is now re-applied to the live cfg on
+every start via the same `setelem` mechanism already used for the password
+hash. Anything NOT in that set (ServerDescription, MessageOfTheDay, a
+setting someone tweaks through the in-game admin menu) is left alone and
+persists across restarts -- only what the repo actually declares an opinion
+on gets enforced.
+
+Verified end to end against a simulated already-deployed server: built the
+real `configSync` script from the current module, ran it against a cfg
+seeded with the OLD settings (research on, no admins) plus a hand-edited
+`<ServerDescription>`, and confirmed research flips off, admins populate,
+and the custom description survives untouched -- exactly the scenario this
+was meant to fix.
+
+Net effect: future settings/admin changes in this file now just need
+`git pull && just rebuild` (no manual `rm` + restart dance) to take effect
+on the live server.
+
 ## Not done / follow-ups
 
 - Deploy (`just rebuild` on spacedock) — needs to run on spacedock itself.
