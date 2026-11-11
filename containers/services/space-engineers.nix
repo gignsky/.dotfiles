@@ -61,7 +61,10 @@
 # without drifting from what's actually in the cfg -- if you add one of
 # those to `settingsList`, change the binding, not the XML literal.
 #
-# Admins: put Steam ID64s in <Administrators> as <string>7656119...</string>.
+# Admins: `administratorSteamIds` above, not a direct edit of the cfg --
+# like the other named settings, the cfg is only seeded from the template
+# once, so a new admin here only takes effect on a fresh instance (delete
+# the live cfg to re-seed) or by hand-editing <Administrators> on disk.
 #
 # Stop/restart is graceful: the entrypoint turns SIGTERM into a Ctrl+C event
 # for the server, which saves and exits (verified), and the unit waits up to
@@ -81,6 +84,13 @@ let
   # ...). Only consulted until a save exists in the instance.
   scenario = "Star System";
   maxPlayers = 8;
+  # Steam ID64s with in-game admin powers (kick/ban, unlimited build
+  # distance, etc.). Not secret -- a Steam ID is public info -- so these are
+  # plain literals rather than a sops secret.
+  administratorSteamIds = [
+    "76561198080701800" # gig
+    "76561198969018039" # Evan
+  ];
   # Gameplay settings worth telling players about before they join -- named
   # here (rather than only as literals in the XML template below) so the
   # website's settings list can't drift from what the server actually runs;
@@ -291,7 +301,7 @@ let
       <SteamPort>${toString steamPort}</SteamPort>
       <ServerPort>${toString gamePort}</ServerPort>
       <AsteroidAmount>0</AsteroidAmount>
-      <Administrators />
+      <Administrators>${lib.concatMapStrings (id: "<string>${id}</string>") administratorSteamIds}</Administrators>
       <Banned />
       <GroupID>0</GroupID>
       <!-- Rewritten on every start by space-engineers-password-configure from the
