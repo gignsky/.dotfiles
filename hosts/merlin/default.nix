@@ -71,7 +71,7 @@
 
     # Fingerprint reader (Goodix). Enabling fprintd makes NixOS add
     # pam_fprintd to every PAM service whose `fprintAuth` defaults to it:
-    # sudo, polkit prompts, swaylock (see niri.nix). Enroll once with
+    # sudo, polkit prompts (hyprlock does its own fprintd D-Bus auth). Enroll once with
     # `fprintd-enroll` (and `fprintd-list gig` to verify).
     fprintd.enable = true;
   };
