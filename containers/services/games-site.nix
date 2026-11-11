@@ -25,7 +25,9 @@ let
         if (!res.ok) throw new Error("bad response");
         var data = await res.json();
         if (data.online) {
-          el.textContent = "Online — " + data.players + "/" + data.max_players + " players";
+          el.textContent = (typeof data.players === "number" && typeof data.max_players === "number")
+            ? "Online — " + data.players + "/" + data.max_players + " players"
+            : "Online";
           el.className = "status online";
         } else {
           el.textContent = "Offline";
