@@ -823,10 +823,10 @@
     "nix-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1794228234,
-        "narHash": "sha256-zjg3DGgO4OvJrrmOenz8R5OrkztuNLawnVR6I0/j+W0=",
+        "lastModified": 1794426235,
+        "narHash": "sha256-E++smA0CWDLQP++lHPrHD1IFU6ED14LDVhgLPkLFEn8=",
         "ref": "main",
-        "rev": "991b0a365387ecd9fad36af63926adad495779b0",
+        "rev": "fa86ddd36eca8244ff674cd989e5787124f426a1",
         "shallow": true,
         "type": "git",
         "url": "ssh://git@github.com/gignsky/nix-secrets.git"
