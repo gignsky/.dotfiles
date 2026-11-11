@@ -33,7 +33,7 @@
     (configLib.relativeToRoot "hosts/common/optional/bluetooth.nix") # Enable Bluetooth support
     (configLib.relativeToRoot "hosts/common/optional/brightness-control.nix") # Enable brightness control for Framework laptops
     (configLib.relativeToRoot "hosts/common/optional/docker.nix") # Enable brightness control for Framework laptops
-    # ../common/optional/xrdp.nix
+    (configLib.relativeToRoot "hosts/common/optional/xrdp.nix") # RDP server (separate XFCE X11 session) for Windows Remote Desktop
 
     #gig users
     (configLib.relativeToRoot "hosts/common/users/gig")
