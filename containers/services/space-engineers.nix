@@ -229,7 +229,11 @@ let
             "players": info["players"],
             "max_players": info["max_players"],
         }
-    except Exception:
+    except Exception as e:
+        # Logged (journalctl -u space-engineers-status-check.service) rather
+        # than swallowed, so a wrong assumption about the query protocol
+        # shows up instead of just quietly reporting offline forever.
+        print(f"space-engineers-status-check: {type(e).__name__}: {e}", file=sys.stderr)
         result = {"online": False}
 
     tmp = out_path + ".tmp"

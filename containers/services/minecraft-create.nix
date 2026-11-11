@@ -168,7 +168,11 @@ let
             "players": players.get("online", 0),
             "max_players": players.get("max", 0),
         }
-    except Exception:
+    except Exception as e:
+        # Logged (journalctl -u minecraft-status-check.service) rather than
+        # swallowed, so a protocol/parsing mistake shows up instead of just
+        # quietly reporting offline forever.
+        print(f"minecraft-status-check: {type(e).__name__}: {e}", file=sys.stderr)
         result = {"online": False}
 
     tmp = out_path + ".tmp"
