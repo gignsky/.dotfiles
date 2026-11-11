@@ -43,6 +43,10 @@ let
         Type = "oneshot";
         # Holds the out-link that GC-roots the current image.
         StateDirectory = state;
+        # This runs an actual `nix build`; never outrank the live game (see
+        # the github-runners above for the same rationale).
+        Nice = 19;
+        IOSchedulingClass = "idle";
       };
       environment =
         config.nix.envVars
@@ -153,6 +157,14 @@ in
         rustc
         gcc
       ];
+      # CI jobs are background work; never starve interactive use (same
+      # rationale as the binary-cache builder's Nice/IOSchedulingClass in
+      # modules/nixos/binary-cache/service.nix) -- spacedock also runs a
+      # live, latency-sensitive Space Engineers session, and a cargo/rustc
+      # build mid-game is exactly the kind of CPU spike that drops the
+      # server's sim speed and shows up to remote players as rubber-banding.
+      serviceOverrides.Nice = 19;
+      serviceOverrides.IOSchedulingClass = "idle";
     };
     christina-website = {
       enable = true;
@@ -183,6 +195,9 @@ in
         config.sops.secrets."christina-website/beta-worker-secrets".path
       ];
       serviceOverrides.SupplementaryGroups = [ "christina-auth" ];
+      # See the gigpkgs runner above: CI work never outranks the live game.
+      serviceOverrides.Nice = 19;
+      serviceOverrides.IOSchedulingClass = "idle";
     };
     kottonmouth = {
       enable = true;
@@ -203,6 +218,9 @@ in
         config.sops.secrets."kottonmouth/cloudflare-api-token".path
         config.sops.secrets."kottonmouth/beta-worker-secrets".path
       ];
+      # See the gigpkgs runner above: CI work never outranks the live game.
+      serviceOverrides.Nice = 19;
+      serviceOverrides.IOSchedulingClass = "idle";
     };
   };
 

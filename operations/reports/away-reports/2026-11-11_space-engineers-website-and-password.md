@@ -156,6 +156,57 @@ If real Space Engineers player counts matter later, the Remote API is the
 path, but it needs someone to either find Keen's actual auth-signing spec or
 test the HMAC scheme against a live server rather than guess at it blind.
 
+## Addendum 4 (same day): rubber-banding for a remote player (Portugal)
+
+Reported: a remote player (high RTT, transatlantic) saw rubber-banding.
+Baseline network latency on that path is a real, unfixable floor, but
+rubber-banding on top of it usually means the server's simulation tick
+intermittently falls behind real-time (sim speed < 1.0) -- the resulting
+correction is a bigger snap, and it's most visible to whichever client has
+the highest round-trip time, i.e. exactly the remote player.
+
+Spacedock runs several other background/batch workloads alongside the game:
+Tdarr transcoding (CIFS-mounted media, VA-API hardware encode but still CPU
+overhead for orchestration) and three self-hosted GitHub Actions runners
+(gigpkgs, christina-website, kottonmouth) whose jobs include `cargo`/`rustc`/
+`gcc` builds and on-demand `nix build`s (the two rolling-deploy units). None
+of these had any scheduling priority set, so a CI job or a transcode landing
+mid-session competes equally with the live game for CPU -- a plausible and
+fixable contributor, as distinct from pure network latency/jitter, which
+isn't.
+
+Fix: gave all of them `Nice = 19` + `IOSchedulingClass = "idle"`, the exact
+same treatment `modules/nixos/binary-cache/service.nix` already uses for the
+nightly binary-cache builder ("Builds are background work; never starve
+interactive use"). This only matters under contention -- on an idle box
+these jobs still get the whole machine, same as before.
+
+- `containers/services/tdarr-node.nix`: `podman-tdarr-node.service`.
+- `hosts/spacedock/github-runner.nix`: all three runner services
+  (`serviceOverrides.Nice`/`IOSchedulingClass`), plus both `mkRollingDeploy`-
+  generated units (kottonmouth/christina rolling deploys), which run actual
+  `nix build`s.
+- Also fixed a stale header comment on tdarr-node.nix claiming it was
+  disabled/not imported; it is imported and running.
+
+**Deliberately not touched:** spacedock's own `nix-daemon` is NOT throttled
+via `nix-build-throttle.nix` (by design -- see that file's header: spacedock
+is the fleet's build server, and throttling it would slow the binary cache
+for everyone). So a `just rebuild`/`nixos-rebuild switch` on spacedock
+itself will still cause a brief CPU spike during the rebuild. That's a
+short, one-off event, not the sustained background load this fix targets,
+and changing it would conflict with an existing, deliberate design
+decision -- flagging it rather than touching it.
+
+**Not fixed by this, and can't be from the server side:** the physical
+network path itself (ISP routing, packet loss, jitter on the Portugal leg).
+If rubber-banding persists after this deploys, the next diagnostic step is
+checking in-game Sim Speed (F11 performance overlay) during a laggy moment:
+below 1.00 points back at server-side load (worth also checking `htop` on
+spacedock at that moment to see what's actually running); a normal Sim Speed
+with still-bad rubber-banding points at the network path itself, which would
+need a traceroute/mtr from the remote player's side to narrow down.
+
 ## Not done / follow-ups
 
 - Deploy (`just rebuild` on spacedock) — needs to run on spacedock itself.
