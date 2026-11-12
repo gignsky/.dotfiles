@@ -465,52 +465,60 @@ in
       "d ${webDir} 0755 root root -"
     ];
 
-    services.podman-minecraft-create.serviceConfig = {
-      TimeoutStopSec = lib.mkForce 180;
-      # The default 100ms restart hammers Modrinth when a mod fails to resolve.
-      RestartSec = "30s";
-      # Appended after oci-containers' own pre-start, which removes the old
-      # container.
-      ExecStartPre = [ "${clearStaleDnat}/bin/minecraft-create-clear-stale-dnat" ];
-    };
+    services = {
+      podman-minecraft-create.serviceConfig = {
+        TimeoutStopSec = lib.mkForce 180;
+        # The default 100ms restart hammers Modrinth when a mod fails to resolve.
+        RestartSec = "30s";
+        # Appended after oci-containers' own pre-start, which removes the old
+        # container.
+        ExecStartPre = [ "${clearStaleDnat}/bin/minecraft-create-clear-stale-dnat" ];
+      };
 
-    # mods.zip for the website: every jar the server is running, so a client
-    # that unzips it is guaranteed to match. Written to a temp name and moved
-    # into place so a download never sees a half-written zip.
-    services.minecraft-create-modzip = {
-      description = "Rebuild mods.zip for the Create server website";
-      serviceConfig.Type = "oneshot";
-      path = [ pkgs.zip ];
-      script = ''
-        # Debounce: the path unit fires once per jar while the server is still
-        # downloading, so let the folder settle before zipping it.
-        sleep 30
-        shopt -s nullglob
-        jars=(${dataDir}/mods/*.jar)
-        [ ''${#jars[@]} -gt 0 ] || exit 0
-        rm -f ${webDir}/mods.zip.tmp
-        zip -jq ${webDir}/mods.zip.tmp "''${jars[@]}"
-        chmod 0644 ${webDir}/mods.zip.tmp
-        mv ${webDir}/mods.zip.tmp ${webDir}/mods.zip
-      '';
-    };
-    paths.minecraft-create-modzip = {
-      wantedBy = [ "multi-user.target" ];
-      pathConfig.PathChanged = "${dataDir}/mods";
-    };
+      # mods.zip for the website: every jar the server is running, so a client
+      # that unzips it is guaranteed to match. Written to a temp name and moved
+      # into place so a download never sees a half-written zip.
+      minecraft-create-modzip = {
+        description = "Rebuild mods.zip for the Create server website";
+        serviceConfig.Type = "oneshot";
+        path = [ pkgs.zip ];
+        script = ''
+          # Debounce: the path unit fires once per jar while the server is still
+          # downloading, so let the folder settle before zipping it.
+          sleep 30
+          shopt -s nullglob
+          jars=(${dataDir}/mods/*.jar)
+          [ ''${#jars[@]} -gt 0 ] || exit 0
+          rm -f ${webDir}/mods.zip.tmp
+          zip -jq ${webDir}/mods.zip.tmp "''${jars[@]}"
+          chmod 0644 ${webDir}/mods.zip.tmp
+          mv ${webDir}/mods.zip.tmp ${webDir}/mods.zip
+        '';
+      };
 
-    services.minecraft-status-check = {
-      description = "Poll the Create server's status for the website";
-      serviceConfig = {
-        Type = "oneshot";
-        ExecStart = "${statusCheck}/bin/minecraft-status-check";
+      minecraft-status-check = {
+        description = "Poll the Create server's status for the website";
+        serviceConfig = {
+          Type = "oneshot";
+          ExecStart = "${statusCheck}/bin/minecraft-status-check";
+        };
       };
     };
-    timers.minecraft-status-check = {
-      wantedBy = [ "timers.target" ];
-      timerConfig = {
-        OnBootSec = "30s";
-        OnUnitActiveSec = "30s";
+
+    paths = {
+      minecraft-create-modzip = {
+        wantedBy = [ "multi-user.target" ];
+        pathConfig.PathChanged = "${dataDir}/mods";
+      };
+    };
+
+    timers = {
+      minecraft-status-check = {
+        wantedBy = [ "timers.target" ];
+        timerConfig = {
+          OnBootSec = "30s";
+          OnUnitActiveSec = "30s";
+        };
       };
     };
   };

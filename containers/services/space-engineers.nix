@@ -712,45 +712,51 @@ in
       "d ${webDir} 0755 root root -"
     ];
 
-    services.podman-space-engineers.serviceConfig = {
-      # The server exits cleanly on its own restarts/updates; always come back.
-      Restart = lib.mkForce "always";
-      RestartSec = "30s";
-      TimeoutStopSec = lib.mkForce 180;
-      # Rewrites the live cfg's password hash/salt (and the website's copy of
-      # the plaintext password) from the sops secret before every start, so a
-      # password rotation just needs `systemctl restart podman-space-engineers`.
-      ExecStartPre = [ "${configSync}/bin/space-engineers-config-sync" ];
+    services = {
+      podman-space-engineers.serviceConfig = {
+        # The server exits cleanly on its own restarts/updates; always come back.
+        Restart = lib.mkForce "always";
+        RestartSec = "30s";
+        TimeoutStopSec = lib.mkForce 180;
+        # Rewrites the live cfg's password hash/salt (and the website's copy of
+        # the plaintext password) from the sops secret before every start, so a
+        # password rotation just needs `systemctl restart podman-space-engineers`.
+        ExecStartPre = [ "${configSync}/bin/space-engineers-config-sync" ];
+      };
+
+      # Nightly restart = save + pick up game updates (SteamCMD runs on every start).
+      space-engineers-restart = {
+        description = "Nightly restart of the Space Engineers server (save + update)";
+        serviceConfig = {
+          Type = "oneshot";
+          ExecStart = "${pkgs.systemd}/bin/systemctl try-restart podman-space-engineers.service";
+        };
+      };
+
+      space-engineers-status-check = {
+        description = "Poll the Space Engineers server's status for the website";
+        serviceConfig = {
+          Type = "oneshot";
+          ExecStart = "${statusCheck}/bin/space-engineers-status-check";
+        };
+      };
     };
 
-    # Nightly restart = save + pick up game updates (SteamCMD runs on every start).
-    services.space-engineers-restart = {
-      description = "Nightly restart of the Space Engineers server (save + update)";
-      serviceConfig = {
-        Type = "oneshot";
-        ExecStart = "${pkgs.systemd}/bin/systemctl try-restart podman-space-engineers.service";
+    timers = {
+      space-engineers-restart = {
+        wantedBy = [ "timers.target" ];
+        timerConfig = {
+          OnCalendar = restartCalendar;
+          Persistent = false;
+        };
       };
-    };
-    timers.space-engineers-restart = {
-      wantedBy = [ "timers.target" ];
-      timerConfig = {
-        OnCalendar = restartCalendar;
-        Persistent = false;
-      };
-    };
 
-    services.space-engineers-status-check = {
-      description = "Poll the Space Engineers server's status for the website";
-      serviceConfig = {
-        Type = "oneshot";
-        ExecStart = "${statusCheck}/bin/space-engineers-status-check";
-      };
-    };
-    timers.space-engineers-status-check = {
-      wantedBy = [ "timers.target" ];
-      timerConfig = {
-        OnBootSec = "30s";
-        OnUnitActiveSec = "30s";
+      space-engineers-status-check = {
+        wantedBy = [ "timers.target" ];
+        timerConfig = {
+          OnBootSec = "30s";
+          OnUnitActiveSec = "30s";
+        };
       };
     };
   };
