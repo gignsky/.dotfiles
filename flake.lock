@@ -1237,11 +1237,11 @@
         "roll-flow-0_2_9-dev": "roll-flow-0_2_9-dev"
       },
       "locked": {
-        "lastModified": 1794863433,
-        "narHash": "sha256-fQJdfluwdz3ZHbMGCvzxWkTLbl0iGfrt6pVG/BDLyr0=",
+        "lastModified": 1794869785,
+        "narHash": "sha256-IFHDUd+hPVH6P88TBRD9dJ9I4a2sKNMW2X19Q4jAWz8=",
         "ref": "gigos-2605",
-        "rev": "909020bbffb0d848bd5cb76b73e5c5b0f22f9ae0",
-        "revCount": 349,
+        "rev": "d8a056a21695ffb4568e985db170b12c95e00f2d",
+        "revCount": 351,
         "type": "git",
         "url": "https://github.com/gignsky/gigpkgs"
       },
