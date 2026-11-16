@@ -5,11 +5,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1790788103,
-        "narHash": "sha256-C4D1hpJpqFAwPBnyIcrXLhRr3ZF9jIJ+CgxzhsJzIMM=",
+        "lastModified": 1794501892,
+        "narHash": "sha256-vZBQuWatGTuJWE9BiSvyEJjSQQsdb0AAA4/MI2xALtE=",
         "owner": "gignsky",
         "repo": "avecmoi",
-        "rev": "5b1dcf1ecb75eb30594569bc17b04271e30f39bc",
+        "rev": "820c3197a220b057bfdea51f79768cab5619ff08",
         "type": "github"
       },
       "original": {
@@ -502,6 +502,24 @@
         "type": "github"
       }
     },
+    "flake-utils_8": {
+      "inputs": {
+        "systems": "systems_8"
+      },
+      "locked": {
+        "lastModified": 1731533236,
+        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
     "fupdate": {
       "inputs": {
         "nixpkgs": "nixpkgs_6"
@@ -597,11 +615,11 @@
         "snacks-nvim": "snacks-nvim"
       },
       "locked": {
-        "lastModified": 1794107276,
-        "narHash": "sha256-Y4GqGl1Sq+aOlki6+x1LqWmfc/7holDq1UpdFPmys1U=",
+        "lastModified": 1794862793,
+        "narHash": "sha256-1d7MyZoNRjwqvxkUp6D5KqqeIVfFwB3DCyIntuBdsfw=",
         "owner": "gignsky",
         "repo": "gigvim",
-        "rev": "0cf841f945107766add25c1293d39a7eb7859522",
+        "rev": "7a7de4595cfe6c12a760964cc00d18e8dcc31667",
         "type": "github"
       },
       "original": {
@@ -1219,11 +1237,11 @@
         "roll-flow-0_2_9-dev": "roll-flow-0_2_9-dev"
       },
       "locked": {
-        "lastModified": 1794371656,
-        "narHash": "sha256-sIL97yHDM2lba9itpTY++kpX2nU9uZHL/xcbRnWig+o=",
+        "lastModified": 1794869785,
+        "narHash": "sha256-IFHDUd+hPVH6P88TBRD9dJ9I4a2sKNMW2X19Q4jAWz8=",
         "ref": "gigos-2605",
-        "rev": "7bc3161efb2119e2eecb75b5b8a49ff71ce7cd2f",
-        "revCount": 347,
+        "rev": "d8a056a21695ffb4568e985db170b12c95e00f2d",
+        "revCount": 351,
         "type": "git",
         "url": "https://github.com/gignsky/gigpkgs"
       },
@@ -1266,6 +1284,22 @@
       }
     },
     "nixpkgs_8": {
+      "locked": {
+        "lastModified": 1791260994,
+        "narHash": "sha256-Miqqk/ammqnTUxaoCyvtwoPeLbI1ksFyLxi/CazZpWY=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "151fa4e8ddfdd8dd25d945ad94ed54a13de9f6e4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_9": {
       "locked": {
         "lastModified": 1754340878,
         "narHash": "sha256-lgmUyVQL9tSnvvIvBp7x1euhkkCho7n3TMzgjdvgPoU=",
@@ -1424,11 +1458,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1794230636,
-        "narHash": "sha256-0rGMVv7dm05m8sG2CB6tNPuq560XJQ5jWRlCkdsrBQ4=",
+        "lastModified": 1794467953,
+        "narHash": "sha256-GBQTM7EPQYR3BHGSmR07CozjhRpBKwqrXcnpOkoqr/U=",
         "owner": "gignsky",
         "repo": "ripae",
-        "rev": "c632b88805814a3f665dea1505a34d4e85b4a5dc",
+        "rev": "99fafa2ba9ccf5abbc67878958f3f5e382b038f8",
         "type": "github"
       },
       "original": {
@@ -2295,6 +2329,7 @@
         "ripae": "ripae",
         "scribbydascribe": "scribbydascribe",
         "sops-nix": "sops-nix",
+        "spaceweed-inc": "spaceweed-inc",
         "treefmt-nix": "treefmt-nix",
         "vscode-server": "vscode-server",
         "wrapd": "wrapd"
@@ -2440,6 +2475,26 @@
         "type": "github"
       }
     },
+    "spaceweed-inc": {
+      "inputs": {
+        "flake-utils": "flake-utils_8",
+        "nixpkgs": "nixpkgs_8"
+      },
+      "locked": {
+        "lastModified": 1792381183,
+        "narHash": "sha256-9LcAuMrHI7Y2IWnKmTSk1HTr88TtMhnXslKq0gnWmU8=",
+        "ref": "master",
+        "rev": "6a7147ae7a4ff5f29fb16ea971aa6452906955a3",
+        "revCount": 12,
+        "type": "git",
+        "url": "ssh://git@github.com/gignsky/spaceweed-inc.git"
+      },
+      "original": {
+        "ref": "master",
+        "type": "git",
+        "url": "ssh://git@github.com/gignsky/spaceweed-inc.git"
+      }
+    },
     "systems": {
       "locked": {
         "lastModified": 1681028828,
@@ -2560,6 +2615,21 @@
         "type": "github"
       }
     },
+    "systems_9": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
     "treefmt-nix": {
       "inputs": {
         "nixpkgs": [
@@ -2625,10 +2695,10 @@
         "dotfiles": [],
         "flake-parts": "flake-parts_5",
         "git-hooks": "git-hooks",
-        "nixpkgs": "nixpkgs_8",
+        "nixpkgs": "nixpkgs_9",
         "process-compose-flake": "process-compose-flake",
         "rust-flake": "rust-flake",
-        "systems": "systems_8",
+        "systems": "systems_9",
         "treefmt-nix": "treefmt-nix_2"
       },
       "locked": {
