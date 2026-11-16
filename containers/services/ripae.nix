@@ -26,9 +26,37 @@
 let
   # `default` is the bare binary; `container` is the buildLayeredImage tarball.
   imageFile = inputs.ripae.packages.${pkgs.stdenv.hostPlatform.system}.container;
+
+  # Runs as root via the sudo rule below; `scripts/dev.sh live` in the ripae
+  # repo calls it over ssh to pull a copy of the live database. The script
+  # comes from the ripae input, so `nix flake update ripae` picks up changes.
+  ripae-snapshot = pkgs.writeShellApplication {
+    name = "ripae-snapshot";
+    runtimeInputs = [
+      pkgs.sqlite
+      pkgs.coreutils
+      pkgs.getent
+    ];
+    text = builtins.readFile "${inputs.ripae}/scripts/spacedock-snapshot.sh";
+  };
 in
 {
   sops.secrets.ripae-env = { };
+
+  environment.systemPackages = [ ripae-snapshot ];
+
+  # gig may run exactly this one command as root, without a password.
+  security.sudo.extraRules = [
+    {
+      users = [ "gig" ];
+      commands = [
+        {
+          command = "/run/current-system/sw/bin/ripae-snapshot";
+          options = [ "NOPASSWD" ];
+        }
+      ];
+    }
+  ];
 
   systemd.tmpfiles.rules = [ "d /var/lib/ripae 0750 root root -" ];
 

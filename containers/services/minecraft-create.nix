@@ -505,16 +505,20 @@ in
       };
     };
 
-    paths.minecraft-create-modzip = {
-      wantedBy = [ "multi-user.target" ];
-      pathConfig.PathChanged = "${dataDir}/mods";
+    paths = {
+      minecraft-create-modzip = {
+        wantedBy = [ "multi-user.target" ];
+        pathConfig.PathChanged = "${dataDir}/mods";
+      };
     };
 
-    timers.minecraft-status-check = {
-      wantedBy = [ "timers.target" ];
-      timerConfig = {
-        OnBootSec = "30s";
-        OnUnitActiveSec = "30s";
+    timers = {
+      minecraft-status-check = {
+        wantedBy = [ "timers.target" ];
+        timerConfig = {
+          OnBootSec = "30s";
+          OnUnitActiveSec = "30s";
+        };
       };
     };
   };
