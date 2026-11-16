@@ -190,14 +190,16 @@ in
       # here: christina-auth.service keeps it in /var/lib/christina-auth/token.json
       # (christina-auth.nix) and the workflow reads it at build time.
       # BETA_* (beta-worker-secrets) are the beta Worker secrets rolling-preview.yml restores.
-      serviceOverrides.EnvironmentFile = [
-        config.sops.secrets."christina-website/beta-env".path
-        config.sops.secrets."christina-website/beta-worker-secrets".path
-      ];
-      serviceOverrides.SupplementaryGroups = [ "christina-auth" ];
-      # See the gigpkgs runner above: CI work never outranks the live game.
-      serviceOverrides.Nice = 19;
-      serviceOverrides.IOSchedulingClass = "idle";
+      serviceOverrides = {
+        EnvironmentFile = [
+          config.sops.secrets."christina-website/beta-env".path
+          config.sops.secrets."christina-website/beta-worker-secrets".path
+        ];
+        SupplementaryGroups = [ "christina-auth" ];
+        # See the gigpkgs runner above: CI work never outranks the live game.
+        Nice = 19;
+        IOSchedulingClass = "idle";
+      };
     };
     kottonmouth = {
       enable = true;
@@ -214,13 +216,15 @@ in
         rustc
         gcc
       ];
-      serviceOverrides.EnvironmentFile = [
-        config.sops.secrets."kottonmouth/cloudflare-api-token".path
-        config.sops.secrets."kottonmouth/beta-worker-secrets".path
-      ];
-      # See the gigpkgs runner above: CI work never outranks the live game.
-      serviceOverrides.Nice = 19;
-      serviceOverrides.IOSchedulingClass = "idle";
+      serviceOverrides = {
+        EnvironmentFile = [
+          config.sops.secrets."kottonmouth/cloudflare-api-token".path
+          config.sops.secrets."kottonmouth/beta-worker-secrets".path
+        ];
+        # See the gigpkgs runner above: CI work never outranks the live game.
+        Nice = 19;
+        IOSchedulingClass = "idle";
+      };
     };
   };
 
