@@ -615,11 +615,11 @@
         "snacks-nvim": "snacks-nvim"
       },
       "locked": {
-        "lastModified": 1794107276,
-        "narHash": "sha256-Y4GqGl1Sq+aOlki6+x1LqWmfc/7holDq1UpdFPmys1U=",
+        "lastModified": 1794862793,
+        "narHash": "sha256-1d7MyZoNRjwqvxkUp6D5KqqeIVfFwB3DCyIntuBdsfw=",
         "owner": "gignsky",
         "repo": "gigvim",
-        "rev": "0cf841f945107766add25c1293d39a7eb7859522",
+        "rev": "7a7de4595cfe6c12a760964cc00d18e8dcc31667",
         "type": "github"
       },
       "original": {
@@ -1237,11 +1237,11 @@
         "roll-flow-0_2_9-dev": "roll-flow-0_2_9-dev"
       },
       "locked": {
-        "lastModified": 1794371656,
-        "narHash": "sha256-sIL97yHDM2lba9itpTY++kpX2nU9uZHL/xcbRnWig+o=",
+        "lastModified": 1794863433,
+        "narHash": "sha256-fQJdfluwdz3ZHbMGCvzxWkTLbl0iGfrt6pVG/BDLyr0=",
         "ref": "gigos-2605",
-        "rev": "7bc3161efb2119e2eecb75b5b8a49ff71ce7cd2f",
-        "revCount": 347,
+        "rev": "909020bbffb0d848bd5cb76b73e5c5b0f22f9ae0",
+        "revCount": 349,
         "type": "git",
         "url": "https://github.com/gignsky/gigpkgs"
       },
