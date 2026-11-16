@@ -37,3 +37,37 @@ ganoslal = true
 merlin = true
 wsl = true
 spacedock = true
+
+# The TUI's `n` rebuild menu. Each entry runs your justfile recipes, so every
+# pre/post step they do (sudo-keepalive, dont-fuck-my-build, cache-push) is
+# kept, and the rebuild scripts write the marker commits the `build` column
+# reads. `sudo` is off because `just rebuild` already asks via sudo-keepalive.
+[[rebuild_menu]]
+key = "s"
+label = "switch: NixOS, then home-manager"
+commands = ["just switch"]
+
+[[rebuild_menu]]
+key = "r"
+label = "rebuild: NixOS switch"
+commands = ["just rebuild"]
+
+[[rebuild_menu]]
+key = "t"
+label = "NixOS test (not added to the bootloader)"
+commands = ["just rebuild -T"]
+
+[[rebuild_menu]]
+key = "b"
+label = "NixOS boot (active from the next boot)"
+commands = ["just rebuild -b"]
+
+[[rebuild_menu]]
+key = "h"
+label = "home-manager switch"
+commands = ["just home"]
+
+[[rebuild_menu]]
+key = "H"
+label = "home-manager test build (no generation created)"
+commands = ["just home -t"]

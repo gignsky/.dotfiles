@@ -38,12 +38,18 @@ rec {
   #################### Packages with external source ####################
   # zsh-als-aliases = pkgs.callPackage ./zsh-als-aliases { }; # Removed as unnecessary but left for help in the future
 
+  #################### Rebuild scripts (from gigpkgs) ####################
+  # Moved to gigpkgs as `gig-nixos-rebuild` / `gig-home-switch` (named so they
+  # never shadow nixpkgs' own `nixos-rebuild`). Re-exported under their old
+  # names so the justfile's `nix run .#nixos-rebuild` / `.#home-switch` keep
+  # working unchanged. They still build the flake in the current directory.
+  nixos-rebuild = pkgs.gig-nixos-rebuild;
+  home-switch = pkgs.gig-home-switch;
+
   #################### Packaged Scripts ####################
   # Import all packaged scripts from scripts.nix
   inherit (scripts)
     check-hardware-config
-    nixos-rebuild
-    home-switch
     flake-build
     pre-commit-flake-check
     run-iso-vm

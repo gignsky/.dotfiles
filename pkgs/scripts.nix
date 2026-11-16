@@ -98,34 +98,6 @@ let
       description = "Validates hardware configuration synchronization and GPU setup";
     };
 
-    # System rebuild script
-    nixos-rebuild = makeScriptPackage {
-      name = "nixos-rebuild";
-      scriptPath = ../scripts/nixos-rebuild.sh;
-      dependencies = with pkgs; [
-        bash
-        nix
-        # nixos-rebuild is available from system, not needed here (would cause recursion)
-        hostname
-        util-linux # `script`, used to keep Nix's live build-progress bar when teeing output
-      ];
-      description = "Rebuilds NixOS system configuration from flake";
-    };
-
-    # Home Manager rebuild script
-    home-switch = makeScriptPackage {
-      name = "home-switch";
-      scriptPath = ../scripts/home-switch.sh;
-      dependencies = with pkgs; [
-        bash
-        nix
-        home-manager
-        hostname
-        util-linux # `script`, used to keep Nix's live build-progress bar when teeing output
-      ];
-      description = "Rebuilds Home Manager configuration from flake";
-    };
-
     # # Bootstrap script
     # bootstrap-nixos = makeScriptPackage {
     #   name = "bootstrap-nixos";

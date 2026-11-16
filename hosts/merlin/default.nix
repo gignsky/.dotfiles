@@ -28,11 +28,12 @@
     (configLib.relativeToRoot "hosts/common/optional/dns.nix") # Pin LAN DNS to the router
     (configLib.relativeToRoot "hosts/common/optional/firefox.nix")
     (configLib.relativeToRoot "hosts/common/optional/nix-build-throttle.nix") # Keep nix builds from starving interactive use
+    (configLib.relativeToRoot "hosts/common/optional/memory-tuning.nix") # zram + swap/writeback tuning so big copies don't freeze the desktop
     (configLib.relativeToRoot "hosts/common/optional/audio.nix") # Enable PipeWire audio system
     (configLib.relativeToRoot "hosts/common/optional/bluetooth.nix") # Enable Bluetooth support
     (configLib.relativeToRoot "hosts/common/optional/brightness-control.nix") # Enable brightness control for Framework laptops
     (configLib.relativeToRoot "hosts/common/optional/docker.nix") # Enable brightness control for Framework laptops
-    # ../common/optional/xrdp.nix
+    (configLib.relativeToRoot "hosts/common/optional/xrdp.nix") # RDP server (separate XFCE X11 session) for Windows Remote Desktop
 
     #gig users
     (configLib.relativeToRoot "hosts/common/users/gig")
@@ -55,6 +56,30 @@
 
   # Tailscale configuration
   tailscale.enable = false;
+
+  services = {
+    # power-saver / balanced / performance via amd-pstate EPP -- Framework's
+    # recommended power manager (do not also enable TLP; they conflict).
+    # Switched from the waybar module (waybarPowerProfiles in
+    # home/gig/merlin.nix) or `powerprofilesctl set <profile>`.
+    power-profiles-daemon.enable = true;
+
+    # Firmware updates from LVFS (BIOS, NVMe, USB4 retimers, fingerprint
+    # reader). Never applies anything on its own:
+    #   fwupdmgr refresh; fwupdmgr get-updates; fwupdmgr update
+    fwupd.enable = true;
+
+    # Fingerprint reader (Goodix). Enabling fprintd makes NixOS add
+    # pam_fprintd to every PAM service whose `fprintAuth` defaults to it:
+    # sudo, polkit prompts (hyprlock does its own fprintd D-Bus auth). Enroll once with
+    # `fprintd-enroll` (and `fprintd-list gig` to verify).
+    fprintd.enable = true;
+  };
+
+  # greetd's tuigreet prompt: keep it password-only. With pam_fprintd first in
+  # the stack the password prompt would stall until the fingerprint scan times
+  # out, and a login-time fingerprint cannot unlock the keyring anyway.
+  security.pam.services.greetd.fprintAuth = false;
 
   # Grub installation
   boot.loader = {

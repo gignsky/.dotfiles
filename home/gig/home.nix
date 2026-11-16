@@ -20,6 +20,7 @@
     ./common/core
     ./common/optional/direnv.nix
     ./common/optional/bat.nix
+    ./common/optional/spaceweed.nix
     # direnvModule
     inputs.nixpkgs.homeManagerModules.gignews
   ];
@@ -75,6 +76,9 @@
 
     pdfarranger
     pdf4qt
+
+    #rar file's
+    unrar
 
     #calculator - RPN
     orpie

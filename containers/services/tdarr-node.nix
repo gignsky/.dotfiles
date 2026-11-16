@@ -1,6 +1,5 @@
 # Tdarr transcode node run-as-a-service container, ported verbatim from
-# dot-spacedock. DISABLED by default (not imported by
-# containers/services/default.nix).
+# dot-spacedock. Enabled -- imported by containers/services/default.nix.
 #
 # ⚠️  Before enabling: needs CIFS/samba mounts and /etc/samba/cifs-creds
 # (provisioned via sops-nix), and the hardcoded server IP (192.168.51.3).
@@ -37,6 +36,15 @@ in
     "d /var/lib/tdarr/configs 0755 root root -"
     "d /var/lib/tdarr/logs 0755 root root -"
   ];
+  # Transcoding is background work; never starve interactive use (same
+  # rationale as the binary-cache builder's Nice/IOSchedulingClass in
+  # modules/nixos/binary-cache/service.nix) -- spacedock also runs a live,
+  # latency-sensitive Space Engineers session, and this is the other
+  # sustained CPU/IO consumer on the box besides CI builds.
+  systemd.services.podman-tdarr-node.serviceConfig = {
+    Nice = 19;
+    IOSchedulingClass = "idle";
+  };
   virtualisation.oci-containers.containers.tdarr-node = {
     image = "ghcr.io/haveagitgat/tdarr_node:latest";
     autoStart = true;

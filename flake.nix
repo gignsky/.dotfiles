@@ -93,6 +93,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Ripae — org commodity-run ledger (axum/sqlx, SQLite), run as a container
+    # on spacedock. See containers/services/ripae.nix. The repo's trunk branch
+    # is `master` (not `main`), per gignsky/ripae's own convention.
+    ripae = {
+      url = "github:gignsky/ripae/master";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # kottonmouthband.com keeper image (private repo, so ssh like nix-secrets).
     # See containers/services/kottonmouth-keeper.nix.
     kottonmouth = {
@@ -109,6 +117,12 @@
       url = "git+ssh://git@github.com/gignsky/christina-website.git?ref=master&lfs=1";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Spaceweed Inc. coop ledger TUI (private repo, so ssh). Installed via
+    # home/gig/common/optional/spaceweed.nix, which wraps it with annex
+    # pull/commit/push. Doesn't follow our nixpkgs: it pins its own unstable
+    # for the Rust toolchain. Update with `nix flake update spaceweed-inc`.
+    spaceweed-inc.url = "git+ssh://git@github.com/gignsky/spaceweed-inc.git?ref=master";
 
     # No `rolling` input for the dev keepers: their image is built and loaded at
     # runtime by kottonmouth-/christina-rolling-deploy.service (hosts/spacedock/
@@ -190,7 +204,7 @@
       # as `nixpkgs` -- TODO remove this comment later should everything work out (07/20/2026)
       customPkgs = import ./pkgs { pkgs = inputs.nixpkgs.legacyPackages.${system}; };
       pkgs = inputs.nixpkgs.legacyPackages.${system} // customPkgs;
-      unstable = inputs.nixpkgs-unstable.legacyPackages.${system};
+      # unstable = inputs.nixpkgs-unstable.legacyPackages.${system};
     in
     {
       # NixOS configuration entrypoint
@@ -552,9 +566,10 @@
             locker
             #necessary for bootstrapping
             ripgrep
+            roll-flow
             ;
           #unstable packages
-          inherit (unstable) roll-flow;
+          # inherit (unstable) roll-flow;
         };
 
         shellHook = ''
