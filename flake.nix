@@ -113,6 +113,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Spaceweed Inc. coop ledger TUI (private repo, so ssh). Installed via
+    # home/gig/common/optional/spaceweed.nix, which wraps it with annex
+    # pull/commit/push. Doesn't follow our nixpkgs: it pins its own unstable
+    # for the Rust toolchain. Update with `nix flake update spaceweed-inc`.
+    spaceweed-inc.url = "git+ssh://git@github.com/gignsky/spaceweed-inc.git?ref=master";
+
     # No `rolling` input for the dev keepers: their image is built and loaded at
     # runtime by kottonmouth-/christina-rolling-deploy.service (hosts/spacedock/
     # github-runner.nix), so beta deploys never rebuild the system.
