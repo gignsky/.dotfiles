@@ -183,7 +183,7 @@ in
   imports = [
     ./waybar.nix
     ./mako.nix
-    ./swaylock.nix
+    ./hyprlock.nix
   ];
 
   config = {
@@ -220,17 +220,6 @@ in
       // niri has no minimize. Emulate it by parking windows on this named
       // workspace; see the Mod+N binds.
       workspace "minimized"
-
-      // WezTerm on Wayland waits for a configure event with a zero size
-      // before it will draw, so a window niri gives a concrete width (the
-      // default 50% column) can stay blank or never map. It hit ganoslal's
-      // 5120-wide DP-5 but not the 1920-wide DP-1. An empty
-      // default-column-width lets WezTerm pick its own size. Workaround from
-      // niri's Application-Issues wiki.
-      window-rule {
-          match app-id=r#"^org\.wezfurlong\.wezterm$"#
-          default-column-width {}
-      }
 
       spawn-at-startup "${pkgs.swaybg}/bin/swaybg" "-i" "${config.home.homeDirectory}/.background-image" "-m" "fill"
       spawn-at-startup "${pkgs.waybar}/bin/waybar"
@@ -346,7 +335,7 @@ in
           Mod+Print { screenshot-screen; }
 
           // Lock screen -- new, bspwm never had one.
-          Mod+Shift+Escape { spawn "${pkgs.swaylock}/bin/swaylock"; }
+          Mod+Shift+Escape { spawn "${pkgs.hyprlock}/bin/hyprlock"; }
 
           // Full display refresh: power-cycle every output (see
           // refreshDisplays above). For a monitor that stays dark after sleep.
