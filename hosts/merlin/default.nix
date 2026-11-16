@@ -33,7 +33,7 @@
     (configLib.relativeToRoot "hosts/common/optional/bluetooth.nix") # Enable Bluetooth support
     (configLib.relativeToRoot "hosts/common/optional/brightness-control.nix") # Enable brightness control for Framework laptops
     (configLib.relativeToRoot "hosts/common/optional/docker.nix") # Enable brightness control for Framework laptops
-    # ../common/optional/xrdp.nix
+    (configLib.relativeToRoot "hosts/common/optional/xrdp.nix") # RDP server (separate XFCE X11 session) for Windows Remote Desktop
 
     #gig users
     (configLib.relativeToRoot "hosts/common/users/gig")
@@ -68,7 +68,18 @@
     # reader). Never applies anything on its own:
     #   fwupdmgr refresh; fwupdmgr get-updates; fwupdmgr update
     fwupd.enable = true;
+
+    # Fingerprint reader (Goodix). Enabling fprintd makes NixOS add
+    # pam_fprintd to every PAM service whose `fprintAuth` defaults to it:
+    # sudo, polkit prompts (hyprlock does its own fprintd D-Bus auth). Enroll once with
+    # `fprintd-enroll` (and `fprintd-list gig` to verify).
+    fprintd.enable = true;
   };
+
+  # greetd's tuigreet prompt: keep it password-only. With pam_fprintd first in
+  # the stack the password prompt would stall until the fingerprint scan times
+  # out, and a login-time fingerprint cannot unlock the keyring anyway.
+  security.pam.services.greetd.fprintAuth = false;
 
   # Grub installation
   boot.loader = {

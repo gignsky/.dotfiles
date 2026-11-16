@@ -35,7 +35,7 @@ in
     # inputs.nix-colors.homeManagerModules.default
 
     ./home.nix
-    ./common/optional/niri.nix # Enable niri window manager configuration (Wayland; pulls in waybar/mako/swaylock)
+    ./common/optional/niri.nix # Enable niri window manager configuration (Wayland; pulls in waybar/mako/hyprlock)
     # Previous X11 desktop; swap back together with hosts/ganoslal/default.nix.
     # ./common/optional/bspwm.nix # Enable bspwm window manager configuration
     ./common/optional/thunderbird.nix # WorkMail account, declaratively configured
@@ -76,6 +76,16 @@ in
   # there yet -- see hosts/ganoslal/niri-render-gpu.nix and checkRenderGpu.
   niriHostConfig = ''
     spawn-at-startup "${checkRenderGpu}"
+
+    // WezTerm on Wayland waits for a configure event with a zero size before
+    // it will draw, so a concrete niri width can leave it blank. It hit this
+    // host's 5120-wide DP-5 but not the 1920-wide DP-1. An empty
+    // default-column-width lets WezTerm pick its own size. ganoslal only: on
+    // merlin it made new terminals sometimes open short until resized.
+    window-rule {
+        match app-id=r#"^org\.wezfurlong\.wezterm$"#
+        default-column-width {}
+    }
 
     output "HDMI-A-2" {
         mode "1920x1080"
