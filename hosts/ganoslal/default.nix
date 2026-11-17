@@ -40,6 +40,7 @@
     (configLib.relativeToRoot "hosts/common/optional/nix-build-throttle.nix") # Keep nix builds from starving interactive use
     (configLib.relativeToRoot "hosts/common/optional/memory-tuning.nix") # zram + swap/writeback tuning so big copies don't freeze the desktop
     (configLib.relativeToRoot "hosts/common/optional/docker.nix") # Enable docker/podman
+    (configLib.relativeToRoot "hosts/common/optional/star-citizen.nix") # RSI Launcher + wine-astral + LUG kernel limits (nix-citizen)
     # ../common/optional/xrdp.nix
     # NOTE: autorandr is deliberately not imported — this host has a fixed
     # 4-monitor set, and two of its panels have byte-identical EDIDs so

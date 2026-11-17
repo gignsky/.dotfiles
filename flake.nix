@@ -57,6 +57,13 @@
       inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
 
+    # Star Citizen: RSI Launcher + wine-astral + LUG kernel limits
+    # (consumed by hosts/common/optional/star-citizen.nix).
+    # Deliberately NOT following our nixpkgs: the packages must be built against
+    # nix-citizen's own locked nixpkgs to be substitutable from
+    # nix-citizen.cachix.org -- wine-astral is a multi-hour local build otherwise.
+    nix-citizen.url = "github:LovingMelody/nix-citizen";
+
     #################### Personal Repositories ####################
 
     # Private secrets repo.  See ./docs/secretsmgmt.md
