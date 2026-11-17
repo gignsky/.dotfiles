@@ -26,6 +26,9 @@ in
     sops.secrets = {
       "ready-room/door-token".owner = "ready-room";
       "ready-room/annex-key".owner = "ready-room";
+      # Read-write deploy key on gignsky/annex: the beam pushes to the
+      # transporter pad. annex-key (read-only) stays declared as a fallback.
+      "ready-room/annex-key-rw".owner = "ready-room";
       "ready-room/door-passphrase".owner = "ready-room";
     };
 
@@ -33,7 +36,7 @@ in
       enable = true;
       configFile = ./ready-room.toml;
       doorTokenFile = config.sops.secrets."ready-room/door-token".path;
-      sshKeyFile = config.sops.secrets."ready-room/annex-key".path;
+      sshKeyFile = config.sops.secrets."ready-room/annex-key-rw".path;
       # Opens the OAuth door (ready-room roll/1-1116-oauth): claude.ai adds
       # https://ready-room.giglab.dev/mcp as a custom connector and signs in
       # on the passphrase page the core serves. The bearer token still works.
