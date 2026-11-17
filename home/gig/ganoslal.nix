@@ -3,6 +3,7 @@
 {
   # inputs,
   pkgs,
+  lib,
   ...
 }:
 let
@@ -144,13 +145,24 @@ in
   home = {
 
     # Software H.264 decode for discordNoCuda. With CUDA hidden, Discord can't
-    # decode streams on the GPU and falls back to OpenH264 -- but its decoder
-    # is hardcoded to this 2.5.1 (ABI .7) filename, while its downloader only
-    # ever fetched 2.7.0 (ABI .8). Every 1440p stream frame then failed with
-    # "avcodec_open2 error" and the stream stayed black (2026-11-17).
-    # nixpkgs' openh264 is 2.6.0 with the same .so.7 ABI.
-    file.".config/discord/discord_asset_cache/openh264/libopenh264-2.5.1-linux64.7.so".source =
-      "${pkgs.openh264}/lib/libopenh264.so.7";
+    # decode streams on the GPU (Chromium's VA-API path runs on CUDA too) and
+    # falls back to OpenH264. That fallback was broken in three ways
+    # (2026-11-17), so every stream frame failed with "avcodec_open2 error"
+    # and the viewer showed error 2012:
+    #   - the native decoder asks for libopenh264-2.5.1-linux64.7.so;
+    #   - the JS side only downloads 2.7.0 and, on every start, deletes any
+    #     other file in the folder ("OpenH264 cleanup: Deleted unused file");
+    #   - Cisco's 2.7.0 binary can't load on NixOS (no libstdc++ on its path).
+    # So: link nixpkgs' openh264 (2.6.0, same .so.7 ABI, rpath intact) under
+    # the 2.5.1 name and make the folder read-only so cleanup can't unlink
+    # it. A Discord-side download into the folder then fails, which is fine.
+    activation.discordOpenH264 = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      dir="$HOME/.config/discord/discord_asset_cache/openh264"
+      run mkdir -p "$dir"
+      run chmod u+w "$dir"
+      run ln -sfn ${pkgs.openh264}/lib/libopenh264.so.7 "$dir/libopenh264-2.5.1-linux64.7.so"
+      run chmod a-w "$dir"
+    '';
 
     packages = with pkgs; [
       # ytmdesktop
