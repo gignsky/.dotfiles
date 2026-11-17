@@ -15,8 +15,34 @@
 #
 # Every slot is a registered GC root (`nix build --out-link`), so `nix gc`
 # can't delete an env we might restore later.
+#
+# After a fresh eval (a miss), the env's closure is also pushed to the fleet
+# binary cache in the background, so other hosts entering the same project get
+# it substituted. The Nix module defines `_flake_cache_push_cmd` (cache-push
+# with its --to/--server-host args); without it, or with FLAKE_CACHE_PUSH=0,
+# nothing is pushed. Output goes to $XDG_STATE_HOME/direnv/cache-push.log.
 
 : "${FLAKE_CACHE_SLOTS:=5}"
+: "${FLAKE_CACHE_PUSH:=1}"
+
+# Fire-and-forget: detached from direnv's fds so `direnv export` never waits on
+# the upload, and every failure (cache unreachable, etc.) stays in the log.
+_flake_cache_push() {
+  local path=$1 dir=$2
+  # shellcheck disable=SC2154 # defined by the Nix module, ahead of this file
+  [[ $FLAKE_CACHE_PUSH == 1 ]] && declare -p _flake_cache_push_cmd &>/dev/null || return 0
+  local log_dir="${XDG_STATE_HOME:-$HOME/.local/state}/direnv"
+  mkdir -p "$log_dir" 2>/dev/null || return 0
+  # One server root per host+project: re-entering after a lock bump replaces it.
+  local id name
+  id=$(printf '%s' "$dir" | sha256sum)
+  name=${dir##*/}
+  name=${name//[^A-Za-z0-9._-]/_}
+  local kind="direnv-${name}-${id:0:8}"
+  nohup "${_flake_cache_push_cmd[@]}" --kind "$kind" "$path" \
+    </dev/null >>"$log_dir/cache-push.log" 2>&1 &
+  disown 2>/dev/null || true
+}
 
 if declare -f use_flake >/dev/null && ! declare -f _flake_cache_orig_use_flake >/dev/null; then
   eval "_flake_cache_orig_use_flake() $(declare -f use_flake | tail -n +2)"
@@ -84,6 +110,8 @@ if declare -f use_flake >/dev/null && ! declare -f _flake_cache_orig_use_flake >
         mkdir -p "$slots"
         if [[ $(readlink -f "$slot.env" 2>/dev/null) != "$profile_path" ]]; then
           _nix_add_gcroot "$profile_path" "$slot.env" >/dev/null
+          # New env we haven't seen before: share it with the fleet.
+          _flake_cache_push "$profile_path" "$(cd "$flake_dir" && pwd -P)"
         fi
         cmp -s "$profile_rc" "$slot.rc" || cp "$profile_rc" "$slot.rc"
 
