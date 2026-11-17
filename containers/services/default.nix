@@ -9,7 +9,7 @@ _: {
     ./tdarr-node.nix # Tdarr node — needs CIFS mounts + samba creds first
     ./floatplane-wan-show.nix # Floatplane downloader (WAN Show + Techquickie) → Sonarr, see file header
     ./avec-moi-app.nix
-    ./giglab-dev.nix # giglab.dev — interim static image, no TLS/front door yet
+    ./giglab-dev.nix # giglab.dev via gigpkgs fromInputs + Host-routed nginx on :1776 behind TrueNAS NPM, see file header
     ./scribbydascribe.nix # Discord voice transcriber — needs the `scribbydascribe-env` sops key first
     ./ripae.nix # Org commodity-run ledger — needs the `ripae-env` sops key first, see file header
     ./games-site.nix # games.gignsky.com hub page on :1801 — minecraft-create.nix and space-engineers.nix add their own sub-pages to it
