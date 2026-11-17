@@ -1,16 +1,18 @@
 # cache-push — copy locally built closures to the cache host and root them
 # there. Never fails the caller for an unreachable cache: it just skips.
 #
-#   cache-push --to <ssh-host> [--server-host <hostname>] [paths...]
+#   cache-push --to <ssh-host> [--server-host <hostname>] [--kind <name>] [paths...]
 #
 # With no paths, pushes this host's current system and home-manager
 # generation. Each path is rooted on the server at
 # ~/cache-roots/<this-host>-<kind> (kind = basename of the given path), so the
-# latest push per host+kind survives the server's GC.
+# latest push per host+kind survives the server's GC. `--kind` overrides the
+# basename for every given path (direnv uses it to root one env per project).
 
 def main [
     --to: string            # ssh host of the cache server (as in ~/.ssh/config)
     --server-host: string   # hostname of the cache server; pushing is skipped there
+    --kind: string          # root name on the server (default: basename of each path)
     ...paths: string
 ] {
     if $to == null { error make { msg: "--to <ssh-host> is required" } }
@@ -32,7 +34,7 @@ def main [
             { kind: home, path: ($env.HOME | path join .local/state/home-manager/gcroots/current-home) }
         ]
     } else {
-        $paths | each {|p| { kind: ($p | path expand --no-symlink | path basename), path: $p } }
+        $paths | each {|p| { kind: ($kind | default ($p | path expand --no-symlink | path basename)), path: $p } }
     }
 
     let targets = $candidates
