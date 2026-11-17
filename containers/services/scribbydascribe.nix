@@ -31,7 +31,9 @@ let
   imageFile = inputs.scribbydascribe.packages.${pkgs.stdenv.hostPlatform.system}.default;
 in
 {
-  sops.secrets.scribbydascribe-env = { };
+  sops.secrets.scribbydascribe-env = {
+    restartUnits = [ "podman-scribbydascribe.service" ];
+  };
 
   systemd.tmpfiles.rules = [ "d /var/lib/scribbydascribe 0750 root root -" ];
 
