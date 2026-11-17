@@ -14,6 +14,7 @@ let
   #   ready-room:
   #     door-token:      <any long random string>
   #     annex-key:       <private half of a read-only deploy key on gignsky/annex>
+  #     annex-key-rw:    <private half of a read-write deploy key on gignsky/annex>
   #     door-passphrase: <the phrase Lord Gig types on the door's sign-in page>
   # Until then the service is declared but not enabled, so the host still
   # evaluates and builds.
@@ -25,9 +26,10 @@ in
   config = lib.mkIf haveSecrets {
     sops.secrets = {
       "ready-room/door-token".owner = "ready-room";
+      # Two deploy keys on gignsky/annex: annex-key (read-only) does every
+      # clone, fetch and pull; annex-key-rw (read-write) is used only by
+      # `git push` — each beam to the transporter pad and each pad review.
       "ready-room/annex-key".owner = "ready-room";
-      # Read-write deploy key on gignsky/annex: the beam pushes to the
-      # transporter pad. annex-key (read-only) stays declared as a fallback.
       "ready-room/annex-key-rw".owner = "ready-room";
       "ready-room/door-passphrase".owner = "ready-room";
     };
@@ -36,7 +38,8 @@ in
       enable = true;
       configFile = ./ready-room.toml;
       doorTokenFile = config.sops.secrets."ready-room/door-token".path;
-      sshKeyFile = config.sops.secrets."ready-room/annex-key-rw".path;
+      sshKeyFile = config.sops.secrets."ready-room/annex-key".path; # reads
+      sshWriteKeyFile = config.sops.secrets."ready-room/annex-key-rw".path; # pushes
       # Opens the OAuth door (ready-room roll/1-1116-oauth): claude.ai adds
       # https://ready-room.giglab.dev/mcp as a custom connector and signs in
       # on the passphrase page the core serves. The bearer token still works.

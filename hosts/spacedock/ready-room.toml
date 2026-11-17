@@ -1,6 +1,6 @@
 # Ready Room — the core on spacedock. No secret lives here: the door token,
-# the OAuth passphrase and the annex deploy key are sops-nix files the module
-# hands to the service.
+# the OAuth passphrase and the two annex deploy keys (read, push) are sops-nix
+# files the module hands to the service.
 # Reference: ready-room's ready-room.example.toml and docs/spacedock.md.
 
 state_dir = "/var/lib/ready-room"
