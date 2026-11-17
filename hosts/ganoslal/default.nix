@@ -40,6 +40,7 @@
     (configLib.relativeToRoot "hosts/common/optional/nix-build-throttle.nix") # Keep nix builds from starving interactive use
     (configLib.relativeToRoot "hosts/common/optional/memory-tuning.nix") # zram + swap/writeback tuning so big copies don't freeze the desktop
     (configLib.relativeToRoot "hosts/common/optional/docker.nix") # Enable docker/podman
+    (configLib.relativeToRoot "hosts/common/optional/comfyui.nix") # ComfyUI image generation on the 3060 Ti, http://localhost:8188
     # ../common/optional/xrdp.nix
     # NOTE: autorandr is deliberately not imported — this host has a fixed
     # 4-monitor set, and two of its panels have byte-identical EDIDs so
@@ -66,6 +67,13 @@
 
   # Tailscale configuration
   tailscale.enable = false;
+
+  # ComfyUI (hosts/common/optional/comfyui.nix) renders on the RTX 3060 Ti
+  # only. CUDA 13 cannot drive the Maxwell GTX 970 anyway, so hide it from
+  # the service rather than let the runtime enumerate and trip over it.
+  # UUID from `nvidia-smi -L`; stable across reboots and PCI reordering.
+  systemd.services.comfyui.environment.CUDA_VISIBLE_DEVICES =
+    "GPU-dd9b90fa-4d4d-afe4-71f7-38f4745ef0ec";
 
   # Grub installation
   boot.loader = {
