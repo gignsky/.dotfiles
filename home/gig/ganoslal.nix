@@ -143,6 +143,15 @@ in
 
   home = {
 
+    # Software H.264 decode for discordNoCuda. With CUDA hidden, Discord can't
+    # decode streams on the GPU and falls back to OpenH264 -- but its decoder
+    # is hardcoded to this 2.5.1 (ABI .7) filename, while its downloader only
+    # ever fetched 2.7.0 (ABI .8). Every 1440p stream frame then failed with
+    # "avcodec_open2 error" and the stream stayed black (2026-11-17).
+    # nixpkgs' openh264 is 2.6.0 with the same .so.7 ABI.
+    file.".config/discord/discord_asset_cache/openh264/libopenh264-2.5.1-linux64.7.so".source =
+      "${pkgs.openh264}/lib/libopenh264.so.7";
+
     packages = with pkgs; [
       # ytmdesktop
       claude-desktop-with-fhs
