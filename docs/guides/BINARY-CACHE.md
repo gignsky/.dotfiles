@@ -63,6 +63,16 @@ compiled once and then downloaded by every other host.
      garbage-collected locally in the meantime are dropped.
    - These pushes are **not** GC-rooted on spacedock. They live until disk
      pressure evicts them. Rooted copies still come from `cache-push`.
+5. **direnv:** when `use flake` has to evaluate a devShell it hasn't cached
+   yet (`home/gig/common/resources/direnvrc-flake-cache.sh`), it runs
+   `cache-push --kind direnv-<dir>-<hash>` on the new env in the background.
+   That pushes the env's **whole closure** (including inputs substituted from
+   cache.nixos.org, which push-on-build never sees), rooted as
+   `<host>-direnv-<dir>-<hash>`: one root per host and project, replaced on
+   the next fresh eval.
+   - direnv never waits on it. Output goes to
+     `~/.local/state/direnv/cache-push.log`.
+   - Turn it off for a shell with `FLAKE_CACHE_PUSH=0`.
 
 ### Why the watcher's builds hit for gigpkgs
 
