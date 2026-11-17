@@ -27,6 +27,27 @@ let
     ${pkgs.libnotify}/bin/notify-send -u critical "niri is on the wrong GPU" \
       "Rendering on ''${got:-unknown} instead of the 3060 Ti ($want). Expect flicker; log out and back in."
   '';
+
+  # Discord with CUDA hidden. With the camera on in a call, discord_voice.node
+  # encodes through NVENC via libcuda, which maps buffers into nvidia_uvm. On
+  # the 580 legacy driver (pinned for the GTX 970, see
+  # hosts/ganoslal/nvidia.nix) that path oopses inside nvidia.ko --
+  # `_nv0184xxrm` page faults under nvUvmInterfaceDupMemory /
+  # FreeDupedHandle, Comm ThreadPoolSingl/ThreadPoolForeg -- and the GPU lock
+  # it holds takes the whole desktop down (2026-11-08 x2, 2026-11-09,
+  # 2026-11-17). With no visible CUDA device Discord falls back to software
+  # H.264 (OpenH264). The .desktop entry runs `Discord` by name, so wrapping
+  # both bin names covers launcher starts too.
+  discordNoCuda = pkgs.symlinkJoin {
+    name = "discord-no-cuda";
+    paths = [ pkgs.discord ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      for bin in discord Discord; do
+        wrapProgram "$out/bin/$bin" --set CUDA_VISIBLE_DEVICES -1
+      done
+    '';
+  };
 in
 {
   # You can import other home-manager modules here
@@ -131,7 +152,7 @@ in
       remmina
       # bitwarden-cli
       bitwarden-desktop
-      discord
+      discordNoCuda
       # anydesk
       gpu-viewer
       # AnyDesk re-uploaded the 8.1.0 tarball in place (2026-11-03), breaking
