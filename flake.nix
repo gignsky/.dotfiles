@@ -119,6 +119,12 @@
     # Python core needs fastembed and claude-agent-sdk from gigpkgs-unstable.
     ready-room.url = "git+ssh://git@github.com/gignsky/ready-room.git?ref=master";
 
+    # Spaceweed Inc. coop ledger TUI (private repo, so ssh). Installed via
+    # home/gig/common/optional/spaceweed.nix, which wraps it with annex
+    # pull/commit/push. Doesn't follow our nixpkgs: it pins its own unstable
+    # for the Rust toolchain. Update with `nix flake update spaceweed-inc`.
+    spaceweed-inc.url = "git+ssh://git@github.com/gignsky/spaceweed-inc.git?ref=master";
+
     # No `rolling` input for the dev keepers: their image is built and loaded at
     # runtime by kottonmouth-/christina-rolling-deploy.service (hosts/spacedock/
     # github-runner.nix), so beta deploys never rebuild the system.
@@ -199,7 +205,7 @@
       # as `nixpkgs` -- TODO remove this comment later should everything work out (07/20/2026)
       customPkgs = import ./pkgs { pkgs = inputs.nixpkgs.legacyPackages.${system}; };
       pkgs = inputs.nixpkgs.legacyPackages.${system} // customPkgs;
-      unstable = inputs.nixpkgs-unstable.legacyPackages.${system};
+      # unstable = inputs.nixpkgs-unstable.legacyPackages.${system};
     in
     {
       # NixOS configuration entrypoint
@@ -561,9 +567,10 @@
             locker
             #necessary for bootstrapping
             ripgrep
+            roll-flow
             ;
           #unstable packages
-          inherit (unstable) roll-flow;
+          # inherit (unstable) roll-flow;
         };
 
         shellHook = ''

@@ -183,7 +183,7 @@ in
   imports = [
     ./waybar.nix
     ./mako.nix
-    ./swaylock.nix
+    ./hyprlock.nix
   ];
 
   config = {
@@ -335,7 +335,7 @@ in
           Mod+Print { screenshot-screen; }
 
           // Lock screen -- new, bspwm never had one.
-          Mod+Shift+Escape { spawn "${pkgs.swaylock}/bin/swaylock"; }
+          Mod+Shift+Escape { spawn "${pkgs.hyprlock}/bin/hyprlock"; }
 
           // Full display refresh: power-cycle every output (see
           // refreshDisplays above). For a monitor that stays dark after sleep.

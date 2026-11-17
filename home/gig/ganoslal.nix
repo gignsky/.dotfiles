@@ -35,7 +35,7 @@ in
     # inputs.nix-colors.homeManagerModules.default
 
     ./home.nix
-    ./common/optional/niri.nix # Enable niri window manager configuration (Wayland; pulls in waybar/mako/swaylock)
+    ./common/optional/niri.nix # Enable niri window manager configuration (Wayland; pulls in waybar/mako/hyprlock)
     # Previous X11 desktop; swap back together with hosts/ganoslal/default.nix.
     # ./common/optional/bspwm.nix # Enable bspwm window manager configuration
     ./common/optional/thunderbird.nix # WorkMail account, declaratively configured
