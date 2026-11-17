@@ -9,11 +9,12 @@
   ...
 }:
 let
-  # Flip once both secrets sit in nix-secrets (`just sops`), owned by the
+  # Flip once the secrets sit in nix-secrets (`just sops`), owned by the
   # service user:
   #   ready-room:
-  #     door-token: <any long random string>
-  #     annex-key:  <private half of a read-only deploy key on gignsky/annex>
+  #     door-token:      <any long random string>
+  #     annex-key:       <private half of a read-only deploy key on gignsky/annex>
+  #     door-passphrase: <the phrase Lord Gig types on the door's sign-in page>
   # Until then the service is declared but not enabled, so the host still
   # evaluates and builds.
   haveSecrets = true;
@@ -25,6 +26,7 @@ in
     sops.secrets = {
       "ready-room/door-token".owner = "ready-room";
       "ready-room/annex-key".owner = "ready-room";
+      "ready-room/door-passphrase".owner = "ready-room";
     };
 
     services.ready-room = {
@@ -32,6 +34,10 @@ in
       configFile = ./ready-room.toml;
       doorTokenFile = config.sops.secrets."ready-room/door-token".path;
       sshKeyFile = config.sops.secrets."ready-room/annex-key".path;
+      # Opens the OAuth door (ready-room roll/1-1116-oauth): claude.ai adds
+      # https://ready-room.giglab.dev/mcp as a custom connector and signs in
+      # on the passphrase page the core serves. The bearer token still works.
+      passphraseFile = config.sops.secrets."ready-room/door-passphrase".path;
       # Cloned into /var/lib/ready-room/clones/annex before the first start,
       # then pulled every five minutes by the core's watcher.
       clones.annex.url = "git@github.com:gignsky/annex.git";
@@ -48,9 +54,10 @@ in
     # (Pebble) away from home. Same tunnel as kottonmouth-keeper.nix and
     # christina-auth.nix (NixOS merges tunnels.<id>.ingress across files);
     # giglab.dev is in the same Cloudflare account as kottonmouthband.com.
-    # Only /mcp is routed, anything else gets the tunnel's 404. The door's
-    # bearer token is the sole lock (the phone client cannot do a Cloudflare
-    # Access login), so see docs in ready-room.toml before loosening anything.
+    # The whole hostname is routed: /mcp (the door), /oauth/* and
+    # /.well-known/* (the OAuth sign-in claude.ai needs), /health. The locks
+    # are the door's own — bearer token or OAuth access token — since the
+    # phone client cannot do a Cloudflare Access login; see ready-room.toml.
     #
     # Its proxied CNAME  ready-room -> <tunnel-id>.cfargotunnel.com  is
     # upserted on every switch by giglab-dns (hosts/spacedock/
@@ -58,7 +65,6 @@ in
     services.cloudflared.tunnels."1a878786-561d-427c-90cd-358f1b82aea4".ingress."ready-room.giglab.dev" =
       {
         service = "http://127.0.0.1:7474";
-        path = "^/mcp";
       };
   };
 }

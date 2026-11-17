@@ -1,5 +1,6 @@
-# Ready Room — the core on spacedock. No secret lives here: the door token
-# and the annex deploy key are sops-nix files the module hands to the service.
+# Ready Room — the core on spacedock. No secret lives here: the door token,
+# the OAuth passphrase and the annex deploy key are sops-nix files the module
+# hands to the service.
 # Reference: ready-room's ready-room.example.toml and docs/spacedock.md.
 
 state_dir = "/var/lib/ready-room"
@@ -7,11 +8,15 @@ state_dir = "/var/lib/ready-room"
 [door]
 # Open on the LAN (and loopback): dial http://192.168.51.2:7474/mcp. Away from
 # home the same door is reached at https://ready-room.giglab.dev/mcp through
-# the cloudflared tunnel (hosts/spacedock/ready-room.nix). The bearer token is
-# the only lock on both roads, so keep it long (32+ random bytes) and rotate it
-# if a device is lost. The token file comes from
-# the module as $RR_DOOR_TOKEN_FILE.
+# the cloudflared tunnel (hosts/spacedock/ready-room.nix). Two locks on both
+# roads: the bearer token (keep it long, 32+ random bytes, rotate it if a
+# device is lost) and, for claude.ai's custom connector, OAuth sign-in on the
+# passphrase page. Both files come from the module, as $RR_DOOR_TOKEN_FILE
+# and $RR_DOOR_PASSPHRASE_FILE; neither key is set here.
 bind = "0.0.0.0:7474"
+# The URL the world reaches the door at: the OAuth issuer, and the host the
+# connector's sign-in is sent back through. Scheme and host only.
+public_url = "https://ready-room.giglab.dev"
 # The door refuses any Host header it does not know. Loopback names are always
 # accepted; these are the names LAN callers dial.
 allowed_hosts = ["192.168.51.2", "spacedock", "ready-room.giglab.dev"]
