@@ -3,6 +3,7 @@
 {
   # inputs,
   pkgs,
+  lib,
   ...
 }:
 let
@@ -27,6 +28,27 @@ let
     ${pkgs.libnotify}/bin/notify-send -u critical "niri is on the wrong GPU" \
       "Rendering on ''${got:-unknown} instead of the 3060 Ti ($want). Expect flicker; log out and back in."
   '';
+
+  # Discord with CUDA hidden. With the camera on in a call, discord_voice.node
+  # encodes through NVENC via libcuda, which maps buffers into nvidia_uvm. On
+  # the 580 legacy driver (pinned for the GTX 970, see
+  # hosts/ganoslal/nvidia.nix) that path oopses inside nvidia.ko --
+  # `_nv0184xxrm` page faults under nvUvmInterfaceDupMemory /
+  # FreeDupedHandle, Comm ThreadPoolSingl/ThreadPoolForeg -- and the GPU lock
+  # it holds takes the whole desktop down (2026-11-08 x2, 2026-11-09,
+  # 2026-11-17). With no visible CUDA device Discord falls back to software
+  # H.264 (OpenH264). The .desktop entry runs `Discord` by name, so wrapping
+  # both bin names covers launcher starts too.
+  discordNoCuda = pkgs.symlinkJoin {
+    name = "discord-no-cuda";
+    paths = [ pkgs.discord ];
+    nativeBuildInputs = [ pkgs.makeWrapper ];
+    postBuild = ''
+      for bin in discord Discord; do
+        wrapProgram "$out/bin/$bin" --set CUDA_VISIBLE_DEVICES -1
+      done
+    '';
+  };
 in
 {
   # You can import other home-manager modules here
@@ -122,6 +144,26 @@ in
 
   home = {
 
+    # Software H.264 decode for discordNoCuda. With CUDA hidden, Discord can't
+    # decode streams on the GPU (Chromium's VA-API path runs on CUDA too) and
+    # falls back to OpenH264. That fallback was broken in three ways
+    # (2026-11-17), so every stream frame failed with "avcodec_open2 error"
+    # and the viewer showed error 2012:
+    #   - the native decoder asks for libopenh264-2.5.1-linux64.7.so;
+    #   - the JS side only downloads 2.7.0 and, on every start, deletes any
+    #     other file in the folder ("OpenH264 cleanup: Deleted unused file");
+    #   - Cisco's 2.7.0 binary can't load on NixOS (no libstdc++ on its path).
+    # So: link nixpkgs' openh264 (2.6.0, same .so.7 ABI, rpath intact) under
+    # the 2.5.1 name and make the folder read-only so cleanup can't unlink
+    # it. A Discord-side download into the folder then fails, which is fine.
+    activation.discordOpenH264 = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+      dir="$HOME/.config/discord/discord_asset_cache/openh264"
+      run mkdir -p "$dir"
+      run chmod u+w "$dir"
+      run ln -sfn ${pkgs.openh264}/lib/libopenh264.so.7 "$dir/libopenh264-2.5.1-linux64.7.so"
+      run chmod a-w "$dir"
+    '';
+
     packages = with pkgs; [
       # ytmdesktop
       claude-desktop-with-fhs
@@ -131,7 +173,7 @@ in
       remmina
       # bitwarden-cli
       bitwarden-desktop
-      discord
+      discordNoCuda
       # anydesk
       gpu-viewer
       # AnyDesk re-uploaded the 8.1.0 tarball in place (2026-11-03), breaking
