@@ -42,3 +42,5 @@ law = "ANNEX.md"
 # The one room the Computer writes to: new files only, each committed and
 # pushed with the read-write deploy key (sops ready-room/annex-key-rw).
 pad = "transporter pad/"
+filed = "cargo bay/"
+crew = "crew quarters/"
