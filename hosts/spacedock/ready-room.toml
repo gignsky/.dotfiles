@@ -44,3 +44,7 @@ law = "ANNEX.md"
 pad = "transporter pad/"
 filed = "cargo bay/"
 crew = "crew quarters/"
+
+# The repositories the crew are allowed (allowedRepos in ready-room.nix) are
+# indexed too: ready-room.nix appends a [[repos]] block for each below this
+# line, read-only, from that one list. Do not add them here by hand.
