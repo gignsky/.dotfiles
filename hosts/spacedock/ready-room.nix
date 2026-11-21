@@ -17,7 +17,7 @@ let
       url = "git@github.com:gignsky/ready-room.git";
     };
     dotfiles = {
-      url = "git@github.com:gignsky/dotfiles.git";
+      url = "git@github.com:gignsky/.dotfiles.git";
       branchesOnly = true;
     };
   };
@@ -101,7 +101,7 @@ let
   #   ready-room:
   #     crew-claude-token:   <the token `claude setup-token` prints>
   #     crew-ready-room-key: <private half of a read-write deploy key on gignsky/ready-room>
-  #     crew-dotfiles-key:   <private half of a read-write deploy key on gignsky/dotfiles>
+  #     crew-dotfiles-key:   <private half of a read-write deploy key on gignsky/.dotfiles>
   haveCrewSecrets = false;
   # `services.ready-room.crew` arrives with ready-room roll/9-1120-real-runner;
   # until the flake input carries it, nothing of the crew is declared.
