@@ -54,8 +54,8 @@
     # christinasceramics.com, giglab.dev), one DNS-edit token for all of them.
     (configLib.relativeToRoot "hosts/spacedock/cloudflare-dns.nix")
 
-    # `build-mode`: stop the two game servers for the length of a big build and
-    # bring them back after (`just build-mode rebuild`); see the file.
+    # Build mode: the two game servers stop by themselves while a big Nix
+    # build you started runs, and come back after; see the file.
     (configLib.relativeToRoot "hosts/spacedock/build-mode.nix")
 
     # zram swap + swap/writeback sysctls, shared with ganoslal and merlin.
