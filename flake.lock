@@ -3317,11 +3317,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794939791,
-        "narHash": "sha256-AAlUbg38hoIma33xJhqtDowoQuC1UqvrP9a3Mt/c5T8=",
+        "lastModified": 1795298974,
+        "narHash": "sha256-C8G7Rpwt/tXdkFVTGc9rwtKZDfvTq92nMQtbQ5JYZ7g=",
         "owner": "gignsky",
         "repo": "scribbydascribe",
-        "rev": "1f7c5c5566db10624b88dfbe802597089dfc9e6c",
+        "rev": "f2acfc646c9a6bd347862afff4b460094988ab07",
         "type": "github"
       },
       "original": {
