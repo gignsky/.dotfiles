@@ -19,6 +19,15 @@ let
     dotfiles = {
       url = "git@github.com:gignsky/.dotfiles.git";
       branchesOnly = true;
+      # The crew's pre-push hook defaults to main, master and rolling; this
+      # repo's rolling branch is `develop` (.roll-flow.toml), so name it too.
+      # Setting the list replaces the default, hence the old three kept.
+      protectedBranches = [
+        "main"
+        "master"
+        "rolling"
+        "develop"
+      ];
     };
   };
 
@@ -30,9 +39,8 @@ let
   # read-only deploy key on that repo sits in nix-secrets as
   #   ready-room:
   #     <name>-key:   e.g. ready-room-key, dotfiles-key
-  # and this flake's `ready-room` input carries `clones.<name>.sshKeyFile`
-  # (ready-room roll/10-1120-index-repos, once on master). Until then the
-  # Computer indexes the annex alone, as before.
+  # (`clones.<name>.sshKeyFile` is in the pinned input, ready-room v0.6.2.)
+  # Until then the Computer indexes the annex alone, as before.
   haveRepoKeys = false;
   indexedRepos = lib.optionalAttrs haveRepoKeys allowedRepos;
   repoKey = name: config.sops.secrets."ready-room/${name}-key".path;
@@ -103,8 +111,8 @@ let
   #     crew-ready-room-key: <private half of a read-write deploy key on gignsky/ready-room>
   #     crew-dotfiles-key:   <private half of a read-write deploy key on gignsky/.dotfiles>
   haveCrewSecrets = false;
-  # `services.ready-room.crew` arrives with ready-room roll/9-1120-real-runner;
-  # until the flake input carries it, nothing of the crew is declared.
+  # `services.ready-room.crew` is in the pinned input (ready-room v0.6.2);
+  # the option check stays so an older pin still evaluates.
   crewOn = haveSecrets && haveCrewSecrets && options.services.ready-room ? crew;
 
   # A user of their own with clones apart from ~gig/local_repos, the claude
