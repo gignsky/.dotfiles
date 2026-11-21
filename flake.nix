@@ -113,6 +113,12 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Ready Room — the ship's Computer, run as a service on spacedock
+    # (hosts/spacedock/ready-room.nix). Private repo, so ssh like kottonmouth;
+    # its trunk is `master`. Its nixpkgs is NOT made to follow the fleet's: the
+    # Python core needs fastembed and claude-agent-sdk from gigpkgs-unstable.
+    ready-room.url = "git+ssh://git@github.com/gignsky/ready-room.git?ref=master";
+
     # Spaceweed Inc. coop ledger TUI (private repo, so ssh). Installed via
     # home/gig/common/optional/spaceweed.nix, which wraps it with annex
     # pull/commit/push. Doesn't follow our nixpkgs: it pins its own unstable
