@@ -83,13 +83,28 @@ let
     ''
     + lib.optionalString (rules ? sealed) "sealed = ${builtins.toJSON rules.sealed}\n"
     + lib.optionalString (rules ? law) "law = ${builtins.toJSON rules.law}\n";
+
+  # Calls: Scribby's live notes (ready-room `calls` and `call`, read-only).
+  # On once both halves are here: Scribby's container on this host, and a
+  # ready-room input that knows the [calls] table. An older core refuses an
+  # unknown table at start, so the block waits on the input, not on a flag.
+  scribbyHere = config.virtualisation.oci-containers.containers ? scribbydascribe;
+  callsReady = scribbyHere && builtins.pathExists "${inputs.ready-room}/crates/rr-core/src/calls.rs";
+  callsBlock = lib.optionalString callsReady ''
+
+    [calls]
+    # Scribby's recordings, read as they grow; never written. Every server's
+    # calls (Lord Gig, 21 Nov 2026: live notes for everything). To narrow it,
+    # name servers by id or name: guilds = ["Column & Coin"]
+    sessions_dir = "/var/lib/scribbydascribe/sessions"
+  '';
+
+  extraToml = callsBlock + lib.concatStrings (lib.mapAttrsToList repoBlock indexedRepos);
   configFile =
-    if indexedRepos == { } then
+    if extraToml == "" then
       ./ready-room.toml
     else
-      pkgs.writeText "ready-room.toml" (
-        builtins.readFile ./ready-room.toml + lib.concatStrings (lib.mapAttrsToList repoBlock indexedRepos)
-      );
+      pkgs.writeText "ready-room.toml" (builtins.readFile ./ready-room.toml + extraToml);
 
   # Flip once the secrets sit in nix-secrets (`just sops`), owned by the
   # service user:
@@ -186,6 +201,11 @@ in
       # For `summaries = "haiku"` the claude CLI must be on the service PATH:
       # extraPath = [ pkgs.claude-code ];
     };
+
+    # Scribby's folder is root's (0750); its group lets the core read the
+    # recordings' live notes. Read only: the unit's ProtectSystem = "strict"
+    # leaves it no write there, and the core never tries.
+    users.users.ready-room.extraGroups = lib.mkIf callsReady [ "scribbydascribe" ];
 
     # The door listens on the LAN (ready-room.toml binds 0.0.0.0:7474). Do not
     # forward it on the router: away from the house it is reached through the
