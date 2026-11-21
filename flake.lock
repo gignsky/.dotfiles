@@ -1113,10 +1113,10 @@
     "nix-secrets": {
       "flake": false,
       "locked": {
-        "lastModified": 1794940154,
-        "narHash": "sha256-zau9sbVkkQ/kIADYjO31a5f6qX/9KutNibv8tr32+t0=",
+        "lastModified": 1795304654,
+        "narHash": "sha256-TEyzBCeZXEQQ/WRavFnSpXBtkknP2DWO76It4w5ceIc=",
         "ref": "main",
-        "rev": "31f79330e7d1ed0408fde2d5d96910a1cfc582c1",
+        "rev": "078a3d3ed63bf4bc9d3045698f00447ace7c57d4",
         "shallow": true,
         "type": "git",
         "url": "ssh://git@github.com/gignsky/nix-secrets.git"
@@ -1898,11 +1898,11 @@
         "nixpkgs": "nixpkgs_8"
       },
       "locked": {
-        "lastModified": 1795197940,
-        "narHash": "sha256-yRCvft1HSvmrM0cZQ/fY/vGqwntu26AA/8IRUyQ+6mk=",
+        "lastModified": 1795303393,
+        "narHash": "sha256-ZO9iFCo8Gq16ikRuddaSqlwnRuqqGNTHSoT0jl42pTk=",
         "ref": "master",
-        "rev": "17aec6c2c1b31e4490e435569be68b5ccb34ce4b",
-        "revCount": 49,
+        "rev": "0d68c1d52f0454656532ee9a9d377bc11469b6bd",
+        "revCount": 57,
         "type": "git",
         "url": "ssh://git@github.com/gignsky/ready-room.git"
       },
