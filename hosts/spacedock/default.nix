@@ -53,7 +53,32 @@
     # DNS records for every cloudflared tunnel hostname (kottonmouthband.com,
     # christinasceramics.com, giglab.dev), one DNS-edit token for all of them.
     (configLib.relativeToRoot "hosts/spacedock/cloudflare-dns.nix")
+
+    # `build-mode`: stop the two game servers for the length of a big build and
+    # bring them back after (`just build-mode rebuild`); see the file.
+    (configLib.relativeToRoot "hosts/spacedock/build-mode.nix")
+
+    # zram swap + swap/writeback sysctls, shared with ganoslal and merlin.
+    # Spacedock has no disk swap at all (hardware-configuration.nix), so zram
+    # is its only swap: compressed RAM a build can spill into instead of the
+    # OOM killer taking a game server or the build down.
+    (configLib.relativeToRoot "hosts/common/optional/memory-tuning.nix")
   ];
+
+  # Soft memory ceiling for nix-daemon and every build it forks (they share its
+  # cgroup). Past it the kernel reclaims from the builds, pushing their cold
+  # pages into zram, instead of squeezing the game servers and everything else
+  # on the box. A ceiling, not a kill: MemoryMax would fail a build that
+  # legitimately needs more. ~11.5 GiB of spacedock's ~15.5, leaving room for
+  # the system and its smaller services.
+  #
+  # Only the memory cap from hosts/common/optional/nix-build-throttle.nix, on
+  # purpose: that module also lowers max-jobs/cores and the daemon's CPU and IO
+  # weights, and spacedock keeps its full build parallelism.
+  #
+  # To lift it for one big build without a rebuild (reverts on reboot):
+  #   sudo systemctl set-property --runtime nix-daemon.service MemoryHigh=infinity
+  systemd.services.nix-daemon.serviceConfig.MemoryHigh = "75%";
   # gigpkgs container engine — the module is injected in flake.nix as
   # `inputs.nixpkgs.nixosModules.containers`. Provides the OCI runtime for
   # containers that run either as a service (via `gigpkgs.containers.services`

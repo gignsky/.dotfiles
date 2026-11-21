@@ -502,6 +502,23 @@ package-script:
 check-hardware:
 	nix run .#check-hardware-config
 
+# Spacedock build mode: run any recipe with the game servers stopped, restoring
+# them afterwards even if it fails or you Ctrl-C (`just build-mode rebuild`,
+# `just build-mode build .#foo`). See hosts/spacedock/build-mode.nix.
+build-mode +recipe: sudo-keepalive
+	@command -v build-mode > /dev/null || { echo "build-mode is only installed on spacedock"; exit 1; }
+	build-mode run -- just {{recipe}}
+
+# Spacedock: stop both game servers (they save first) to free their memory
+pause-games: sudo-keepalive
+	@command -v build-mode > /dev/null || { echo "build-mode is only installed on spacedock"; exit 1; }
+	build-mode pause
+
+# Spacedock: start the game servers that pause-games stopped
+resume-games: sudo-keepalive
+	@command -v build-mode > /dev/null || { echo "build-mode is only installed on spacedock"; exit 1; }
+	build-mode resume
+
 # Pull the latest tdarr-node image and restart the container (spacedock)
 update-tdarr: sudo-keepalive
   @nix-shell -p lolcat --run 'echo "Pulling latest tdarr-node image..." | lolcat 2> /dev/null'
