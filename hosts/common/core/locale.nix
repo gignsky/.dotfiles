@@ -3,7 +3,10 @@
 {
   i18n.defaultLocale = lib.mkDefault "en_US.UTF-8";
   time.timeZone = lib.mkDefault "America/New_York";
-  services.ntp.enable = true;
+  # ntpd (classic) binds a socket on every interface and segfaults in
+  # socktoa() when a podman veth vanishes mid-scan (seen on spacedock).
+  # chrony is client-only by default and never binds per-interface.
+  services.chrony.enable = true;
   i18n.extraLocaleSettings = {
     LC_ADDRESS = "en_US.UTF-8";
     LC_IDENTIFICATION = "en_US.UTF-8";
