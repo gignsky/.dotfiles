@@ -26,7 +26,7 @@ let
   #     door-passphrase: <Lilu's passphrase: new, long, never the Captain's>
   # Add the two public halves on GitHub (column-and-coin, Settings, Deploy
   # keys; tick "Allow write access" on the second).
-  haveLiluSecrets = false;
+  haveLiluSecrets = true;
 
   # The guests option arrives with the ready-room input that carries
   # nix/guest.nix; an older pin still evaluates, with Lilu off.
