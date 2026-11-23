@@ -130,6 +130,21 @@ let
   # the option check stays so an older pin still evaluates.
   crewOn = haveSecrets && haveCrewSecrets && options.services.ready-room ? crew;
 
+  # Fastmail: the Computer's own read-only JMAP token, so it can read mail
+  # (16 Nov 2026 ruling: one token per agent, read-only to start; made as in
+  # the Fastmail runbook, section 7: Type JMAP, Scopes "Read-only access"
+  # only). Flip once it sits in nix-secrets (`just sops`) as
+  #   ready-room:
+  #     fastmail-token: <the token Fastmail shows once, on creation>
+  # Owned by the service user, like the door token. The core is handed the
+  # file's path, never the token, as $RR_FASTMAIL_TOKEN_FILE, beside the JMAP
+  # session resource it starts from (Fastmail's developer page: send the token
+  # as `Authorization: Bearer <token>`). The pinned core reads neither yet:
+  # mail is a ready-room roll of its own. An unknown variable is ignored, so
+  # flipping this early only puts the secret in place.
+  haveFastmailToken = false;
+  fastmailOn = haveSecrets && haveFastmailToken;
+
   # A user of their own with clones apart from ~gig/local_repos, the claude
   # CLI on their path, the token from sops. Reports reach the pad through the
   # core's beam, so the crew need no reach into the annex. On the dotfiles:
@@ -175,7 +190,10 @@ in
     # One read-only deploy key per allowed repository, for the Computer's clone.
     // lib.mapAttrs' (
       name: _: lib.nameValuePair "ready-room/${name}-key" { owner = "ready-room"; }
-    ) indexedRepos;
+    ) indexedRepos
+    // lib.optionalAttrs fastmailOn {
+      "ready-room/fastmail-token".owner = "ready-room";
+    };
 
     services.ready-room = {
       enable = true;
@@ -200,6 +218,11 @@ in
       }) indexedRepos;
       # For `summaries = "haiku"` the claude CLI must be on the service PATH:
       # extraPath = [ pkgs.claude-code ];
+      # Mail, read-only (haveFastmailToken above).
+      environment = lib.optionalAttrs fastmailOn {
+        RR_FASTMAIL_TOKEN_FILE = config.sops.secrets."ready-room/fastmail-token".path;
+        RR_FASTMAIL_SESSION_URL = "https://api.fastmail.com/jmap/session";
+      };
     };
 
     # Scribby's folder is root's (0750); its group lets the core read the
