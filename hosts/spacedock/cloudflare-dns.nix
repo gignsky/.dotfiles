@@ -1,5 +1,5 @@
 # DNS for the cloudflared tunnel hostnames, across kottonmouthband.com,
-# christinasceramics.com and giglab.dev.
+# christinasceramics.com, giglab.dev and countthecoin.us.
 #
 # `services.cloudflared.tunnels.<id>.ingress` only tells the tunnel where to
 # *send* a hostname's traffic; it never creates the DNS record that makes
@@ -24,7 +24,8 @@
 # Zones, one unit each: kottonmouthband.com (admin.* from kottonmouth-keeper.nix),
 # christinasceramics.com (auth.* from hosts/spacedock/christina-auth.nix, admin.*
 # from ../christina/christina-keeper.nix) and giglab.dev (ready-room.* from
-# hosts/spacedock/ready-room.nix). Other records in those zones, giglab.dev's
+# hosts/spacedock/ready-room.nix) and countthecoin.us (api.* from
+# hosts/spacedock/column-and-coin-signup.nix). Other records in those zones, giglab.dev's
 # DDNS ones included, are never touched.
 {
   config,
@@ -142,6 +143,13 @@ in
     # tunnel serves, and refuses to overwrite a non-CNAME at one of them.
     giglab-dns = mkDns {
       zone = "giglab.dev";
+      tokenFile = dnsToken;
+    };
+
+    # api.countthecoin.us (hosts/spacedock/column-and-coin-signup.nix), the
+    # Column & Coin signup server. Needs the token above to reach this zone too.
+    countthecoin-dns = mkDns {
+      zone = "countthecoin.us";
       tokenFile = dnsToken;
     };
   };
