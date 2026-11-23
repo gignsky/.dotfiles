@@ -62,6 +62,7 @@ in
     # ./common/optional/bspwm.nix # Enable bspwm window manager configuration
     ./common/optional/thunderbird.nix # WorkMail account, declaratively configured
     ./common/optional/thunderbird-gmail.nix # Personal Gmail accounts, OAuth2
+    ./common/optional/thunderbird-fastmail.nix # Column & Coin Fastmail account, OAuth2
     ./common/optional/minecraft-create.nix # Prism Launcher + instance matching the spacedock Create server
     # ./cams-countertop.nix
   ];
