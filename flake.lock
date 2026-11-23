@@ -140,6 +140,27 @@
         "type": "github"
       }
     },
+    "column-and-coin": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1795476896,
+        "narHash": "sha256-rNw2gOzlUvhBuqRDFWxJC3+Rj6oF0GN4FTOFZ9jvwbA=",
+        "ref": "master",
+        "rev": "f62fd28cb2c9278f4f392ae44d69733183ab505c",
+        "revCount": 29,
+        "type": "git",
+        "url": "ssh://git@github.com/gignsky/column-and-coin.git"
+      },
+      "original": {
+        "ref": "master",
+        "type": "git",
+        "url": "ssh://git@github.com/gignsky/column-and-coin.git"
+      }
+    },
     "crane": {
       "locked": {
         "lastModified": 1762538466,
@@ -3216,6 +3237,7 @@
       "inputs": {
         "avec-moi": "avec-moi",
         "christina-website": "christina-website",
+        "column-and-coin": "column-and-coin",
         "fancy-fonts": "fancy-fonts",
         "git-aliases": "git-aliases",
         "home-manager": [
