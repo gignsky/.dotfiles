@@ -35,7 +35,7 @@ let
   tunnelId = "1a878786-561d-427c-90cd-358f1b82aea4";
   port = 7480;
 
-  mailReady = false;
+  mailReady = true;
   sender = "maxwell@countthecoin.us";
 in
 {
