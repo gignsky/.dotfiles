@@ -1,7 +1,8 @@
 # Keep swap and big writes from freezing the desktop.
 #
 # Opt-in, for hosts someone is actually sitting at (ganoslal, merlin) -- the
-# same split as nix-build-throttle.nix.
+# same split as nix-build-throttle.nix. Spacedock imports it too, for the zram
+# alone: it has no disk swap, and its builds share RAM with two game servers.
 #
 # The problem this fixes, as measured on ganoslal (2026-11-08): copying a 51 GB
 # archive off the NAS pushed the TEAM T253X2 SATA SSD to ~260 ms per read once
