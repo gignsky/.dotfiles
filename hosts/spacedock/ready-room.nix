@@ -142,7 +142,7 @@ let
   # as `Authorization: Bearer <token>`). The pinned core reads neither yet:
   # mail is a ready-room roll of its own. An unknown variable is ignored, so
   # flipping this early only puts the secret in place.
-  haveFastmailToken = false;
+  haveFastmailToken = true;
   fastmailOn = haveSecrets && haveFastmailToken;
 
   # A user of their own with clones apart from ~gig/local_repos, the claude
