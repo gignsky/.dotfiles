@@ -35,7 +35,16 @@ in
     restartUnits = [ "podman-scribbydascribe.service" ];
   };
 
-  systemd.tmpfiles.rules = [ "d /var/lib/scribbydascribe 0750 root root -" ];
+  # Root's, as before, but readable by the `scribbydascribe` group: Ready Room's
+  # core is in it (hosts/spacedock/ready-room.nix) to read each recording's
+  # live.md as the call goes on. The bot writes as root inside the container;
+  # its session folders and files come out 0755/0644, so the group needs only
+  # these two levels. Nobody in the group can write here.
+  users.groups.scribbydascribe = { };
+  systemd.tmpfiles.rules = [
+    "d /var/lib/scribbydascribe 0750 root scribbydascribe -"
+    "d /var/lib/scribbydascribe/sessions 0750 root scribbydascribe -"
+  ];
 
   virtualisation.oci-containers.containers.scribbydascribe = {
     inherit imageFile;

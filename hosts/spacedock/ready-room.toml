@@ -1,0 +1,50 @@
+# Ready Room — the core on spacedock. No secret lives here: the door token,
+# the OAuth passphrase and the two annex deploy keys (read, push) are sops-nix
+# files the module hands to the service.
+# Reference: ready-room's ready-room.example.toml and docs/spacedock.md.
+
+state_dir = "/var/lib/ready-room"
+
+[door]
+# Open on the LAN (and loopback): dial http://192.168.51.2:7474/mcp. Away from
+# home the same door is reached at https://ready-room.giglab.dev/mcp through
+# the cloudflared tunnel (hosts/spacedock/ready-room.nix). Two locks on both
+# roads: the bearer token (keep it long, 32+ random bytes, rotate it if a
+# device is lost) and, for claude.ai's custom connector, OAuth sign-in on the
+# passphrase page. Both files come from the module, as $RR_DOOR_TOKEN_FILE
+# and $RR_DOOR_PASSPHRASE_FILE; neither key is set here.
+bind = "0.0.0.0:7474"
+# The URL the world reaches the door at: the OAuth issuer, and the host the
+# connector's sign-in is sent back through. Scheme and host only.
+public_url = "https://ready-room.giglab.dev"
+# The door refuses any Host header it does not know. Loopback names are always
+# accepted; these are the names LAN callers dial.
+allowed_hosts = ["192.168.51.2", "spacedock", "ready-room.giglab.dev"]
+
+[watcher]
+interval_secs = 300
+nightly_hour = 3
+
+[index]
+# Keyword-only to start. "haiku" is one Claude call per file (1,199 today);
+# embeddings cost CPU and one model download into /var/lib/ready-room/models.
+summaries = "heuristic"
+embeddings = false
+
+[[repos]]
+name = "annex"
+# The module clones gignsky/annex here on first start, as the service user.
+path = "/var/lib/ready-room/clones/annex"
+pull = true
+# Never opened, listed or named. Law.
+sealed = ["library/sealed/"]
+law = "ANNEX.md"
+# The one room the Computer writes to: new files only, each committed and
+# pushed with the read-write deploy key (sops ready-room/annex-key-rw).
+pad = "transporter pad/"
+filed = "cargo bay/"
+crew = "crew quarters/"
+
+# The repositories the crew are allowed (allowedRepos in ready-room.nix) are
+# indexed too: ready-room.nix appends a [[repos]] block for each below this
+# line, read-only, from that one list. Do not add them here by hand.
