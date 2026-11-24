@@ -32,6 +32,23 @@ let
   # nix/guest.nix; an older pin still evaluates, with Lilu off.
   liluOn = haveLiluSecrets && options.services.ready-room ? guests;
 
+  # Her mail, read-only: a Fastmail API token made in *her own* Fastmail
+  # login (Settings, Privacy & Security, API tokens: "Read-only access"
+  # ticked, Email the only scope), never the Captain's, which reads his whole
+  # account. Flip once it sits in nix-secrets (`just sops`) as
+  #   ready-room-lilu:
+  #     fastmail-token: <her token, shown once on creation>
+  # Owned by ready-room-lilu, so the Captain's core cannot read it, as hers
+  # cannot read his; the module refuses her core if handed his file. Her door
+  # then gains `mail` and `mail_item`, logged as every call is, the mail
+  # counted and never copied. The option arrives with ready-room
+  # roll/11-1123-mail; an older pin still evaluates, with her mail off.
+  haveLiluMailToken = false;
+  liluMailOn =
+    liluOn
+    && haveLiluMailToken
+    && (options.services.ready-room.guests.type.getSubOptions [ ]) ? mailTokenFile;
+
   # The one folder of column-and-coin she reaches. To rename it, move the
   # folder in that repo and change this in the same breath.
   folder = "ready-room";
@@ -55,6 +72,9 @@ in
       "ready-room-lilu/repo-key".owner = "ready-room-lilu";
       "ready-room-lilu/repo-key-rw".owner = "ready-room-lilu";
       "ready-room-lilu/door-passphrase".owner = "ready-room-lilu";
+    }
+    // lib.optionalAttrs liluMailOn {
+      "ready-room-lilu/fastmail-token".owner = "ready-room-lilu";
     };
 
     services.ready-room.guests.lilu = {
@@ -71,6 +91,9 @@ in
       inherit port;
       publicUrl = "https://${hostname}";
       calls.guildIds = callGuildIds;
+    }
+    // lib.optionalAttrs liluMailOn {
+      mailTokenFile = secret "fastmail-token";
     };
 
     # The door listens on loopback only; the world reaches it through the

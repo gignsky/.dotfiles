@@ -139,11 +139,17 @@ let
   # Owned by the service user, like the door token. The core is handed the
   # file's path, never the token, as $RR_FASTMAIL_TOKEN_FILE, beside the JMAP
   # session resource it starts from (Fastmail's developer page: send the token
-  # as `Authorization: Bearer <token>`). The pinned core reads neither yet:
-  # mail is a ready-room roll of its own. An unknown variable is ignored, so
-  # flipping this early only puts the secret in place.
+  # as `Authorization: Bearer <token>`). The core reads it from ready-room
+  # roll/11-1123-mail on (the `mail` and `mail_item` tools), where the module
+  # takes the file as `mailTokenFile` and refuses a guest handed the same
+  # file. An older pin gets the variable through `environment` instead and
+  # ignores it, so the flag only puts the secret in place until the input
+  # carries the mail roll. This token is the Captain's alone; Lilu's Computer
+  # reads her own (ready-room-lilu.nix).
   haveFastmailToken = true;
   fastmailOn = haveSecrets && haveFastmailToken;
+  mailOption = options.services.ready-room ? mailTokenFile;
+  fastmailToken = config.sops.secrets."ready-room/fastmail-token".path;
 
   # A user of their own with clones apart from ~gig/local_repos, the claude
   # CLI on their path, the token from sops. Reports reach the pad through the
@@ -218,11 +224,14 @@ in
       }) indexedRepos;
       # For `summaries = "haiku"` the claude CLI must be on the service PATH:
       # extraPath = [ pkgs.claude-code ];
-      # Mail, read-only (haveFastmailToken above).
-      environment = lib.optionalAttrs fastmailOn {
-        RR_FASTMAIL_TOKEN_FILE = config.sops.secrets."ready-room/fastmail-token".path;
-        RR_FASTMAIL_SESSION_URL = "https://api.fastmail.com/jmap/session";
-      };
+    }
+    # Mail, read-only (haveFastmailToken above). The session URL is the
+    # core's default, Fastmail's own.
+    // lib.optionalAttrs (fastmailOn && mailOption) {
+      mailTokenFile = fastmailToken;
+    }
+    // lib.optionalAttrs (fastmailOn && !mailOption) {
+      environment.RR_FASTMAIL_TOKEN_FILE = fastmailToken;
     };
 
     # Scribby's folder is root's (0750); its group lets the core read the
