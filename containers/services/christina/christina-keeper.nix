@@ -30,7 +30,7 @@ let
     inputs.christina-website.packages.${pkgs.stdenv.hostPlatform.system}.keeper-image or null;
   # Same tunnel as kottonmouth-keeper.nix and christina-auth.nix; this file
   # only adds one more ingress hostname to it. The christina-dns unit
-  # (kottonmouth/kottonmouth-dns.nix) upserts the proxied CNAME for it.
+  # (hosts/spacedock/cloudflare-dns.nix) upserts the proxied CNAME for it.
   tunnelId = "1a878786-561d-427c-90cd-358f1b82aea4";
   adminPort = 8795;
   # Loopback port nginx listens on, between cloudflared and the keeper.

@@ -7,6 +7,5 @@ _: {
   imports = [
     ./kottonmouth-keeper.nix # kottonmouthband.com keeper — needs its sops secrets + tunnel first
     ./kottonmouth-keeper-dev.nix # beta.kottonmouthband.com keeper — autoStart = false; started/stopped by rolling-preview.yml
-    ./kottonmouth-dns.nix # DNS records for the tunnel hostnames above — needs a DNS-edit Cloudflare token
   ];
 }

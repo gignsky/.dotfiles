@@ -22,7 +22,7 @@
 # the Meta app), AUTH_USER and AUTH_PASSWORD. The proxied CNAME
 # `auth.christinasceramics.com -> <tunnel-id>.cfargotunnel.com` is upserted on
 # every switch by the christina-dns unit in
-# containers/services/kottonmouth/kottonmouth-dns.nix.
+# hosts/spacedock/cloudflare-dns.nix.
 {
   config,
   inputs,

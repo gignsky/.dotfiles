@@ -61,6 +61,7 @@ in
     (defaultMount "tdarr-cache" "mnt/tdarr-cache" "192.168.51.3")
     (defaultMount "caches" "mnt/caches" "192.168.51.3")
     (defaultMount "plex-database" "mnt/plex-database" "192.168.51.3")
+    (defaultMount "column-and-coin" "mnt/column-and-coin" "192.168.51.3")
     # Example absolute path: (defaultMount "media" "/mnt/dad/media" "192.168.4.15")
   ];
 
