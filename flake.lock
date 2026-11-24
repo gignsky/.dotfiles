@@ -3428,11 +3428,11 @@
         "nixpkgs": "nixpkgs_10"
       },
       "locked": {
-        "lastModified": 1795300029,
-        "narHash": "sha256-ESc3FVLW6dK5QpXsHGJW3wEIV6tET+d+veGnPUGsi4E=",
+        "lastModified": 1795474370,
+        "narHash": "sha256-tOVTw899s5OMbnBT5tqgeW9VJ7KBu/B7zHMKc0Otpjg=",
         "ref": "master",
-        "rev": "336a08701c89f5c6de98b6a801552409d811f705",
-        "revCount": 14,
+        "rev": "90be3d3ffa4e15b3dca2631f60b358da3c454541",
+        "revCount": 16,
         "type": "git",
         "url": "ssh://git@github.com/gignsky/spaceweed-inc.git"
       },
