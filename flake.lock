@@ -1919,11 +1919,11 @@
         "nixpkgs": "nixpkgs_8"
       },
       "locked": {
-        "lastModified": 1795306909,
-        "narHash": "sha256-JJgLDuikbxXTazPzl/oWhPZwd4OYqack2TP7wXfAkCw=",
+        "lastModified": 1795483706,
+        "narHash": "sha256-zRVDpdlfYEWQ6dnF5+tTk8baQ2YZ0OsqDBHbm7x1yPs=",
         "ref": "master",
-        "rev": "27bd5f58762ff4472fb5d30554aa93d42a151323",
-        "revCount": 59,
+        "rev": "04aa145a2f4d6e1ed14d1d8b930718b256ba57b7",
+        "revCount": 69,
         "type": "git",
         "url": "ssh://git@github.com/gignsky/ready-room.git"
       },
