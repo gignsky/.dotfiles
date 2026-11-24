@@ -113,6 +113,22 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # Ready Room — the ship's Computer, run as a service on spacedock
+    # (hosts/spacedock/ready-room.nix). Private repo, so ssh like kottonmouth;
+    # its trunk is `master`. Its nixpkgs is NOT made to follow the fleet's: the
+    # Python core needs fastembed and claude-agent-sdk from gigpkgs-unstable.
+    ready-room.url = "git+ssh://git@github.com/gignsky/ready-room.git?ref=master";
+
+    # Column & Coin (private repo, so ssh like christina-website). Provides
+    # nixosModules.cc-signup, the signup server behind the coming soon page's
+    # notify form; see hosts/spacedock/column-and-coin-signup.nix. Follows
+    # `master`, updated by hand (`nix flake update column-and-coin`) once a
+    # roll is promoted there.
+    column-and-coin = {
+      url = "git+ssh://git@github.com/gignsky/column-and-coin.git?ref=master";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+
     # Spaceweed Inc. coop ledger TUI (private repo, so ssh). Installed via
     # home/gig/common/optional/spaceweed.nix, which wraps it with annex
     # pull/commit/push. Doesn't follow our nixpkgs: it pins its own unstable
