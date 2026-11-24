@@ -46,6 +46,9 @@
     # Always-on Instagram login + weekly token refresh for christinasceramics.com.
     (configLib.relativeToRoot "hosts/spacedock/christina-auth.nix")
 
+    # Column & Coin signup server (api.countthecoin.us), behind the notify form.
+    (configLib.relativeToRoot "hosts/spacedock/column-and-coin-signup.nix")
+
     # Ready Room — the ship's Computer (MCP door onto the annex). Enabled once
     # its two secrets are in nix-secrets; see the file.
     (configLib.relativeToRoot "hosts/spacedock/ready-room.nix")
